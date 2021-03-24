@@ -1,0 +1,417 @@
+<% layout('layouts/boilerplate') %>
+<h1>Edit Rules</h1>
+<h6 class="text-muted">Last modified by <%= lastModified.user || 'someone who wants to remain anonymous' %> on <%= lastModified.dateParts.fullDate %></h6>
+<form class="mb-3" method="POST" action="/rules">
+    <% sections.forEach((section, sIndex) => { %>
+    <section class="border border-3 rounded-3 mb-3 p-3">
+        <div class="row border border-2 rounded-2 mx-0 mb-3 py-2">
+            <label for="s-<%= sIndex %>|t" class="col-2 col-form-label">Heading</label>
+            <div class="col-10">
+                <textarea id="s-<%= sIndex %>|t" class="form-control" name="s-<%= sIndex %>[title]" rows="1"><%= section.title %></textarea>
+            </div>
+        </div>
+        <% if (section.description.length > 0) { %>
+        <div class="row border border-2 rounded-2 mx-0 mb-3 py-2">
+            <% section.description.forEach((description, dIndex) => { %>
+            <% const reference = `s-${sIndex}|d-${dIndex}` %>
+            <div class="col-2">
+                <label for="<%= reference %>" class="col-form-label<%= dIndex > 0 ? " d-none" : "" %>" <%= dIndex > 0 ? "visibility=hidden" : "" %> data-element="<%= reference %>">Description</label>
+            </div>
+            <div class="col-8">
+                <textarea id="<%= reference %>" class="form-control mb-2" name="s-<%= sIndex %>[description]" rows="1" data-element="<%= reference %>"><%= description %></textarea>
+            </div>
+            <div class="col-2">
+                <div class="d-flex align-items">
+                    <div class="btn btn-danger mx-auto" data-action="remove-description" data-element="<%= reference %>">Remove</div>
+                </div>
+            </div>
+            <% }); %>
+            <div class="row mx-0">
+                <div class="btn btn-primary col-10 mx-auto" data-action="add-description" data-element="s-<%= sIndex %>|d">Add Description</div>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="mb-3 border border-3 rounded-3 p-3">
+            <div class="row mx-0">
+                <div class="btn btn-primary mx-auto" data-action="add-description">Add Description</div>
+            </div>
+        </div>
+        <% }; %>
+        <!-- needs a function creating to loop through nested sections -->
+        <% if (section.sections.length > 0) { %>
+        <div class="row border border-2 rounded-2 mx-0 mb-3 py-2">
+            <ol class="px-0 mb-0">
+                <% section.sections.forEach((breakdown, bIndex) => { %>
+                <div class="row mx-0">
+                    <div class="col-2">
+                        <label for="s-<%= sIndex %>|s-<%= bIndex %>" class="col-form-label<%= bIndex > 0 ? " d-none" : "" %>" <%= bIndex > 0 ? "visibility=hidden" : "" %>>Breakdown</label>
+                    </div>
+                    <li class="col-8 <%= bIndex < section.sections.length - 1 ? "mb-2 pb-2 border-2 border-bottom" : "" %>">
+                        <% breakdown.description.forEach((description, dIndex) => { %>
+                        <textarea id="s-<%= sIndex %>|s-<%= bIndex %>" class="form-control mb-2" name="s-<%= sIndex %>[sections]" rows="1"><%= description %></textarea>
+                        <% }); %>
+                        <div class="row mb-2">
+                            <div class="btn btn-primary mx-auto">Add Description</div>
+                        </div>
+                        <div class="row">
+                            <div class="btn btn-primary col-10 mx-auto">Add Breakdown</div>
+                        </div>
+                    </li>
+                    <div class="col-2">
+                        <div class="d-flex align-items">
+                            <div class="btn btn-danger mx-auto">Remove</div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </ol>
+        </div>
+        <% } else { %>
+        <div class="mb-3 border border-3 rounded-3 p-3">
+            <div class="row mx-0">
+                <div class="btn btn-primary mx-auto">Add Breakdown</div>
+            </div>
+        </div>
+        <% }; %>
+        <div class="row mx-0">
+            <div class="btn btn-danger" data-action="remove-section">Remove Section</div>
+        </div>
+    </section>
+    <% }); %>
+    <div class="mb-3 border border-3 rounded-3 p-3">
+        <div class="row mx-0">
+            <div class="btn btn-primary" data-action="add-section" data-element="s">Add Section</div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="row px-2">
+            <a class="btn btn-warning col-5 container" href="/rules">Cancel</a>
+            <input class="btn btn-success col-5 container" type="submit" value="Submit">
+        </div>
+    </div>
+</form>
+<script src="/scripts/resize-textareas.js"></script>
+<script>
+    const addDescriptions = document.querySelectorAll('[data-action="add-description"]');
+    const addSections = document.querySelectorAll('[data-action="add-section"]');
+
+    const removeDescriptions = document.querySelectorAll('[data-action="remove-description"]');
+    const removeSections = document.querySelectorAll('[data-action="remove-section"]');
+    
+    for (const addDescription of addDescriptions) addDescription.addEventListener('click', addDescriptionFunction);
+    for (const addSection of addSections) addSection.addEventListener('click', addSectionFunction);
+
+    for (const removeDescription of removeDescriptions) removeDescription.addEventListener('click', removeDescriptionFunction);
+    for (const removeSection of removeSections) removeSection.addEventListener('click', removeSectionFunction);
+
+    function removeDescriptionFunction() {
+        const parentElement = this.closest('div[class*="row"]')
+        const removeElements = document.querySelectorAll(`[data-element="${this.dataset.element}"]`);
+        for (const removeElement of removeElements) removeElement.closest('div[class^="col-"]').remove();
+        const children = parentElement.querySelectorAll('div[class*="col-"]:not([class*="btn"])');
+        if (children.length > 0) {
+            const firstChild = children[0].children[0];
+            firstChild.classList.remove('d-none')
+            firstChild.removeAttribute('visibility');
+        } else {
+            const allColumns = [
+                'col-1',
+                'col-2',
+                'col-3',
+                'col-4',
+                'col-5',
+                'col-6',
+                'col-7',
+                'col-8',
+                'col-9',
+                'col-10',
+                'col-11',
+                'col-12'
+            ];
+            parentElement.querySelector('.btn').classList.remove( ...allColumns );
+        };
+    };
+
+    function removeSectionFunction() {
+        this.closest('section').remove();
+    };
+
+    function addDescriptionFunction() {
+
+        this.classList.add('col-10');
+
+        const parentRow = this.closest('div[class*="row border"]');
+        const childElementCount = parentRow.querySelectorAll('div[class*="col-"]:not([class*="btn"])').length;
+        const nextIndex = Math.floor(childElementCount / 3);
+        const reference = `${this.dataset.element}-${nextIndex}`;
+
+        const labelParentElement = document.createElement('div');
+        const labelElement = document.createElement('label');
+
+        const textAreaParentElement = document.createElement('div');
+        const textAreaElement = document.createElement('textarea');
+
+        const removeGrandParentElement = document.createElement('div');
+        const removeParentElement = document.createElement('div');
+        const removeElement = document.createElement('div');
+        
+        labelParentElement.classList.add('col-2');
+
+        labelElement.classList.add('col-form-label');
+        labelElement.setAttribute('for', reference)
+        labelElement.setAttribute('data-element', reference);
+        labelElement.innerText = 'Description';
+
+        if (childElementCount) {
+            labelElement.classList.add('d-none')
+            labelElement.setAttribute('visibility', 'hidden');
+        };
+
+        textAreaParentElement.classList.add('col-8');
+
+        textAreaElement.classList.add('form-control', 'mb-2');
+        textAreaElement.setAttribute('id', reference);
+        textAreaElement.setAttribute('name', reference);
+        textAreaElement.setAttribute('rows', 1);
+        textAreaElement.setAttribute('data-element', reference);
+        textAreaElement.addEventListener('input', onInput, false);
+
+        removeGrandParentElement.classList.add('col-2');
+        
+        removeParentElement.classList.add('d-flex', 'align-items');
+
+        removeElement.classList.add('btn', 'btn-danger', 'mx-auto');
+        removeElement.setAttribute('data-action', 'remove');
+        removeElement.setAttribute('data-element', reference);
+        removeElement.addEventListener('click', removeDescriptionFunction);
+        removeElement.innerText = 'Remove';
+
+        labelParentElement.appendChild(labelElement);
+
+        textAreaParentElement.appendChild(textAreaElement);
+
+        removeParentElement.appendChild(removeElement);
+        removeGrandParentElement.appendChild(removeParentElement);
+
+        parentRow.insertBefore(labelParentElement, this.closest('div[class*="row"] div[class*="row"]'));
+        parentRow.insertBefore(textAreaParentElement, this.closest('div[class*="row"] div[class*="row"]'));
+        parentRow.insertBefore(removeGrandParentElement, this.closest('div[class*="row"] div[class*="row"]'));
+
+        textAreaElement.focus();
+        textAreaElement.select();
+    };
+
+    function addSectionFunction() {
+        const form = this.closest('form');
+        const nextIndex = form.querySelectorAll('section').length;
+        const sectionReference = `${this.dataset.element}-${nextIndex}`;
+
+        const sectionElement = document.createElement('section');
+
+        const headingElement = document.createElement('div');
+
+        const headingLabelElement = document.createElement('label');
+
+        const headingTextAreaParentElement = document.createElement('div');
+        const headingTextAreaElement = document.createElement('textarea');
+
+        sectionElement.classList.add('border', 'border-3', 'rounded-3', 'mb-3', 'p-3');
+
+        headingElement.classList.add('row', 'border', 'border-2', 'rounded-2', 'mx-0', 'mb-3', 'py-2');
+
+        headingLabelElement.classList.add('col-2', 'col-form-label');
+        headingLabelElement.setAttribute('for', `${sectionReference}|t`);
+        headingLabelElement.innerText = 'Heading';
+
+        headingTextAreaParentElement.classList.add('col-10');
+        
+        headingTextAreaElement.classList.add('form-control');
+        headingTextAreaElement.setAttribute('id', `${sectionReference}|t`);
+        headingTextAreaElement.setAttribute('name', `${sectionReference}[title]`);
+        headingTextAreaElement.setAttribute('rows', 1);
+        headingTextAreaElement.addEventListener('input', onInput, false);
+            
+        headingTextAreaParentElement.appendChild(headingTextAreaElement);
+
+        headingElement.appendChild(headingLabelElement);
+        headingElement.appendChild(headingTextAreaParentElement);
+
+        sectionElement.appendChild(headingElement);
+
+        form.insertBefore(sectionElement, this.closest('form > div'));
+
+        headingTextAreaElement.focus();
+        headingTextAreaElement.select();
+
+        const descriptionReference = `${sectionReference}|d-0`;
+
+        const descriptionRowElement = document.createElement('div');
+
+        const descriptionLabelParentElement = document.createElement('div');
+        const descriptionLabelElement = document.createElement('label');
+
+        const descriptionTextAreaParentElement = document.createElement('div');
+        const descriptionTextAreaElement = document.createElement('textarea');
+
+        const removeDescriptionGrandParentElement = document.createElement('div');
+        const removeDescriptionParentElement = document.createElement('div');
+        const removeDescriptionElement = document.createElement('div');
+
+        const addDescriptionRowElement = document.createElement('div');
+        const addDescriptionElement = document.createElement('div');
+        
+        descriptionRowElement.classList.add('row', 'border', 'border-2', 'rounded-2', 'mx-0', 'mb-3', 'py-2',);
+
+        descriptionLabelParentElement.classList.add('col-2');
+
+        descriptionLabelElement.classList.add('col-form-label');
+        descriptionLabelElement.setAttribute('for', descriptionReference)
+        descriptionLabelElement.setAttribute('data-element', descriptionReference);
+        descriptionLabelElement.innerText = 'Description';
+
+        descriptionTextAreaParentElement.classList.add('col-8');
+
+        descriptionTextAreaElement.classList.add('form-control', 'mb-2');
+        descriptionTextAreaElement.setAttribute('id', descriptionReference);
+        descriptionTextAreaElement.setAttribute('name', descriptionReference);
+        descriptionTextAreaElement.setAttribute('rows', 1);
+        descriptionTextAreaElement.setAttribute('data-element', descriptionReference);
+        descriptionTextAreaElement.addEventListener('input', onInput, false);
+
+        removeDescriptionGrandParentElement.classList.add('col-2');
+        
+        removeDescriptionParentElement.classList.add('d-flex', 'align-items');
+
+        removeDescriptionElement.classList.add('btn', 'btn-danger', 'mx-auto');
+        removeDescriptionElement.setAttribute('data-action', 'remove');
+        removeDescriptionElement.setAttribute('data-element', descriptionReference);
+        removeDescriptionElement.addEventListener('click', removeDescriptionFunction);
+        removeDescriptionElement.innerText = 'Remove';
+
+        addDescriptionRowElement.classList.add('row', 'mx-0');
+
+        addDescriptionElement.classList.add('btn', 'btn-primary', 'col-10', 'mx-auto');
+        addDescriptionElement.setAttribute('data-action', 'add-description');
+        addDescriptionElement.setAttribute('data-element', `${sectionReference}|d`);
+        addDescriptionElement.addEventListener('click', addDescriptionFunction);
+        addDescriptionElement.innerText = 'Add Description';
+
+        descriptionLabelParentElement.appendChild(descriptionLabelElement);
+
+        descriptionTextAreaParentElement.appendChild(descriptionTextAreaElement);
+
+        removeDescriptionParentElement.appendChild(removeDescriptionElement);
+        removeDescriptionGrandParentElement.appendChild(removeDescriptionParentElement);
+
+        addDescriptionRowElement.appendChild(addDescriptionElement);
+
+        descriptionRowElement.appendChild(descriptionLabelParentElement);
+        descriptionRowElement.appendChild(descriptionTextAreaParentElement);
+        descriptionRowElement.appendChild(removeDescriptionGrandParentElement);
+        descriptionRowElement.appendChild(addDescriptionRowElement);
+
+        sectionElement.appendChild(descriptionRowElement);
+
+        const breakdownRowElement = document.createElement('div');
+
+        const breakdownLabelParentElement = document.createElement('div');
+        const breakdownLabelElement = document.createElement('label');
+
+        const breakdownOrderedListElement = document.createElement('ol');
+
+        const breakdownListItemRowElement = document.createElement('div');
+
+        const breakdownListItemElement = document.createElement('li');
+
+        const breakdownTextAreaElement = document.createElement('textarea');
+
+        const breakdownAddDescriptionRowElement = document.createElement('div');
+        const breakdownAddDescriptionElement = document.createElement('div');
+
+        const breakdownAddBreakdownRowElement = document.createElement('div');
+        const breakdownAddBreakdownElement = document.createElement('div');
+
+        const removeBreakdownGrandParentElement = document.createElement('div');
+        const removeBreakdownParentElement = document.createElement('div');
+        const removeBreakdownElement = document.createElement('div');
+
+        breakdownRowElement.classList.add('row', 'border', 'border-2', 'rounded-2', 'mx-0', 'mb-3', 'py-2');
+
+        breakdownLabelParentElement.classList.add('col-2');
+
+        breakdownLabelElement.classList.add('col-form-label');
+        breakdownLabelElement.setAttribute('for', `${sectionReference}|s-0`);
+        breakdownLabelElement.innerText = 'Breakdown';
+
+        breakdownOrderedListElement.classList.add('px-0', 'mb-0');
+
+        breakdownListItemRowElement.classList.add('row', 'mx-0');
+
+        breakdownListItemElement.classList.add('col-8');
+
+        breakdownTextAreaElement.classList.add('form-control', 'mb-2');
+        breakdownTextAreaElement.setAttribute('id', `${sectionReference}|s-0`);
+        breakdownTextAreaElement.setAttribute('name', `${sectionReference}[sections]`);
+        breakdownTextAreaElement.setAttribute('rows', 1);
+        breakdownTextAreaElement.addEventListener('input', onInput, false);
+
+        breakdownAddDescriptionRowElement.classList.add('row', 'mb-2');
+
+        breakdownAddDescriptionElement.classList.add('btn', 'btn-primary', 'mx-auto');
+        // breakdownAddDescriptionElement.addEventListener('click', )
+        breakdownAddDescriptionElement.innerText = 'Add Description';
+
+        breakdownAddBreakdownRowElement.classList.add('row');
+
+        breakdownAddBreakdownElement.classList.add('btn', 'btn-primary', 'col-10', 'mx-auto');
+        // breakdownAddBreakdownElement.addEventListener('click', )
+        breakdownAddBreakdownElement.innerText = 'Add Breakdown'
+
+        removeBreakdownGrandParentElement.classList.add('col-2');
+
+        removeBreakdownParentElement.classList.add('d-flex', 'align-items');
+
+        removeBreakdownElement.classList.add('btn', 'btn-danger', 'mx-auto');
+        // removeBreakdownElement.setAttribute('data-action', );
+        // removeBreakdownElement.setAttribute('data-element', );
+        // removeBreakdownElement.addEventListener('click', );
+        removeBreakdownElement.innerText = 'Remove';
+
+        breakdownLabelParentElement.appendChild(breakdownLabelElement);
+
+        breakdownAddDescriptionRowElement.appendChild(breakdownAddDescriptionElement);
+
+        breakdownAddBreakdownRowElement.appendChild(breakdownAddBreakdownElement);
+
+        breakdownListItemElement.appendChild(breakdownTextAreaElement);
+        breakdownListItemElement.appendChild(breakdownAddDescriptionRowElement);
+        breakdownListItemElement.appendChild(breakdownAddBreakdownRowElement);
+
+        removeBreakdownParentElement.appendChild(removeBreakdownElement);
+        removeBreakdownGrandParentElement.appendChild(removeBreakdownParentElement);
+
+        breakdownListItemRowElement.appendChild(breakdownLabelParentElement);
+        breakdownListItemRowElement.appendChild(breakdownListItemElement);
+        breakdownListItemRowElement.appendChild(removeBreakdownGrandParentElement);
+
+        breakdownOrderedListElement.appendChild(breakdownListItemRowElement);
+
+        breakdownRowElement.appendChild(breakdownOrderedListElement);
+
+        sectionElement.appendChild(breakdownRowElement);
+
+        const removeSectionParentElement = document.createElement('div');
+        const removeSectionElement = document.createElement('div');
+
+        removeSectionParentElement.classList.add('row', 'mx-0');
+
+        removeSectionElement.classList.add('btn', 'btn-danger');
+        removeSectionElement.setAttribute('data-action', 'remove-section');
+        removeSectionElement.addEventListener('click', removeSectionFunction)
+        removeSectionElement.innerText = 'Remove Section';
+
+        removeSectionParentElement.appendChild(removeSectionElement);
+    
+        sectionElement.appendChild(removeSectionParentElement);
+    };
+</script>

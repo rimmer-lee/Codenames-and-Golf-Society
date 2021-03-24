@@ -1,0 +1,25 @@
+<% layout('layouts/boilerplate') %>
+<main>
+    <h1>Rules</h1>
+    <% for (const section of sections) { %>
+    <section>
+        <h4><%= section.title %></h4>
+        <% for (const description of section.description) { %>
+        <p><%= description %></p>
+        <% }; %>
+        <!-- needs a function creating to loop through nested sections -->
+        <% if (section.sections.length > 0) { %>
+        <ol>        
+            <% for (const subSection of section.sections) { %>
+            <li>
+                <% for (const description of subSection.description) { %>
+                <p><%= description %></p>
+                <% }; %>
+            </li>
+            <% }; %>
+        </ol>
+        <% }; %>
+    </section>
+    <% }; %>
+</main>
+<!-- <a href="/rules/edit">Edit</a> -->
