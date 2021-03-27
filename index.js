@@ -104,16 +104,14 @@ app.get('/', (req, res) => res.render('home'));
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
 app.get('/rules', async (req, res) => {
-    // need to find the last saved one or a particular version
-    const charter = await Charter.find().populate('sections');
-    const sections = charter[0].sections;
+    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections');
+    const { sections } = charter;
+    console.log(sections)
     res.render('rules/index', { sections });
 });
 app.get('/rules/edit', async (req, res) => {
-    // need to find the last saved one or a particular version
-    const charter = await Charter.find().populate('sections');
-    const { lastModified, sections } = charter[0];
-    
+    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections');
+    const { lastModified, sections } = charter;    
     res.render('rules/edit', { lastModified, sections });
 });
 app.post('/rules', (req, res) => {
@@ -125,14 +123,24 @@ app.post('/rules', (req, res) => {
     const charter = new Charter();
     for (const key of Object.keys(data)) {
         const section = data[key];
+        let sectionsArray = [];
+        if (section.sections) {
+            sectionsArray = section.sections.map(value => {
+                return { description: [value] };
+            })
+        }
         charter.sections.push({
             title: section.title,
             description: stringToArray(section.description),
-            sections: section.sections
+            sections: sectionsArray
         });        
     };
     charter.save();
     res.redirect('/rules');
+});
+
+app.get('/demerits', (req, res) => {
+    
 });
 
 app.all('*', (req, res, next) => next(new ExpressError(404, 'Page Not Found')));

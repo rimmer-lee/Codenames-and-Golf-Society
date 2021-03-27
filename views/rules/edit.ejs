@@ -1,6 +1,11 @@
 <% layout('layouts/boilerplate') %>
+<% const incomplete = true %>
 <h1>Edit Rules</h1>
+<% if (incomplete) { %>
+<h6 class="text-muted">Last modified on <%= lastModified.dateParts.fullDate %></h6>
+<% } else { %>
 <h6 class="text-muted">Last modified by <%= lastModified.user || 'someone who wants to remain anonymous' %> on <%= lastModified.dateParts.fullDate %></h6>
+<% }; %>
 <form class="mb-3" method="POST" action="/rules">
     <% sections.forEach((section, sIndex) => { %>
     <section class="border border-3 rounded-3 mb-3 p-3">
@@ -31,26 +36,29 @@
             </div>
         </div>
         <!-- needs a function creating to loop through nested sections -->
-        <!-- not sure about xxl breakdown - maybe should be 2 -->
+        <% if (section.sections.length > 0 || !incomplete) { %>
         <div class="border border-2 rounded-2 mb-3 py-2">
             <ol class="mb-0 p-0">
                 <% section.sections.forEach((breakdown, bIndex) => { %>
                 <div class="row mx-0">
-                    <div class="col-3 col-md-2 col-xxl-1">
-                        <label for="s<%= sIndex %>|s<%= bIndex %>" class="col-form-label<%= bIndex > 0 ? " d-none" : "" %>" <%= bIndex > 0 ? "visibility=hidden" : "" %>>Breakdown</label>
+                    <div class="col-3 col-md-2">
+                        <label for="s<%= sIndex %>|b<%= bIndex %>" class="col-form-label<%= bIndex > 0 ? " d-none" : "" %>" <%= bIndex > 0 ? "visibility=hidden" : "" %>>Breakdown</label>
                     </div>
-                    <li class="col-6 col-md-8 col-xxl-10 mb-2 pb-2 border-2 border-bottom">
+                    <% if (incomplete) { %>
+                    <li class="col-6 col-md-8">
+                    <% } else { %>
+                    <li class="col-6 col-md-8 mb-2 pb-2 border-2 border-bottom">
+                    <% }; %>
                         <% breakdown.description.forEach((description, dIndex) => { %>
-                        <textarea id="s<%= sIndex %>|s<%= bIndex %>" class="form-control mb-2" name="s<%= sIndex %>[sections]" rows="1"><%= description %></textarea>
+                        <textarea id="s<%= sIndex %>|b<%= bIndex %>" class="form-control mb-2" name="s<%= sIndex %>[sections]" rows="1"><%= description %></textarea>
                         <% }); %>
-                        <div class="row mb-2">
-                            <div class="btn btn-primary col-10 mx-auto">Add Description</div>
-                        </div>
+                        <% if (!incomplete) { %>
                         <div class="row">
-                            <div class="btn btn-primary col-8 mx-auto">New Breakdown</div>
+                            <div class="btn btn-primary col-10 mx-auto" data-action="new-breakdown">New Breakdown</div>
                         </div>
+                        <% }; %>
                     </li>
-                    <div class="col-3 col-md-2 col-xxl-1 mb-2 pb-2">
+                    <div class="col-3 col-md-2<%= incomplete ? "" : " mb-2 pb-2" %>">
                         <div class="d-flex align-items">
                             <div class="btn btn-danger mx-auto" data-action="remove-breakdown">Remove</div>
                         </div>
@@ -58,10 +66,11 @@
                 </div>
                 <% }); %>
                 <div class="row d-flex align-items mx-0 px-2">
-                    <div class="btn btn-primary mx-auto <%= section.sections.length > 0 ? " col-10" : "col-12"  %>" data-action="add-breakdown">Add Breakdown</div>
+                    <div class="btn btn-primary mx-auto<%= section.sections.length > 0 ? " col-10" : " col-12"  %>" data-action="add-breakdown">Add Breakdown</div>
                 </div>
             </ol>
         </div>
+        <% }; %>
         <div class="row mx-0">
             <div class="btn btn-danger" data-action="remove-section">Remove Section</div>
         </div>
@@ -98,11 +107,49 @@
     for (const removeSection of removeSections) removeSection.addEventListener('click', removeSectionFunction);
 
     function updateSectionReference() {
-        const sections = document.querySelectorAll('sections');
-        sections.forEach((section, index) => {
-            
+        const sections = document.querySelectorAll('section');
+        sections.forEach((section, sectionIndex) => {
+            const groupings = section.querySelectorAll('section > [class*="border"]');
+            groupings.forEach((group, groupIndex) => {
+                switch (groupIndex) {
+                    case 0:
+                        // heading
+                        const textArea = group.querySelector('textarea');
+                        if (!textArea) return;
+                        group.querySelector('label').setAttribute('for', `s${sectionIndex}|t`);
+                        textArea.setAttribute('id', `s${sectionIndex}|t`);
+                        textArea.setAttribute('name', `s${sectionIndex}[title]`);
+                        break;
+                    case 1:
+                        //description
+                        const descriptionRows = group.querySelectorAll('[class*="row"]');
+                        descriptionRows.forEach((description, descriptionIndex) => {
+                            const textArea = description.querySelector('textarea');
+                            if (!textArea) return;
+                            description.querySelector('label').setAttribute('for', `s${sectionIndex}|d${descriptionIndex}`);
+                            textArea.setAttribute('id', `s${sectionIndex}|d${descriptionIndex}`);
+                            textArea.setAttribute('name', `s${sectionIndex}[description]`);
+                        });
+                        break;
+                    case 2:
+                        //breakdown
+                        const breakdownRows = group.querySelectorAll('.row .mx-0');
+                        breakdownRows.forEach((breakdown, breakdownIndex) => {
+                            const textArea = breakdown.querySelector('textarea');
+                            if (!textArea) return;
+                            breakdown.querySelector('label').setAttribute('for', `s${sectionIndex}|b${breakdownIndex}`);
+                            textArea.setAttribute('id', `s${sectionIndex}|b${breakdownIndex}`);
+                            textArea.setAttribute('name', `s${sectionIndex}[sections]`);
+                        });
+                        break;
+                    default:
+                        break;
+                };
+            });
         });
     };
+
+    
 
     function createElement(options) {
         const newElement = document.createElement(options.type || 'div');
@@ -236,7 +283,7 @@
         };
 
         const labelParent = {
-            classList: ['col-3', 'col-md-2', 'col-xxl-1'],
+            classList: ['col-3', 'col-md-2'],
             children: [label]
         };
 
@@ -255,18 +302,9 @@
             }
         };
 
-        const addDescription = {
-            classList: ['btn', 'btn-primary', 'col-10', 'mx-auto'],
-            innerText: 'Add Description'
-        };
-
-        const addDescriptionParent = {
-            classList: ['row', 'mb-2'],
-            children: [addDescription]
-        };
-
         const newBreakdown = {
-            classList: ['btn', 'btn-primary', 'col-8', 'mx-auto'],
+            classList: ['btn', 'btn-primary', 'col-10', 'mx-auto'],
+            attributes: [{ id: 'data-action', value: 'new-breakdown' }],
             innerText: 'New Breakdown'
         };
 
@@ -277,8 +315,9 @@
 
         const listItemElement = {
             type: 'li',
-            classList: ['col-6', 'col-md-8', 'col-xxl-10', 'mb-2', 'pb-2', 'border-2', 'border-bottom'],
-            children: [textArea, addDescriptionParent, newBreakdownParent]
+            classList: ['col-6', 'col-md-8', 'mb-2', 'pb-2', 'border-2', 'border-bottom'],
+            // children: [textArea, newBreakdownParent]
+            children: [textArea]
         };  
 
         const remove = {
@@ -297,17 +336,13 @@
         };
 
         const removeGrandParent = {
-            classList: ['col-3', 'col-md-2', 'col-xxl-1', 'mb-2', 'pb-2'],
+            classList: ['col-3', 'col-md-2', 'mb-2', 'pb-2'],
             children: [removeParent]
         };
 
         const newRow = {
             classList: ['row', 'mx-0'],
-            children: [
-                labelParent,
-                listItemElement,
-                removeGrandParent
-            ]
+            children: [labelParent, listItemElement, removeGrandParent]
         };
 
         const newRowElement = createElement(newRow);
@@ -326,14 +361,14 @@
         const nextIndex = form.querySelectorAll('section').length;
         const sectionReference = `${this.dataset.element}-${nextIndex}`;
 
-        const headingLabelElement = {
+        const headingLabel = {
             type: 'label',
             classList: ['col-3', 'col-md-2', 'col-xxl-1', 'col-form-label'],
             attributes: [{ id: 'for', value: `${sectionReference}|t` }],
             innerText: 'Heading'
         };
 
-        const headingTextAreaElement = {
+        const headingTextArea = {
             type: 'textarea',
             classList: ['form-control'],
             attributes: [
@@ -348,30 +383,30 @@
             }
         };        
 
-        const headingTextAreaParentElement = {
+        const headingTextAreaParent = {
             classList: ['col-9', 'col-md-10', 'col-xxl-11'],
-            children: [headingTextAreaElement]
+            children: [headingTextArea]
         };
 
-        const headingElement = {
+        const heading = {
             classList: ['row', 'border', 'border-2', 'rounded-2', 'mx-0', 'mb-3', 'py-2'],
-            children: [headingLabelElement, headingTextAreaParentElement]
+            children: [headingLabel, headingTextAreaParent]
         };
 
         const descriptionReference = `${sectionReference}|d-0`;
 
-        const descriptionLabelElement = {
+        const descriptionLabel = {
             classList: ['col-form-label'],
             attributes: [{ id: 'for', value: descriptionReference }],
             innerText: 'Description'
         };
 
-        const descriptionLabelParentElement = {
+        const descriptionLabelParent = {
             classList: ['col-3', 'col-md-2', 'col-xxl-1'],
-            children: [descriptionLabelElement]
+            children: [descriptionLabel]
         };
 
-        const descriptionTextAreaElement = {
+        const descriptionTextArea = {
             type: 'textarea',
             classList: ['form-control', 'mb-2'],
             attributes: [
@@ -386,12 +421,12 @@
             }
         };
 
-        const descriptionTextAreaParentElement = {
+        const descriptionTextAreaParent = {
             classList: ['col-6', 'col-md-8', 'col-xxl-10'],
-            children: [descriptionTextAreaElement]
+            children: [descriptionTextArea]
         };
 
-        const removeDescriptionElement = {
+        const removeDescription = {
             classList: ['btn', 'btn-danger', 'mx-auto'],
             attributes: [{ id: 'data-action', value: 'remove-description' }],
             innerText: 'Remove',
@@ -401,17 +436,17 @@
             }
         };
 
-        const removeDescriptionParentElement = {
+        const removeDescriptionParent = {
             classList: ['d-flex', 'align-items'],
-            children: [removeDescriptionElement]
+            children: [removeDescription]
         };
 
-        const removeDescriptionGrandParentElement = {
+        const removeDescriptionGrandParent = {
             classList: ['col-3', 'col-md-2', 'col-xxl-1'],
-            children: [removeDescriptionParentElement]
+            children: [removeDescriptionParent]
         };
 
-        const addDescriptionElement = {
+        const addDescription = {
             classList: ['btn', 'btn-primary', 'col-10', 'mx-auto'],
             attributes: [{ id: 'data-action', value: 'add-description' }],
             innerText: 'Add Description',
@@ -421,145 +456,123 @@
             }
         };
         
-        const addDescriptionRowElement = {
+        const addDescriptionRow = {
             classList: ['row', 'd-flex', 'align-items', 'mx-0', 'px-2'],
-            children: [addDescriptionElement]
+            children: [addDescription]
         };
 
-        const descriptionRowElement = {
+        const descriptionRow = {
             classList: ['row', 'mx-0'],
-            children: [
-                descriptionLabelParentElement,
-                descriptionTextAreaParentElement,
-                removeDescriptionGrandParentElement,
-                ]
+            children: [descriptionLabelParent, descriptionTextAreaParent, removeDescriptionGrandParent]
         };
 
-        const descriptionBorderElement = {
+        const description = {
             classList: ['border', 'border-2', 'rounded-2', 'mb-3', 'py-2'],
-            children: [descriptionRowElement, addDescriptionRowElement]
+            children: [descriptionRow, addDescriptionRow]
+        };
+
+        const breakdownLabel = {
+            type: 'label',
+            classList: ['col-form-label'],
+            attributes: [{ id: 'for', value: 'some-reference' }],
+            innerText: 'Breakdown'
+        };
+
+        const breakdownLabelParent = {
+            classList: ['col-3', 'col-md-2'],
+            children: [breakdownLabel]
+        }
+
+        const breakdownTextArea = {
+            type: 'textarea',
+            classList: ['form-control', 'mb-2'],
+            attributes: [
+                { id: 'id', value: ''},
+                { id: 'name', value: ''},
+                { id: 'rows', value: 1 }
+            ]
+        };
+
+        const newBreakdown = {
+            classList: ['btn', 'btn-primary', 'col-10', 'mx-auto'],
+            attributes: [{ id: 'data-action', value: 'new-breakdown' }],
+            innerText: 'New Breakdown',
+            // addEventListener: {
+                // type: 'click',
+                // listener: newBreakdownFunction
+            // }
+        };
+        
+        const newBreakdownParent = { classList: ['row'], children: [newBreakdown] };
+
+        const breakdownContentParent = {
+            type: 'li',
+            classList: ['col-6', 'col-md-8', 'mb-2', 'pb-2', 'border-2', 'border-bottom'],
+            // children: [breakdownTextArea, newBreakdownParent]
+            children: [breakdownTextArea]
+        };        
+
+        const removeBreakdown = {
+            classList: ['btn', 'btn-danger', 'mx-auto'],
+            attributes: [{ id: 'data-action', value: 'remove-breakdown' }],
+            innerText: 'Remove',
+            addEventListener: {
+                type: 'click',
+                listener: removeRowFunction
+            }
+        };
+
+        const removeBreakdownParent = {
+            classList: ['d-flex', 'align-items'],
+            children: [removeBreakdown]
+        };
+
+        const removeBreakdownGrandParent = {
+            classList: ['col-3', 'col-md-2', 'mb-2', 'pb-2'],
+            children: [removeBreakdownParent]
+        };
+
+        const breakdownRow = {
+            classList: ['row', 'mx-0'],
+            children: [breakdownLabelParent, breakdownContentParent, removeBreakdownGrandParent]
+        };       
+
+        const addBreakdown = {
+            classList: ['btn', 'btn-primary', 'mx-auto', 'col-10'],
+            attributes: [{ id: 'data-action', value: 'add-breakdown' }],
+            innerText: 'Add Breakdown',
+            addEventListener: {
+                type: 'click',
+                listener: addBreakdownFunction
+            }
+        };
+
+        const addBreakdownRow = {
+            classList: ['row', 'd-flex', 'align-items', 'mx-0', 'px-2'],
+            children: [addBreakdown]
+        };
+
+        const breakdownList = {
+            type: 'ol',
+            classList: ['mb-0', 'p-0'],
+            children: [breakdownRow, addBreakdownRow]
+        };
+
+        const breakdown = {
+            classList: ['border', 'border-2', 'rounded-2', 'mb-3', 'py-2'],
+            children: [breakdownList]
         };
 
         const sectionElementOptions = {
             type: 'section',
             classList: ['border', 'border-3', 'rounded-3', 'mb-3', 'p-3'],
-            children: [headingElement, descriptionBorderElement]
+            children: [heading, description, breakdown]
         };
 
         const sectionElement = createElement(sectionElementOptions);
 
         form.insertBefore(sectionElement, this.closest('form > div'));
 
-        const breakdownRowElement = document.createElement('div');
-        breakdownRowElement.classList.add('row', 'border', 'border-2', 'rounded-2', 'mx-0', 'mb-3', 'py-2');
-
-        const breakdownLabelElementOptions = {
-            type: 'label',
-            classList: ['col-form-label'],
-            attributes: [{ id: 'for', value: `${sectionReference}|s0` }],
-            innerText: 'Breakdown'
-        };
-
-        const breakdownLabelParentElementOptions = {
-            classList: ['col-3', 'col-md-2', 'col-xxl-1'],
-            children: [breakdownLabelElementOptions]
-        };
-
-        const breakdownLabelParentElement = createElement(breakdownLabelParentElementOptions);
-
-        const breakdownOrderedListElementOptions = {
-            type: 'ol',
-            classList: ['px-0', 'mb-0']
-        };
-        const breakdownOrderedListElement = createElement(breakdownOrderedListElementOptions);
-
-        const breakdownListItemRowElementOptions = { classList: ['row', 'mx-0'] };
-        const breakdownListItemRowElement = createElement(breakdownListItemRowElementOptions);
-
-        const breakdownListItemElementOptions = { type: 'li', classList: ['col-6', 'col-md-8', 'col-xxl-10'] };
-        const breakdownListItemElement = createElement(breakdownListItemElementOptions);
-
-        const breakdownTextAreaElementOptions = {
-            type: 'textarea',
-            classList: ['form-control', 'mb-2'],
-            attributes: [
-                { id: 'id', value: `${sectionReference}|s0` },
-                { id: 'name', value: `${sectionReference}[sections]` },
-                { id: 'rows', value: 1 }
-            ],
-            addEventListener: {
-                type: 'input',
-                listener: onInput,
-                options: { once: false }
-            }
-        };
-
-        const breakdownTextAreaElement = createElement(breakdownTextAreaElementOptions);
-
-        const breakdownAddDescriptionRowElementOptions = { classList: ['row', 'mb-2'] };
-        const breakdownAddDescriptionRowElement = createElement(breakdownAddDescriptionRowElementOptions)
-
-        const breakdownAddDescriptionElementOptions = {
-            classList: ['btn', 'btn-primary', 'mx-auto'],
-            innerText: 'Add Description',
-            // addEventListener: {
-                // type: 'click',
-                // listener: 
-            // }
-        };
-        const breakdownAddDescriptionElement = createElement(breakdownAddDescriptionElementOptions);
-
-        const breakdownAddBreakdownRowElementOptions = { classList: ['row'] };
-        const breakdownAddBreakdownRowElement = createElement(breakdownAddBreakdownRowElementOptions);
-
-        const breakdownAddBreakdownElementOptions = {
-            classList: ['btn', 'btn-primary', 'col-10', 'mx-auto'],
-            innerText: 'Add Breakdown',
-            // addEventListener: {
-                // type: 'click',
-                // listener: 
-            // }
-        };
-        const breakdownAddBreakdownElement = createElement(breakdownAddBreakdownElementOptions);
-
-        const removeBreakdownGrandParentElementOptions = { classList: ['col-3', 'col-md-2', 'col-xxl-1'] };
-        const removeBreakdownGrandParentElement = createElement(removeBreakdownGrandParentElementOptions);
-
-        const removeBreakdownParentElementOptions = { classList: ['d-flex', 'align-items']};
-        const removeBreakdownParentElement = createElement(removeBreakdownParentElementOptions);
-
-        const removeBreakdownElementOptions = {
-            classList: ['btn', 'btn-danger', 'mx-auto'],
-            innerText: 'Remove',
-            // addEventListener: {
-                // type: 'click',
-                // listener: 
-            // }
-        };
-        const removeBreakdownElement = createElement(removeBreakdownElementOptions);
-
-        breakdownAddDescriptionRowElement.appendChild(breakdownAddDescriptionElement);
-
-        breakdownAddBreakdownRowElement.appendChild(breakdownAddBreakdownElement);
-
-        breakdownListItemElement.appendChild(breakdownTextAreaElement);
-        breakdownListItemElement.appendChild(breakdownAddDescriptionRowElement);
-        breakdownListItemElement.appendChild(breakdownAddBreakdownRowElement);
-
-        removeBreakdownParentElement.appendChild(removeBreakdownElement);
-        removeBreakdownGrandParentElement.appendChild(removeBreakdownParentElement);
-
-        breakdownListItemRowElement.appendChild(breakdownLabelParentElement);
-        breakdownListItemRowElement.appendChild(breakdownListItemElement);
-        breakdownListItemRowElement.appendChild(removeBreakdownGrandParentElement);
-
-        breakdownOrderedListElement.appendChild(breakdownListItemRowElement);
-
-        breakdownRowElement.appendChild(breakdownOrderedListElement);
-
-        sectionElement.appendChild(breakdownRowElement);
-
-        
         const removeSectionElementOption = {
             classList: ['btn', 'btn-danger'],
             attributes: [{ id: 'data-action', value: 'remove-section' }],
