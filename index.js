@@ -116,7 +116,24 @@ app.get('/rules/edit', async (req, res) => {
     
     res.render('rules/edit', { lastModified, sections });
 });
-app.post('/rules', (req, res) => res.send(req.body));
+app.post('/rules', (req, res) => {
+    function stringToArray(item) {
+        if (typeof item === 'string') return [item];
+        return item;
+    };
+    const data = req.body;
+    const charter = new Charter();
+    for (const key of Object.keys(data)) {
+        const section = data[key];
+        charter.sections.push({
+            title: section.title,
+            description: stringToArray(section.description),
+            sections: section.sections
+        });        
+    };
+    charter.save();
+    res.redirect('/rules');
+});
 
 app.all('*', (req, res, next) => next(new ExpressError(404, 'Page Not Found')));
 

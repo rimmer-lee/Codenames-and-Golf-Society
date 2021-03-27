@@ -10,9 +10,11 @@ const SectionSchema = new Schema({
 });
 
 const CharterSchema = new Schema({
-    lastModified: { 
+    version: { type: String, default: 'Test', required: true },
+    lastModified: {
         date: { type: Date, default: Date.now() },
-        by: { type: Schema.Types.ObjectId, default: 'anonymous user', ref: 'User' }
+        by: { type: String, default: 'anonymous user' }
+        // by: { type: Schema.Types.ObjectId, ref: 'User' }
     },
     sections: [ SectionSchema ]
 }, options);
