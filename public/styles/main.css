@@ -84,8 +84,12 @@ i.bi {
     font-size: 1.35em;
 }
 
+.text {
+    font-size: 2vmin;
+}
+
 .heading {
-    font-size: 1.25rem;
+    font-size: 3vmin;
 }
 
 section.custom-table > .row > div[class*="col"] {

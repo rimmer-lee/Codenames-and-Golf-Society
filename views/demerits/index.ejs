@@ -7,19 +7,19 @@
         </div>
     </div>
 </div>
-<section class="container custom-table mb-3">
-    <div class="row heading">
+<section class="container custom-table mb-3 text">
+    <div class="row">
         <div class="col-2"></div>
         <% for (const player of data.players) { %>
         <div class="col-2 d-flex">
-            <div class="m-auto">
+            <div class="m-auto heading">
                 <%= player.name %>
             </div>
         </div>
         <% }; %>
     </div>
-    <div class="row heading mp-3">
-        <div class="col-2">
+    <div class="row mp-3">
+        <div class="col-2 heading">
             Demerits
         </div>
         <% for (const player of data.players) { %>
