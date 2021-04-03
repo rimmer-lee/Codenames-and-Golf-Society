@@ -1,0 +1,9 @@
+<% if (section.title) { %>
+<h4 class="pb-2 border-bottom border-1"><%= section.title %></h4>
+<% }; %>
+<% if (section.description) { %>
+<%- include('description.ejs', { descriptions: section.description }) %>
+<% }; %>
+<% if (section.sections) { %>
+<%- include('breakdown.ejs', { breakdowns: section.sections }) %>
+<% }; %>

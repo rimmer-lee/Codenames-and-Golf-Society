@@ -1,0 +1,218 @@
+<% layout('layouts/boilerplate') %>
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1>New Demerit</h1>
+</div>
+<form class="mb-3" method="POST" action="/demerits">
+    <div class="row d-flex mb-3">
+        <div class="col-6 border border-3 rounded-3 mx-auto">
+            <div class="row my-2 mx-0">
+                <label for="date" class="col-4 col-form-label">
+                    Date
+                </label>
+                <input id="date" class="col form-control" type="date" name="demerit[date]" value="<%= date %>">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="player" class="col-4 col-form-label">
+                    Player
+                </label>
+                <select id="player" class="col form-select" aria-label="player" name="demerit[player]">
+                    <option value="Select player" selected>Select player</option>
+                    <% for (const player of players) { %>
+                    <option value="<%= player %>"><%= player %></option>
+                    <% }; %>
+                </select>
+            </div>    
+            <div class="row mx-0 mb-2">
+                <label for="value" class="col-4 col-form-label">Demerits</label>
+                <input id="value" class="col form-control" type="number" value="0" min="0" name="demerit[value]">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="comments" class="col-4 col-form-label">Comments</label>
+                <textarea id="comments" class="col form-control" name="demerit[comments]" rows="1" placeholder="Optional"></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <div class="row px-2">
+            <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
+            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
+        </div>
+    </div>
+</form>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+<script src="/scripts/resize-textareas.js"></script>
+<script>
+
+    // needs to be added to new elements
+    // https://getbootstrap.com/docs/5.0/components/tooltips/
+    const tooltipElements = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    const tooltipList = tooltipElements.map(tooltipElement => new bootstrap.Tooltip(tooltipElement));
+
+    // same as rules/edit.ejs
+    function createElement(options) {
+        const newElement = document.createElement(options.type || 'div');
+        options.classList && newElement.classList.add( ...options.classList );
+        if (options.attributes) for (const attribute of options.attributes) newElement.setAttribute(attribute.id, attribute.value);
+        if (options.innerText) newElement.innerText = options.innerText;
+        options.addEventListener && newElement.addEventListener(options.addEventListener.type || 'click', options.addEventListener.listener, options.addEventListener.options)
+        if (options.children) for (const child of options.children) newElement.appendChild(createElement(child));
+        return newElement;
+    };
+
+    function selectChange(e) {
+        const selectElements = document.querySelectorAll('select');    
+        for (const selectElements of selectElements) selectElements.options.find(({ value }) => e.target.options.selectedIndex).remove();
+    };    
+    const selectElements = document.querySelectorAll('select');
+    for (const selectElement of selectElements) selectElement.addEventListener('change', selectChange);
+    
+    const addDemerits = document.querySelectorAll('[data-action="add-demerit"]');
+    for (const addDemerit of addDemerits) addDemerit.addEventListener('click', addDemeritFunction);
+
+    const addDrinks = document.querySelectorAll('[data-action="add-drink"]');
+    for (const addDrink of addDrinks) addDrink.addEventListener('click', addDrinkFunction);
+
+    const removeDemerits = document.querySelectorAll('[data-action="remove-demerit"]');
+    for (const removeDemerit of removeDemerits) removeDemerit.addEventListener('click', removeDemeritFunction);
+
+    const removeDrinks = document.querySelectorAll('[data-action="remove-drink"]');
+    for (const removeDrink of removeDrinks) removeDrink.addEventListener('click', removeDrinkFunction);
+
+    function removeDemeritFunction() {
+        this.closest('.row').remove();
+    };
+    
+    function removeDrinkFunction() {
+        this.closest('.col').remove();
+    }
+
+    function addDrinkFunction() {
+        const parentElement = this.closest('[class*="row-cols"]');
+        const drink = {
+            classList: ['col', 'd-flex', 'justify-content-end', 'pe-0'],
+            children: [
+                {
+                    type: 'label',
+                    classList: ['col-form-label', 'd-none'],
+                    attributes: [
+                        { id: 'for', value: '' },
+                        { id: 'visibility', value: 'hidden' }
+                    ]
+                },
+                {
+                    type: 'input',
+                    classList: ['form-control'],
+                    attributes: [
+                        { id: 'id', value: '' },
+                        { id: 'name', value: '' },
+                        { id: 'type', value: 'number' },
+                        { id: 'value', value: '0' },
+                        { id: 'min', value: '0' }
+                    ]
+                },
+                {
+                    classList: ['d-flex', 'm-auto', 'ps-1'],
+                    children: [
+                        {
+                            classList: ['btn', 'btn-danger', 'p-1'],
+                            attributes: [
+                                { id: 'data-action', value: 'remove-drink' },
+                                { id: 'data-bs-toggle', value: 'tooltip' },
+                                { id: 'data-bs-placement', value: 'top' },
+                                { id: 'title', value: 'Remove Drink' }
+                            ],
+                            addEventListener: { listener: removeDrinkFunction },
+                            children: [
+                                {
+                                    classList: ['btn-close', 'btn-close-white'],
+                                    attributes: [{ id: 'aria-label', value: 'remove drink' }]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        parentElement.insertBefore(createElement(drink), this.closest('.col'));
+    };
+
+    function addDemeritFunction() {
+        const parentElement = this.closest('div[class*="border"]');
+        const demerit = {
+            classList: ['row', 'me-0', 'mb-2'],
+            children: [
+                {
+                    classList: ['col-4', 'col-md-3', 'col-xxl-2'],
+                    children: [
+                        {
+                            type: 'label',
+                            classList: ['col-form-label', 'd-none'],
+                            attributes: [
+                                { id: 'for', value: '' },
+                                { id: 'visibility', value: 'hidden' }
+                            ]
+                        },
+                        {
+                            type: 'input',
+                            classList: ['form-control'],
+                            attributes: [
+                                { id: 'id', value: '' },
+                                { id: 'name', value: '' },
+                                { id: 'type', value: 'number' },
+                                { id: 'value', value: '0' },
+                                { id: 'min', value: '0' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    classList: ['col', 'd-flex', 'justify-content-end', 'px-0'],
+                    children: [
+                        {
+                            type: 'label',
+                            classList: ['col-form-label', 'd-none'],
+                            attributes: [
+                                { id: 'for', value: '' },
+                                { id: 'visibility', value: 'hidden' }
+                            ]
+                        },
+                        {
+                            type: 'textarea',
+                            classList: ['form-control'],
+                            attributes: [
+                                { id: 'id', value: '' },
+                                { id: 'name', value: '' },
+                                { id: 'rows', value: '1' },
+                                { id: 'placeholder', value: 'Comments (Optional)' }
+                            ]
+                        },
+                        {
+                            classList: ['d-flex', 'm-auto', 'ps-2'],
+                            children: [
+                                {
+                                    classList: ['btn', 'btn-danger', 'p-1'],
+                                    attributes: [
+                                        { id: 'data-action', value: 'remove-demerit' },
+                                        { id: 'data-bs-toggle', value: 'tooltip' },
+                                        { id: 'data-bs-placement', value: 'left' },
+                                        { id: 'title', value: 'Remove Demerit' }
+                                    ],
+                                    addEventListener: { listener: removeDemeritFunction },
+                                    children: [
+                                        {
+                                            classList: ['btn-close', 'btn-close-white'],
+                                            attributes: [{ id: 'aria-labe', value: 'remove demerit' }]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        parentElement.insertBefore(createElement(demerit), this.parentElement);
+    };
+
+</script>

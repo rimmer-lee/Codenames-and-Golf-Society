@@ -8,8 +8,25 @@ html, body {
     margin: 0;
 }
 
+ol {
+    list-style: 1 inside;
+}
+
+ol ol {
+    list-style-type: lower-alpha;
+}
+
+ol ol ol {
+    list-style-type: lower-roman;
+}
+
+ol ol ol {
+    list-style-type: disc;
+}
+
 textarea {
     overflow-y:hidden;
+    resize: none;
 }
 
 #home-logo {
@@ -17,4 +34,60 @@ textarea {
     max-width: 100%;
     min-height: 100%;
     min-width: 100%;
+}
+
+.plus {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    position: relative;
+}
+
+.plus::after,
+.plus::before {
+    content: ' ';
+    position: absolute;
+    display: block;
+    background-color: #000;
+    opacity: 0.5;
+    filter: invert(1) grayscale(100%) brightness(200%);
+    z-index: 9;
+    --thickness: 2px;
+    --thickness-offset: calc(var(--thickness) / -2);
+    --size: 3px;
+}
+
+.plus::after {
+    height: var(--thickness);
+    margin-top: var(--thickness-offset);
+    top: 50%;
+    left: var(--size);
+    right: var(--size);
+}
+
+.plus::before {
+    width: var(--thickness);
+    margin-left: var(--thickness-offset);
+    left: 50%;
+    top: var(--size);
+    bottom: var(--size);
+}
+
+.plus:hover::after,
+.plus:hover::before {
+    color: #000;
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+i.bi {
+    font-size: 1.35em;
+}
+
+.heading {
+    font-size: 1.25rem;
+}
+
+section.custom-table > .row > div[class*="col"] {
+    border: solid rgb(222, 226, 230) 1px;
 }

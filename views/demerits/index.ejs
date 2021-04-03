@@ -1,0 +1,127 @@
+<% layout('layouts/boilerplate') %>
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1 class="col">Demerits</h1>
+    <div class="col-2 justify-content-end">
+        <div class="d-flex align-items">
+            <a class="btn btn-primary mx-auto" href="/demerits/new">New</a>
+        </div>
+    </div>
+</div>
+<section class="container custom-table mb-3">
+    <div class="row heading">
+        <div class="col-2"></div>
+        <% for (const player of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <%= player.name %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+    <div class="row heading mp-3">
+        <div class="col-2">
+            Demerits
+        </div>
+        <% for (const player of data.players) { %>
+        <div class="col-2">
+            <div class="row">
+                <% for (const title of player.titles) { %>
+                <% if (title === 'Ace') { %>
+                    <div class="col d-flex p-0">
+                    <i class="mx-auto bi bi-suit-spade-fill"></i>
+                </div>
+                <% } else if (title === 'flag bitch') { %>
+                <div class="col d-flex p-0">
+                    <i class="mx-auto bi bi-flag-fill"></i>
+                </div>
+                <% } else if (title === 'Karen') { %>
+                    <div class="col d-flex p-0">
+                    <i class="mx-auto bi bi-cone-striped"></i>
+                </div>
+                <% }; %>
+                <% }; %>
+            </div>            
+        </div>        
+        <% }; %>
+    </div>
+    <% for (const demerit of data.demerits) { %>
+    <div class="row mp-2">
+        <div class="col-2 d-flex justify-content-end">
+            <%= demerit.date %>
+        </div>
+        <% for (const p of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <% const d = demerit.players.find(({ player }) => player === p.name); %>
+                <%= d.demerits && d.demerits > 0 ? d.demerits : ""; %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+    <% }; %>
+    <div class="row mp-3">
+        <div class="col-2 heading">
+            Total
+        </div>
+        <% for (const player of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <%= player.demerits %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+    <div class="row mp-3">
+        <div class="col-2 heading">
+            Drinks
+        </div>
+        <% for (const player of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <%= player.owed %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+    <% for (const drink of data.drinks) { %>
+    <div class="row mp-2">
+        <div class="col-2 d-flex justify-content-end">
+            <%= drink.date %>
+        </div>
+        <% for (const p of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <% const d = drink.players.find(({ player }) => player === p.name); %>
+                <%= d.drinks && d.drinks > 0 ? d.drinks : ""; %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+    <% }; %>
+    <div class="row mp-3">
+        <div class="col-2 heading">
+            Balance
+        </div>
+        <% for (const player of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <%= player.balance %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+    <div class="row mp-3">
+        <div class="col-2 heading">
+            BBQ
+        </div>
+        <% for (const player of data.players) { %>
+        <div class="col-2 d-flex">
+            <div class="m-auto">
+                <% if (player.bbq) { %>
+                <img src="/images/bbq.png" alt="bbq" style="height: 100%; width: 100%;">
+                <% }; %>
+            </div>
+        </div>
+        <% }; %>
+    </div>
+</section>
