@@ -1,0 +1,41 @@
+<% layout('layouts/boilerplate') %>
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1>New Drink</h1>
+</div>
+<form class="mb-3" method="POST" action="/demerits/drinks">
+    <div class="row d-flex mb-3">
+        <div class="col-6 border border-3 rounded-3 mx-auto">
+            <div class="row my-2 mx-0">
+                <label for="date" class="col-4 col-form-label">
+                    Date
+                </label>
+                <input id="date" class="col form-control" type="date" name="drink[date]" value="<%= date %>">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="player" class="col-4 col-form-label">
+                    Player
+                </label>
+                <select id="player" class="col form-select" aria-label="player" name="drink[player]">
+                    <option value="Select player" selected>Select player</option>
+                    <% for (const player of players) { %>
+                    <option value="<%= player %>"><%= player %></option>
+                    <% }; %>
+                </select>
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="value" class="col-4 col-form-label">Drinks</label>
+                <input id="value" class="col form-control" type="number" value="0" min="0" name="drink[value]">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="comments" class="col-4 col-form-label">Comments</label>
+                <textarea id="comments" class="col form-control" name="drink[comments]" rows="1" placeholder="Optional"></textarea>
+            </div>
+        </div>
+    </div>    
+    <div class="mb-3">
+        <div class="row px-2">
+            <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
+            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
+        </div>
+    </div>
+</form>

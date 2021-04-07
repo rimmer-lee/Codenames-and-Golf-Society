@@ -1,127 +1,210 @@
 <% layout('layouts/boilerplate') %>
+<!-- add tooltips -->
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1 class="col">Demerits</h1>
-    <div class="col-2 justify-content-end">
+    <!-- add new buttons alongside relevant section in table -->
+    <!-- <div class="col">
         <div class="d-flex align-items">
-            <a class="btn btn-primary mx-auto" href="/demerits/new">New</a>
+            <a class="btn btn-primary me-0 mx-auto" href="/demerits/titles/new">New Title</a>
         </div>
-    </div>
+    </div> -->
+    <!-- <div class="col">
+        <div class="row">
+            <label class="col d-flex align-items-center justify-content-end" for="year">Year</label> -->
+            <!-- need to add listener for a change event (for AJAX) or submit the change as a form to trigger a page load -->
+            <!-- <select id="year" class="col form-select" aria-label="player">
+                <% years.forEach((year, index) => { %>
+                <option value="<%= year %>" <%= index === 1 ? "selected" : "" %>><%= year %></option>
+                <% }); %>
+            </select>
+        </div>
+    </div> -->
 </div>
-<section class="container custom-table mb-3 text">
-    <div class="row">
-        <div class="col-2"></div>
-        <% for (const player of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto heading">
-                <%= player.name %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
-    <div class="row mp-3">
-        <div class="col-2 heading">
-            Demerits
-        </div>
-        <% for (const player of data.players) { %>
-        <div class="col-2">
-            <div class="row">
-                <% for (const title of player.titles) { %>
-                <% if (title === 'Ace') { %>
-                    <div class="col d-flex p-0">
-                    <i class="mx-auto bi bi-suit-spade-fill"></i>
-                </div>
-                <% } else if (title === 'flag bitch') { %>
-                <div class="col d-flex p-0">
-                    <i class="mx-auto bi bi-flag-fill"></i>
-                </div>
-                <% } else if (title === 'Karen') { %>
-                    <div class="col d-flex p-0">
-                    <i class="mx-auto bi bi-cone-striped"></i>
-                </div>
+<section>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col"></th>
+                <% for (const player of data.players) { %>
+                <th class="align-top" scope="col">
+                    <div class="row">
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                <div>
+                                    <%= player.name %>
+                                </div>
+                                <!-- <a href="">
+                                    <%= player.name %>
+                                </a> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <% for (const title of player.titles) { %>
+                        <% if (title === 'Ace') { %>
+                        <div class="col d-flex p-0">
+                            <i class="mx-auto bi bi-suit-spade-fill"></i>
+                        </div>
+                        <!-- <a class="col d-flex p-0" href="/demerits/titles/edit">
+                            <i class="mx-auto bi bi-suit-spade-fill"></i>
+                        </a> -->
+                        <% } else if (title === 'flag bitch') { %>
+                        <div class="col d-flex p-0">
+                            <i class="mx-auto bi bi-flag-fill"></i>
+                        </div>
+                        <!-- <a class="col d-flex p-0" href="/demerits/titles/edit">
+                            <i class="mx-auto bi bi-flag-fill"></i>
+                        </a> -->
+                        <% } else if (title === 'Karen') { %>
+                        <div class="col d-flex p-0">
+                            <i class="mx-auto bi bi-cone-striped"></i>
+                        </div>
+                        <!-- <a class="col d-flex p-0" href="/demerits/titles/edit">
+                            <i class="mx-auto bi bi-cone-striped"></i>
+                        </a> -->
+                        <% }; %>
+                        <% }; %>
+                    </div>
+                </th>
                 <% }; %>
-                <% }; %>
-            </div>            
-        </div>        
-        <% }; %>
-    </div>
-    <% for (const demerit of data.demerits) { %>
-    <div class="row mp-2">
-        <div class="col-2 d-flex justify-content-end">
-            <%= demerit.date %>
-        </div>
-        <% for (const p of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto">
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th class="table-secondary" colspan="<%= data.players.length + 1 %>" scope="row">
+                    <div class="row justify-content-end">
+                        <div class="col d-flex align-items-center">Demerits</div>
+                        <div class="col">
+                            <div class="d-flex align-items">
+                                <a class="btn btn-primary me-0 mx-auto" href="/demerits/new">New Demerit</a>
+                            </div>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+            <% for (const demerit of data.demerits) { %>
+            <tr>
+                <th class="d-flex justify-content-end" scope="row">
+                    <!-- <a href="/demerits/edit?d=<%= demerit.date %>"> -->
+                        <%= demerit.date %>
+                    <!-- </a> -->
+                </th>
+                <% for (const p of data.players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.name); %>
-                <%= d.demerits && d.demerits > 0 ? d.demerits : ""; %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
-    <% }; %>
-    <div class="row mp-3">
-        <div class="col-2 heading">
-            Total
-        </div>
-        <% for (const player of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto">
-                <%= player.demerits %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
-    <div class="row mp-3">
-        <div class="col-2 heading">
-            Drinks
-        </div>
-        <% for (const player of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto">
-                <%= player.owed %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
-    <% for (const drink of data.drinks) { %>
-    <div class="row mp-2">
-        <div class="col-2 d-flex justify-content-end">
-            <%= drink.date %>
-        </div>
-        <% for (const p of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto">
-                <% const d = drink.players.find(({ player }) => player === p.name); %>
-                <%= d.drinks && d.drinks > 0 ? d.drinks : ""; %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
-    <% }; %>
-    <div class="row mp-3">
-        <div class="col-2 heading">
-            Balance
-        </div>
-        <% for (const player of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto">
-                <%= player.balance %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
-    <div class="row mp-3">
-        <div class="col-2 heading">
-            BBQ
-        </div>
-        <% for (const player of data.players) { %>
-        <div class="col-2 d-flex">
-            <div class="m-auto">
-                <% if (player.bbq) { %>
-                <img src="/images/bbq.png" alt="bbq" style="height: 100%; width: 100%;">
+                <% const value = d.demerits && d.demerits > 0 ? d.demerits : ""; %> 
+                
+                <% include('../partials/tables/demerits/cell', { value }) %>
+
+                <td>
+                    <div class="d-flex">
+                        <div class="mx-auto">
+                            <!-- <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.name %>"> -->
+                                <%= value %>
+                            <!-- </a> -->
+                        </div>
+                    </div>
+                </td>
+
                 <% }; %>
-            </div>
-        </div>
-        <% }; %>
-    </div>
+            </tr>
+            <% }; %>
+
+            <% include('../partials/tables/demerits/row', { players: data.players, title: 'Total', property: 'demerits' }) %>
+
+            <tr>
+                <th scope="row">Total</th>
+                <% for (const player of data.players) { %>
+                <td>
+                    <div class="d-flex">
+                        <div class="mx-auto">
+                            <%= player.demerit %>
+                        </div>
+                    </div>
+                </td>
+                <% }; %>
+            </tr>
+
+            <tr>
+                <th class="table-secondary" colspan="<%= data.players.length + 1 %>" scope="row">
+                    <div class="row justify-content-end">
+                        <div class="col d-flex align-items-center">Drinks</div>
+                        <div class="col">
+                            <div class="d-flex align-items">
+                                <a class="btn btn-primary me-0 mx-auto" href="/demerits/drinks/new">New Drink</a>
+                            </div>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+            <% for (const drink of data.drinks) { %>
+            <tr>
+                <th class="d-flex justify-content-end" scope="row">
+                    <a href="/demerits/drinks/edit?d=<%= drink.date %>">
+                        <%= drink.date %>
+                    </a>
+                </th>
+                <% for (const p of data.players) { %>
+                <% const d = drink.players.find(({ player }) => player === p.name); %>
+                <% const value = d.drinks && d.drinks > 0 ? d.drinks : ""; %>
+                
+                <% include('../partials/tables/demerits/cell', { value }) %>
+
+                <td>
+                    <div class="d-flex">
+                        <div class="mx-auto">
+                            <%= value %>
+                        </div>
+                    </div>
+                </td>
+
+                <% }; %>
+            </tr>
+            <% }; %>
+
+            <% include('../partials/tables/demerits/row', { players: data.players, title: 'Owed', property: 'owed' }) %>
+
+            <tr>
+                <th scope="row">Owed</th>
+                <% for (const player of data.players) { %>
+                <td>
+                    <div class="d-flex">
+                        <div class="mx-auto">
+                            <%= player.owed %>
+                        </div>
+                    </div>
+                </td>
+                <% }; %>
+            </tr>
+
+            <% include('../partials/tables/demerits/row', { players: data.players, title: 'Balance', property: 'balance' }) %>
+
+            <tr>
+                <th scope="row">Balance</th>
+                <% for (const player of data.players) { %>
+                <td>
+                    <div class="d-flex">
+                        <div class="mx-auto">
+                            <%= player.balance %>
+                        </div>
+                    </div>
+                </td>
+                <% }; %>
+            </tr>
+
+            <tr>
+                <th scope="row">BBQ</th>
+                <% for (const player of data.players) { %>
+                    <td>
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                <% if (player.bbq) { %>
+                                <img src="/images/bbq.png" alt="bbq">
+                                <% }; %>
+                            </div>
+                        </div>
+                    </td>
+                <% }; %>
+            </tr>
+        </tbody>
+    </table>
 </section>

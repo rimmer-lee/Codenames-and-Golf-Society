@@ -5,8 +5,9 @@ const options = { toJSON: { virtuals: true } };
 
 const SectionSchema = new Schema({
     title: String,
-    description: [String],
-    sections: [this]
+    description: [ String ],
+    // sections: [this]
+    rules: [{ type: Schema.Types.ObjectId, ref: 'Rule' }]
 });
 
 const CharterSchema = new Schema({

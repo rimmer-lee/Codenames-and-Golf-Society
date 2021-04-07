@@ -1,0 +1,6 @@
+<tr>
+    <th scope="row"><%= title %></th>
+    <% for (const player of players) { %>
+    <%- include('cell', { value: player[property] }) %>
+    <% }; %>
+</tr>
