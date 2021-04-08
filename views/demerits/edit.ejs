@@ -18,7 +18,7 @@
                 </label>
                 <select id="player" class="col form-select" aria-label="player" name="demerit[<%= demerit.id %>][player]">
                     <% for (const player of players) { %>
-                    <option value="<%= player %>" <%= demerit.player.name.knownAs === player ? "selected" : "" %>><%= player %></option>
+                    <option value="<%= player.id %>" <%= String(demerit.player._id) === player.id ? "selected" : "" %>><%= player.name %></option>
                     <% }; %>
                 </select>
             </div>
@@ -33,8 +33,8 @@
                 <select id="rule" class="col form-select" aria-label="player" name="demerit[<%= demerit.id %>][rule]">
                     <% for (const rule of rules) { %>
                     <!-- find the optimum number of characters -->
-                    <option value="<%= rule.index %>" <%= demerit.rule.index === rule.index ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
-                    <!-- <option value="<%= rule.index %>" <%= demerit.rule.index === rule.index ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
+                    <option value="<%= rule.id %>" <%= String(demerit.rule.id) === String(rule.id) ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
+                    <!-- <option value="<%= rule.id %>" <%= String(demerit.rule.id) === String(rule.id) ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
                     <% }; %>
                 </select>
             </div>            
@@ -43,11 +43,11 @@
             </div>
             <div class="row mx-0 mb-2">
                 <label for="comments" class="col-4 col-form-label">Comments</label>
-                <textarea id="comments" class="col form-control" name="demerit[<%= demerit.id %>][comments]" rows="1" placeholder="Optional"><%= demerit.rule.comments %></textarea>
+                <textarea id="comments" class="col form-control" name="demerit[<%= demerit.id %>][comments]" rows="1" placeholder="Optional"><%= demerit.comments %></textarea>
             </div>
             <div class="row mx-0 mb-2">
                 <label for="status" class="d-none" visibility="hidden"></label>
-                <input id="status" class="btn btn-danger" data-type="button" data-status="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][status]">
+                <input id="status" class="btn btn-danger" data-type="button" data-status="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][status]" readonly>
             </div>
         </div>
     </div>
@@ -60,37 +60,12 @@
     </div>
 </form>
 <script src="/scripts/demerits/new.js"></script>
+<script src="/scripts/demerits/edit.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const rulesAsString = '<%- JSON.stringify(rules) %>';
         const rules = JSON.parse(rulesAsString);
         ruleSelector(rules);
-
-        const demerits = document.querySelectorAll('[data-type="button"]');
-        for (const demerit of demerits) {
-            demerit.addEventListener('click', (e) => {
-                const t = e.target;
-                const parentRow = t.closest('.row');
-                t.classList.toggle('btn-danger')
-                t.classList.toggle('btn-primary')
-                if (t.dataset.status === 'remove') {
-                    console.log('remove')
-                    t.setAttribute('data-status', 'restore');
-                    t.innerText = 'Restore Demerit';
-                } else if (t.dataset.status === 'restore') {
-                    console.log('restore')
-                    t.setAttribute('data-status', 'remove');
-                    t.innerText = 'Remove Demerit';
-                };
-                for (const child of t.closest('[class*="border"]').children) {
-                    child.classList.toggle('d-none');
-                    child.setAttribute('visibility', 'hidden');
-                };
-                parentRow.classList.toggle('mt-2')
-                parentRow.classList.remove('d-none');
-                parentRow.removeAttribute('visibility');
-            });
-        };
-
+        toggle('Demerits')
     });
 </script>

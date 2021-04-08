@@ -31,10 +31,10 @@
                         <div class="d-flex">
                             <div class="mx-auto">
                                 <div>
-                                    <%= player.name %>
+                                    <%= player.name.knownAs %>
                                 </div>
                                 <!-- <a href="">
-                                    <%= player.name %>
+                                    <%= player.name.knownAs %>
                                 </a> -->
                             </div>
                         </div>
@@ -90,7 +90,7 @@
                     </a>
                 </th>
                 <% for (const p of data.players) { %>
-                <% const d = demerit.players.find(({ player }) => player === p.name); %>
+                <% const d = demerit.players.find(({ player }) => player === p.id); %>
                 <% const value = d.demerits && d.demerits > 0 ? d.demerits : ""; %> 
                 
                 <% include('../partials/tables/demerits/cell', { value }) %>
@@ -98,7 +98,7 @@
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
-                            <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.name %>">
+                            <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.id %>">
                                 <%= value %>
                             </a>
                         </div>
@@ -144,7 +144,7 @@
                     </a>
                 </th>
                 <% for (const p of data.players) { %>
-                <% const d = drink.players.find(({ player }) => player === p.name); %>
+                <% const d = drink.players.find(({ player }) => player === p.id); %>
                 <% const value = d.drinks && d.drinks > 0 ? d.drinks : ""; %>
                 
                 <% include('../partials/tables/demerits/cell', { value }) %>
@@ -152,7 +152,7 @@
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
-                            <a href="/demerits/drinks/edit?d=<%= drink.date %>&p=<%= p.name %>">
+                            <a href="/demerits/drinks/edit?d=<%= drink.date %>&p=<%= p.id %>">
                                 <%= value %>
                             </a>
                         </div>

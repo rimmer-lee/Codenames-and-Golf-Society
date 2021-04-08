@@ -1,1 +1,52 @@
-<%= data %>
+<% layout('layouts/boilerplate') %>
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1>Edit Drinks</h1>
+</div>
+<form class="mb-3" method="POST" action="/demerits/drinks?_method=PUT">
+    <% for (const drink of data) { %>
+    <div class="row d-flex mb-3">
+        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
+            <div class="row my-2 mx-0">
+                <label for="date" class="col-4 col-form-label">
+                    Date
+                </label>
+                <input id="date" class="col form-control" type="date" name="drink[<%= drink.id %>][date]" value="<%= drink.formattedDate.datePicker %>">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="player" class="col-4 col-form-label">
+                    Player
+                </label>
+                <select id="player" class="col form-select" aria-label="player" name="drink[<%= drink.id %>][player]">
+                    <% for (const player of players) { %>
+                    <option value="<%= player.id %>" <%= String(drink.player._id) === player.id ? "selected" : "" %>><%= player.name %></option>
+                    <% }; %>
+                </select>
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="value" class="col-4 col-form-label">Drinks</label>
+                <input id="value" class="col form-control" type="number" value="<%= drink.value %>" min="0" name="drink[<%= drink.id %>][value]">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="comments" class="col-4 col-form-label">Comments</label>
+                <textarea id="comments" class="col form-control" name="drink[<%= drink.id %>][comments]" rows="1" placeholder="Optional"><%= drink.comments %></textarea>
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="status" class="d-none" visibility="hidden"></label>
+                <input id="status" class="btn btn-danger" data-type="button" data-status="remove" value="Remove Drink" name="drink[<%= drink.id %>][status]" readonly>
+            </div>
+        </div>
+    </div>
+    <% }; %>
+    <div class="mb-3">
+        <div class="row px-2">
+            <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
+            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
+        </div>
+    </div>
+</form>
+<script src="/scripts/demerits/edit.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        toggle('Drinks')
+    });
+</script>

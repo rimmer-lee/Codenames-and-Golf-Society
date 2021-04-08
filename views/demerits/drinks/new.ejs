@@ -18,7 +18,7 @@
                 <select id="player" class="col form-select" aria-label="player" name="drink[player]">
                     <option value="Select player" selected>Select player</option>
                     <% for (const player of players) { %>
-                    <option value="<%= player %>"><%= player %></option>
+                    <option value="<%= player.id %>"><%= player.name %></option>
                     <% }; %>
                 </select>
             </div>

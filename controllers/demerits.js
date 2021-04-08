@@ -7,6 +7,23 @@ const User = require('../models/user');
 
 const formatDate = require('../utilities/formatDate');
 
+async function create (req, res) {
+    const date = formatDate('yyyy-mm-dd');
+    const users = await User.find().sort({ 'name.knownAs': 1 });
+    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
+    const rules = charter.sections.find(section => section.title === 'Rules on the Course').rules;
+    const players = users.map(user => ({ name: user.name.knownAs, id: user._id }));
+    res.render('demerits/new', { date, players, rules });
+};
+
+async function save (req, res) {
+    const { demerit } = req.body;
+    demerit.player = await User.findById(demerit.player);
+    demerit.rule = await Rule.findById(demerit.rule);
+    await new Demerit(demerit).save();
+    res.redirect('/demerits');
+};
+
 async function show (req, res) {
     // make editable based on dropdown or replicate with AJAX
     const currentYear = new Date().getFullYear();
@@ -23,14 +40,21 @@ async function show (req, res) {
     const demeritDates = [ ...new Set(demerits.map(({ formattedDate }) => formattedDate.friendly)) ];
     const drinkDates = [ ...new Set(drinks.map(({ formattedDate }) => formattedDate.friendly)) ];
     const data = {
-        players: users.map(user => ({ name: user.name.knownAs, titles: [] })),
+        players: users.map(user => {
+            return {
+                id: String(user._id),
+                name: user.name,
+                titles: [],
+                bbq: false
+            };
+        }),
         demerits: demeritDates.map(demeritDate => {
             const demeritsForDate = demerits.filter(({ formattedDate }) => formattedDate.friendly === demeritDate);
             return {
                 date: demeritDate,
-                players: users.map(user => {
-                    const player = user.name.knownAs;
-                    const demerits = demeritsForDate.filter(demerit => demerit.player.name.knownAs === player).reduce((accumulate, demerit) => accumulate + demerit.value, 0)
+                players: users.map(({ _id }) => {
+                    const player = String(_id);
+                    const demerits = demeritsForDate.filter(demerit => String(demerit.player._id) === player).reduce((accumulate, demerit) => accumulate + demerit.value, 0)
                     return { player, demerits };
                 })
             };
@@ -39,58 +63,45 @@ async function show (req, res) {
             const drinksForDate = drinks.filter(({ formattedDate }) => formattedDate.friendly === drinkDate);
             return {
                 date: drinkDate,
-                players: users.map(user => {
-                    const player = user.name.knownAs;
-                    const drinks = drinksForDate.filter(drink => drink.player.name.knownAs === player).reduce((accumulate, drink) => accumulate + drink.value, 0)
+                players: users.map(({ _id }) => {
+                    const player = String(_id);
+                    const drinks = drinksForDate.filter(drink => String(drink.player._id) === player).reduce((accumulate, drink) => accumulate + drink.value, 0)
                     return { player, drinks };
                 })
             };
         }),
-    };
-    for (const title of titles) {
-        const t = await Title.findOne({ name: title }).sort({ date: -1 }).populate('holder');
-        data.players.find(({ name }) => t.holder.name.knownAs === name).titles.push(title);
-    };
+    };    
     for (const player of data.players) {
-        player.demerits = demerits.filter(demerit => demerit.player.name.knownAs === player.name).reduce((accumulate, drink) => accumulate + drink.value, 0);
-        player.bought = drinks.filter(drink => drink.player.name.knownAs === player.name).reduce((accumulate, drink) => accumulate + drink.value, 0);
+        player.demerits = demerits.filter(demerit => String(demerit.player._id) === player.id).reduce((accumulate, drink) => accumulate + drink.value, 0);
+        player.bought = drinks.filter(drink => String(drink.player._id) === player.id).reduce((accumulate, drink) => accumulate + drink.value, 0);
         player.owed = Math.floor(player.demerits / 5);
         player.balance = player.owed - player.bought
         if (player.demerits >= 20) player.bbq = true;
-        else player.bbq = false;
+    };
+    for (const title of titles) {
+        const T = await Title.findOne({ name: title }).sort({ date: -1 }).populate('holder');
+        const holder = data.players.find(({ id }) => String(T.holder._id) === id);
+        if (holder) holder.titles.push(title);
     };
     res.render('demerits/index', { years, data } );
-};
-
-async function save (req, res) {
-    const { demerit } = req.body;
-    demerit.player = await User.findOne({ 'name.knownAs': demerit.player });
-    demerit.rule = await Rule.findOne({ index: demerit.rule });
-    await new Demerit(demerit).save();
-    res.redirect('/demerits');
 };
 
 async function update (req, res) {
     const { demerit } = req.body;
     for (const id of Object.keys(demerit)) {
         const d = demerit[id];
-        const D = await Demerit.findById(id);
-        D.rule = await Rule.findOne({ index: d.rule });
-        D.player = await User.findOne({ 'name.knownAs': d.player });
-        D.date = d.date;
-        D.value = d.value;
-        await D.save();
+        if (/Restore/.test(d.status)) await Demerit.findByIdAndDelete(id);
+        else if (/Remove/.test(d.status)) {
+            const D = await Demerit.findById(id);
+            const dateParts = d.date.match(/(\d{4})-(\d{2})-(\d{2})/);
+            D.rule = await Rule.findById(d.rule);
+            D.player = await User.findById(d.player);
+            D.date = new Date(dateParts[1], dateParts[2] - 1, dateParts[3]);
+            D.value = d.value;
+            await D.save();
+        };
     };
-    res.redirect('/demerits')
-};
-
-async function create (req, res) {
-    const date = formatDate('yyyy-mm-dd');
-    const users = await User.find().sort({ 'name.knownAs': 1 });
-    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const rules = charter.sections.find(section => section.title === 'Rules on the Course').rules;
-    const players = users.map(user => user.name.knownAs);
-    res.render('demerits/new', { date, players, rules });
+    res.redirect('/demerits');
 };
 
 async function edit (req, res) {
@@ -102,11 +113,11 @@ async function edit (req, res) {
     const endDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(23, 59, 59, 999);
     const demerits = await Demerit.find({ date: { $gte: startDate, $lte: endDate } }).populate('player').populate('rule');
     const users = await User.find();
-    const players = users.map(user => user.name.knownAs);
+    const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
     const rules = charter.sections.find(section => section.title === 'Rules on the Course').rules;
     if (!p) return res.render('demerits/edit', { data: demerits, players, rules });
-    const data = demerits.filter(({ player }) => player.name.knownAs === p);
+    const data = demerits.filter(({ player }) => String(player._id) === p);
     res.render('demerits/edit', { data, players, rules });
 };
 

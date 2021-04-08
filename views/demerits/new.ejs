@@ -18,7 +18,7 @@
                 <select id="player" class="col form-select" aria-label="player" name="demerit[player]">
                     <option value="Select player" selected>Select player</option>
                     <% for (const player of players) { %>
-                    <option value="<%= player %>"><%= player %></option>
+                    <option value="<%= player.id %>"><%= player.name %></option>
                     <% }; %>
                 </select>
             </div>
@@ -34,7 +34,7 @@
                     <option value="Select rule" selected>Select rule</option>
                     <% for (const rule of rules) { %>
                     <!-- find the optimum number of characters -->
-                    <option value="<%= rule.index %>"><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option>
+                    <option value="<%= rule._id %>"><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option>
                     <% }; %>
                 </select>
             </div>            
