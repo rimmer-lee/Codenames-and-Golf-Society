@@ -8,4 +8,8 @@ async function save (req, res) {
     res.redirect('/demerits');
 };
 
-module.exports = { save };
+async function update (req, res) {
+
+};
+
+module.exports = { save, update };

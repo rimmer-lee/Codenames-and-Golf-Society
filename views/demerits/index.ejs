@@ -85,9 +85,9 @@
             <% for (const demerit of data.demerits) { %>
             <tr>
                 <th class="d-flex justify-content-end" scope="row">
-                    <!-- <a href="/demerits/edit?d=<%= demerit.date %>"> -->
+                    <a href="/demerits/edit?d=<%= demerit.date %>">
                         <%= demerit.date %>
-                    <!-- </a> -->
+                    </a>
                 </th>
                 <% for (const p of data.players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.name); %>
@@ -98,9 +98,9 @@
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
-                            <!-- <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.name %>"> -->
+                            <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.name %>">
                                 <%= value %>
-                            <!-- </a> -->
+                            </a>
                         </div>
                     </div>
                 </td>
@@ -152,7 +152,9 @@
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
-                            <%= value %>
+                            <a href="/demerits/drinks/edit?d=<%= drink.date %>&p=<%= p.name %>">
+                                <%= value %>
+                            </a>
                         </div>
                     </div>
                 </td>

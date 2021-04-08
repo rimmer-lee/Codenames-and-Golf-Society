@@ -1,3 +1,5 @@
+@import 'tables.css';
+
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -25,7 +27,7 @@ ol ol ol {
 }
 
 textarea {
-    overflow-y:hidden;
+    overflow-y: hidden;
     resize: none;
 }
 
@@ -84,20 +86,8 @@ i.bi {
     font-size: 1.35em;
 }
 
-/* update so widith grows/shrinks with number of users */
-tr > *:not(:first-child) {
-    width: 15%;
-}
-
 a {
     text-decoration: none;
-}
-
-/* need optimising to fit in the table cell */
-table img {
-    object-fit: cover;
-    width: 100%;
-    height: 100px;
 }
 
 select {

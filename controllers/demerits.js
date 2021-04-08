@@ -71,7 +71,17 @@ async function save (req, res) {
 };
 
 async function update (req, res) {
-    
+    const { demerit } = req.body;
+    for (const id of Object.keys(demerit)) {
+        const d = demerit[id];
+        const D = await Demerit.findById(id);
+        D.rule = await Rule.findOne({ index: d.rule });
+        D.player = await User.findOne({ 'name.knownAs': d.player });
+        D.date = d.date;
+        D.value = d.value;
+        await D.save();
+    };
+    res.redirect('/demerits')
 };
 
 async function create (req, res) {

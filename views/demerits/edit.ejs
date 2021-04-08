@@ -2,59 +2,56 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Edit Demerits</h1>
 </div>
-<form class="mb-3" method="POST" action="/demerits">
-    <div class="row row-cols-2 gx-5">
-        <% for (const demerit of data) { %>
-        <div class="col">
-            <div class="row d-flex mb-3">
-                <div class="col border border-3 rounded-3 mx-auto">
-                    <div class="row my-2 mx-0">
-                        <label for="date" class="col-4 col-form-label">
-                            Date
-                        </label>
-                        <input id="date" class="col form-control" type="date" name="demerit[date]" value="<%= demerit.formattedDate.datePicker %>">
-                    </div>
-                    <div class="row mx-0 mb-2">
-                        <label for="player" class="col-4 col-form-label">
-                            Player
-                        </label>
-                        <select id="player" class="col form-select" aria-label="player" name="demerit[player]">
-                            <% for (const player of players) { %>
-                            <option value="<%= player %>" <%= demerit.player.name.knownAs === player ? "selected" : "" %>><%= player %></option>
-                            <% }; %>
-                        </select>
-                    </div>
-                    <div class="row mx-0 mb-2">
-                        <label for="value" class="col-4 col-form-label">Demerits</label>
-                        <input id="value" class="col form-control" type="number" value="<%= demerit.value %>" min="0" name="demerit[value]">
-                    </div>
-                    <div class="row mx-0 mb-2">
-                        <label for="rule" class="col-4 col-form-label">
-                            Rule
-                        </label>
-                        <select id="rule" class="col form-select" aria-label="player" name="demerit[rule]">
-                            <% for (const rule of rules) { %>
-                            <!-- find the optimum number of characters -->
-                            <option value="<%= rule.index %>" <%= demerit.rule.index === rule.index ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
-                            <!-- <option value="<%= rule.index %>" <%= demerit.rule.index === rule.index ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
-                            <% }; %>
-                        </select>
-                    </div>            
-                    <div class="row mx-0 mb-2 px-4">
-                        <p id="rule-description" class="mb-0 text-overflow" readonly="true" rows="1"><%= rules.find(({ index }) => index === demerit.rule.index).description %></p>
-                    </div>
-                    <div class="row mx-0 mb-2">
-                        <label for="comments" class="col-4 col-form-label">Comments</label>
-                        <textarea id="comments" class="col form-control" name="demerit[comments]" rows="1" placeholder="Optional"><%= demerit.rule.comments %></textarea>
-                    </div>
-                    <div class="row mx-0 mb-2">
-                        <div class="btn btn-danger" data-type="button" data-status="remove">Remove Demerit</div>
-                    </div>
-                </div>
+<form class="mb-3" method="POST" action="/demerits?_method=PUT">
+    <% for (const demerit of data) { %>
+    <div class="row d-flex mb-3">
+        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
+            <div class="row my-2 mx-0">
+                <label for="date" class="col-4 col-form-label">
+                    Date
+                </label>
+                <input id="date" class="col form-control" type="date" name="demerit[<%= demerit.id %>][date]" value="<%= demerit.formattedDate.datePicker %>">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="player" class="col-4 col-form-label">
+                    Player
+                </label>
+                <select id="player" class="col form-select" aria-label="player" name="demerit[<%= demerit.id %>][player]">
+                    <% for (const player of players) { %>
+                    <option value="<%= player %>" <%= demerit.player.name.knownAs === player ? "selected" : "" %>><%= player %></option>
+                    <% }; %>
+                </select>
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="value" class="col-4 col-form-label">Demerits</label>
+                <input id="value" class="col form-control" type="number" value="<%= demerit.value %>" min="0" name="demerit[<%= demerit.id %>][value]">
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="rule" class="col-4 col-form-label">
+                    Rule
+                </label>
+                <select id="rule" class="col form-select" aria-label="player" name="demerit[<%= demerit.id %>][rule]">
+                    <% for (const rule of rules) { %>
+                    <!-- find the optimum number of characters -->
+                    <option value="<%= rule.index %>" <%= demerit.rule.index === rule.index ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
+                    <!-- <option value="<%= rule.index %>" <%= demerit.rule.index === rule.index ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
+                    <% }; %>
+                </select>
+            </div>            
+            <div class="row mx-0 mb-2 px-4">
+                <p id="rule-description" class="mb-0 text-overflow" readonly="true" rows="1"><%= rules.find(({ index }) => index === demerit.rule.index).description %></p>
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="comments" class="col-4 col-form-label">Comments</label>
+                <textarea id="comments" class="col form-control" name="demerit[<%= demerit.id %>][comments]" rows="1" placeholder="Optional"><%= demerit.rule.comments %></textarea>
+            </div>
+            <div class="row mx-0 mb-2">
+                <label for="status" class="d-none" visibility="hidden"></label>
+                <input id="status" class="btn btn-danger" data-type="button" data-status="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][status]">
             </div>
         </div>
-        <% }; %>
     </div>
+    <% }; %>
     <div class="mb-3">
         <div class="row px-2">
             <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
@@ -72,30 +69,26 @@
         const demerits = document.querySelectorAll('[data-type="button"]');
         for (const demerit of demerits) {
             demerit.addEventListener('click', (e) => {
-                const parentRow = e.target.closest('.row');
-                if (e.target.dataset.status === 'remove') {
+                const t = e.target;
+                const parentRow = t.closest('.row');
+                t.classList.toggle('btn-danger')
+                t.classList.toggle('btn-primary')
+                if (t.dataset.status === 'remove') {
                     console.log('remove')
-                    e.target.setAttribute('data-status', 'restore');
-                    e.target.innerText = 'Restore Demerit';
-                    
-                } else if (e.target.dataset.status === 'restore') {
+                    t.setAttribute('data-status', 'restore');
+                    t.innerText = 'Restore Demerit';
+                } else if (t.dataset.status === 'restore') {
                     console.log('restore')
-                    e.target.setAttribute('data-status', 'remove');
-                    e.target.innerText = 'Remove Demerit';
+                    t.setAttribute('data-status', 'remove');
+                    t.innerText = 'Remove Demerit';
                 };
-
-                for (const child of e.target.closest('[class*="border"]').children) {
+                for (const child of t.closest('[class*="border"]').children) {
                     child.classList.toggle('d-none');
                     child.setAttribute('visibility', 'hidden');
                 };
-
                 parentRow.classList.toggle('mt-2')
                 parentRow.classList.remove('d-none');
                 parentRow.removeAttribute('visibility');
-                
-                e.target.classList.toggle('btn-danger')
-                e.target.classList.toggle('btn-primary')
-
             });
         };
 

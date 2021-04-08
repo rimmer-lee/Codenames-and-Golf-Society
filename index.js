@@ -6,6 +6,7 @@ const express = require('express');
 // const flash = require('connect-flash');
 const helmet = require('helmet');
 // const LocalStrategy = require('passport-local');
+const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 // const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo').default;
@@ -86,6 +87,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session(sessionConfig));
 app.use(helmet.contentSecurityPolicy({
