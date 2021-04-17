@@ -1,4 +1,7 @@
 <div class="row my-2 mx-0">
     <label for="<%= id %>" class="col-4 col-form-label">Date</label>
-    <input id="<%= id %>" class="col form-control" type="date" name="<%= name %>" value="<%= value %>">
+    <input id="<%= id %>" class="col form-control" type="date" name="<%= name %>" value="<%= value %>" required>
+    <div class="invalid-feedback">
+        Please select a date.
+    </div>
 </div>

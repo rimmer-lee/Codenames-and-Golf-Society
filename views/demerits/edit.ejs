@@ -2,7 +2,7 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Edit Demerits</h1>
 </div>
-<form class="mb-3" method="POST" action="/demerits?_method=PUT">
+<form class="mb-3 needs-validation" method="POST" action="/demerits?_method=PUT" novalidate>
     <!-- need to add index to IDs -->
     <% for (const demerit of data) { %>
     <div class="row d-flex mb-3">

@@ -1,9 +1,14 @@
 <div class="row mx-0 mb-2">
     <label for="<%= id %>" class="col-4 col-form-label">Player</label>
-    <select id="<%= id %>" class="col form-select" aria-label="player" name="<%= name %>">
-        <option value="Select player" selected>Select player</option>
+    <select id="<%= id %>" class="col form-select" aria-label="player" name="<%= name %>" autofocus required>
+        <% if (!selected) { %>
+        <option value="" selected disabled>Select player</option>
+        <% }; %>
         <% for (const player of players) { %>
         <option value="<%= player.id %>"<%= selected === player.id ? " selected" : "" %>><%= player.name %></option>
         <% }; %>
     </select>
+    <div class="invalid-feedback">
+        Please select a player.
+    </div>
 </div>

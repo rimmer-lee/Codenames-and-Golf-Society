@@ -2,25 +2,27 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Edit Drinks</h1>
 </div>
-<form class="mb-3" method="POST" action="/demerits/drinks?_method=PUT">
+<form class="mb-3 needs-validation" method="POST" action="/demerits/drinks?_method=PUT" novalidate>
     <% for (const drink of data) { %>
     <div class="row d-flex mb-3">
         <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
             <div class="row my-2 mx-0">
-                <label for="date" class="col-4 col-form-label">
-                    Date
-                </label>
-                <input id="date" class="col form-control" type="date" name="drink[<%= drink.id %>][date]" value="<%= drink.formattedDate.datePicker %>">
+                <label for="date" class="col-4 col-form-label">Date</label>
+                <input id="date" class="col form-control" type="date" name="drink[<%= drink.id %>][date]" value="<%= drink.formattedDate.datePicker %>" required>
+                <div class="invalid-feedback">
+                    Please select a date.
+                </div>
             </div>
             <div class="row mx-0 mb-2">
-                <label for="player" class="col-4 col-form-label">
-                    Player
-                </label>
-                <select id="player" class="col form-select" aria-label="player" name="drink[<%= drink.id %>][player]">
+                <label for="player" class="col-4 col-form-label">Player</label>
+                <select id="player" class="col form-select" aria-label="player" name="drink[<%= drink.id %>][player]" autofocus required>
                     <% for (const player of players) { %>
                     <option value="<%= player.id %>" <%= String(drink.player._id) === player.id ? "selected" : "" %>><%= player.name %></option>
                     <% }; %>
                 </select>
+                <div class="invalid-feedback">
+                    Please select a player.
+                </div>
             </div>
             <div class="row mx-0 mb-2">
                 <label for="value" class="col-4 col-form-label">Drinks</label>

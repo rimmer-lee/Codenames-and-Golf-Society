@@ -2,7 +2,7 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>New Demerit</h1>
 </div>
-<form class="mb-3" method="POST" action="/demerits">
+<form class="mb-3 needs-validation" method="POST" action="/demerits" novalidate>
     <div class="row d-flex mb-3">
         <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
             <%- include('../partials/forms/demerits/date.ejs', { id: 'date', name: 'demerit[when][date]', value: date }) %>
