@@ -6,16 +6,26 @@ const options = { toJSON: { virtuals: true } };
 const SectionSchema = new Schema({
     title: String,
     description: [ String ],
-    // sections: [this]
     rules: [{ type: Schema.Types.ObjectId, ref: 'Rule' }]
 });
 
 const CharterSchema = new Schema({
-    version: { type: String, default: 'Test', required: true },
+    version: {
+        type: String,
+        required: true
+    },
     lastModified: {
-        date: { type: Date, default: Date.now() },
-        by: { type: String, default: 'anonymous user' }
-        // by: { type: Schema.Types.ObjectId, ref: 'User' }
+        date: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        by: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        comments: String
     },
     sections: [ SectionSchema ]
 }, options);

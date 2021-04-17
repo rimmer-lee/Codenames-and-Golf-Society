@@ -1,0 +1,9 @@
+<div class="row mx-0 mb-2">
+    <label for="<%= id %>" class="col-4 col-form-label">Player</label>
+    <select id="<%= id %>" class="col form-select" aria-label="player" name="<%= name %>">
+        <option value="Select player" selected>Select player</option>
+        <% for (const player of players) { %>
+        <option value="<%= player.id %>"<%= selected === player.id ? " selected" : "" %>><%= player.name %></option>
+        <% }; %>
+    </select>
+</div>

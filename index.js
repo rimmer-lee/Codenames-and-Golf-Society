@@ -22,8 +22,9 @@ const db = mongoose.connection;
 const charterRoutes = require('./routes/charter');
 const demeritRoutes = require('./routes/demerits');
 const drinkRoutes = require('./routes/drinks');
-// const titleRoutes = require('./routes/titles');
-const gameRoutes = require('./routes/games');
+// const gameRoutes = require('./routes/games');
+const accountRoutes = require('./routes/account');
+const userRoutes = require('./routes/users');
 
 const port = process.env.PORT || 3000;
 const secret = process.env.SECRET || 'thisshouldbeabettersecret';
@@ -105,7 +106,7 @@ app.use(helmet.contentSecurityPolicy({
 
 app.get('/', (req, res) => res.render('home'));
 
-app.use('/games', gameRoutes);
+// app.use('/games', gameRoutes);
 
 // app.get('/:route', (req, res) => res.render(`${req.params.route}/index`));
 
@@ -117,7 +118,17 @@ app.use('/demerits', demeritRoutes);
 
 app.use('/demerits/drinks', drinkRoutes);
 
-// app.use('/demerits/titles', titleRoutes);
+app.use('/account', accountRoutes);
+
+app.use('/users', userRoutes);
+
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/reseed', async (req, res) => {
+        const { seedDatabase } = require('./seeds/seed');
+        await seedDatabase();
+        res.redirect('/');
+    });
+};
 
 app.all('*', (req, res, next) => next(new ExpressError(404, 'Page Not Found')));
 

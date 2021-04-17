@@ -4,7 +4,21 @@ const Schema = mongoose.Schema;
 const RuleSchema = new Schema({
     index: Number,
     description: [ String ],
-    demerits: Number,
+    action: {
+        demerits: Number,
+        titles: [
+            {
+                method: {
+                    type: String,
+                    enum: ['award', 'revoke']
+                },
+                title: {
+                    type: String,
+                    enum: ['Ace', 'flag bitch', 'Karen']
+                }
+            }
+        ]
+    },
     rules: [ this ]
 });
 

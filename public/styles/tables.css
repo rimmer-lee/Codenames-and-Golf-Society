@@ -6,8 +6,12 @@
 }
 
 /* update so widith grows/shrinks with number of users */
-tr > *:not(:first-child) {
+#demerit tr > *:not(:first-child) {
     width: 15%;
+}
+
+#user tr > * {
+    width: 33%;
 }
 
 /* need optimising to fit in the table cell */

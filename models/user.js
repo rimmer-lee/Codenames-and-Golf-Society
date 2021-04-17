@@ -25,19 +25,31 @@ const UserSchema = new Schema({
         type: String,
         enum: ['founder', 'admin', 'user'],
         required: true
+    },
+    status: {
+        type: String,
+        default: 'active',
+        enum: ['active', 'inactive'],
+        required: true
     }
 }, options);
 
 // UserSchema.plugin(passportLocalMongoose);
 
 UserSchema.virtual('name.full').get(function () {
-    const { first, middle = [], last } = this;
+    const { first, middle = [], last } = this.name;
     if (!first || !last) return;
     return `${first} ${middle.length > 0 ? middle.join(' ') + ' ' : ''}${last}`;
 });
 
+UserSchema.virtual('name.friendly').get(function () {
+    const { knownAs, last } = this.name;
+    if (!knownAs || !last) return;
+    return `${knownAs} ${last}`;
+});
+
 UserSchema.virtual('name.initialed').get(function () {
-    const { first = '', middle = [], last = '' } = this;
+    const { first = '', middle = [], last = '' } = this.name;
     if (!first || !last) return;
     return `${first[0]}. ${middle.length > 0 ? middle.map(m => `${m[0]}.`).join(' ') + ' ' : ''}${last}`;
 });

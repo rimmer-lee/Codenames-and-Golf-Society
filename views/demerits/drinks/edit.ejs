@@ -31,8 +31,8 @@
                 <textarea id="comments" class="col form-control" name="drink[<%= drink.id %>][comments]" rows="1" placeholder="Optional"><%= drink.comments %></textarea>
             </div>
             <div class="row mx-0 mb-2">
-                <label for="status" class="d-none" visibility="hidden"></label>
-                <input id="status" class="btn btn-danger" data-type="button" data-status="remove" value="Remove Drink" name="drink[<%= drink.id %>][status]" readonly>
+                <label for="operation" class="d-none" visibility="hidden"></label>
+                <input id="operation" class="btn btn-danger" data-type="button" data-operation="remove" value="Remove Drink" name="drink[<%= drink.id %>][operation]" readonly>
             </div>
         </div>
     </div>
@@ -44,9 +44,7 @@
         </div>
     </div>
 </form>
-<script src="/scripts/demerits/edit.js"></script>
+<script src="/scripts/toggle.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        toggle('Drinks')
-    });
+    document.addEventListener('DOMContentLoaded', () => toggle());
 </script>

@@ -2,12 +2,6 @@
 <!-- add tooltips -->
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1 class="col">Demerits</h1>
-    <!-- add new buttons alongside relevant section in table -->
-    <!-- <div class="col">
-        <div class="d-flex align-items">
-            <a class="btn btn-primary me-0 mx-auto" href="/demerits/titles/new">New Title</a>
-        </div>
-    </div> -->
     <!-- <div class="col">
         <div class="row">
             <label class="col d-flex align-items-center justify-content-end" for="year">Year</label> -->
@@ -21,7 +15,7 @@
     </div> -->
 </div>
 <section>
-    <table class="table table-bordered">
+    <table id="demerit" class="table table-bordered">
         <thead class="table-dark">
             <tr>
                 <th scope="col"></th>
@@ -33,7 +27,8 @@
                                 <div>
                                     <%= player.name.knownAs %>
                                 </div>
-                                <!-- <a href="">
+                                <!-- add year into URL -->
+                                <!-- <a href="/demerits/edit?p=<%= player.id %>">
                                     <%= player.name.knownAs %>
                                 </a> -->
                             </div>
@@ -45,21 +40,22 @@
                         <div class="col d-flex p-0">
                             <i class="mx-auto bi bi-suit-spade-fill"></i>
                         </div>
-                        <!-- <a class="col d-flex p-0" href="/demerits/titles/edit">
+                        <!-- add link to titles page to see history of titles? -->
+                        <!-- <a class="col d-flex p-0" href="">
                             <i class="mx-auto bi bi-suit-spade-fill"></i>
                         </a> -->
                         <% } else if (title === 'flag bitch') { %>
                         <div class="col d-flex p-0">
                             <i class="mx-auto bi bi-flag-fill"></i>
                         </div>
-                        <!-- <a class="col d-flex p-0" href="/demerits/titles/edit">
+                        <!-- <a class="col d-flex p-0" href="">
                             <i class="mx-auto bi bi-flag-fill"></i>
                         </a> -->
                         <% } else if (title === 'Karen') { %>
                         <div class="col d-flex p-0">
                             <i class="mx-auto bi bi-cone-striped"></i>
                         </div>
-                        <!-- <a class="col d-flex p-0" href="/demerits/titles/edit">
+                        <!-- <a class="col d-flex p-0" href="">
                             <i class="mx-auto bi bi-cone-striped"></i>
                         </a> -->
                         <% }; %>
@@ -117,7 +113,7 @@
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
-                            <%= player.demerit %>
+                            <%= player.demerits %>
                         </div>
                     </div>
                 </td>

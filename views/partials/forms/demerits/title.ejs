@@ -1,0 +1,24 @@
+<div class="row mx-0 mb-2">
+    <div class="col-4 col-form-label d-flex align-items-center">Titles</div>
+    <div class="col px-0">
+        <div class="row">                
+            <div class="btn-group" role="group" aria-label="Title checkbox toggle group">
+                <!-- need to move the setting of titles array elsewhere -->
+                <% const titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }]; %>
+                <% if (holder) { %>
+                    <% for (const title of titles) { %>
+                        <% if (holder.some(({ name }) => name === title.value)) title.holder = true; %>
+                    <% }; %>
+                <% }; %>
+                <% for (const title of titles) { %>
+                <input id="<%= title.id %>" class="btn-check" type="checkbox" autocomplete="off" name="<%= name %>" value="<%= title.value %>"<%= title.holder ? " checked" : "" %>>
+                <label for="<%= title.id %>" class="btn btn-outline-danger">
+                    <div class="d-flex p-0">
+                        <i class="mx-auto bi <%= title.icon %>"></i>
+                    </div>
+                </label>
+                <% }; %>
+            </div>
+        </div>
+    </div>
+</div>

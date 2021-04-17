@@ -5,60 +5,23 @@
 <form class="mb-3" method="POST" action="/demerits">
     <div class="row d-flex mb-3">
         <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
-            <div class="row my-2 mx-0">
-                <label for="date" class="col-4 col-form-label">
-                    Date
-                </label>
-                <input id="date" class="col form-control" type="date" name="demerit[date]" value="<%= date %>">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="player" class="col-4 col-form-label">
-                    Player
-                </label>
-                <select id="player" class="col form-select" aria-label="player" name="demerit[player]">
-                    <option value="Select player" selected>Select player</option>
-                    <% for (const player of players) { %>
-                    <option value="<%= player.id %>"><%= player.name %></option>
-                    <% }; %>
-                </select>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="value" class="col-4 col-form-label">Demerits</label>
-                <input id="value" class="col form-control" type="number" value="0" min="0" name="demerit[value]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="rule" class="col-4 col-form-label">
-                    Rule
-                </label>
-                <select id="rule" class="col form-select" aria-label="player" name="demerit[rule]">
-                    <option value="Select rule" selected>Select rule</option>
-                    <% for (const rule of rules) { %>
-                    <!-- find the optimum number of characters -->
-                    <option value="<%= rule._id %>"><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option>
-                    <% }; %>
-                </select>
-            </div>            
-            <div class="row mx-0 mb-2 px-4 d-none" visibility="hidden">
-                <p id="rule-description" class="mb-0 text-overflow" readonly="true" rows="1"></p>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="comments" class="col-4 col-form-label">Comments</label>
-                <textarea id="comments" class="col form-control" name="demerit[comments]" rows="1" placeholder="Optional"></textarea>
-            </div>
-        </div>
-    </div>    
-    <div class="mb-3">
-        <div class="row px-2">
-            <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
-            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
+            <%- include('../partials/forms/demerits/date.ejs', { id: 'date', name: 'demerit[when][date]', value: date }) %>
+            <%- include('../partials/forms/demerits/hole.ejs', { id: 'hole', name: 'demerit[when][hole]', value: 0 }) %>
+            <%- include('../partials/forms/demerits/player.ejs', { id: 'player', name: 'demerit[player]', players, selected: false }) %>
+            <%- include('../partials/forms/demerits/demerit.ejs', { id: 'demerit', name: 'demerit[action][demerits]', value: 0 }) %>
+            <%- include('../partials/forms/demerits/rule.ejs', { id: 'rule', name: 'demerit[rule]', rules, selected: false }) %>            
+            <%- include('../partials/forms/demerits/rule-description.ejs', { id: 'rule-description', description: false }) %>
+            <%- include('../partials/forms/demerits/title.ejs', { name: 'demerit[action][titles]', holder: false }) %>
+            <%- include('../partials/forms/demerits/comments.ejs', { id: 'comments', name: 'demerit[comments]', value: '' }) %>
         </div>
     </div>
+    <%- include('../partials/forms/demerits/buttons.ejs') %>
 </form>
-<script src="/scripts/demerits/new.js"></script>
+<script src="/scripts/select-rule.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const rulesAsString = '<%- JSON.stringify(rules) %>';
         const rules = JSON.parse(rulesAsString);
-        ruleSelector(rules);
+        selectRule(rules);
     });
 </script>

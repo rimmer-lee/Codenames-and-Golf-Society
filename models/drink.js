@@ -9,7 +9,11 @@ const DrinkSchema = new Schema({
         ref: 'User',
         required: true
     },
-    value: { type: Number, required: true },
+    value: {
+        type: Number,
+        default: 0,
+        required: true
+    },
     comments: String,
     date: {
         type: Date,
@@ -24,6 +28,11 @@ DrinkSchema.virtual('formattedDate.datePicker').get(function () {
 
 DrinkSchema.virtual('formattedDate.friendly').get(function () {
     return formatDate('dd/mm/yyyy', this.date);
+});
+
+DrinkSchema.virtual('formattedDate.date').get(function () {
+    const date = this.date;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 });
 
 module.exports = mongoose.model('Drink', DrinkSchema);

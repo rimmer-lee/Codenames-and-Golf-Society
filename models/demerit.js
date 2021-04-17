@@ -1,83 +1,95 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const Title = require('./title');
+
 const formatDate = require('../utilities/formatDate');
 
 const options = { toJSON: { virtuals: true } };
 
 const DemeritSchema = new Schema({
+    when: {
+        date: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        hole: Number
+    },
     player: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    value: { type: Number, required: true },
     rule: {
         type: Schema.Types.ObjectId,
         ref: 'Rule',
         required: true
     },
     comments: String,
-    date: {
-        type: Date,
-        default: Date.now(),
+    status: {
+        type: String,
+        enum: ['Submitted', 'Approved'],
         required: true
+    },
+    action: {
+        demerits: {
+            type: Number,
+            default: 0,
+            required: true
+        },
+        titles: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Title'
+            }
+        ]
     },
     history: [
         {
             status: {
                 type: String,
-                enum: ['Submitted', 'Approved'],
-                // reqrired: true
+                enum: ['Created', 'Submitted', 'Approved'],
+                reqrired: true
             },
             updated: {
                 by: {
                     type: Schema.Types.ObjectId,
                     ref: 'User',
-                    // required: true
+                    required: true
                 },
                 date: {
                     type: Date,
                     default: Date.now(),
-                    // required: true
+                    required: true
                 },
-                changes: [
-                    {
-                        property: {
-                            type: String,
-                            enum: ['comments', 'rule', 'value', 'player'],
-                            // required: true
-                        },
-                        value: { 
-                            type: String,
-                            // required: true
-                        }
-                    }                    
-                ]
+                // updates: [{ property: String, value: String }]
             }
         }
-    ],
-    created: {
-        by: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            // required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now(),
-            // required: true
-        }
-    }
+    ]
 }, options);
 
 // shared with drink schema
-DemeritSchema.virtual('formattedDate.datePicker').get(function () {
-    return formatDate('yyyy-mm-dd', this.date);
+DemeritSchema.virtual('when.formattedDate.datePicker').get(function () {
+    return formatDate('yyyy-mm-dd', this.when.date);
 });
 
-DemeritSchema.virtual('formattedDate.friendly').get(function () {
-    return formatDate('dd/mm/yyyy', this.date);
+DemeritSchema.virtual('when.formattedDate.friendly').get(function () {
+    return formatDate('dd/mm/yyyy', this.when.date);
+});
+
+DemeritSchema.virtual('when.formattedDate.date').get(function () {
+    const date = this.when.date;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+});
+
+DemeritSchema.post('findOneAndDelete', async function(demerit) {
+    if (demerit && demerit.action && demerit.action.titles) {
+        for (const title of demerit.action.titles) {
+            console.log(await Title.findById(title._id))
+            await Title.findByIdAndDelete(title._id)
+        };
+    };
 });
 
 module.exports = mongoose.model('Demerit', DemeritSchema);

@@ -36,12 +36,11 @@ async function update (req, res) {
     const { drink } = req.body;
     for (const id of Object.keys(drink)) {
         const d = drink[id];
-        if (/Restore/.test(d.status)) await Drink.findByIdAndDelete(id);
-        else if (/Remove/.test(d.status)) {
+        if (/Restore/.test(d.operation)) await Drink.findByIdAndDelete(id);
+        else if (/Remove/.test(d.operation)) {
             const D = await Drink.findById(id);
-            const dateParts = d.date.match(/(\d{4})-(\d{2})-(\d{2})/);
             D.player = await User.findById(d.player);
-            D.date = new Date(dateParts[1], dateParts[2] - 1, dateParts[3]);
+            D.date = d.date
             D.value = d.value;
             await D.save();
         };

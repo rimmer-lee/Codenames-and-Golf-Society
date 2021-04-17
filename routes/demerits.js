@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 
+const catchAsync = require('../utilities/catchAsync');
 const demerits = require('../controllers/demerits');
 
 router.route('/')
-    .get(demerits.show)
-    .post(demerits.save)
-    .put(demerits.update)
+    .get(catchAsync(demerits.show))
+    .post(catchAsync(demerits.save))
+    .put(catchAsync(demerits.update));
 
-router.get('/new', demerits.create);
+router.get('/new', catchAsync(demerits.create));
 
-router.get('/edit', demerits.edit);
+router.get('/edit', catchAsync(demerits.edit));
 
 module.exports = router;

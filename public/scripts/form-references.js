@@ -1,7 +1,7 @@
 function updateSectionReference() {
     const sections = document.querySelectorAll('section');
     sections.forEach((section, sectionIndex) => {
-        const groupings = section.querySelectorAll('section > [class*="border"]');
+        const groupings = section.querySelectorAll('section > [class~="border"]');
         groupings.forEach((group, groupIndex) => {
             switch (groupIndex) {
                 case 0:
@@ -13,7 +13,7 @@ function updateSectionReference() {
                     textArea.setAttribute('name', titleReference);
                     break;
                 case 1:
-                    const descriptionRows = group.querySelectorAll('[class*="row"]');
+                    const descriptionRows = group.querySelectorAll('[class~="row"]');
                     descriptionRows.forEach((description, descriptionIndex) => {
                         const textArea = description.querySelector('textarea');
                         if (!textArea) return;

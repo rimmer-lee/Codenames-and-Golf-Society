@@ -90,8 +90,19 @@ a {
     text-decoration: none;
 }
 
-select {
+/* select {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+} */
+
+.capitalise {
+    text-transform: capitalize;
 }
+
+select option {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* max-width: 100%; */
+  }

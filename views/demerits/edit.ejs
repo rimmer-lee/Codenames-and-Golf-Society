@@ -3,69 +3,34 @@
     <h1>Edit Demerits</h1>
 </div>
 <form class="mb-3" method="POST" action="/demerits?_method=PUT">
+    <!-- need to add index to IDs -->
     <% for (const demerit of data) { %>
     <div class="row d-flex mb-3">
         <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
-            <div class="row my-2 mx-0">
-                <label for="date" class="col-4 col-form-label">
-                    Date
-                </label>
-                <input id="date" class="col form-control" type="date" name="demerit[<%= demerit.id %>][date]" value="<%= demerit.formattedDate.datePicker %>">
-            </div>
+            <%- include('../partials/forms/demerits/date.ejs', { id: `${demerit.id}|date`, name: `demerit[${demerit.id}][when][date]`, value: demerit.when.formattedDate.datePicker }) %>
+            <%- include('../partials/forms/demerits/hole.ejs', { id: `${demerit.id}|hole`, name: `demerit[${demerit.id}][when][hole]`, value: demerit.when.hole }) %>
+            <%- include('../partials/forms/demerits/player.ejs', { id: `${demerit.id}|player`, name: `demerit[${demerit.id}][player]`, players, selected: String(demerit.player._id) }) %>
+            <%- include('../partials/forms/demerits/demerit.ejs', { id: `${demerit.id}|demerit`, name: `demerit[${demerit.id}][action][demerits]`, value: demerit.action.demerits }) %>
+            <%- include('../partials/forms/demerits/rule.ejs', { id: `${demerit.id}|rule`, name: `demerit[${demerit.id}][rule]`, rules, selected: String(demerit.rule.id) }) %>
+            <%- include('../partials/forms/demerits/rule-description.ejs', { id: 'rule-description', description: rules.find(({ index }) => index === demerit.rule.index).description }) %>
+            <%- include('../partials/forms/demerits/title.ejs', { name: `demerit[${demerit.id}][action][titles]`, holder: demerit.action.titles }) %>
+            <%- include('../partials/forms/demerits/comments.ejs', { id: `${demerit.id}|comments`, name: `demerit[${demerit.id}][comments]`, value: demerit.comments }) %>
             <div class="row mx-0 mb-2">
-                <label for="player" class="col-4 col-form-label">
-                    Player
-                </label>
-                <select id="player" class="col form-select" aria-label="player" name="demerit[<%= demerit.id %>][player]">
-                    <% for (const player of players) { %>
-                    <option value="<%= player.id %>" <%= String(demerit.player._id) === player.id ? "selected" : "" %>><%= player.name %></option>
-                    <% }; %>
-                </select>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="value" class="col-4 col-form-label">Demerits</label>
-                <input id="value" class="col form-control" type="number" value="<%= demerit.value %>" min="0" name="demerit[<%= demerit.id %>][value]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="rule" class="col-4 col-form-label">
-                    Rule
-                </label>
-                <select id="rule" class="col form-select" aria-label="player" name="demerit[<%= demerit.id %>][rule]">
-                    <% for (const rule of rules) { %>
-                    <!-- find the optimum number of characters -->
-                    <option value="<%= rule.id %>" <%= String(demerit.rule.id) === String(rule.id) ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
-                    <!-- <option value="<%= rule.id %>" <%= String(demerit.rule.id) === String(rule.id) ? "selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
-                    <% }; %>
-                </select>
-            </div>            
-            <div class="row mx-0 mb-2 px-4">
-                <p id="rule-description" class="mb-0 text-overflow" readonly="true" rows="1"><%= rules.find(({ index }) => index === demerit.rule.index).description %></p>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="comments" class="col-4 col-form-label">Comments</label>
-                <textarea id="comments" class="col form-control" name="demerit[<%= demerit.id %>][comments]" rows="1" placeholder="Optional"><%= demerit.comments %></textarea>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="status" class="d-none" visibility="hidden"></label>
-                <input id="status" class="btn btn-danger" data-type="button" data-status="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][status]" readonly>
+                <label for="<%= demerit.id %>|operation" class="d-none" visibility="hidden"></label>
+                <input id="<%= demerit.id %>|operation" class="btn btn-danger" data-type="button" data-operation="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][operation]" readonly>
             </div>
         </div>
     </div>
     <% }; %>
-    <div class="mb-3">
-        <div class="row px-2">
-            <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
-            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
-        </div>
-    </div>
+    <%- include('../partials/forms/demerits/buttons.ejs') %>
 </form>
-<script src="/scripts/demerits/new.js"></script>
-<script src="/scripts/demerits/edit.js"></script>
+<script src="/scripts/select-rule.js"></script>
+<script src="/scripts/toggle.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const rulesAsString = '<%- JSON.stringify(rules) %>';
         const rules = JSON.parse(rulesAsString);
-        ruleSelector(rules);
-        toggle('Demerits')
+        selectRule(rules);
+        toggle()
     });
 </script>

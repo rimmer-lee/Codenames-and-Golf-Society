@@ -1,0 +1,11 @@
+<div class="row mx-0 mb-2">
+    <label for="<%= id %>" class="col-4 col-form-label">Rule</label>
+    <select id="<%= id %>" class="col form-select" aria-label="player" name="<%= name %>">
+        <option value="Select rule" selected>Select rule</option>
+        <% for (const rule of rules) { %>
+        <!-- find the optimum number of characters -->
+        <option value="<%= rule._id %>"<%= selected === String(rule.id) ? " selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
+        <!-- <option value="<%= rule._id %>"<%= selected === String(rule.id) ? " selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
+        <% }; %>
+    </select>
+</div>
