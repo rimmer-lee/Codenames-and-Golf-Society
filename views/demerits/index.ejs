@@ -87,7 +87,7 @@
                 </th>
                 <% for (const p of data.players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.id); %>
-                <% const value = d.demerits && d.demerits > 0 ? d.demerits : ""; %> 
+                <% const value = d.demerits ? d.demerits : ""; %> 
                 
                 <% include('../partials/tables/demerits/cell', { value }) %>
 
@@ -141,7 +141,7 @@
                 </th>
                 <% for (const p of data.players) { %>
                 <% const d = drink.players.find(({ player }) => player === p.id); %>
-                <% const value = d.drinks && d.drinks > 0 ? d.drinks : ""; %>
+                <% const value = d.drinks ? d.drinks : ""; %>
                 
                 <% include('../partials/tables/demerits/cell', { value }) %>
 

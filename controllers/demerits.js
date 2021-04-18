@@ -23,7 +23,10 @@ async function create (req, res) {
 
 async function edit (req, res) {
     const { d, p, y } = req.query;
-    if (!d && !p && !y) return res.redirect('/demerits');
+    if (!d && !p && !y) {
+        req.flash('error', 'Something went wrong');
+        return res.redirect('/demerits');
+    };
 
     // need to check for scenarios where combinations of values are available for when there are links for player name and title
 
@@ -57,6 +60,7 @@ async function save (req, res) {
     // created by Lee by default for now
     demerit.history = [{ status: 'Created', updated: { by: await User.findOne({ 'name.knownAs' : 'Lee' }), date: Date.now() } }];
     await new Demerit(demerit).save();
+    req.flash('success', 'Demerit saved');
     res.redirect('/demerits');
 };
 
@@ -134,6 +138,10 @@ async function show (req, res) {
 
 async function update (req, res) {
     const { demerit } = req.body;
+    if (!demerit) {
+        req.flash('error', 'Something went wrong');
+        return res.redirect('/demerits');
+    };
     for (const id of Object.keys(demerit)) {
         const d = demerit[id];
         const D = await Demerit.findById(id).populate('action.titles');
@@ -172,6 +180,7 @@ async function update (req, res) {
             await D.save();
         };
     };
+    req.flash('success', 'Demerits updated');
     res.redirect('/demerits');
 };
 

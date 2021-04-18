@@ -6,32 +6,10 @@
     <% for (const drink of data) { %>
     <div class="row d-flex mb-3">
         <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
-            <div class="row my-2 mx-0">
-                <label for="date" class="col-4 col-form-label">Date</label>
-                <input id="date" class="col form-control" type="date" name="drink[<%= drink.id %>][date]" value="<%= drink.formattedDate.datePicker %>" required>
-                <div class="invalid-feedback">
-                    Please select a date.
-                </div>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="player" class="col-4 col-form-label">Player</label>
-                <select id="player" class="col form-select" aria-label="player" name="drink[<%= drink.id %>][player]" autofocus required>
-                    <% for (const player of players) { %>
-                    <option value="<%= player.id %>" <%= String(drink.player._id) === player.id ? "selected" : "" %>><%= player.name %></option>
-                    <% }; %>
-                </select>
-                <div class="invalid-feedback">
-                    Please select a player.
-                </div>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="value" class="col-4 col-form-label">Drinks</label>
-                <input id="value" class="col form-control" type="number" value="<%= drink.value %>" min="0" name="drink[<%= drink.id %>][value]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="comments" class="col-4 col-form-label">Comments</label>
-                <textarea id="comments" class="col form-control" name="drink[<%= drink.id %>][comments]" rows="1" placeholder="Optional"><%= drink.comments %></textarea>
-            </div>
+            <%- include('../../partials/forms/demerits/date', { id: `${drink.id}|date`, name: `drink[${drink.id}][date]`, value: drink.formattedDate.datePicker }) %>
+            <%- include('../../partials/forms/demerits/player', { id: `${drink.id}|player`, name: `drink[${drink.id}][player]`, players, selected: String(drink.player._id) }) %>
+            <%- include('../../partials/forms/demerits/drink', { id: `${drink.id}|value`, name: `drink[${drink.id}][value]`, value: drink.value }) %>
+            <%- include('../../partials/forms/demerits/comments', { id: `${drink.id}|comments`, name: `drink[${drink.id}][comments]`, value: drink.comments }) %>
             <div class="row mx-0 mb-2">
                 <label for="operation" class="d-none" visibility="hidden"></label>
                 <input id="operation" class="btn btn-danger" data-type="button" data-operation="remove" value="Remove Drink" name="drink[<%= drink.id %>][operation]" readonly>
@@ -39,12 +17,7 @@
         </div>
     </div>
     <% }; %>
-    <div class="mb-3">
-        <div class="row px-2">
-            <a class="btn btn-warning col-5 container" href="/demerits">Cancel</a>
-            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
-        </div>
-    </div>
+    <%- include('../../partials/forms/demerits/buttons') %>
 </form>
 <script src="/scripts/toggle.js"></script>
 <script>

@@ -12,8 +12,12 @@ async function edit (req, res) {
 
 async function save (req, res) {
     const { user } = req.body;
-    if (user.name.middle) user.name.middle = user.name.middle.split(' ');
-    await new User(user).save();
+    if (!user) req.flash('error', 'Something went wrong');    
+    else {
+        if (user.name.middle) user.name.middle = user.name.middle.split(' ');
+        await new User(user).save();
+        req.flash('success', 'User saved');
+    };
     res.redirect('/users');
 };
 
@@ -26,7 +30,10 @@ async function update (req, res) {
     const id = req.query.u;
     const { operation } = req.body.user;
     const user = await User.findById(id);
-
+    if (!user) {
+        req.flash('error', 'Something went wrong');
+        return res.redirect('/users');
+    };
     // or should we delete users from the database?
     if (/Restore/.test(operation)) user.status = 'inactive';
 
@@ -39,6 +46,7 @@ async function update (req, res) {
         user.role = role;
     } else return res.redirect('/users');
     await user.save();
+    req.flash('success', 'User updated');
     res.redirect('/users');
 };
 

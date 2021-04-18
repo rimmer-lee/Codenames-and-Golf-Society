@@ -1,0 +1,21 @@
+<% let id, name = 'demerit', date = date, hole = 0, selectedPlayer = false, demerits = 0, selectedRule = false, description = false, holder = false, comments = ''; %>
+<% if (demerit) { %>
+<% id = `${demerit.id}|`; %>
+<% name += `[${demerit.id}]`; %>
+<% date = demerit.when.formattedDate.datePicker; %>
+<% hole = demerit.when.hole; %>
+<% selectedPlayer = String(demerit.player._id); %>
+<% demerits = demerit.action.demerits; %>
+<% selectedRule = String(demerit.rule.id); %>
+<% description = rules.find(({ index }) => index === demerit.rule.index).description; %>
+<% holder = demerit.action.titles; %>
+<% comments = demerit.comments; %>
+<% }; %>
+<%- include('./components/date', { id: `${id}date`, name: `${name}[when][date]`, value: date }) %>
+<%- include('./components/hole', { id: `${id}hole`, name: `${name}[when][hole]`, value: hole }) %>
+<%- include('./components/player', { id: `${id}player`, name: `${name}[player]`, players, selected: selectedPlayer }) %>
+<%- include('./components/demerit', { id: `${id}demerit`, name: `${name}[action][demerits]`, value: demerits }) %>
+<%- include('./components/rule', { id: `${id}rule`, name: `${name}[rule]`, rules, selected: selectedRule }) %>
+<%- include('./components/rule-description', { id: 'rule-description', description }) %>
+<%- include('./components/title', { id, name: `${name}[action][titles]`, holder }) %>
+<%- include('./components/comments', { id: `${id}comments`, name: `${name}[comments]`, value: comments }) %>

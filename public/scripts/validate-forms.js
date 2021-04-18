@@ -17,3 +17,5 @@
             }, false)
         });
 })()
+
+// can add .is-invalid or .is-valid to inputs, selects and textareas should they require validation

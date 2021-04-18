@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const bodyParser = require('body-parser');
 const ejsMate = require('ejs-mate');
 const express = require('express');
-// const flash = require('connect-flash');
+const flash = require('connect-flash');
 const helmet = require('helmet');
 // const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
@@ -91,6 +91,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session(sessionConfig));
+app.use(flash());
 app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc: ["'self'"],
@@ -104,13 +105,19 @@ app.use(helmet.contentSecurityPolicy({
     }
 }));
 
-app.get('/', (req, res) => res.render('home'));
-
 // app.use('/games', gameRoutes);
 
 // app.get('/:route', (req, res) => res.render(`${req.params.route}/index`));
 
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
+
+app.use((req, res, next) => {
+    // res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');
+    res.locals.info = req.flash('info');
+    res.locals.error = req.flash('error');
+    next();
+});
 
 app.use('/charter', charterRoutes);
 
@@ -121,6 +128,8 @@ app.use('/demerits/drinks', drinkRoutes);
 app.use('/account', accountRoutes);
 
 app.use('/users', userRoutes);
+
+app.get('/', (req, res) => res.render('home'));
 
 if (process.env.NODE_ENV !== 'production') {
     app.get('/reseed', async (req, res) => {

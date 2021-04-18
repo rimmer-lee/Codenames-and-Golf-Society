@@ -27,13 +27,21 @@ async function edit (req, res) {
 
 async function save (req, res) {
     const { drink } = req.body;
-    drink.player = await User.findById(drink.player);
-    await new Drink(drink).save();
+    if (!drink) req.flash('error', 'Something went wrong');
+    else {
+        drink.player = await User.findById(drink.player);
+        await new Drink(drink).save();
+        req.flash('success', 'Drink saved');
+    };
     res.redirect('/demerits');
 };
 
 async function update (req, res) {
     const { drink } = req.body;
+    if (!drink) {
+        req.flash('error', 'Something went wrong');
+        return res.redirect('/demerits');
+    };
     for (const id of Object.keys(drink)) {
         const d = drink[id];
         if (/Restore/.test(d.operation)) await Drink.findByIdAndDelete(id);
@@ -45,6 +53,7 @@ async function update (req, res) {
             await D.save();
         };
     };
+    req.flash('success', 'Drinks updated');
     res.redirect('/demerits')
 };
 
