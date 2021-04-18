@@ -1,4 +1,5 @@
-function toggle() {
+(function() {
+    'use strict'
     for (const element of document.querySelectorAll('[data-type="button"]')) {
         element.addEventListener('click', (e) => {
             const t = e.target;
@@ -18,4 +19,4 @@ function toggle() {
             };
         });
     };
-}
+})();
