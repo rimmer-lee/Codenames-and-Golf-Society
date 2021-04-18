@@ -1,0 +1,12 @@
+<ol>        
+    <% for (const rule of rules) { %>
+    <li>
+        <% for (const description of rule.description) { %>
+        <p class="lh-lg"><%= description %></p>
+        <% }; %>
+        <% if (rule.sections) { %>
+        <%- include('rule.ejs', { rules: rule.sections }) %>
+        <% }; %>
+    </li>
+    <% }; %>
+</ol>

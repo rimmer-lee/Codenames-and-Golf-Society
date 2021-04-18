@@ -54,9 +54,9 @@
             <% }; %>
         </div>
         <ol class="border border-2 rounded-2 mb-3 ps-0 py-2">
-            <% if (section.sections.length > 0) { %>
-            <% section.sections.forEach((breakdown, bIndex) => { %>
-            <% const breakdownReference = `s${sIndex}|s${bIndex}`; %>
+            <% if (section.rules.length > 0) { %>
+            <% section.rules.forEach((rule, bIndex) => { %>
+            <% const ruleReference = `s${sIndex}|s${bIndex}`; %>
             <div class="row mx-0">
                 <% if (bIndex > 0) { %>
                 <div class="row mx-0 my-2 px-0">
@@ -65,14 +65,14 @@
                 <% }; %>
                 <div class="row mb-2 mx-0 px-0">
                     <div class="col-3 col-md-2">
-                        <label for="<%= breakdownReference %>|d" class="col-form-label<%= bIndex > 0 ? " d-none" : "" %>" <%= bIndex > 0 ? "visibility=hidden" : "" %>>Breakdown</label>
+                        <label for="<%= ruleReference %>|d" class="col-form-label<%= bIndex > 0 ? " d-none" : "" %>" <%= bIndex > 0 ? "visibility=hidden" : "" %>>Rules</label>
                     </div>                    
                     <li class="col px-0">                        
                         <div class="d-flex justify-content-end px-0">
-                            <textarea id="<%= breakdownReference %>|d" class="form-control" name="<%= breakdownReference %>|d"><%= breakdown.description %></textarea>
+                            <textarea id="<%= ruleReference %>|d" class="form-control" name="<%= ruleReference %>|d"><%= rule.description %></textarea>
                             <div class="col d-flex flex-column justify-content-between px-2">
                                 <div class="mb-2">
-                                    <div class="col btn btn-danger p-1" data-action="remove-row" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Breakdown">
+                                    <div class="col btn btn-danger p-1" data-action="remove-row" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove rule">
                                         <div class="btn-close btn-close-white" aria-label="close"></div>
                                     </div>
                                 </div>
@@ -83,21 +83,21 @@
                                 </div>
                             </div>
                         </div>
-                        <% if (breakdown.sections) { %>
-                        <%- include('../partials/forms/charter/edit/breakdown.ejs', { sections: breakdown.sections, sectionReference: breakdownReference }) %>
+                        <% if (rule.sections) { %>
+                        <%- include('../partials/forms/charter/edit/breakdown.ejs', { sections: rule.sections, sectionReference: ruleReference }) %>
                         <% }; %>
                     </li>
                 </div>
                 <div class="row mx-0 px-0">
                     <div class="d-flex justify-content-end pe-4">
-                        <i class="bi bi-arrow-return-right btn btn-success px-4 py-0" aria-label="breakdown" data-action="breakdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Breakdown"></i>
+                        <i class="bi bi-arrow-return-right btn btn-success px-4 py-0" aria-label="rule" data-action="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="rule"></i>
                     </div>
                 </div>
             </div>
             <% }); %>
             <% } else { %>
             <div class="row mx-2">
-                <div class="btn btn-success mx-auto" data-action="new-breakdown">New Breakdown</div>
+                <div class="btn btn-success mx-auto" data-action="new-rule">New Breakdown</div>
             </div>
             <% }; %>
         </ol>

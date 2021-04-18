@@ -4,7 +4,7 @@
 </div>
 <form class="mb-3 needs-validation" method="POST" action="/demerits/drinks" novalidate>
     <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
+        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
             <%- include('../../partials/forms/demerits/date', { id: 'date', name: 'drink[date]', value: date }) %>
             <%- include('../../partials/forms/demerits/player', { id: 'player', name: 'drink[player]', players, selected: false }) %>
             <%- include('../../partials/forms/demerits/drink', { id: 'drink', name: 'drink[value]', value: 0 }) %>

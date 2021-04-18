@@ -5,7 +5,7 @@
 <form class="mb-3 needs-validation" method="POST" action="/demerits?_method=PUT" novalidate>
     <% for (const demerit of data) { %>
     <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
+        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
             <%- include('../partials/forms/demerits/date', { id: `${demerit.id}|date`, name: `demerit[${demerit.id}][when][date]`, value: demerit.when.formattedDate.datePicker }) %>
             <%- include('../partials/forms/demerits/hole', { id: `${demerit.id}|hole`, name: `demerit[${demerit.id}][when][hole]`, value: demerit.when.hole }) %>
             <%- include('../partials/forms/demerits/player', { id: `${demerit.id}|player`, name: `demerit[${demerit.id}][player]`, players, selected: String(demerit.player._id) }) %>
