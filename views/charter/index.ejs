@@ -10,7 +10,15 @@
 <% if (sections) { %>
 <% for (const section of sections) { %>
 <section class="border border-3 rounded-3 my-3 px-3 pt-3">
-    <%- include('../partials/forms/charter/show/section.ejs', { section }) %>
+    <% if (section.title) { %>
+    <h4 class="pb-2 border-bottom border-1"><%= section.title %></h4>
+    <% }; %>
+    <% if (section.description) { %>
+    <%- include('../partials/forms/charter/show/description', { descriptions: section.description }) %>
+    <% }; %>
+    <% if (section.rules) { %>
+    <%- include('../partials/forms/charter/show/rule', { rules: section.rules }) %>
+    <% }; %>
 </section>
 <% }; %>
 <% }; %>

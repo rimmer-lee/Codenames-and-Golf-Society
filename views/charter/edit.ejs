@@ -12,34 +12,34 @@
     <h6 class="text-muted">Last modified by <%= lastModified.user || 'someone who wants to remain anonymous' %> on <%= lastModified.dateParts.fullDate %></h6>
     <% }; %>
 </div>
-<form class="mb-3" method="POST" action="/rules">
-    <% sections.forEach((section, sIndex) => { %>
-    <% const sectionReference = `s${sIndex}|t`; %>
+<form class="mb-3" method="POST" action="/charter">
+    <% for (const section of sections) { %>
     <section class="border border-3 rounded-3 mb-3 p-3">
         <div class="row border border-2 rounded-2 mx-0 mb-3 py-2">
-            <label for="<%= sectionReference %>" class="col-3 col-md-2 col-xxl-1 col-form-label">Heading</label>
+            <div class="col-3 col-md-2 col-xxl-1 fw-bold">Heading</div>
             <div class="col-9 col-md-10 col-xxl-11 ps-0">
-                <textarea id="<%= sectionReference %>" class="form-control" name="<%= sectionReference %>" rows="1"><%= section.title %></textarea>
+                <label for="" class="col-form-label d-none" visibility="hidden">Heading</label>
+                <textarea id="" class="form-control" rows="1"><%= section.title %></textarea>
             </div>
         </div>
         <div class="border border-2 rounded-2 mb-3 py-2">
             <% if (section.description.length > 0) { %>
             <% section.description.forEach((description, dIndex) => { %>
-            <% const descriptionReference = `s${sIndex}|d${dIndex}`; %>
             <div class="row mx-0<%= dIndex > 0 ? " mt-2" : "" %>">
                 <div class="col-3 col-md-2 col-xxl-1">
-                    <label for="<%= descriptionReference %>" class="col-form-label<%= dIndex > 0 ? " d-none" : "" %>" <%= dIndex > 0 ? "visibility=hidden" : "" %>>Description</label>
+                    <div class="fw-bold<%= dIndex > 0 ? " d-none" : "" %>" <%= dIndex > 0 ? "visibility=hidden" : "" %>>Description</div>
                 </div>
                 <div class="col d-flex justify-content-end px-0">
-                    <textarea id="<%= descriptionReference %>" class="form-control" name="<%= descriptionReference %>"><%= description %></textarea>
+                    <label for="" class="col-form-label d-none" visibility="hidden">Description</label>
+                    <textarea id="" class="form-control"><%= description %></textarea>
                     <div class="col d-flex flex-column justify-content-between px-2">
                         <div class="mb-2">
-                            <div class="col btn btn-danger p-1" data-action="remove-row" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Description">
+                            <div class="col btn btn-danger p-1" data-type="button" data-operation="remove" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Description">
                                 <div class="btn-close btn-close-white" aria-label="remove"></div>
                             </div>
                         </div>
                         <div>
-                            <div class="col btn btn-success p-1" data-action="add-description" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Description">
+                            <div class="col btn btn-success p-1" data-type="button" data-operation="add" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Description">
                                 <div class="plus" aria-label="add"></div>
                             </div>
                         </div>
@@ -49,67 +49,124 @@
             <% }); %>
             <% } else { %>
             <div class="row mx-2">
-                <div class="btn btn-success mx-auto" data-action="add-description">New Description</div>
+                <div class="btn btn-success mx-auto" data-type="button" data-operation="new" data-section="description">New Description</div>
             </div>
             <% }; %>
         </div>
         <ol class="border border-2 rounded-2 mb-3 ps-0 py-2">
             <% if (section.rules.length > 0) { %>
-            <% section.rules.forEach((rule, bIndex) => { %>
-            <% const ruleReference = `s${sIndex}|s${bIndex}`; %>
+            <% section.rules.forEach((rule, rIndex) => { %>
             <div class="row mx-0">
-                <% if (bIndex > 0) { %>
+                <% if (rIndex > 0) { %>
                 <div class="row mx-0 my-2 px-0">
                     <div class="offset-1 col-10 border-2 border-top"></div>
                 </div>
                 <% }; %>
                 <div class="row mb-2 mx-0 px-0">
                     <div class="col-3 col-md-2">
-                        <label for="<%= ruleReference %>|d" class="col-form-label<%= bIndex > 0 ? " d-none" : "" %>" <%= bIndex > 0 ? "visibility=hidden" : "" %>>Rules</label>
-                    </div>                    
-                    <li class="col px-0">                        
-                        <div class="d-flex justify-content-end px-0">
-                            <textarea id="<%= ruleReference %>|d" class="form-control" name="<%= ruleReference %>|d"><%= rule.description %></textarea>
-                            <div class="col d-flex flex-column justify-content-between px-2">
+                        <div class="fw-bold<%= rIndex > 0 ? " d-none" : "" %>" <%= rIndex > 0 ? "visibility=hidden" : "" %>>Rules</div>
+                    </div>
+                    <li class="col px-0">
+                        <% rule.description.forEach((description, dIndex) => { %>
+                        <div class="d-flex justify-content-end px-0<%= dIndex > 0 ? " mt-2" : "" %>">
+                            <label for="" class="col-form-label d-none" visibility="hidden">Rules</label>
+                            <textarea id="" class="form-control"><%= description %></textarea>
+                            <div class="d-flex flex-column justify-content-between px-2">
                                 <div class="mb-2">
-                                    <div class="col btn btn-danger p-1" data-action="remove-row" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove rule">
-                                        <div class="btn-close btn-close-white" aria-label="close"></div>
+                                    <div class="col btn btn-danger p-1" data-type="button" data-operation="remove" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Rule">
+                                        <div class="btn-close btn-close-white" aria-label="remove"></div>
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="col btn btn-success p-1" data-action="add-description" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Description">
+                                    <div class="btn btn-success p-1" data-type="button" data-operation="add" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Rule">
                                         <div class="plus" aria-label="add"></div>
+                                        <!-- <i class="bi bi-plus p-1 off-white"></i> -->
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <% if (rule.sections) { %>
-                        <%- include('../partials/forms/charter/edit/breakdown.ejs', { sections: rule.sections, sectionReference: ruleReference }) %>
+
+                        <% }); %>
+
+                        <% if (rule.breakdown && rule.breakdown.length > 0) { %>
+                        <!-- rules section needs to be updated first -->
+                        <% include('../partials/forms/charter/edit/rule', { rules: rule.rules }) %>
                         <% }; %>
                     </li>
                 </div>
+                <div class="row mb-2 mx-0 px-0">
+                    <div class="col col-9 offset-2 px-0">
+                        <div class="row justify-content-start py-1">
+                            <div class="col d-flex justify-content-end">
+                                <label for="" class="col-form-label ps-3 fw-bold">Demerits</label>
+                            </div>
+                            <div class="col">
+                                <input id="" class="col-2 form-control" type="number" name="" value="<%= rule.action && rule.action.demerits && rule.action.demerits !== 0 ? rule.action.demerits : 0 %>">
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+
+
+                <!-- need to move the setting of titles array elsewhere -->
+                <% const titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }]; %>         
+                <% if (rule.action && rule.action.titles) { %>
+                    <% for (const t of titles) { %>
+                        <% const r = rule.action.titles.find(({ title }) => title === t.value); %>
+                        <% if (r) { %>
+                            <% if (r.method === 'award') t.award = true; %>
+                            <% if (r.method === 'revoke') t.revoke = true; %>
+                        <% }; %>
+                    <% }; %>
+                <% }; %>
+                <% const actions = [{ method: 'award', title: 'Award', class: 'btn-outline-danger' }, { method: 'revoke', title: 'Revoke', class: 'btn-outline-success' }]; %>
+
+
+                <% for (const action of actions) { %>
+                <div class="row mb-2 mx-0 px-0">
+                    <div class="col col-9 offset-2 px-0">
+                        <div class="row justify-content-start">
+                            <div class="col d-flex justify-content-end">
+                                <div class="col-form-label ps-3 fw-bold"><%= action.title %> Title</div>
+                            </div>                    
+                            <div class="col btn-group" role="group" aria-label="Title checkbox toggle group">
+                                <% for (const title of titles) { %>
+                                <input id="" class="btn-check" type="checkbox" autocomplete="off" value="<%= title.value %>"<%= title[action.method] ? " checked" : "" %> data-method="<%= action.method %>">
+                                <label for="" class="btn <%= action.class %>">
+                                    <div class="d-flex p-0">
+                                        <i class="mx-auto bi <%= title.icon %>"></i>
+                                    </div>
+                                </label>
+                                <% }; %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }; %>
                 <div class="row mx-0 px-0">
-                    <div class="d-flex justify-content-end pe-4">
-                        <i class="bi bi-arrow-return-right btn btn-success px-4 py-0" aria-label="rule" data-action="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="rule"></i>
+                    <div class="col d-flex justify-content-end pe-4">
+                        <div class="d-flex align-items-center col-form-label px-2 fq-bold btn btn-success py-0" data-type="button" data-operation="add" data-section="breakdown"  data-bs-toggle="tooltip" data-bs-placement="left" title="Add Breakdown">
+                            <i class="bi bi-arrow-return-right" aria-label="rule"></i>
+                            <div class="py-1 ps-2">Add Breakdown</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <% }); %>
             <% } else { %>
             <div class="row mx-2">
-                <div class="btn btn-success mx-auto" data-action="new-rule">New Breakdown</div>
+                <div class="btn btn-success mx-auto" data-type="button" data-operation="new" data-section="rules">New Rules</div>
             </div>
             <% }; %>
         </ol>
-        <!-- https://getbootstrap.com/docs/5.0/components/collapse/ -->
         <div class="row mx-0">
-            <div class="btn btn-danger" data-action="remove-section">Remove Section</div>
+            <div class="btn btn-danger" data-type="button" data-operation="remove" data-section="section" readonly>Remove Section</div>
         </div>
     </section>
-    <% }); %>
+    <% }; %>
     <div class="mb-3 border border-3 rounded-3 p-3">
         <div class="row mx-0">
-            <div class="btn btn-success" data-action="add-section" data-element="s">New Section</div>
+            <div class="btn btn-success" data-type="button" data-operation="add" data-section="section">New Section</div>
         </div>
     </div>
     <div class="mb-3">
@@ -120,9 +177,12 @@
     </div>
 </form>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
 <!-- makes scripts modular and import them into a single script -->
 <script src="/scripts/resize-textareas.js"></script>
-<script src="/scripts/form-references.js"></script>
+<script src="/scripts/charter/form-references.js"></script>
+<script src="/scripts/charter/toggle.js"></script>
 <script>
 
     // needs to be added to new elements
@@ -148,7 +208,7 @@
                 { id: 'data-bs-placement', value: 'left' },
                 { id: 'title', value: 'Remove Description' }
             ],
-            addEventListener: { type: 'click', listener: removeRowFunction },
+            // addEventListener: { type: 'click', listener: removeRowFunction },
             children: [{
                 classList: ['btn-close', 'btn-close-white'],
                 attributes: [{ id: 'aria-label', value: 'remove' }],
@@ -200,8 +260,27 @@
 
     for (const newBreakdown of newBreakdowns) newBreakdown.addEventListener('click', newBreakdownFunction);
 
-    for (const removeRow of removeRows) removeRow.addEventListener('click', removeRowFunction);
-    for (const removeSection of removeSections) removeSection.addEventListener('click', removeSectionFunction);
+    for (const removeRow of removeRows) {
+        removeRow.addEventListener('click', e => {
+            const t = e.target;
+            const parent = t.closest('[class~="border"]');
+            const value = t.getAttribute('value');
+            parent.classList.toggle('border-danger');
+            parent.classList.toggle('bg-danger');
+            parent.classList.toggle('text-white');
+            t.classList.toggle('btn-danger')
+            t.classList.toggle('btn-dark')
+            if (t.dataset.operation === 'remove') {
+                t.setAttribute('data-operation', 'restore');
+                t.setAttribute('value', value.replace('Remove', 'Restore'));
+            } else if (t.dataset.operation === 'restore') {
+                t.setAttribute('data-operation', 'remove');
+                t.setAttribute('value', value.replace('Restore', 'Remove'));
+            };
+        });
+    };
+
+    
 
 
     function createElement(options) {
@@ -214,21 +293,21 @@
         return newElement;
     };
 
-    function removeRowFunction() {
-        const rowToBeRemoved = this.closest('[class*="border"] > [class*="row"]')
-        const borderedRow = rowToBeRemoved.parentElement;
-        rowToBeRemoved.remove();
-        const remainingChildren = borderedRow.querySelectorAll('div[class*="col-"]:not([class*="btn"])');
-        if (remainingChildren.length > 0) {
-            const firstChildLabel = remainingChildren[0].querySelector('label');
-            firstChildLabel.classList.remove('d-none')
-            firstChildLabel.removeAttribute('visibility');
-        } else borderedRow.querySelector('.btn').classList.remove('col-10');
-    };
+    // function removeRowFunction() {
+    //     const rowToBeRemoved = this.closest('[class*="border"] > [class*="row"]')
+    //     const borderedRow = rowToBeRemoved.parentElement;
+    //     rowToBeRemoved.remove();
+    //     const remainingChildren = borderedRow.querySelectorAll('div[class*="col-"]:not([class*="btn"])');
+    //     if (remainingChildren.length > 0) {
+    //         const firstChildLabel = remainingChildren[0].querySelector('label');
+    //         firstChildLabel.classList.remove('d-none')
+    //         firstChildLabel.removeAttribute('visibility');
+    //     } else borderedRow.querySelector('.btn').classList.remove('col-10');
+    // };
 
-    function removeSectionFunction() {
-        this.closest('section').remove();
-    };
+    // function removeSectionFunction() {
+    //     this.closest('section').remove();
+    // };
 
     function focusElement(element) {
         element.focus();
@@ -516,7 +595,7 @@
             innerText: 'Remove',
             addEventListener: {
                 type: 'click',
-                listener: removeRowFunction
+                // listener: removeRowFunction
             }
         };
 

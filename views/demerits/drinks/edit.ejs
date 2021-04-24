@@ -6,17 +6,17 @@
     <% for (const drink of data) { %>
     <div class="row d-flex mb-3">
         <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
-            <%- include('../../partials/forms/demerits/date', { id: `${drink.id}|date`, name: `drink[${drink.id}][date]`, value: drink.formattedDate.datePicker }) %>
+            <%- include('../../partials/forms/demerits/date', { id: `${drink.id}|date`, name: `drink[${drink.id}][when][date]`, value: drink.when.formattedDate.datePicker }) %>
             <%- include('../../partials/forms/demerits/player', { id: `${drink.id}|player`, name: `drink[${drink.id}][player]`, players, selected: String(drink.player._id) }) %>
             <%- include('../../partials/forms/demerits/drink', { id: `${drink.id}|value`, name: `drink[${drink.id}][value]`, value: drink.value }) %>
             <%- include('../../partials/forms/demerits/comments', { id: `${drink.id}|comments`, name: `drink[${drink.id}][comments]`, value: drink.comments }) %>
             <div class="row mx-0 mb-2">
                 <label for="operation" class="d-none" visibility="hidden"></label>
-                <input id="operation" class="btn btn-danger" data-type="button" data-operation="remove" value="Remove Drink" name="drink[<%= drink.id %>][operation]" readonly>
+                <input id="operation" class="btn btn-danger" data-type="button" data-operation="remove" data-section="border" value="Remove Drink" name="drink[<%= drink.id %>][operation]" readonly>
             </div>
         </div>
     </div>
     <% }; %>
     <%- include('../../partials/forms/demerits/buttons') %>
 </form>
-<script src="/scripts/toggle.js"></script>
+<script src="/scripts/demerits/toggle.js"></script>

@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const BreakdownSchema = new Schema({
+    description: [ String ],
+    breakdown: [ this ]
+});
+
 const RuleSchema = new Schema({
     index: Number,
     description: [ String ],
@@ -19,7 +24,7 @@ const RuleSchema = new Schema({
             }
         ]
     },
-    rules: [ this ]
+    breakdown: [ BreakdownSchema ]
 });
 
 module.exports = mongoose.model('Rule', RuleSchema);

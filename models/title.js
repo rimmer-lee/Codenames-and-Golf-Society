@@ -11,13 +11,27 @@ const TitleSchema = new Schema({
         enum: ['Ace', 'flag bitch', 'Karen'],
         required: true
     },
-    holder: {
+    method: {
+        type: String,
+        enum: ['award', 'revoke']
+    },
+    player: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
     when: {
         hole: Number,
         date: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        updated: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        created: {
             type: Date,
             default: Date.now(),
             required: true

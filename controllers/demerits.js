@@ -12,36 +12,54 @@ function convertToArray(value) {
     return [value];
 };
 
+function titleObject(value) {
+    const values = value.match(/(award|revoke)\|(.+)/);
+    return { method: values[1], title: values[2] };
+};
+
 async function create (req, res) {
     const date = formatDate('yyyy-mm-dd');
     const users = await User.find().sort({ 'name.knownAs': 1 });
     const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const rules = charter.sections.find(section => section.title === 'Rules on the Course').rules;
+    const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
     const players = users.map(user => ({ name: user.name.knownAs, id: user._id }));
     res.render('demerits/new', { date, players, rules });
 };
 
 async function edit (req, res) {
     const { d, p, y } = req.query;
-    if (!d && !p && !y) {
+    if (!d && !y) {
         req.flash('error', 'Something went wrong');
         return res.redirect('/demerits');
     };
+    let startDate, endDate;
 
     // need to check for scenarios where combinations of values are available for when there are links for player name and title
-
-    const dateParts = d.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-    if (dateParts.length < 4) return res.redirect('/demerits');
-    const startDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(0, 0, 0, 0);
-    const endDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(23, 59, 59, 999);
+    if (d) {
+        const dateParts = d.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (dateParts.length < 4) {
+            req.flash('error', 'Something went wrong');
+            return res.redirect('/demerits');
+        };
+        startDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(0, 0, 0, 0);
+        endDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(23, 59, 59, 999);
+    };
+    if (y) {
+        if (!/\d{4}/.test(y)) {
+            req.flash('error', 'Something went wrong');
+            return res.redirect('/demerits');
+        };
+        startDate = new Date(y, 0, 1).setHours(0, 0, 0, 0);
+        endDate = new Date(y, 11, 31).setHours(23, 59, 59, 999);
+    }
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).populate('player').populate('rule').populate('action.titles');
     const users = await User.find();
     const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const rules = charter.sections.find(section => section.title === 'Rules on the Course').rules;
+    const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
     if (!p) return res.render('demerits/edit', { data: demerits, players, rules });
     const data = demerits.filter(({ player }) => String(player._id) === p);
-    res.render('demerits/edit', { data, players, rules });
+    res.render('demerits/edit', { data, players, rules });    
 };
 
 async function save (req, res) {
@@ -49,10 +67,11 @@ async function save (req, res) {
     demerit.player = await User.findById(demerit.player);
     demerit.rule = await Rule.findById(demerit.rule);
     if (demerit.action && demerit.action.titles) {
-        // demerit.action.titles = convertToArray(demerit.action.titles);
         demerit.action.titles = await Promise.all(
-            convertToArray(demerit.action.titles).map(async title => {
-                return await new Title({ name: title, holder: demerit.player, when: demerit.when }).save()
+            convertToArray(demerit.action.titles).map(async demeritTitle => {
+                const { title, method } = titleObject(demeritTitle);
+                const { when, player} = demerit;
+                return await new Title({ name: title, when, player, method }).save();
             }));
     };
     // approved by default for now
@@ -77,14 +96,15 @@ async function show (req, res) {
 
     const users = await User.find().sort({ 'name.knownAs': 1 });
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
-    const drinks = await Drink.find({ date: { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
+    const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
 
-    // const allTitles = await Title.find({ date: { $gte: startDate, $lte: endDate } });    
-    // const titles = [ ...new Set(allTitles.map(({ name }) => name)) ];
+    const allTitles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
+    
+    // create a constants in the database?
     const titles = ['Karen', 'Ace', 'flag bitch']
 
     const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
-    const drinkDates = [ ...new Set(drinks.map(({ formattedDate }) => formattedDate.friendly)) ];
+    const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
     const data = {
         players: users.map(user => {
             return {
@@ -106,7 +126,7 @@ async function show (req, res) {
             };
         }),        
         drinks: drinkDates.map(drinkDate => {
-            const drinksForDate = drinks.filter(({ formattedDate }) => formattedDate.friendly === drinkDate);
+            const drinksForDate = drinks.filter(({ when }) => when.formattedDate.friendly === drinkDate);
             return {
                 date: drinkDate,
                 players: users.map(({ _id }) => {
@@ -128,10 +148,17 @@ async function show (req, res) {
         if (player.demerits >= 20) player.bbq = true;
     };
     for (const title of titles) {
-        const T = await Title.findOne({ name: title }).sort({ 'when.date': -1, 'when.hole': -1 }).populate('holder');
-        if (!T) continue;
-        const holder = data.players.find(({ id }) => String(T.holder._id) === id);
-        if (holder) holder.titles.push(title);
+        const filterTitles = allTitles.filter(({ name }) => name === title);
+        if (!filterTitles) continue;
+        for (const [index, filterTitle] of filterTitles.entries()) {
+            if (filterTitle.method === 'award') {
+                if (!filterTitles.slice(0, index).filter(({ player }) => String(player) === String(filterTitle.player)).find(({ method }) => method === 'revoke')) {
+                    const holder = data.players.find(({ id }) => String(filterTitle.player) === id);
+                    if (holder) holder.titles.push(title);
+                };
+                break;
+            };
+        };
     };
     res.render('demerits/index', { years, data } );
 };
@@ -143,41 +170,45 @@ async function update (req, res) {
         return res.redirect('/demerits');
     };
     for (const id of Object.keys(demerit)) {
-        const d = demerit[id];
-        const D = await Demerit.findById(id).populate('action.titles');
-        d.action.titles = convertToArray(d.action.titles);
-        if (/Restore/.test(d.operation)) {
-            // corresponding titles should be deleted by demerit.post middleware
-            for (const title of D.action.titles) await Title.findByIdAndDelete(title);
-            await Demerit.findByIdAndDelete(id);
-        } else if (/Remove/.test(d.operation)) {
-            D.rule = await Rule.findById(d.rule);
-            D.player = await User.findById(d.player);
-            D.when = d.when;
-            D.comments = d.comments;
-            D.action.demerits = d.action.demerits;
+        const submittedDemerit = demerit[id];
+        const existingDemerit = await Demerit.findById(id).populate('action.titles');
+        if (/Restore/.test(submittedDemerit.operation)) await Demerit.findByIdAndDelete(id);
+        else if (/Remove/.test(submittedDemerit.operation)) {
+            existingDemerit.rule = await Rule.findById(submittedDemerit.rule);
+            existingDemerit.player = await User.findById(submittedDemerit.player);
+            existingDemerit.when = submittedDemerit.when;
+            existingDemerit.comments = submittedDemerit.comments;
+            existingDemerit.action.demerits = submittedDemerit.action.demerits;
             // approved and update by Lee by default for now
-            D.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'name.knownAs' : 'Lee' }), date: Date.now() } });
-            if (d.action && d.action.titles) {
-                if (D.action && D.action.titles) {
-                    for (const title of D.action.titles) {
-                        if (d.action.titles.some(t => t === title.name)) {
-                            const T = await Title.findById(title._id);
-                            T.when = d.when;
-                            T.holder = D.player;
-                            await T.save();
-                        } else await Title.findByIdAndDelete(title._id);
+            existingDemerit.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'name.knownAs' : 'Lee' }), date: Date.now() } });
+            if (submittedDemerit.action && submittedDemerit.action.titles) {
+                submittedDemerit.action.titles = convertToArray(submittedDemerit.action.titles).map(title => titleObject(title));
+                if (existingDemerit.action && existingDemerit.action.titles) {
+                    for (const existingDemeritTitle of existingDemerit.action.titles) {
+                        const foundSubmittedTitle = submittedDemerit.action.titles.find(({ title }) => title === existingDemeritTitle.name);
+                        if (foundSubmittedTitle) {
+                            const foundExistingTitle = await Title.findById(existingDemeritTitle._id);
+                            foundExistingTitle.when.date = submittedDemerit.when.date;
+                            foundExistingTitle.method = foundSubmittedTitle.method
+                            foundExistingTitle.player = submittedDemerit.player;
+                            await foundExistingTitle.save();
+                        } else await Title.findByIdAndDelete(existingDemeritTitle._id);
                     };
                 };
-                for (const title of d.action.titles) {
-                    if (!D.action.titles.some(T => T.name === title)) {
-                        const T = await new Title({ when: d.when, holder: D.player, name: title }).save();
-                        if (D.action.titles) D.action.titles.push(T);
-                        else D.action.titles = [T];
+                for (const submittedDemeritTitle of submittedDemerit.action.titles) {
+                    if (!existingDemerit.action.titles.some(({ name }) => name === submittedDemeritTitle.title)) {                        
+                        const foundExistingTitle = await new Title({
+                            when: submittedDemerit.when,
+                            name: submittedDemeritTitle.title,
+                            method: submittedDemeritTitle.method,
+                            player: existingDemerit.player
+                        }).save();
+                        if (existingDemerit.action.titles) existingDemerit.action.titles.push(foundExistingTitle);
+                        else existingDemerit.action.titles = [foundExistingTitle];
                     };
                 };
             };            
-            await D.save();
+            await existingDemerit.save();
         };
     };
     req.flash('success', 'Demerits updated');

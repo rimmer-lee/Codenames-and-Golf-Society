@@ -105,4 +105,8 @@ select option {
     overflow: hidden;
     text-overflow: ellipsis;
     /* max-width: 100%; */
-  }
+}
+
+.form-control:disabled {
+    opacity: 0.7;
+}

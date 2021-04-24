@@ -16,8 +16,13 @@ router.get('/edit', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    // const formKeys = Object.keys(req.body);
-    // const sectionKeys = [ ...new Set(formKeys.map(value => value.match(/s\d+|/)[0])) ];
+    const formKeys = Object.keys(req.body);
+    const sectionKeys = [ ...new Set(formKeys.map(value => value.match(/s\d+|/)[0])) ];
+    
+    // remove name attribute from these form inputs
+
+    sectionKeys.filter(key => /Remove/.test(req.body[`${key}|operation`]))
+
     // const sections = sectionKeys.map(value => {
     //     const description = formKeys.filter(key => {
     //         const regex = new RegExp(`${value}\\|d`);
@@ -37,7 +42,7 @@ router.post('/', async (req, res) => {
     // });
     // await new Charter({ sections }).save();
     // res.redirect('/charter');
-    
+
     res.send(req.body)
 
 });

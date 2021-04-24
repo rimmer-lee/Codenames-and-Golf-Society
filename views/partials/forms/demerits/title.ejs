@@ -1,18 +1,17 @@
+<!-- need to move the setting of titles array elsewhere -->
+<% const titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }]; %>
+<% if (existingTitles) for (const existingTitle of existingTitles) titles.find(({ value }) => value === existingTitle.name)[existingTitle.method] = true; %>
+<% const actions = [{ method: 'award', title: 'Award', class: 'btn-outline-danger' }, { method: 'revoke', title: 'Revoke', class: 'btn-outline-success' }]; %>
+<% for (const action of actions) { %>
 <div class="row mx-0 mb-3">
-    <div class="col-4 col-form-label d-flex align-items-center">Titles</div>
+    <div class="col-4 col-form-label d-flex align-items-center"><%= action.title %> Title</div>
     <div class="col px-0">
         <div class="row me-0">
-            <div class="btn-group" role="group" aria-label="Title checkbox toggle group">
-                <!-- need to move the setting of titles array elsewhere -->
-                <% const titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }]; %>
-                <% if (holder) { %>
-                    <% for (const title of titles) { %>
-                        <% if (holder.some(({ name }) => name === title.value)) title.holder = true; %>
-                    <% }; %>
-                <% }; %>
+            <div class="btn-group" role="group" aria-label="Title checkbox toggle group">        
                 <% for (const title of titles) { %>
-                <input id="<%= (id ? `${id}|` : '') + title.id %>" class="btn-check" type="checkbox" autocomplete="off" name="<%= name %>" value="<%= title.value %>"<%= title.holder ? " checked" : "" %>>
-                <label for="<%= (id ? `${id}|` : '') + title.id %>" class="btn btn-outline-danger">
+                <% const reference = `${(id ? `${id}|` : '')}${action.method}|${title.id}`; %>
+                <input id="<%= reference %>" class="btn-check" type="checkbox" autocomplete="off" name="<%= name %>" value="<%= `${action.method}|${title.value}` %>"<%= title[action.method] ? " checked" : "" %>>
+                <label for="<%= reference %>" class="btn <%= action.class %>">
                     <div class="d-flex p-0">
                         <i class="mx-auto bi <%= title.icon %>"></i>
                     </div>
@@ -22,3 +21,4 @@
         </div>
     </div>
 </div>
+<% }; %>

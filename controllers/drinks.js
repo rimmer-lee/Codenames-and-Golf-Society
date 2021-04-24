@@ -17,7 +17,7 @@ async function edit (req, res) {
     if (dateParts.length < 4) return res.redirect('/demerits');
     const startDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(0, 0, 0, 0);
     const endDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(23, 59, 59, 999);
-    const drinks = await Drink.find({ date: { $gte: startDate, $lte: endDate } }).populate('player');
+    const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).populate('player');
     const users = await User.find();
     const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     if (!p) return res.render('demerits/drinks/edit', { data: drinks, players });
@@ -43,14 +43,14 @@ async function update (req, res) {
         return res.redirect('/demerits');
     };
     for (const id of Object.keys(drink)) {
-        const d = drink[id];
-        if (/Restore/.test(d.operation)) await Drink.findByIdAndDelete(id);
-        else if (/Remove/.test(d.operation)) {
-            const D = await Drink.findById(id);
-            D.player = await User.findById(d.player);
-            D.date = d.date
-            D.value = d.value;
-            await D.save();
+        const submittedDrink = drink[id];
+        if (/Restore/.test(submittedDrink.operation)) await Drink.findByIdAndDelete(id);
+        else if (/Remove/.test(submittedDrink.operation)) {
+            const existingDrink = await Drink.findById(id);
+            existingDrink.player = await User.findById(submittedDrink.player);
+            existingDrink.when.date = submittedDrink.when.date;
+            existingDrink.value = submittedDrink.value;
+            await existingDrink.save();
         };
     };
     req.flash('success', 'Drinks updated');

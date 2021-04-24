@@ -15,24 +15,41 @@ const DrinkSchema = new Schema({
         required: true
     },
     comments: String,
-    date: {
-        type: Date,
-        default: Date.now(),
-        required: true
+    when: {
+        date: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        created: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        updated: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        }
     }
 });
 
-DrinkSchema.virtual('formattedDate.datePicker').get(function () {
-    return formatDate('yyyy-mm-dd', this.date);
+DrinkSchema.virtual('when.formattedDate.datePicker').get(function () {
+    return formatDate('yyyy-mm-dd', this.when.date);
 });
 
-DrinkSchema.virtual('formattedDate.friendly').get(function () {
-    return formatDate('dd/mm/yyyy', this.date);
+DrinkSchema.virtual('when.formattedDate.friendly').get(function () {
+    return formatDate('dd/mm/yyyy', this.when.date);
 });
 
-DrinkSchema.virtual('formattedDate.date').get(function () {
-    const date = this.date;
+DrinkSchema.virtual('when.formattedDate.date').get(function () {
+    const date = this.when.date;
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+});
+
+DrinkSchema.pre('save', function(next) {
+    this.when.updated = Date.now();
+    next();
 });
 
 module.exports = mongoose.model('Drink', DrinkSchema);

@@ -1,5 +1,5 @@
 (function () {
-    'use strict'
+    'use strict';
     const forms = document.querySelectorAll('form.needs-validation');
     const required = document.querySelectorAll('*:required');
     for (const r of Array.from(required)) {

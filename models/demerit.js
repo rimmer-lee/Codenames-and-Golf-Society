@@ -14,7 +14,17 @@ const DemeritSchema = new Schema({
             default: Date.now(),
             required: true
         },
-        hole: Number
+        hole: Number,
+        updated: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        },
+        created: {
+            type: Date,
+            default: Date.now(),
+            required: true
+        }
     },
     player: {
         type: Schema.Types.ObjectId,
@@ -85,11 +95,13 @@ DemeritSchema.virtual('when.formattedDate.date').get(function () {
 
 DemeritSchema.post('findOneAndDelete', async function(demerit) {
     if (demerit && demerit.action && demerit.action.titles) {
-        for (const title of demerit.action.titles) {
-            console.log(await Title.findById(title._id))
-            await Title.findByIdAndDelete(title._id)
-        };
+        await Title.deleteMany({ _id: { $in: demerit.action.titles } })
     };
+});
+
+DemeritSchema.pre('save', function(next) {
+    this.when.updated = Date.now();
+    next();
 });
 
 module.exports = mongoose.model('Demerit', DemeritSchema);

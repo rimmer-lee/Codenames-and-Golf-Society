@@ -18,9 +18,9 @@ function selectRule (rules) {
             if (rule.action) {
                 if (rule.action.demerits) demerit.value = rule.action.demerits;
                 else demerit.value = 0;
-                if (rule.action.titles && rule.action.titles) {
+                if (rule.action.titles) {
                     for (const title of rule.action.titles) {
-                        if (title.method === 'award') section.querySelector(`[type="checkbox"][value="${title.title}"]`).checked = true;
+                        section.querySelector(`[type="checkbox"][value="${title.method}|${title.title}"]`).checked = true;
                     };
                 };
             };
