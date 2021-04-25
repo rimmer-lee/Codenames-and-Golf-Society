@@ -19,7 +19,7 @@
         parent.classList.toggle('bg-danger');
         parent.classList.toggle('text-white');
         this.classList.toggle('btn-danger')
-        this.classList.toggle('btn-dark')
+        this.classList.toggle('btn-light')
         disableElements(parent, 'input:not([type="checkbox"]):not([data-type="button"])');
         disableElements(parent, 'textarea');
         disableElements(parent, 'select');

@@ -4,7 +4,7 @@
 <% const actions = [{ method: 'award', title: 'Award', class: 'btn-outline-danger' }, { method: 'revoke', title: 'Revoke', class: 'btn-outline-success' }]; %>
 <% for (const action of actions) { %>
 <div class="row mx-0 mb-3">
-    <div class="col-4 col-form-label d-flex align-items-center"><%= action.title %> Title</div>
+    <%- include('label', { id, label: `${action.title} Title` }) %>
     <div class="col px-0">
         <div class="row me-0">
             <div class="btn-group" role="group" aria-label="Title checkbox toggle group">        

@@ -15,7 +15,7 @@
 
     function toggleButtonStyles(element) {
         element.classList.toggle('btn-danger')
-        element.classList.toggle('btn-dark')
+        element.classList.toggle('btn-light')
     };
 
     function toggleAttribute(element, attribute, value = true) {

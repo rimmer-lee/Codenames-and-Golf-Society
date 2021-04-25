@@ -1,4 +1,4 @@
 <div class="row mx-0 mb-3">
-    <label for="<%= id %>" class="col-4 col-form-label">Hole</label>
+    <%- include('label', { id, label: 'Hole' }) %>
     <input id="<%= id %>" class="col form-control me-2" type="number" min="0" max="18" value="<%= value %>" name="<%= name %>">
 </div>
