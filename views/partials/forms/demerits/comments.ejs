@@ -1,4 +1,4 @@
 <div class="row mx-0 mb-3">
-    <%- include('label', { id, label: 'Comments' }) %>
+    <%- include('./components/label', { id, label: 'Comments' }) %>
     <textarea id="<%= id %>" class="col form-control me-2" name="<%= name %>" rows="1" placeholder="Optional"><%= value %></textarea>
 </div>

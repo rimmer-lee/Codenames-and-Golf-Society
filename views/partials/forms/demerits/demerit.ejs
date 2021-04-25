@@ -1,4 +1,4 @@
 <div class="row mx-0 mb-3">
-    <%- include('label', { id, label: 'Demerits' }) %>
-    <input id="<%= id %>" class="col form-control me-2" type="number" value="<%= value %>" name="<%= name %>">
+    <%- include('./components/label', { id, label: 'Demerits' }) %>
+    <%- include('./components/input', { id, type: 'number', name, value, options: ''}) %>
 </div>
