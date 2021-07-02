@@ -5,7 +5,9 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <div class="col-12 mb-2">
         <h1 class="d-inline me-2">Edit Charter</h1>
+        <% if (charter.created.version) { %>
         <h6 class="d-inline text-muted">v.<%= charter.created.version %></h6>
+        <% }; %>
     </div>
     <div class="col-12">
         <h6 class="text-muted mb-0">Created by <%= charter.created.user || 'someone who wants to remain anonymous' %> on <%= charter.created.dateParts.fullDate %></h6>
