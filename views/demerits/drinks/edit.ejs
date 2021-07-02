@@ -2,18 +2,24 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Edit Drinks</h1>
 </div>
-<form class="mb-3 needs-validation" method="POST" action="/demerits/drinks?_method=PUT" novalidate>
+<form class="row gy-3 needs-validation" method="POST" action="/demerits/drinks?_method=PUT" novalidate>
     <% for (const drink of data) { %>
-    <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
-            <%- include('../../partials/forms/demerits/date', { id: `${drink.id}|date`, name: `drink[${drink.id}][when][date]`, value: drink.when.formattedDate.datePicker }) %>
-            <%- include('../../partials/forms/demerits/player', { id: `${drink.id}|player`, name: `drink[${drink.id}][player]`, players, selected: String(drink.player._id) }) %>
-            <%- include('../../partials/forms/demerits/drink', { id: `${drink.id}|value`, name: `drink[${drink.id}][value]`, value: drink.value }) %>
-            <%- include('../../partials/forms/demerits/comments', { id: `${drink.id}|comments`, name: `drink[${drink.id}][comments]`, value: drink.comments }) %>
-            <div class="row mx-0 mb-2">
-                <label for="operation" class="d-none" visibility="hidden"></label>
-                <input id="operation" class="btn btn-danger" data-type="button" data-operation="remove" data-section="border" value="Remove Drink" name="drink[<%= drink.id %>][operation]" readonly>
-            </div>
+    <div class="col-12">
+        <div class="row d-flex">
+            <section class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <%- include('../../partials/forms/demerits/date', { id: `${drink.id}|date`, name: `drink[${drink.id}][when][date]`, value: drink.when.formattedDate.datePicker }) %>
+                    <%- include('../../partials/forms/demerits/player', { id: `${drink.id}|player`, name: `drink[${drink.id}][player]`, players, selected: String(drink.player._id) }) %>
+                    <%- include('../../partials/forms/demerits/drink', { id: `${drink.id}|value`, name: `drink[${drink.id}][value]`, value: drink.value }) %>
+                    <%- include('../../partials/forms/demerits/comments', { id: `${drink.id}|comments`, name: `drink[${drink.id}][comments]`, value: drink.comments }) %>
+                    <div class="col-12">
+                        <div class="row mx-2">
+                            <label for="operation" class="d-none" visibility="hidden"></label>
+                            <input id="operation" class="btn btn-danger" data-type="button" data-operation="remove" data-section="border" value="Remove Drink" name="drink[<%= drink.id %>][operation]" readonly>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
     <% }; %>

@@ -10,11 +10,7 @@ const SectionSchema = new Schema({
 });
 
 const CharterSchema = new Schema({
-    version: {
-        type: String,
-        required: true
-    },
-    lastModified: {
+    created: {
         date: {
             type: Date,
             default: Date.now(),
@@ -25,14 +21,25 @@ const CharterSchema = new Schema({
             ref: 'User',
             required: true
         },
-        comments: String
+        comments: String,
+        // format of year and iteration e.g. 2021.2
+        version: {
+            type: String,
+            required: true,
+            // unique: true
+        }
     },
-    sections: [ SectionSchema ]
+    sections: [ SectionSchema ],
+    status: {
+        type: String,
+        enum: ['Submitted', 'Approved'],
+        required: true
+    }
 }, options);
 
-CharterSchema.virtual('lastModified.dateParts').get(function () {
+CharterSchema.virtual('created.dateParts').get(function () {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const date = new Date(this.lastModified.date);
+    const date = new Date(this.created.date);
     const dateParts = {
         day: date.getUTCDate(),
         get dayOrdinal() {
@@ -50,12 +57,15 @@ CharterSchema.virtual('lastModified.dateParts').get(function () {
         month: date.getUTCMonth() + 1,
         monthString: months[date.getUTCMonth()],
         year: date.getFullYear(),
-        hours: date.getUTCHours(),
-        minutes: date.getUTCMinutes(),
-        seconds: date.getUTCSeconds(),
         time: date.toLocaleTimeString(),
+        meridiemTime: date.toLocaleTimeString([], {
+            timeZone: 'UTC',
+            hour12: true,
+            hour: 'numeric',
+            minute: '2-digit'
+        }),
         get fullDate() {
-            return `${this.day}${this.dayOrdinal} ${this.monthString}, ${this.year} at ${this.time}`;
+            return `${this.day}${this.dayOrdinal} ${this.monthString}, ${this.year} at ${this.meridiemTime.toLowerCase()}`;
         }
     };
     return dateParts;

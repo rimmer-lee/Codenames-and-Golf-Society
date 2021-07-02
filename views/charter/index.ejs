@@ -1,24 +1,87 @@
 <% layout('layouts/boilerplate') %>
 <div class="row my-3 pb-2 border-bottom border-1">
-    <h1 class="col">Charter</h1>
-    <!-- <div class="col-2 justify-content-end">
-        <div class="d-flex align-items">
-            <a class="btn btn-primary mx-auto" href="/rules/edit">Edit</a>
-        </div>
-    </div> -->
+    <div class="col">
+        <h1 class="d-inline me-2">Charter</h1>
+        <h6 class="d-inline text-muted">v.<%= charter.created.version %></h6>
+    </div>
 </div>
-<% if (sections) { %>
-<% for (const section of sections) { %>
-<section class="border border-3 rounded-3 my-3 px-3 pt-3">
-    <% if (section.title) { %>
-    <h4 class="pb-2 border-bottom border-1"><%= section.title %></h4>
+<% if (charter.sections) { %>
+<div class="row gy-3 mx-0 mb-3">
+    <% for (const section of charter.sections) { %>
+    <section class="col-12 col-lg-10 col-xl-8 border border-3 rounded-3 p-4 mx-auto">
+        <div class="row gy-1">
+            <div class="col-12">
+                <h4 class="pb-2 border-bottom border-1"><%= section.title %></h4>
+            </div>
+            <% if (section.description && section.description.length > 0) { %>
+            <div class="col-12">
+                <div class="row gy-3">
+                    <% for (const description of section.description) { %>
+                    <div class="col-12 lh-lg mx-0"><%= description %></div>
+                    <% }; %>
+                </div>
+            </div>
+            <% }; %>
+            <% if (section.rules && section.rules.length > 0) { %>
+            <div class="col-12">
+                <ol class="row gy-3 mb-0 ms-2">
+                    <% for (const rule of section.rules) { %>
+                    <li class="col-12">
+                        <div class="row gy-2">
+                            <% for (const description of rule.description) { %>
+                            <div class="col-12 lh-lg"><%= description %></div>
+                            <% }; %>
+                        </div>
+                        <div class="row mt-1">
+                            <% if (rule.action && (rule.action.demerits && rule.action.demerits !== 0) || (rule.action.titles && rule.action.titles.length > 0)) { %>
+                            <div class="col-10 mx-auto">
+                                <div class="row row-cols-1 row-cols-md-2 align-items-center fst-italic">
+                                    <% if (rule.action.demerits && rule.action.demerits !== 0) { %>
+                                    <div class="col mb-2">
+                                        <div class="row">
+                                            <div class="col d-flex justify-content-end">Demerits</div>
+                                            <div class="col"><%= rule.action.demerits %></div>
+                                        </div>
+                                    </div>                                    
+                                    <% }; %>
+                                    <% if (rule.action.titles && rule.action.titles.length > 0) { %>
+                                    <div class="col mb-2">
+                                        <div class="row">
+                                            <div class="col d-flex justify-content-end align-items-center">Titles</div>
+                                            <div class="col my-auto text-nowrap">
+                                                <% for (const title of rule.action.titles) { %>
+                                                <% const a = actions.find(({ method }) => method === title.method); %>
+                                                <% const t = titles.find(({ value }) => value === title.title); %>
+                                                <div class="btn btn-<%= a.class %> me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= a.title %> <%= t.value %>">
+                                                    <div class="d-flex p-0">
+                                                        <i class="mx-auto bi <%= t.icon %>"></i>
+                                                    </div>
+                                                </div>
+                                                <% }; %>
+                                            </div>
+                                        </div>
+                                    </div>                                    
+                                    <% }; %>
+                                </div>
+                            </div>
+                            <% }; %>
+                            <% if (rule.breakdown && rule.breakdown.length > 0) { %>
+                            <%- include('../partials/forms/charter/index/breakdown', { breakdowns: rule.breakdown }) %>
+                            <% }; %>
+                        </div>
+                    </li>
+                    <% }; %>
+                </ol>
+            </div>
+            <% }; %>
+        </div>
+    </section>
     <% }; %>
-    <% if (section.description) { %>
-    <%- include('../partials/forms/charter/show/description', { descriptions: section.description }) %>
-    <% }; %>
-    <% if (section.rules) { %>
-    <%- include('../partials/forms/charter/show/rule', { rules: section.rules }) %>
-    <% }; %>
-</section>
+</div>
 <% }; %>
-<% }; %>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+<script>
+    (function() {
+        Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]')).map(tooltipElement => new bootstrap.Tooltip(tooltipElement));
+    })();
+</script>

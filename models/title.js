@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// get titles from from elsewhere
+const titles = ['Ace', 'flag bitch', 'Karen'];
+
 const formatDate = require('../utilities/formatDate');
 
 const options = { toJSON: { virtuals: true } };
@@ -8,7 +11,7 @@ const options = { toJSON: { virtuals: true } };
 const TitleSchema = new Schema({
     name: {
         type: String,
-        enum: ['Ace', 'flag bitch', 'Karen'],
+        enum: titles,
         required: true
     },
     method: {

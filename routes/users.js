@@ -11,6 +11,6 @@ router.route('/')
 
 router.get('/edit/:id', catchAsync(users.edit));
 
-router.get('/new', catchAsync(users.create));
+router.get('/new', users.create);
 
 module.exports = router;

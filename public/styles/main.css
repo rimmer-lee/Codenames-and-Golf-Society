@@ -10,6 +10,10 @@ html, body {
     margin: 0;
 }
 
+textarea.form-control {
+    min-height: 100%;
+}
+
 ol {
     list-style: 1 inside;
 }
@@ -22,7 +26,7 @@ ol ol ol {
     list-style-type: lower-roman;
 }
 
-ol ol ol {
+ol ol ol ol {
     list-style-type: disc;
 }
 
@@ -39,52 +43,13 @@ textarea {
 }
 
 .plus {
-    width: 24px;
-    height: 24px;
-    padding: 4px;
-    position: relative;
+    transform: rotate(45deg);
+    border-radius: 50%;
 }
 
-.plus::after,
-.plus::before {
-    content: ' ';
-    position: absolute;
-    display: block;
-    background-color: #000;
-    opacity: 0.5;
-    filter: invert(1) grayscale(100%) brightness(200%);
-    z-index: 9;
-    --thickness: 2px;
-    --thickness-offset: calc(var(--thickness) / -2);
-    --size: 3px;
-}
-
-.plus::after {
-    height: var(--thickness);
-    margin-top: var(--thickness-offset);
-    top: 50%;
-    left: var(--size);
-    right: var(--size);
-}
-
-.plus::before {
-    width: var(--thickness);
-    margin-left: var(--thickness-offset);
-    left: 50%;
-    top: var(--size);
-    bottom: var(--size);
-}
-
-.plus:hover::after,
-.plus:hover::before {
-    color: #000;
-    text-decoration: none;
-    opacity: 0.75;
-}
-
-i.bi {
+/* i.bi {
     font-size: 1.35em;
-}
+} */
 
 a {
     text-decoration: none;
@@ -109,4 +74,21 @@ select option {
 
 .form-control:disabled {
     opacity: 0.7;
+}
+
+.small-width {
+    max-width: 38px;
+    min-width: 38px;
+}
+
+[draggable] {
+    cursor: move;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+::marker {
+    font-weight: bold;
 }

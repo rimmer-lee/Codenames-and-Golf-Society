@@ -1,0 +1,16 @@
+<div class="col-12">
+    <ol class="row gy-2 mb-0">        
+        <% for (const breakdown of breakdowns) { %>
+        <li class="col-12">
+            <div class="row gy-2">
+                <% for (const description of breakdown.description) { %>
+                <div class="col-12 lh-lg"><%= description %></div>
+                <% }; %>
+                <% if (breakdown.breakdown && breakdown.breakdown.length > 0) { %>
+                <%- include('./breakdown', { breakdowns: breakdown.breakdown }) %>
+                <% }; %>
+            </div>
+        </li>
+        <% }; %>
+    </ol>
+</div>

@@ -2,22 +2,28 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Edit Demerits</h1>
 </div>
-<form class="mb-3 needs-validation" method="POST" action="/demerits?_method=PUT" novalidate>
+<form class="row gy-3 needs-validation" method="POST" action="/demerits?_method=PUT" novalidate>
     <% for (const demerit of data) { %>
-    <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
-            <%- include('../partials/forms/demerits/date', { id: `${demerit.id}|date`, name: `demerit[${demerit.id}][when][date]`, value: demerit.when.formattedDate.datePicker }) %>
-            <%- include('../partials/forms/demerits/hole', { id: `${demerit.id}|hole`, name: `demerit[${demerit.id}][when][hole]`, value: demerit.when.hole }) %>
-            <%- include('../partials/forms/demerits/player', { id: `${demerit.id}|player`, name: `demerit[${demerit.id}][player]`, players, selected: String(demerit.player._id) }) %>
-            <%- include('../partials/forms/demerits/demerit', { id: `${demerit.id}|demerit`, name: `demerit[${demerit.id}][action][demerits]`, value: demerit.action.demerits }) %>
-            <%- include('../partials/forms/demerits/rule', { id: `${demerit.id}|rule`, name: `demerit[${demerit.id}][rule]`, rules, selected: String(demerit.rule.id) }) %>
-            <%- include('../partials/forms/demerits/rule-description', { id: 'rule-description', description: rules.find(({ index }) => index === demerit.rule.index).description }) %>
-            <%- include('../partials/forms/demerits/title', { id: `${demerit.id}`, name: `demerit[${demerit.id}][action][titles]`, existingTitles: demerit.action.titles }) %>
-            <%- include('../partials/forms/demerits/comments', { id: `${demerit.id}|comments`, name: `demerit[${demerit.id}][comments]`, value: demerit.comments }) %>
-            <div class="row mx-0 mb-2">
-                <label for="<%= demerit.id %>|operation" class="d-none" visibility="hidden"></label>
-                <input id="<%= demerit.id %>|operation" class="btn btn-danger" data-type="button" data-operation="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][operation]" readonly>
-            </div>
+    <div class="col-12">
+        <div class="row d-flex">
+            <section class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <%- include('../partials/forms/demerits/date', { id: `${demerit.id}|date`, name: `demerit[${demerit.id}][when][date]`, value: demerit.when.formattedDate.datePicker }) %>
+                    <%- include('../partials/forms/demerits/hole', { id: `${demerit.id}|hole`, name: `demerit[${demerit.id}][when][hole]`, value: demerit.when.hole }) %>
+                    <%- include('../partials/forms/demerits/player', { id: `${demerit.id}|player`, name: `demerit[${demerit.id}][player]`, players, selected: String(demerit.player._id) }) %>
+                    <%- include('../partials/forms/demerits/demerit', { id: `${demerit.id}|demerit`, name: `demerit[${demerit.id}][action][demerits]`, value: demerit.action.demerits }) %>
+                    <%- include('../partials/forms/demerits/rule', { id: `${demerit.id}|rule`, name: `demerit[${demerit.id}][rule]`, rules, selected: String(demerit.rule.id) }) %>
+                    <%- include('../partials/forms/demerits/rule-description', { id: 'rule-description', description: rules.find(({ index }) => index === demerit.rule.index).description }) %>
+                    <%- include('../partials/forms/demerits/title', { id: `${demerit.id}`, name: `demerit[${demerit.id}][action][titles]`, existingTitles: demerit.action.titles }) %>
+                    <%- include('../partials/forms/demerits/comments', { id: `${demerit.id}|comments`, name: `demerit[${demerit.id}][comments]`, value: demerit.comments }) %>
+                    <div class="col-12">
+                        <div class="row mx-2">
+                            <label for="<%= demerit.id %>|operation" class="d-none" visibility="hidden"></label>
+                            <input id="<%= demerit.id %>|operation" class="btn btn-danger" data-type="button" data-operation="remove" value="Remove Demerit" name="demerit[<%= demerit.id %>][operation]" readonly>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
     <% }; %>

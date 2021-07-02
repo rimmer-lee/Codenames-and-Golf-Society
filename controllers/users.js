@@ -33,19 +33,16 @@ async function update (req, res) {
     if (!user) {
         req.flash('error', 'Something went wrong');
         return res.redirect('/users');
-    };
-    // or should we delete users from the database?
-    if (/Restore/.test(operation)) user.status = 'inactive';
-
+    };    
+    if (/Restore/.test(operation)) await User.findByIdAndDelete(id);
     else if (/Remove/.test(operation)) {
         const { name, email, role } = req.body.user;
         if (name && name.middle) name.middle = name.middle.split(' ');
         user.name = name;
         user.email = email;
-        console.log(req.body.user)
         user.role = role;
-    } else return res.redirect('/users');
-    await user.save();
+        await user.save();
+    };
     req.flash('success', 'User updated');
     res.redirect('/users');
 };

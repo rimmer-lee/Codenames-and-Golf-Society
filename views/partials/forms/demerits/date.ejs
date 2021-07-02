@@ -1,5 +1,7 @@
-<div class="row my-3 mx-0">
-    <%- include('./components/label', { id, label: 'Date' }) %>
-    <%- include('./components/input', { id, type: 'date', name, value, options: 'required' }) %>
-    <%- include('../invalid-feedback', { value: 'date' }) %>
+<div class="col-12">
+    <div class="row mx-0">
+        <%- include('./components/label', { id, label: 'Date' }) %>
+        <%- include('./components/input', { id, type: 'date', name, value, options: 'required' }) %>
+        <%- include('../invalid-feedback', { value: 'date' }) %>
+    </div>
 </div>

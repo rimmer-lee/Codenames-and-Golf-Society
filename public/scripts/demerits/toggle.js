@@ -15,6 +15,8 @@
         const parent = this.closest('[class~="border"]');
         const value = this.getAttribute('value');
         const checkboxes = parent.querySelectorAll('input[type="checkbox"]:not([data-type="button"])');
+        const radioButtons = parent.querySelectorAll('input[type="radio"]:not([data-type="button"])');
+        const paragraphs = parent.querySelectorAll('p');
         parent.classList.toggle('border-danger');
         parent.classList.toggle('bg-danger');
         parent.classList.toggle('text-white');
@@ -28,10 +30,16 @@
             checkbox.nextElementSibling.classList.toggle('btn-outline-light');
             toggleAttribute(checkbox, 'disabled');
         };
+        for (const radioButton of radioButtons) {
+            radioButton.classList.toggle('btn-light');
+            radioButton.classList.toggle('btn-outline-danger');
+            // toggleAttribute(radioButton, 'disabled');
+        };
+        for (const paragraph of paragraphs) paragraph.classList.toggle('text-muted');
         if (this.dataset.operation === 'remove') {
             this.setAttribute('data-operation', 'restore');
             this.setAttribute('value', value.replace('Remove', 'Restore'));
-        } else if (t.dataset.operation === 'restore') {
+        } else if (this.dataset.operation === 'restore') {
             this.setAttribute('data-operation', 'remove');
             this.setAttribute('value', value.replace('Restore', 'Remove'));
         };

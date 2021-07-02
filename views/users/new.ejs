@@ -2,51 +2,82 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>New User</h1>
 </div>
-<form class="mb-3" method="POST" action="/users">
-    <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto">
-            <div class="row mx-0 my-2">
-                <label for="first-name" class="col-4 col-form-label">
-                    First Name
-                </label>
-                <input id="first-name" class="col form-control" type="text" name="user[name][first]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="middle-names" class="col-4 col-form-label">
-                    Middle Name(s)
-                </label>
-                <input id="middle-names" class="col form-control" type="text" name="user[name][middle]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="last-name" class="col-4 col-form-label">
-                    Last Name
-                </label>
-                <input id="last-name" class="col form-control" type="text" name="user[name][last]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="known-as" class="col-4 col-form-label">
-                    Known As
-                </label>
-                <input id="known-as" class="col form-control" type="text" name="user[name][knownAs]">
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="role" class="col-4 col-form-label">
-                    Role
-                </label>
-                <select id="role" class="col form-select" aria-label="role" name="user[role]">
-                    <option value="user" selected>User</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div class="row mx-0 mb-2">
-                <label for="email" class="col-4 col-form-label">
-                    Email
-                </label>
-                <input id="email" class="col form-control" type="email" name="user[email]">
+<form class="row gy-3" method="POST" action="/users">
+    <div class="col-12">
+        <div class="row d-flex">
+            <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <label for="first-name" class="col-4 col-form-label d-flex align-items-center fw-bold">
+                                First Name
+                            </label>
+                            <input id="first-name" class="col form-control me-2" type="text" name="user[name][first]">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <label for="first-name" class="col-4 col-form-label d-flex align-items-center fw-bold">
+                                Middle Name(s)
+                            </label>
+                            <input id="middle-names" class="col form-control me-2" type="text" name="user[name][middle]">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <label for="first-name" class="col-4 col-form-label d-flex align-items-center fw-bold">
+                                Last Name
+                            </label>
+                            <input id="last-name" class="col form-control me-2" type="text" name="user[name][last]">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <label for="first-name" class="col-4 col-form-label d-flex align-items-center fw-bold">
+                                Known As
+                            </label>
+                            <input id="known-as" class="col form-control me-2" type="text" name="user[name][knownAs]">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <label for="first-name" class="col-4 col-form-label d-flex align-items-center fw-bold">
+                                Role
+                            </label>
+                            <select id="role" class="col form-select me-2" aria-label="role" name="user[role]">
+                                <option value="user" selected>User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <div class="col-4 col-form-label d-flex align-items-center fw-bold">Status</div>
+                            <div class="col d-flex align-items-center justify-content-around">
+                                <div class="form-check form-check-inline">
+                                    <input id="active" class="form-check-input" type="radio" name="user[status]" value="active" checked disabled>
+                                    <label for="active" class="form-check-label">Active</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input id="inactive" class="form-check-input" type="radio" name="user[status]" value="inactive" disabled>
+                                    <label for="inactive" class="form-check-label">Inactive</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row mx-0">
+                            <label for="first-name" class="col-4 col-form-label d-flex align-items-center fw-bold">
+                                Email
+                            </label>
+                            <input id="email" class="col form-control me-2" type="email" name="user[email]">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="mb-3">
+    <div class="col-12 mb-3">
         <div class="row px-2">
             <a class="btn btn-warning col-5 container" href="/users">Cancel</a>
             <input class="btn btn-primary col-5 container" type="submit" value="Submit">

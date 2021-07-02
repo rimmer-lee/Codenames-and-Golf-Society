@@ -3,17 +3,12 @@
 
     'user strict';
 
-    function onInput() {
-        this.setAttribute('style', 'height:auto');
-        this.setAttribute('style', `height:${this.scrollHeight}px`);
-    };
-
     function updateTextAreas(addEventListener = false) {
         const textAreas = document.getElementsByTagName('textarea');
         for (const textArea of textAreas) {
             textArea.setAttribute('style', 'height:auto');
             textArea.setAttribute('style', `height:${textArea.scrollHeight}px;`);
-            if (addEventListener) textArea.addEventListener('input', onInput, false);
+            if (addEventListener) textArea.addEventListener('input', resize, false);
         };
     };
     
@@ -21,3 +16,8 @@
 
     window.addEventListener('resize', updateTextAreas);
 })();
+
+function resize() {
+    this.setAttribute('style', 'height:auto');
+    this.setAttribute('style', `height:${this.scrollHeight}px`);
+};

@@ -4,8 +4,8 @@
   "description": "For all your Codenames (games) and golf needs",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
-    "dev": "nodemon index"
+    "start": "node",
+    "dev": "nodemon"
   },
   "author": "Lee Rimmer",
   "license": "ISC",

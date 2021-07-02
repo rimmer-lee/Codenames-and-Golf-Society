@@ -2,17 +2,21 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>New Demerit</h1>
 </div>
-<form class="mb-3 needs-validation" method="POST" action="/demerits" novalidate>
-    <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
-            <%- include('../partials/forms/demerits/date', { id: 'date', name: 'demerit[when][date]', value: date }) %>
-            <%- include('../partials/forms/demerits/hole', { id: 'hole', name: 'demerit[when][hole]', value: 0 }) %>
-            <%- include('../partials/forms/demerits/player', { id: 'player', name: 'demerit[player]', players, selected: false }) %>
-            <%- include('../partials/forms/demerits/demerit', { id: 'demerit', name: 'demerit[action][demerits]', value: 0 }) %>
-            <%- include('../partials/forms/demerits/rule', { id: 'rule', name: 'demerit[rule]', rules, selected: false }) %>            
-            <%- include('../partials/forms/demerits/rule-description', { id: 'rule-description', description: false }) %>
-            <%- include('../partials/forms/demerits/title', { id: '', name: 'demerit[action][titles]', existingTitles: false }) %>
-            <%- include('../partials/forms/demerits/comments', { id: 'comments', name: 'demerit[comments]', value: '' }) %>
+<form class="row gy-3 needs-validation" method="POST" action="/demerits" novalidate>
+    <div class="col-12">
+        <div class="row d-flex">
+            <section class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <%- include('../partials/forms/demerits/date', { id: 'date', name: 'demerit[when][date]', value: date }) %>
+                    <%- include('../partials/forms/demerits/hole', { id: 'hole', name: 'demerit[when][hole]', value: 0 }) %>
+                    <%- include('../partials/forms/demerits/player', { id: 'player', name: 'demerit[player]', players, selected: false }) %>
+                    <%- include('../partials/forms/demerits/demerit', { id: 'demerit', name: 'demerit[action][demerits]', value: 0 }) %>
+                    <%- include('../partials/forms/demerits/rule', { id: 'rule', name: 'demerit[rule]', rules, selected: false }) %>            
+                    <%- include('../partials/forms/demerits/rule-description', { id: 'rule-description', description: false }) %>
+                    <%- include('../partials/forms/demerits/title', { id: '', name: 'demerit[action][titles]', existingTitles: false }) %>
+                    <%- include('../partials/forms/demerits/comments', { id: 'comments', name: 'demerit[comments]', value: '' }) %>
+                </div>
+            </section>
         </div>
     </div>
     <%- include('../partials/forms/demerits/buttons') %>

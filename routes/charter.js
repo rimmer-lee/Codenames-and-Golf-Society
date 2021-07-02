@@ -1,50 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const Charter = require('../models/charter');
+const catchAsync = require('../utilities/catchAsync');
+const charters = require('../controllers/charters');
 
-router.get('/', async (req, res) => {
-    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const { sections } = charter;
-    res.render('charter/index', { sections });
-});
+router.route('/')
+    .get(catchAsync(charters.show))
+    .post(catchAsync(charters.save));
 
-router.get('/edit', async (req, res) => {
-    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const { lastModified, sections } = charter;    
-    res.render('charter/edit', { lastModified, sections });
-});
-
-router.post('/', async (req, res) => {
-    const formKeys = Object.keys(req.body);
-    const sectionKeys = [ ...new Set(formKeys.map(value => value.match(/s\d+|/)[0])) ];
-    
-    // remove name attribute from these form inputs
-
-    sectionKeys.filter(key => /Remove/.test(req.body[`${key}|operation`]))
-
-    // const sections = sectionKeys.map(value => {
-    //     const description = formKeys.filter(key => {
-    //         const regex = new RegExp(`${value}\\|d`);
-    //         return regex.test(key)
-    //     }).map(key => req.body[key]);
-    //     const sections = formKeys.filter(key => {
-    //         const regex = new RegExp(`${value}\\|s`);
-    //         return regex.test(key)
-    //     }).map(key => {
-    //         return { description: [req.body[key]] }
-    //     });
-    //     return {
-    //         title: req.body[`${value}|t`],
-    //         description,
-    //         sections
-    //     }
-    // });
-    // await new Charter({ sections }).save();
-    // res.redirect('/charter');
-
-    res.send(req.body)
-
-});
+router.get('/edit', catchAsync(charters.edit));
 
 module.exports = router;

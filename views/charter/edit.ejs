@@ -2,674 +2,224 @@
 <!-- https://www.youtube.com/watch?v=jfYWwQrtzzY -->
 
 <% layout('layouts/boilerplate') %>
-<% const incomplete = true %>
-<% const test = true %>
 <div class="row my-3 pb-2 border-bottom border-1">
-    <h1>Edit Rules</h1>
-    <% if (incomplete) { %>
-    <h6 class="text-muted">Last modified on <%= lastModified.dateParts.fullDate %></h6>
-    <% } else { %>
-    <h6 class="text-muted">Last modified by <%= lastModified.user || 'someone who wants to remain anonymous' %> on <%= lastModified.dateParts.fullDate %></h6>
-    <% }; %>
+    <div class="col-12 mb-2">
+        <h1 class="d-inline me-2">Edit Charter</h1>
+        <h6 class="d-inline text-muted">v.<%= charter.created.version %></h6>
+    </div>
+    <div class="col-12">
+        <h6 class="text-muted mb-0">Created by <%= charter.created.user || 'someone who wants to remain anonymous' %> on <%= charter.created.dateParts.fullDate %></h6>
+    </div>
 </div>
-<form class="mb-3" method="POST" action="/charter">
-    <% for (const section of sections) { %>
-    <section class="border border-3 rounded-3 mb-3 p-3">
-        <div class="row border border-2 rounded-2 mx-0 mb-3 py-2">
-            <div class="col-3 col-md-2 col-xxl-1 fw-bold">Heading</div>
-            <div class="col-9 col-md-10 col-xxl-11 ps-0">
-                <label for="" class="col-form-label d-none" visibility="hidden">Heading</label>
-                <textarea id="" class="form-control" rows="1"><%= section.title %></textarea>
-            </div>
-        </div>
-        <div class="border border-2 rounded-2 mb-3 py-2">
-            <% if (section.description.length > 0) { %>
-            <% section.description.forEach((description, dIndex) => { %>
-            <div class="row mx-0<%= dIndex > 0 ? " mt-2" : "" %>">
-                <div class="col-3 col-md-2 col-xxl-1">
-                    <div class="fw-bold<%= dIndex > 0 ? " d-none" : "" %>" <%= dIndex > 0 ? "visibility=hidden" : "" %>>Description</div>
-                </div>
-                <div class="col d-flex justify-content-end px-0">
-                    <label for="" class="col-form-label d-none" visibility="hidden">Description</label>
-                    <textarea id="" class="form-control"><%= description %></textarea>
-                    <div class="col d-flex flex-column justify-content-between px-2">
-                        <div class="mb-2">
-                            <div class="col btn btn-danger p-1" data-type="button" data-operation="remove" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Description">
-                                <div class="btn-close btn-close-white" aria-label="remove"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="col btn btn-success p-1" data-type="button" data-operation="add" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Description">
-                                <div class="plus" aria-label="add"></div>
-                            </div>
-                        </div>
+<form class="row gy-3 mb-3 mx-0" method="POST" action="/charter">
+    <% for (const section of charter.sections) { %>
+    <section class="col-12 col-lg-10 col-xl-8 border border-3 rounded-3 mx-auto px-2">
+        <div class="row gy-3 pt-3 pb-2">
+            <div class="col-12">
+                <div class="row gy-2 border border-1 rounded-2 pb-2 mx-0">
+                    <div class="col-3 col-md-2 d-flex align-items-baseline">
+                        <div class="fw-bold py-1">Heading</div>
+                    </div>
+                    <div class="col-9 col-md-10 ps-0 pe-2">
+                        <label class="col-form-label d-none" visibility="hidden">Heading</label>
+                        <textarea class="form-control" rows="1"><%= section.title %></textarea>
                     </div>
                 </div>
             </div>
-            <% }); %>
-            <% } else { %>
-            <div class="row mx-2">
-                <div class="btn btn-success mx-auto" data-type="button" data-operation="new" data-section="description">New Description</div>
-            </div>
-            <% }; %>
-        </div>
-        <ol class="border border-2 rounded-2 mb-3 ps-0 py-2">
-            <% if (section.rules.length > 0) { %>
-            <% section.rules.forEach((rule, rIndex) => { %>
-            <div class="row mx-0">
-                <% if (rIndex > 0) { %>
-                <div class="row mx-0 my-2 px-0">
-                    <div class="offset-1 col-10 border-2 border-top"></div>
-                </div>
-                <% }; %>
-                <div class="row mb-2 mx-0 px-0">
-                    <div class="col-3 col-md-2">
-                        <div class="fw-bold<%= rIndex > 0 ? " d-none" : "" %>" <%= rIndex > 0 ? "visibility=hidden" : "" %>>Rules</div>
-                    </div>
-                    <li class="col px-0">
-                        <% rule.description.forEach((description, dIndex) => { %>
-                        <div class="d-flex justify-content-end px-0<%= dIndex > 0 ? " mt-2" : "" %>">
-                            <label for="" class="col-form-label d-none" visibility="hidden">Rules</label>
-                            <textarea id="" class="form-control"><%= description %></textarea>
-                            <div class="d-flex flex-column justify-content-between px-2">
-                                <div class="mb-2">
-                                    <div class="col btn btn-danger p-1" data-type="button" data-operation="remove" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Rule">
-                                        <div class="btn-close btn-close-white" aria-label="remove"></div>
+            <div class="col-12">
+                <div class="row gy-2 border border-1 rounded-2 pb-2 mx-0">
+                    <% if (section.description && section.description.length > 0) { %>
+                    <% section.description.forEach((description, dIndex) => { %>
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-3 col-md-2 d-flex align-items-baseline">
+                                <div class="fw-bold py-1<%= dIndex > 0 ? " d-none" : "" %>" <%= dIndex > 0 ? "visibility=hidden" : "" %>>Description</div>
+                            </div>
+                            <div class="col d-flex justify-content-end ps-0 pe-2">
+                                <label class="col-form-label d-none" visibility="hidden">Description</label>
+                                <textarea class="form-control"><%= description %></textarea>
+                                <div class="d-flex flex-column justify-content-between ps-2">
+                                    <div class="mb-2">
+                                        <div class="btn btn-danger p-1" data-type="button" data-operation="remove" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Description">
+                                            <div class="btn-close btn-close-white" aria-label="remove"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <div class="btn btn-success p-1" data-type="button" data-operation="add" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Rule">
-                                        <div class="plus" aria-label="add"></div>
-                                        <!-- <i class="bi bi-plus p-1 off-white"></i> -->
+                                    <div>
+                                        <div class="btn btn-success p-1 plus" data-type="button" data-operation="new" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="New Description">
+                                            <div class="btn-close btn-close-white" aria-label="new"></div>
+                                        </div>  
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <% }); %>
-
-                        <% if (rule.breakdown && rule.breakdown.length > 0) { %>
-                        <!-- rules section needs to be updated first -->
-                        <% include('../partials/forms/charter/edit/rule', { rules: rule.rules }) %>
-                        <% }; %>
-                    </li>
-                </div>
-                <div class="row mb-2 mx-0 px-0">
-                    <div class="col col-9 offset-2 px-0">
-                        <div class="row justify-content-start py-1">
-                            <div class="col d-flex justify-content-end">
-                                <label for="" class="col-form-label ps-3 fw-bold">Demerits</label>
+                    </div>
+                    <% }); %>
+                    <% } else { %>                        
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-3 col-md-2 d-flex align-items-center">
+                                <div class="fw-bold py-1">Description</div>
                             </div>
-                            <div class="col">
-                                <input id="" class="col-2 form-control" type="number" name="" value="<%= rule.action && rule.action.demerits && rule.action.demerits !== 0 ? rule.action.demerits : 0 %>">
+                            <div class="col d-grid ps-0 pe-2">
+                                <div class="btn btn-success" data-type="button" data-operation="add" data-section="description">Add Description</div>
                             </div>
                         </div>
-                    </div>                    
-                </div>
-
-
-                <!-- need to move the setting of titles array elsewhere -->
-                <% const titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }]; %>         
-                <% if (rule.action && rule.action.titles) { %>
-                    <% for (const t of titles) { %>
-                        <% const r = rule.action.titles.find(({ title }) => title === t.value); %>
-                        <% if (r) { %>
-                            <% if (r.method === 'award') t.award = true; %>
-                            <% if (r.method === 'revoke') t.revoke = true; %>
-                        <% }; %>
+                    </div>
                     <% }; %>
-                <% }; %>
-                <% const actions = [{ method: 'award', title: 'Award', class: 'btn-outline-danger' }, { method: 'revoke', title: 'Revoke', class: 'btn-outline-success' }]; %>
-
-
-                <% for (const action of actions) { %>
-                <div class="row mb-2 mx-0 px-0">
-                    <div class="col col-9 offset-2 px-0">
-                        <div class="row justify-content-start">
-                            <div class="col d-flex justify-content-end">
-                                <div class="col-form-label ps-3 fw-bold"><%= action.title %> Title</div>
-                            </div>                    
-                            <div class="col btn-group" role="group" aria-label="Title checkbox toggle group">
-                                <% for (const title of titles) { %>
-                                <input id="" class="btn-check" type="checkbox" autocomplete="off" value="<%= title.value %>"<%= title[action.method] ? " checked" : "" %> data-method="<%= action.method %>">
-                                <label for="" class="btn <%= action.class %>">
-                                    <div class="d-flex p-0">
-                                        <i class="mx-auto bi <%= title.icon %>"></i>
+                </div>
+            </div>
+            <div class="col-12">
+                <ol class="row gy-2 border border-1 rounded-2 mb-0 mx-0 ps-0 pb-2">
+                    <% if (section.rules && section.rules.length > 0) { %>
+                    <% section.rules.forEach((rule, rIndex) => { %>
+                    <div class="col-12">
+                        <div class="row gy-2">
+                            <div class="col-12<%= rIndex === 0 ? " d-none" : "" %>"<%= rIndex === 0 ? " visibility=hidden" : "" %>>
+                                <div class="row d-flex justify-content-center">
+                                    <div class="col-10 border-2 border-top"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-3 col-md-2 d-flex align-items-baseline">
+                                        <div class="fw-bold py-1<%= rIndex > 0 ? " d-none" : "" %>" <%= rIndex > 0 ? "visibility=hidden" : "" %>>Rules</div>
                                     </div>
-                                </label>
-                                <% }; %>
+                                    <li class="col px-0">
+                                        <div class="row gy-2">
+                                            <% for (const description of rule.description) { %>                                                    
+                                            <div class="col-12">
+                                                <div class="d-flex justify-content-end ps-0 pe-2">
+                                                    <label class="col-form-label d-none" visibility="hidden">Rules</label>
+                                                    <textarea class="form-control"><%= description %></textarea>
+                                                    <div class="d-flex flex-column justify-content-between ps-2">
+                                                        <div class="mb-2">
+                                                            <div class="btn btn-danger p-1" data-type="button" data-operation="remove" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Rule">
+                                                                <div class="btn-close btn-close-white" aria-label="remove"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="btn btn-success p-1 plus" data-type="button" data-operation="new" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="New Rule">
+                                                                <div class="btn-close btn-close-white" aria-label="new"></div>
+                                                            </div>  
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% }; %>                                                    
+                                            <% if (rule.breakdown && rule.breakdown.length > 0) { %>
+                                            <%- include('../partials/forms/charter/edit/breakdown', { breakdowns: rule.breakdown, level: 1 }) %>
+                                            <% }; %>
+                                        </div>
+                                    </li>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col d-flex justify-content-end">
+                                        <div class="d-flex align-items-center col-form-label px-2 btn btn-success" data-type="button" data-operation="add" data-section="breakdown">
+                                            <i class="bi bi-arrow-return-right" aria-label="Breakdown"></i>
+                                            <div class="ps-2">Breakdown</div>
+                                        </div>
+                                        <div class="col small-width"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="row me-0">
+                                            <div class="col d-flex justify-content-end">
+                                                <label class="col-form-label ps-3 fw-bold">Demerits</label>
+                                            </div>
+                                            <div class="col-6 px-0">
+                                                <input class="form-control" type="number" value="<%= rule.action && rule.action.demerits && rule.action.demerits !== 0 ? rule.action.demerits : 0 %>">
+                                            </div>
+                                            <div class="col small-width"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% for (const action of actions) { %>
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="row me-0">
+                                            <div class="col d-flex justify-content-end">
+                                                <div class="col-form-label ps-3 fw-bold"><%= action.title %> Title</div>
+                                            </div>                    
+                                            <div class="col-6 btn-group px-0" role="group" aria-label="Title checkbox toggle group">
+                                                <% for (const title of titles) { %>
+                                                <input class="btn-check" type="checkbox" autocomplete="off" value="<%= title.value %>"<%= rule.action && rule.action.titles && rule.action.titles.find(t => t.title === title.value && t.method === action.method) ? " checked" : "" %> data-method="<%= action.method %>">
+                                                <label class="btn btn-outline-<%= action.class %>" data-bs-toggle="tooltip" data-bs-placement="<%= action.tooltip %>" title="<%= action.title %> <%= title.value %>">
+                                                    <div class="d-flex p-0">
+                                                        <i class="mx-auto bi <%= title.icon %>"></i>
+                                                    </div>
+                                                </label>
+                                                <% }; %>
+                                            </div>
+                                            <div class="col small-width"></div>
+                                        </div>                                                
+                                    </div>
+                                </div>
+                            </div>
+                            <% }; %>
+                        </div>
+                    </div>
+                    <% }); %>
+                    <% } else { %>                    
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-3 col-md-2 d-flex align-items-center">
+                                <div class="fw-bold py-1">Rules</div>
+                            </div>
+                            <div class="col d-grid ps-0 pe-2">
+                                <div class="btn btn-success" data-type="button" data-operation="add" data-section="rule">Add Rules</div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <% }; %>
-                <div class="row mx-0 px-0">
-                    <div class="col d-flex justify-content-end pe-4">
-                        <div class="d-flex align-items-center col-form-label px-2 fq-bold btn btn-success py-0" data-type="button" data-operation="add" data-section="breakdown"  data-bs-toggle="tooltip" data-bs-placement="left" title="Add Breakdown">
-                            <i class="bi bi-arrow-return-right" aria-label="rule"></i>
-                            <div class="py-1 ps-2">Add Breakdown</div>
-                        </div>
-                    </div>
+                    <% }; %>
+                </ol>
+            </div>
+            <div class="col-12 mt-2">
+                <div class="row mx-0">
+                    <div class="btn btn-danger" data-type="button" data-operation="remove" data-section="section" readonly>Remove Section</div>
                 </div>
             </div>
-            <% }); %>
-            <% } else { %>
-            <div class="row mx-2">
-                <div class="btn btn-success mx-auto" data-type="button" data-operation="new" data-section="rules">New Rules</div>
-            </div>
-            <% }; %>
-        </ol>
-        <div class="row mx-0">
-            <div class="btn btn-danger" data-type="button" data-operation="remove" data-section="section" readonly>Remove Section</div>
         </div>
     </section>
     <% }; %>
-    <div class="mb-3 border border-3 rounded-3 p-3">
-        <div class="row mx-0">
-            <div class="btn btn-success" data-type="button" data-operation="add" data-section="section">New Section</div>
+    <div class="col-12">
+        <div class="row d-flex">
+            <div class="col-12 col-lg-10 col-xl-8 border border-3 rounded-3 mx-auto p-2">
+                <div class="row mx-0">
+                    <div class="btn btn-success" data-type="button" data-operation="add" data-section="section">Add Section</div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="mb-3">
-        <div class="row px-2">
-            <a class="btn btn-warning col-5 container" href="/rules">Cancel</a>
-            <input class="btn btn-primary col-5 container" type="submit" value="Submit">
+    <div class="col-12">
+        <div class="row d-flex">
+            <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+                <div class="row g-4">
+                    <div class="col">
+                        <div class="row d-flex mx-0">
+                            <a class="btn btn-warning" href="/rules">Cancel</a>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="row d-flex mx-0">
+                            <input class="btn btn-primary" type="submit" value="Submit">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </form>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-
-<!-- makes scripts modular and import them into a single script -->
+<script src="/scripts/charter/tooltips.js"></script>
 <script src="/scripts/resize-textareas.js"></script>
 <script src="/scripts/charter/form-references.js"></script>
 <script src="/scripts/charter/toggle.js"></script>
-<script>
-
-    // needs to be added to new elements
-    // https://getbootstrap.com/docs/5.0/components/tooltips/
-    const tooltipElements = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    const tooltipList = tooltipElements.map(tooltipElement => new bootstrap.Tooltip(tooltipElement));
-
-
-    const addDescriptions = document.querySelectorAll('[data-action="add-description"]');
-    const addBreakdowns = document.querySelectorAll('[data-action="add-breakdown"]');
-    const addSections = document.querySelectorAll('[data-action="add-section"]');
-
-    const newBreakdowns = document.querySelectorAll('[data-action="new-breakdown"]');
-    const breakdowns = document.querySelectorAll('[data-action="breakdown"]');
-
-    const removeButton = {
-        classList: ['mb-2'],
-        children: [{
-            classList: ['btn', 'btn-danger', 'p-1'],
-            attributes: [
-                { id: 'data-action', value: 'remove-row' },
-                { id: 'data-bs-toggle', value: 'tooltip' },
-                { id: 'data-bs-placement', value: 'left' },
-                { id: 'title', value: 'Remove Description' }
-            ],
-            // addEventListener: { type: 'click', listener: removeRowFunction },
-            children: [{
-                classList: ['btn-close', 'btn-close-white'],
-                attributes: [{ id: 'aria-label', value: 'remove' }],
-            }]
-        }]
-    };
-
-    function newBreakdownFunction() {
-        
-        // <div class="row mx-0">
-            // <div class="row mb-2 mx-0 px-0">
-                // <div class="col-3 col-md-2">
-                    // <label for="" class="col-form-label>Breakdown</label>
-                // </div>                    
-                // <li class="col px-0">                        
-                    // <div class="d-flex justify-content-end px-0">
-                        // <textarea id="" class="form-control" name=""></textarea>
-                        // <div class="col d-flex flex-column justify-content-between px-2">
-                            // <div class="mb-2">
-                                // <div class="col btn btn-danger p-1" data-action="remove-row" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Breakdown">
-                                    // <div class="btn-close btn-close-white" aria-label="close"></div>
-                                // </div>
-                            // </div>
-                            // <div>
-                                // <div class="col btn btn-success p-1" data-action="add-breakdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Breakdown">
-                                    // <div class="btn-close btn-close-white" aria-label="add"></div>
-                                // </div>
-                            // </div>
-                        // </div>
-                    // </div>
-                // </li>
-            // </div>
-            // <div class="row mx-0 px-0">
-                // <div class="d-flex justify-content-end pe-4">
-                    // <div class="btn btn-success" data-action="breakdown">Breakdown</div>
-                // </div>
-            // </div>
-        // </div>
-
-    };
-
-    const removeRows = document.querySelectorAll('[data-action="remove-row"]');
-    
-    const removeSections = document.querySelectorAll('[data-action="remove-section"]');
-    
-    for (const addDescription of addDescriptions) addDescription.addEventListener('click', addDescriptionFunction);
-    for (const addBreakdown of addBreakdowns) addBreakdown.addEventListener('click', addBreakdownFunction);
-    for (const addSection of addSections) addSection.addEventListener('click', addSectionFunction);
-
-    for (const newBreakdown of newBreakdowns) newBreakdown.addEventListener('click', newBreakdownFunction);
-
-    for (const removeRow of removeRows) {
-        removeRow.addEventListener('click', e => {
-            const t = e.target;
-            const parent = t.closest('[class~="border"]');
-            const value = t.getAttribute('value');
-            parent.classList.toggle('border-danger');
-            parent.classList.toggle('bg-danger');
-            parent.classList.toggle('text-white');
-            t.classList.toggle('btn-danger')
-            t.classList.toggle('btn-dark')
-            if (t.dataset.operation === 'remove') {
-                t.setAttribute('data-operation', 'restore');
-                t.setAttribute('value', value.replace('Remove', 'Restore'));
-            } else if (t.dataset.operation === 'restore') {
-                t.setAttribute('data-operation', 'remove');
-                t.setAttribute('value', value.replace('Restore', 'Remove'));
-            };
-        });
-    };
-
-    
-
-
-    function createElement(options) {
-        const newElement = document.createElement(options.type || 'div');
-        options.classList && newElement.classList.add( ...options.classList );
-        if (options.attributes) for (const attribute of options.attributes) newElement.setAttribute(attribute.id, attribute.value);
-        if (options.innerText) newElement.innerText = options.innerText;
-        options.addEventListener && newElement.addEventListener(options.addEventListener.type || 'click', options.addEventListener.listener, options.addEventListener.options)
-        if (options.children) for (const child of options.children) newElement.appendChild(createElement(child));
-        return newElement;
-    };
-
-    // function removeRowFunction() {
-    //     const rowToBeRemoved = this.closest('[class*="border"] > [class*="row"]')
-    //     const borderedRow = rowToBeRemoved.parentElement;
-    //     rowToBeRemoved.remove();
-    //     const remainingChildren = borderedRow.querySelectorAll('div[class*="col-"]:not([class*="btn"])');
-    //     if (remainingChildren.length > 0) {
-    //         const firstChildLabel = remainingChildren[0].querySelector('label');
-    //         firstChildLabel.classList.remove('d-none')
-    //         firstChildLabel.removeAttribute('visibility');
-    //     } else borderedRow.querySelector('.btn').classList.remove('col-10');
-    // };
-
-    // function removeSectionFunction() {
-    //     this.closest('section').remove();
-    // };
-
-    function focusElement(element) {
-        element.focus();
-        element.select();
-    };
-
-    function addDescriptionFunction() {
-        const parentElement = this.closest('div[class*="border"]');
-        const nextElement = this.closest('div[class*="row"]').nextElementSibling;
-        const newElement = createElement({
-            classList: ['row', 'mx-0', 'mt-2'],
-            children: [
-                {
-                    classList: ['col-3', 'col-md-2', 'col-xxl-1'],
-                    children: [{
-                        type: 'label',
-                        classList: ['col-form-label', 'd-none'],
-                        setAttributes: [
-                            { id: 'for', value: '' },
-                            { id: 'visibility', value: 'hidden' }
-                        ],
-                        innerText: 'Description'
-                    }]
-                },
-                {
-                    classList: ['col', 'd-flex', 'justify-content-end', 'px-0'],
-                    children: [
-                        {
-                            type: 'textarea',
-                            classList: ['form-control'],
-                            setAttributes: [{ id: 'name', value: '' }]
-                        },
-                        {
-                            classList: ['col', 'd-flex', 'flex-column', 'justify-content-between', 'px-2'],
-                            children: [
-                                removeButton,
-                                {
-                                    children: [{
-                                        classList: ['col', 'btn', 'btn-success', 'p-1'],
-                                        setAttributes: [{ id: 'data-action', value: '' }],
-                                        children: [{
-                                            classList: ['btn-close', 'btn-close-white'],
-                                            setAttributes: [{ id: 'aria-label', value: 'add' }],
-                                            addEventListener: { listener: addDescriptionFunction }
-                                        }]
-                                    }]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        });
-        parentElement.insertBefore(newElement, nextElement);
-        focusElement(newElement.querySelector('textarea'));
-    };
-
-    function addBreakdownFunction() {
-        const parentElement = this.closest('ol');
-        const nextElement = this.closest('ol > .row').nextElementSibling;
-        const newElement = createElement({
-            classList: ['row', 'mx-0'],
-            children: [
-                // only for non-top element
-                {
-                    classList: ['row', 'mx-0', 'my-2', 'px-0'],
-                    children: [{ classList: ['offset-1', 'col-10', 'border-2', 'border-bottom'] }]
-                },
-                {
-                    classList: ['row', 'mb-2', 'mx-0', 'px-0'],
-                    children: [
-                        {
-                            classList: ['col-3', 'col-md-2'],
-                            children: [{
-                                type: 'label',
-                                class: ['col-form-label', 'd-none'],
-                                attributes: [
-                                    { id: 'for', value: '' },
-                                    { id: 'visibility', value: 'hidden' }
-                                ]
-                            }]
-                        },
-                        {
-                            type: 'li',
-                            classList: ['col', 'px-0'],
-                            children: [{
-                                classList: ['col', 'd-flex', 'justify-content-end', 'px-0'],
-                                children: [
-                                    {
-                                        type: 'textarea',
-                                        classList: ['form-control'],
-                                        attributes: [
-                                            { id: 'id', value: '' },
-                                            { id: 'name', value: '' }
-                                        ]
-                                    },
-                                    {
-                                        classList: ['col', 'd-flex', 'flex-column', 'justify-content-between', 'px-2'],
-                                        children: [
-                                            removeButton,
-                                            {
-                                                children: [{
-                                                    classList: ['col', 'btn', 'btn-success', 'p-1'],
-                                                    attributes: [
-                                                        { id: 'data-action', value: 'add-breakdown' },
-                                                        { id: 'data-bs-toggle', value: 'tooltip' },
-                                                        { id: 'data-bs-placement', value: 'left' },
-                                                        { id: 'title', value: 'Add Breakdown' }
-                                                    ],
-                                                    addEventListener: { listener: addBreakdownFunction },
-                                                    children: [{
-                                                        classList: ['btn-close', 'btn-close-white'],
-                                                        attributes: [{ id: 'aria-label', value: 'add' }]
-                                                    }]
-                                                }]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }]
-                        }
-                    ]
-                },
-                {
-                    classList: ['row', 'mx-0', 'px-0'],
-                    children: [{
-                        classList: ['d-flex', 'justify-content-end', 'pe-4'],
-                        children: [{
-                            classList: ['btn', 'btn-success'],
-                            attributes: [{ id: 'data-action', value: 'add-breakdown' }],
-                            innerText: 'New Breakdown'
-                        }]
-                    }]
-                }
-            ]
-        });
-
-        parentElement.insertBefore(newElement, nextElement);
-        focusElement(newElement.querySelector('textarea'));
-
-    };
-
-    function addSectionFunction() {
-        const form = this.closest('form');
-        const nextIndex = form.querySelectorAll('section').length;
-        const sectionReference = `${this.dataset.element}-${nextIndex}`;
-
-        const headingLabel = {
-            type: 'label',
-            classList: ['col-3', 'col-md-2', 'col-xxl-1', 'col-form-label'],
-            attributes: [{ id: 'for', value: `${sectionReference}|t` }],
-            innerText: 'Heading'
-        };
-
-        const headingTextArea = {
-            type: 'textarea',
-            classList: ['form-control'],
-            attributes: [
-                { id: 'id', value: `${sectionReference}|t` },
-                { id: 'name', value: `${sectionReference}[title]` },
-                { id: 'rows', value: 1 }
-            ],
-            addEventListener: {
-                type: 'input',
-                listener: onInput,
-                options: { once: false }
-            }
-        };        
-
-        const headingTextAreaParent = {
-            classList: ['col-9', 'col-md-10', 'col-xxl-11'],
-            children: [headingTextArea]
-        };
-
-        const heading = {
-            classList: ['row', 'border', 'border-2', 'rounded-2', 'mx-0', 'mb-3', 'py-2'],
-            children: [headingLabel, headingTextAreaParent]
-        };
-
-        const descriptionReference = `${sectionReference}|d-0`;
-
-        const descriptionLabel = {
-            classList: ['col-form-label'],
-            attributes: [{ id: 'for', value: descriptionReference }],
-            innerText: 'Description'
-        };
-
-        const descriptionLabelParent = {
-            classList: ['col-3', 'col-md-2', 'col-xxl-1'],
-            children: [descriptionLabel]
-        };
-
-        const descriptionTextArea = {
-            type: 'textarea',
-            classList: ['form-control', 'mb-2'],
-            attributes: [
-                { id: 'id', value: descriptionReference },
-                { id: 'name', value: descriptionReference }
-            ],
-            addEventListener: {
-                type: 'input',
-                listener: onInput,
-                options: { once: false }
-            }
-        };
-
-        const descriptionTextAreaParent = {
-            classList: ['col-6', 'col-md-8', 'col-xxl-10'],
-            children: [descriptionTextArea]
-        };
-
-        const removeDescriptionGrandParent = {
-            classList: ['col-3', 'col-md-2', 'col-xxl-1'],
-            children: [removeButton()]
-        };
-
-        const addDescription = {
-            classList: ['btn', 'btn-success', 'col-10', 'mx-auto'],
-            attributes: [{ id: 'data-action', value: 'add-description' }],
-            innerText: 'Add Description',
-            addEventListener: {
-                type: 'click',
-                listener: addDescriptionFunction
-            }
-        };
-        
-        const addDescriptionRow = {
-            classList: ['row', 'd-flex', 'align-items', 'mx-0', 'px-2'],
-            children: [addDescription]
-        };
-
-        const descriptionRow = {
-            classList: ['row', 'mx-0'],
-            children: [descriptionLabelParent, descriptionTextAreaParent, removeDescriptionGrandParent]
-        };
-
-        const description = {
-            classList: ['border', 'border-2', 'rounded-2', 'mb-3', 'py-2'],
-            children: [descriptionRow, addDescriptionRow]
-        };
-
-        const breakdownLabel = {
-            type: 'label',
-            classList: ['col-form-label'],
-            attributes: [{ id: 'for', value: 'some-reference' }],
-            innerText: 'Breakdown'
-        };
-
-        const breakdownLabelParent = {
-            classList: ['col-3', 'col-md-2'],
-            children: [breakdownLabel]
-        }
-
-        const breakdownTextArea = {
-            type: 'textarea',
-            classList: ['form-control', 'mb-2'],
-            attributes: [
-                { id: 'id', value: ''},
-                { id: 'name', value: ''}
-            ]
-        };
-
-        const newBreakdown = {
-            classList: ['btn', 'btn-success', 'col-10', 'mx-auto'],
-            attributes: [{ id: 'data-action', value: 'new-breakdown' }],
-            innerText: 'New Breakdown',
-            // addEventListener: {
-                // type: 'click',
-                // listener: newBreakdownFunction
-            // }
-        };
-        
-        const newBreakdownParent = { classList: ['row'], children: [newBreakdown] };
-
-        const breakdownContentParent = {
-            type: 'li',
-            classList: ['col-6', 'col-md-8', 'mb-2', 'pb-2', 'border-2', 'border-bottom'],
-            // children: [breakdownTextArea, newBreakdownParent]
-            children: [breakdownTextArea]
-        };        
-
-        const removeBreakdown = {
-            classList: ['btn', 'btn-danger', 'mx-auto'],
-            attributes: [{ id: 'data-action', value: 'remove-breakdown' }],
-            innerText: 'Remove',
-            addEventListener: {
-                type: 'click',
-                // listener: removeRowFunction
-            }
-        };
-
-        const removeBreakdownParent = {
-            classList: ['d-flex', 'align-items'],
-            children: [removeBreakdown]
-        };
-
-        const removeBreakdownGrandParent = {
-            classList: ['col-3', 'col-md-2', 'mb-2', 'pb-2'],
-            children: [removeBreakdownParent]
-        };
-
-        const breakdownRow = {
-            classList: ['row', 'mx-0'],
-            children: [breakdownLabelParent, breakdownContentParent, removeBreakdownGrandParent]
-        };       
-
-        const addBreakdown = {
-            classList: ['btn', 'btn-success', 'mx-auto', 'col-10'],
-            attributes: [{ id: 'data-action', value: 'add-breakdown' }],
-            innerText: 'Add Breakdown',
-            addEventListener: {
-                type: 'click',
-                listener: addBreakdownFunction
-            }
-        };
-
-        const addBreakdownRow = {
-            classList: ['row', 'd-flex', 'align-items', 'mx-0', 'px-2'],
-            children: [addBreakdown]
-        };
-
-        const breakdownList = {
-            type: 'ol',
-            classList: ['mb-0', 'p-0'],
-            children: [breakdownRow, addBreakdownRow]
-        };
-
-        const breakdown = {
-            classList: ['border', 'border-2', 'rounded-2', 'mb-3', 'py-2'],
-            children: [breakdownList]
-        };
-
-        const sectionElementOptions = {
-            type: 'section',
-            classList: ['border', 'border-3', 'rounded-3', 'mb-3', 'p-3'],
-            children: [heading, description, breakdown]
-        };
-
-        const sectionElement = createElement(sectionElementOptions);
-
-        form.insertBefore(sectionElement, this.closest('form > div'));
-
-        const removeSectionElementOption = {
-            classList: ['btn', 'btn-danger'],
-            attributes: [{ id: 'data-action', value: 'remove-section' }],
-            innerText: 'Remove Section',
-            addEventListener: {
-                type: 'click',
-                listener: removeSectionFunction
-            }
-        };
-        
-        const removeSectionParentElementOptions = {
-            classList: ['row', 'mx-0'],
-            children: [removeSectionElementOption]
-        };
-
-        const removeSectionParentElement = createElement(removeSectionParentElementOptions)
-    
-        sectionElement.appendChild(removeSectionParentElement);
-
-        sectionElement.querySelector('textarea').focus();
-        sectionElement.querySelector('textarea').select();
-    };
-</script>
+<script src="/scripts/charter/enable-listeners.js"></script>
+<!-- <script src="/scripts/charter/drag.js"></script> -->

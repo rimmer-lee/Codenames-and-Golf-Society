@@ -8,7 +8,8 @@ const User = require('../models/user');
 const formatDate = require('../utilities/formatDate');
 
 function convertToArray(value) {
-    if (!value || Array.isArray(value)) return value;
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
     return [value];
 };
 
@@ -176,38 +177,47 @@ async function update (req, res) {
         else if (/Remove/.test(submittedDemerit.operation)) {
             existingDemerit.rule = await Rule.findById(submittedDemerit.rule);
             existingDemerit.player = await User.findById(submittedDemerit.player);
-            existingDemerit.when = submittedDemerit.when;
-            existingDemerit.comments = submittedDemerit.comments;
+            existingDemerit.when.date = submittedDemerit.when.date;
+            if (existingDemerit.when.hole) delete existingDemerit.when.hole;
+            if (submittedDemerit.when.hole && submittedDemerit.when.hole !== '') existingDemerit.when.hole = submittedDemerit.when.hole;
+            existingDemerit.when.updated = Date.now();
+            if (existingDemerit.comments) delete existingDemerit.comments;
+            if (submittedDemerit.comments && submittedDemerit.comments !== '') existingDemerit.comments = submittedDemerit.comments;
             existingDemerit.action.demerits = submittedDemerit.action.demerits;
+            
             // approved and update by Lee by default for now
             existingDemerit.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'name.knownAs' : 'Lee' }), date: Date.now() } });
+
             if (submittedDemerit.action && submittedDemerit.action.titles) {
                 submittedDemerit.action.titles = convertToArray(submittedDemerit.action.titles).map(title => titleObject(title));
-                if (existingDemerit.action && existingDemerit.action.titles) {
+                if (existingDemerit.action) {
                     for (const existingDemeritTitle of existingDemerit.action.titles) {
-                        const foundSubmittedTitle = submittedDemerit.action.titles.find(({ title }) => title === existingDemeritTitle.name);
+                        const foundSubmittedTitle = submittedDemerit.action.titles.find(title => title.title === existingDemeritTitle.name && title.method === existingDemeritTitle.method);
                         if (foundSubmittedTitle) {
                             const foundExistingTitle = await Title.findById(existingDemeritTitle._id);
                             foundExistingTitle.when.date = submittedDemerit.when.date;
-                            foundExistingTitle.method = foundSubmittedTitle.method
+                            foundExistingTitle.when.updated = Date.now();
+                            foundExistingTitle.method = foundSubmittedTitle.method;
                             foundExistingTitle.player = submittedDemerit.player;
                             await foundExistingTitle.save();
-                        } else await Title.findByIdAndDelete(existingDemeritTitle._id);
+                        } else await Title.findByIdAndDelete(existingDemeritTitle._id);                        
                     };
                 };
                 for (const submittedDemeritTitle of submittedDemerit.action.titles) {
-                    if (!existingDemerit.action.titles.some(({ name }) => name === submittedDemeritTitle.title)) {                        
+                    if (!existingDemerit.action.titles.some(title => title.name === submittedDemeritTitle.title && title.method === submittedDemeritTitle.method)) {
                         const foundExistingTitle = await new Title({
-                            when: submittedDemerit.when,
+                            when: existingDemerit.when,
                             name: submittedDemeritTitle.title,
                             method: submittedDemeritTitle.method,
                             player: existingDemerit.player
                         }).save();
-                        if (existingDemerit.action.titles) existingDemerit.action.titles.push(foundExistingTitle);
+                        if (existingDemerit.action.titles && existingDemerit.action.titles.length > 0) existingDemerit.action.titles.push(foundExistingTitle);
                         else existingDemerit.action.titles = [foundExistingTitle];
                     };
                 };
-            };            
+            } else if (!submittedDemerit.action && !submittedDemerit.action.titles && existingDemerit.action && existingDemerit.action.titles) {
+                existingDemerit.action.titles = await Promise.all(convertToArray(existingDemerit.action.titles).map(async title => await Title.findByIdAndDelete(title._id)));
+            };
             await existingDemerit.save();
         };
     };

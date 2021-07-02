@@ -1,28 +1,63 @@
-<ol class="pt-2">
-    <% sections.forEach((section, sIndex) => { %>
-    <% const reference = `${sectionReference}|s${sIndex}`; %>
-    <div class="row mx-0 px-0">
-        <div class="col-0">
-            <label for="<%= reference %>|d" class="col-form-label d-none" visibility="hidden"></label>
-        </div>                    
-        <li class="col px-0">                        
-            <div class="d-flex justify-content-end px-0">
-                <textarea id="<%= reference %>|d" class="form-control" name="<%= reference %>|d"><%= section.description %></textarea>
-                <div class="col d-flex flex-column justify-content-between px-2">
-                    <div class="mb-2">
-                        <div class="col btn btn-danger p-1" data-action="remove-row" data-bs-toggle="tooltip" data-bs-placement="left" title="Remove Breakdown">
-                            <div class="btn-close btn-close-white" aria-label="close"></div>
-                        </div>
+<div class="col-12">
+    <ol class="row gy-2 mb-0 mx-0 px-2" data-level="<%= level %>">
+        <% breakdowns.forEach((breakdown, bIndex) => { %>
+        <div class="col-12">
+            <div class="row gy-2">
+                <div class="col-12<%= bIndex === 0 ? " d-none" : "" %>"<%= bIndex === 0 ? " visibility=hidden" : "" %>>
+                    <div class="row d-flex justify-content-center">
+                        <div class="col-10 border-2 border-top"></div>
                     </div>
-                    <div>
-                        <div class="col btn btn-success p-1" data-action="add-breakdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Add Breakdown">
-                            <div class="btn-close btn-close-white" aria-label="add"></div>
+                </div>
+                <div class="col-12">
+                    <div class="row">
+                        <li class="col px-0">
+                            <div class="row gy-2">
+                                <% for (const description of breakdown.description) { %>
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-end ps-0 pe-2">
+                                        <label class="col-form-label d-none" visibility="hidden">Breakdowns</label>
+                                        <textarea class="form-control"><%= description %></textarea>
+                                        <div class="d-flex flex-column justify-content-between ps-2">
+                                            <div class="mb-2">
+                                                <div>
+                                                    <div class="col btn btn-danger p-1" data-type="button" data-operation="remove" data-section="breakdown" data-bs-toggle="tooltip" data-bs-placement="left" title="" data-bs-original-title="Remove Breakdown" aria-label="Remove Breakdown">
+                                                        <div class="btn-close btn-close-white" aria-label="remove"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div>
+                                                    <div class="col btn btn-success p-1 plus" data-type="button" data-operation="new" data-section="breakdown" data-bs-toggle="tooltip" data-bs-placement="left" title="" data-bs-original-title="New Breakdown" aria-label="New Breakdown">
+                                                        <div class="btn-close btn-close-white" aria-label="new"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }; %>
+                                <% if (breakdown.breakdown && breakdown.breakdown.length > 0) { %>
+                                <%- include('./breakdown', { breakdowns: breakdown.breakdown, level: level + 1 }) %>
+                                <% }; %>
+                            </div>
+                        </li>
+                    </div>
+                </div>
+                <% if (!breakdown.breakdown && level < 3) { %>
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col d-flex justify-content-end">
+                            <div class="d-flex align-items-center col-form-label px-2 btn btn-success" data-type="button" data-operation="add" data-section="breakdown">
+                                <i class="bi bi-arrow-return-right" aria-label="Breakdown"></i>
+                                <div class="ps-2">Breakdown</div>
+                            </div>
+                            <div class="col small-width"></div>
                         </div>
                     </div>
                 </div>
+                <% }; %>
             </div>
-            <%- include('breakdown.ejs', { sections: section, sectionReference: reference }) %>
-        </li>
-    </div>
-    <% }); %>
-</ol>
+        </div>
+        <% }); %>
+    </ol>
+</div>

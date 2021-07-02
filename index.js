@@ -1,10 +1,17 @@
+// login tutorial
+// https://www.youtube.com/watch?v=-RCnNyD0L-s
+
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 const bodyParser = require('body-parser');
 const ejsMate = require('ejs-mate');
 const express = require('express');
 const flash = require('connect-flash');
+
+// alternative
+// https://www.youtube.com/watch?v=PNtFSVU-YTI
 const helmet = require('helmet');
+
 // const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
@@ -133,10 +140,16 @@ app.get('/', (req, res) => res.render('home'));
 
 if (process.env.NODE_ENV !== 'production') {
     app.get('/reseed', async (req, res) => {
-        const { seedDatabase } = require('./seeds/seed');
-        await seedDatabase();
+        const { seed } = require('./seeds/seed');
+        await seed();
         res.redirect('/');
     });
+    app.get('/download', async (req, res) => {
+        const { download } = require('./seeds/seed');
+        const data = await download();
+        return res.send(data)
+        res.redirect('/');
+    })
 };
 
 app.all('*', (req, res, next) => next(new ExpressError(404, 'Page Not Found')));

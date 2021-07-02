@@ -2,14 +2,18 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>New Drink</h1>
 </div>
-<form class="mb-3 needs-validation" method="POST" action="/demerits/drinks" novalidate>
-    <div class="row d-flex mb-3">
-        <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
-            <%- include('../../partials/forms/demerits/date', { id: 'date', name: 'drink[when][date]', value: date }) %>
-            <%- include('../../partials/forms/demerits/player', { id: 'player', name: 'drink[player]', players, selected: false }) %>
-            <%- include('../../partials/forms/demerits/drink', { id: 'drink', name: 'drink[value]', value: 0 }) %>
-            <%- include('../../partials/forms/demerits/comments', { id: 'comments', name: 'drink[comments]', value: '' }) %>
-        </div>
-    </div>    
+<form class="row gy-3 needs-validation" method="POST" action="/demerits/drinks" novalidate>
+    <div class="col-12">
+        <div class="row d-flex">
+            <section class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <%- include('../../partials/forms/demerits/date', { id: 'date', name: 'drink[when][date]', value: date }) %>
+                    <%- include('../../partials/forms/demerits/player', { id: 'player', name: 'drink[player]', players, selected: false }) %>
+                    <%- include('../../partials/forms/demerits/drink', { id: 'drink', name: 'drink[value]', value: 0 }) %>
+                    <%- include('../../partials/forms/demerits/comments', { id: 'comments', name: 'drink[comments]', value: '' }) %>
+                </div>                
+            </section>
+        </div>    
+    </div>
     <%- include('../../partials/forms/demerits/buttons') %>
 </form>

@@ -3,20 +3,22 @@
 <% if (existingTitles) for (const existingTitle of existingTitles) titles.find(({ value }) => value === existingTitle.name)[existingTitle.method] = true; %>
 <% const actions = [{ method: 'award', title: 'Award', class: 'btn-outline-danger' }, { method: 'revoke', title: 'Revoke', class: 'btn-outline-success' }]; %>
 <% for (const action of actions) { %>
-<div class="row mx-0 mb-3">
-    <div class="col-4 col-form-label d-flex align-items-center fw-bold"><%= action.title %> Title</div>
-    <div class="col px-0">
-        <div class="row me-0">
-            <div class="btn-group" role="group" aria-label="Title checkbox toggle group">        
-                <% for (const title of titles) { %>
-                <% const reference = `${(id ? `${id}|` : '')}${action.method}|${title.id}`; %>
-                <input id="<%= reference %>" class="btn-check" type="checkbox" autocomplete="off" name="<%= name %>" value="<%= `${action.method}|${title.value}` %>"<%= title[action.method] ? " checked" : "" %>>
-                <label for="<%= reference %>" class="btn <%= action.class %>">
-                    <div class="d-flex p-0">
-                        <i class="mx-auto bi <%= title.icon %>"></i>
-                    </div>
-                </label>
-                <% }; %>
+<div class="col-12">
+    <div class="row mx-0">
+        <div class="col-4 col-form-label d-flex align-items-center fw-bold"><%= action.title %> Title</div>
+        <div class="col px-0">
+            <div class="row me-0">
+                <div class="btn-group" role="group" aria-label="Title checkbox toggle group">        
+                    <% for (const title of titles) { %>
+                    <% const reference = `${(id ? `${id}|` : '')}${action.method}|${title.id}`; %>
+                    <input id="<%= reference %>" class="btn-check" type="checkbox" autocomplete="off" name="<%= name %>" value="<%= `${action.method}|${title.value}` %>"<%= title[action.method] ? " checked" : "" %>>
+                    <label for="<%= reference %>" class="btn <%= action.class %>">
+                        <div class="d-flex p-0">
+                            <i class="mx-auto bi <%= title.icon %>"></i>
+                        </div>
+                    </label>
+                    <% }; %>
+                </div>
             </div>
         </div>
     </div>
