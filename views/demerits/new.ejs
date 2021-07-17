@@ -3,29 +3,33 @@
     <h1>New Demerit</h1>
 </div>
 <form class="row gy-3 needs-validation" method="POST" action="/demerits" novalidate>
-    <div class="col-12">
+    <section class="col-12">
         <div class="row d-flex">
-            <section class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+            <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
                 <div class="row gy-3 py-3">
-                    <%- include('../partials/forms/demerits/date', { id: 'date', name: 'demerit[when][date]', value: date }) %>
-                    <%- include('../partials/forms/demerits/hole', { id: 'hole', name: 'demerit[when][hole]', value: 0 }) %>
-                    <%- include('../partials/forms/demerits/player', { id: 'player', name: 'demerit[player]', players, selected: false }) %>
-                    <%- include('../partials/forms/demerits/demerit', { id: 'demerit', name: 'demerit[action][demerits]', value: 0 }) %>
-                    <%- include('../partials/forms/demerits/rule', { id: 'rule', name: 'demerit[rule]', rules, selected: false }) %>            
-                    <%- include('../partials/forms/demerits/rule-description', { id: 'rule-description', description: false }) %>
-                    <%- include('../partials/forms/demerits/title', { id: '', name: 'demerit[action][titles]', existingTitles: false }) %>
-                    <%- include('../partials/forms/demerits/comments', { id: 'comments', name: 'demerit[comments]', value: '' }) %>
+                    <%- include('../partials/forms/demerits/date', { id: '0|date', name: 'demerit[0][when][date]', value: date }) %>
+                    <%- include('../partials/forms/demerits/hole', { id: '0|hole', name: 'demerit[0][when][hole]', value: 0 }) %>
+                    <%- include('../partials/forms/demerits/player', { id: '0|player', name: 'demerit[0][player]', players, selected: false }) %>
+                    <%- include('../partials/forms/demerits/demerit', { id: '0|demerit', name: 'demerit[0][action][demerits]', value: 0 }) %>
+                    <%- include('../partials/forms/demerits/rule', { id: '0|rule', name: 'demerit[0][rule]', rules, selected: false }) %>            
+                    <%- include('../partials/forms/demerits/rule-description', { description: false }) %>
+                    <%- include('../partials/forms/demerits/title', { id: '0', name: 'demerit[0][action][titles]', existingTitles: false }) %>
+                    <%- include('../partials/forms/demerits/comments', { id: '0|comments', name: 'demerit[0][comments]', value: '' }) %>
+                    <%- include('../partials/forms/demerits/remove', { page: 'Demerit' }) %>
                 </div>
-            </section>
+            </div>
         </div>
-    </div>
+    </section>
+    <%- include('../partials/forms/demerits/add', { page: 'Demerit' }) %>
     <%- include('../partials/forms/demerits/buttons') %>
 </form>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/demerits/remove.js"></script>
 <script src="/scripts/demerits/select-rule.js"></script>
+<script src="/scripts/demerits/add.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const rulesAsString = '<%- JSON.stringify(rules) %>';
-        const rules = JSON.parse(rulesAsString);
-        selectRule(rules);
-    });
+    const players = JSON.parse('<%- JSON.stringify(players) %>');
+    const rules = JSON.parse('<%- JSON.stringify(rules) %>');
+    const actions = JSON.parse('<%- JSON.stringify(actions) %>');
+    const titles = JSON.parse('<%- JSON.stringify(titles) %>');
 </script>

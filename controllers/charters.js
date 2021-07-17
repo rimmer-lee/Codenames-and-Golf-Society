@@ -2,10 +2,6 @@ const Charter = require('../models/charter');
 const Rule = require('../models/rule');
 const User = require('../models/user');
 
-// move constants to database
-const titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }];
-const actions = [{ method: 'award', title: 'Award', class: 'success', tooltip: 'top' }, { method: 'revoke', title: 'Revoke', class: 'danger', tooltip: 'bottom' }];
-
 async function getLatestCharter() {
     const charter = await (await Charter.findOne().sort({ 'created.date': -1 }).populate('sections.rules'));
     return charter;
@@ -13,7 +9,7 @@ async function getLatestCharter() {
 
 async function edit (req, res) {
     const charter = await getLatestCharter();
-    res.render('charter/edit', { charter, actions, titles });
+    res.render('charter/edit', { charter });
 };
 
 async function save (req, res) {
@@ -69,15 +65,21 @@ async function save (req, res) {
                 const regex = new RegExp(`${regexRuleKey}\\|t`);
                 return regex.test(formKey);
             }).map(key => {
-                const titlesMap = {
-                    a: 'award',
-                    r: 'revoke',
-                    'flag-bitch': 'flag bitch',
-                    karen: 'Karen',
-                    ace: 'Ace'
-                };
-                const method = titlesMap[key.match('t(a|r)-')[1]];
-                const title = titlesMap[key.match('(?:ta|tr)-(.*)')[1]];
+
+                // const titlesMap = {
+                //     a: 'award',
+                //     r: 'revoke',
+                //     'flag-bitch': 'flag bitch',
+                //     karen: 'Karen',
+                //     ace: 'Ace'
+                // };
+
+                // const method = titlesMap[key.match('t(a|r)-')[1]];
+                const method = res.locals.actions.find(({ method }) => method[0] === key.match('t(a|r)-')[1]).method;
+
+                // const title = titlesMap[key.match('(?:ta|tr)-(.*)')[1]];
+                const title = res.locals.titles.find(({ id }) => id === key.match('(?:ta|tr)-(.*)')[1]).value;
+
                 return { method, title };
             });
             const action = { demerits };
@@ -122,7 +124,7 @@ async function save (req, res) {
 
 async function show (req, res) {
     const charter = await getLatestCharter();
-    res.render('charter/index', { charter, actions, titles });
+    res.render('charter/index', { charter });
 };
 
 module.exports = { edit, save, show };

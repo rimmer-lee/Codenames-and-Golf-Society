@@ -12,16 +12,18 @@ const flash = require('connect-flash');
 // https://www.youtube.com/watch?v=PNtFSVU-YTI
 const helmet = require('helmet');
 
-// const LocalStrategy = require('passport-local');
+const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 // const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo').default;
-// const passport = require('passport');
+const passport = require('passport');
 const path = require('path');
 const session = require('express-session');
 
 const ExpressError = require('./utilities/ExpressError');
+
+const User = require('./models/user');
 
 const app = express();
 const db = mongoose.connection;
@@ -36,6 +38,7 @@ const userRoutes = require('./routes/users');
 const port = process.env.PORT || 3000;
 const secret = process.env.SECRET || 'thisshouldbeabettersecret';
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/codenames-and-golf-society'; // DB_URL=mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority
+const sessionDuration = 60 * 60 * 24 * 7;
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -45,16 +48,16 @@ const store = MongoStore.create({
 
 const sessionConfig = {
     store,
-    // name: 'sessions',
+    name: 'session',
     secret,
     resave: false,
-    saveUninitialized: true
-    // , cookie: {
-    //     httpOnly: true,
-    //     secure: false,
-    //     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
-    //     maxAge: 1000 * 60 * 60 * 24 * 7
-    // }
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        expires: Date.now() + sessionDuration,
+        maxAge: sessionDuration
+    }
 };
 
 const safeUrls = {
@@ -111,6 +114,12 @@ app.use(helmet.contentSecurityPolicy({
         fontSrc: ["'self'", ...safeUrls.font]
     }
 }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // app.use('/games', gameRoutes);
 
@@ -119,7 +128,9 @@ app.use(helmet.contentSecurityPolicy({
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
 app.use((req, res, next) => {
-    // res.locals.currentUser = req.user;
+    res.locals.currentUser = req.user;
+    res.locals.titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }];
+    res.locals.actions = [{ method: 'award', title: 'Award', class: 'success', tooltip: 'top' }, { method: 'revoke', title: 'Revoke', class: 'danger', tooltip: 'bottom' }];
     res.locals.success = req.flash('success');
     res.locals.info = req.flash('info');
     res.locals.error = req.flash('error');
@@ -135,6 +146,14 @@ app.use('/demerits/drinks', drinkRoutes);
 app.use('/account', accountRoutes);
 
 app.use('/users', userRoutes);
+
+app.get('/login', (req, res) => {
+    res.send('this will be the login page')
+});
+
+app.get('/register', (req, res) => {
+    res.send('this will be the register page')
+});
 
 app.get('/', (req, res) => res.render('home'));
 

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// const passportLocalMongoose = require('passport-local-mongoose');
+const passportLocalMongoose = require('passport-local-mongoose');
 const Schema = mongoose.Schema;
 
 const options = { toJSON: { virtuals: true } };
@@ -34,7 +34,7 @@ const UserSchema = new Schema({
     }
 }, options);
 
-// UserSchema.plugin(passportLocalMongoose);
+UserSchema.plugin(passportLocalMongoose);
 
 UserSchema.virtual('name.full').get(function () {
     const { first, middle = [], last } = this.name;

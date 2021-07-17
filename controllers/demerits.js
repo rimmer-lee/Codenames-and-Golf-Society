@@ -65,22 +65,29 @@ async function edit (req, res) {
 
 async function save (req, res) {
     const { demerit } = req.body;
-    demerit.player = await User.findById(demerit.player);
-    demerit.rule = await Rule.findById(demerit.rule);
-    if (demerit.action && demerit.action.titles) {
-        demerit.action.titles = await Promise.all(
-            convertToArray(demerit.action.titles).map(async demeritTitle => {
-                const { title, method } = titleObject(demeritTitle);
-                const { when, player} = demerit;
-                return await new Title({ name: title, when, player, method }).save();
-            }));
-    };
-    // approved by default for now
-    demerit.status = 'Approved';
-    // created by Lee by default for now
-    demerit.history = [{ status: 'Created', updated: { by: await User.findOne({ 'name.knownAs' : 'Lee' }), date: Date.now() } }];
-    await new Demerit(demerit).save();
-    req.flash('success', 'Demerit saved');
+    if (demerit) {
+        await Promise.all(demerit.map(async d => {
+            d.player = await User.findById(d.player);
+            d.rule = await Rule.findById(d.rule);
+            if (d.action && d.action.titles) {
+                d.action.titles = await Promise.all(
+                    convertToArray(d.action.titles).map(async demeritTitle => {
+                        const { title, method } = titleObject(demeritTitle);
+                        const { when, player} = d;
+                        return await new Title({ name: title, when, player, method }).save();
+                    }));
+            };
+
+            // approved by default for now
+            d.status = 'Approved';
+
+            // created by Lee by default for now
+            d.history = [{ status: 'Created', updated: { by: d.player, date: Date.now() } }];
+            console.log(d)
+            await new Demerit(d).save();
+        }));
+        req.flash('success', `Demerit${demerit.length > 1 ? 's' : ''} saved`);
+    } else req.flash('info', 'No changes made');
     res.redirect('/demerits');
 };
 
@@ -100,10 +107,7 @@ async function show (req, res) {
     const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
 
     const allTitles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
-    
-    // create a constants in the database?
-    const titles = ['Karen', 'Ace', 'flag bitch']
-
+    const titles = res.locals.titles.map(({ value }) => value);
     const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
     const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
     const data = {

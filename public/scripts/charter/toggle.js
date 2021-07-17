@@ -240,16 +240,6 @@ function toggleBreakdown() {
     };
 };
 
-function createElement(options) {
-    const newElement = document.createElement(options.type || 'div');
-    options.classList && newElement.classList.add( ...options.classList );
-    if (options.attributes) for (const attribute of options.attributes) newElement.setAttribute(attribute.id, attribute.value);
-    if (options.innerText) newElement.innerText = options.innerText;
-    options.addEventListener && newElement.addEventListener(options.addEventListener.type || 'click', options.addEventListener.listener, options.addEventListener.options)
-    if (options.children) for (const child of options.children) newElement.appendChild(createElement(child));
-    return newElement;
-};
-
 function focusElement(element) {
     element.focus();
     element.select();
@@ -354,7 +344,7 @@ function breakdownButtonColumnElement() {
                                     },
                                     { classList: ['ps-2'], innerText: 'Breakdown' }
                                 ],
-                                addEventListener: { listener: addBreakdownFunction }
+                                addEventListener: [{ listener: addBreakdownFunction }]
                             },
                             { classList: ['col', 'small-width'] }
                         ]
@@ -390,13 +380,13 @@ function buttonElement (operation, section) {
     };    
     if (operation === 'New') {
         button.children[0].classList.push('plus');
-        if (section === 'Description') button.children[0].addEventListener = { listener: newDescriptionFunction };
-        if (section === 'Rule') button.children[0].addEventListener = { listener: newRuleFunction };
-        if (section === 'Breakdown') button.children[0].addEventListener = { listener: newBreakdownFunction };
+        if (section === 'Description') button.children[0].addEventListener = [{ listener: newDescriptionFunction }];
+        if (section === 'Rule') button.children[0].addEventListener = [{ listener: newRuleFunction }];
+        if (section === 'Breakdown') button.children[0].addEventListener = [{ listener: newBreakdownFunction }];
     } else {
-        if (section === 'Description') button.children[0].addEventListener = { listener: toggleDescription };
-        if (section === 'Rule') button.children[0].addEventListener = { listener: toggleRule };
-        if (section === 'Breakdown') button.children[0].addEventListener = { listener: toggleBreakdown };
+        if (section === 'Description') button.children[0].addEventListener = [{ listener: toggleDescription }];
+        if (section === 'Rule') button.children[0].addEventListener = [{ listener: toggleRule }];
+        if (section === 'Breakdown') button.children[0].addEventListener = [{ listener: toggleBreakdown }];
     };
     return button;
 };
@@ -438,7 +428,7 @@ function descriptionElement({ firstElement = false } = {}) {
                             {
                                 type: 'textarea',
                                 classList: ['form-control'],
-                                addEventListener: { type: 'input', listener: resize, options: { once: false } }
+                                addEventListener: [{ type: 'input', listener: resize, options: { once: false } }]
                             },
                             buttonGroupElement('Description')
                         ]
@@ -798,7 +788,7 @@ function sectionElement() {
                                             { id: 'readonly', value: '' }
                                         ],
                                         innerText: 'Remove Section',
-                                        addEventListener: { listener: toggleSection }
+                                        addEventListener: [{ listener: toggleSection }]
                                     }
                                 ]
                             }
@@ -859,11 +849,11 @@ function addRowElement(section) {
             }
         ]
     };
-    if (section === 'Description') addRow.children[0].children[1].children[0].addEventListener = { listener: addDescriptionFunction };
+    if (section === 'Description') addRow.children[0].children[1].children[0].addEventListener = [{ listener: addDescriptionFunction }];
     if (section === 'Rule') {
         addRow.children[0].children[0].children[0].innerText += 's';
         addRow.children[0].children[1].children[0].innerText += 's';
-        addRow.children[0].children[1].children[0].addEventListener = { listener: addRuleFunction };
+        addRow.children[0].children[1].children[0].addEventListener = [{ listener: addRuleFunction }];
         return addRow;
     };
     return addRow;

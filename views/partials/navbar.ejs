@@ -5,21 +5,21 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div id="navbarNavAltMarkup" class="collapse navbar-collapse">
-            <div class="navbar-nav mx-3">
+            <div class="navbar-nav ms-3 me-auto">
                 <!-- <a class="nav-link" href="/">Home</a> -->
                 <a class="nav-link" href="/charter">Charter</a>
                 <a class="nav-link" href="/demerits">Demerits</a>
                 <a class="nav-link" href="/users">Users</a>
                 <!-- <a class="nav-link" href="/games">Games</a> -->
             </div>
-            <!-- <div class="navbar-nav ms-auto">
-                <%/* if (currentUser)  { */%>
+            <div class="navbar-nav mx-3">
+                <% if (currentUser)  { %>
                 <a class="nav-link" href="/logout">Logout</a>
-                <%/* } else { */%>
+                <% } else { %>
                 <a class="nav-link" href="/login">Login</a>
                 <a class="nav-link" href="/register">Register</a>
-                <%/* } */%>
-            </div> -->
+                <% }; %>
+            </div>
         </div>
     </div>
 </nav>

@@ -3,17 +3,25 @@
     <h1>New Drink</h1>
 </div>
 <form class="row gy-3 needs-validation" method="POST" action="/demerits/drinks" novalidate>
-    <div class="col-12">
+    <section class="col-12">
         <div class="row d-flex">
-            <section class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+            <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
                 <div class="row gy-3 py-3">
-                    <%- include('../../partials/forms/demerits/date', { id: 'date', name: 'drink[when][date]', value: date }) %>
-                    <%- include('../../partials/forms/demerits/player', { id: 'player', name: 'drink[player]', players, selected: false }) %>
-                    <%- include('../../partials/forms/demerits/drink', { id: 'drink', name: 'drink[value]', value: 0 }) %>
-                    <%- include('../../partials/forms/demerits/comments', { id: 'comments', name: 'drink[comments]', value: '' }) %>
+                    <%- include('../../partials/forms/demerits/date', { id: '0|date', name: 'drink[0][when][date]', value: date }) %>
+                    <%- include('../../partials/forms/demerits/player', { id: '0|player', name: 'drink[0][player]', players, selected: false }) %>
+                    <%- include('../../partials/forms/demerits/drink', { id: '0|drink', name: 'drink[0][value]', value: 0 }) %>
+                    <%- include('../../partials/forms/demerits/comments', { id: '0|comments', name: 'drink[0][comments]', value: '' }) %>
+                    <%- include('../../partials/forms/demerits/remove', { page: 'Drink' }) %>
                 </div>                
-            </section>
+            </div>
         </div>    
-    </div>
+    </section>
+    <%- include('../../partials/forms/demerits/add', { page: 'Drink' }) %>
     <%- include('../../partials/forms/demerits/buttons') %>
 </form>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/demerits/remove.js"></script>
+<script src="/scripts/demerits/add.js"></script>
+<script>
+    const players = JSON.parse('<%- JSON.stringify(players) %>');
+</script>

@@ -13,7 +13,7 @@
                     <%- include('../partials/forms/demerits/player', { id: `${demerit.id}|player`, name: `demerit[${demerit.id}][player]`, players, selected: String(demerit.player._id) }) %>
                     <%- include('../partials/forms/demerits/demerit', { id: `${demerit.id}|demerit`, name: `demerit[${demerit.id}][action][demerits]`, value: demerit.action.demerits }) %>
                     <%- include('../partials/forms/demerits/rule', { id: `${demerit.id}|rule`, name: `demerit[${demerit.id}][rule]`, rules, selected: String(demerit.rule.id) }) %>
-                    <%- include('../partials/forms/demerits/rule-description', { id: 'rule-description', description: rules.find(({ index }) => index === demerit.rule.index).description }) %>
+                    <%- include('../partials/forms/demerits/rule-description', { description: rules.find(({ index }) => index === demerit.rule.index).description }) %>
                     <%- include('../partials/forms/demerits/title', { id: `${demerit.id}`, name: `demerit[${demerit.id}][action][titles]`, existingTitles: demerit.action.titles }) %>
                     <%- include('../partials/forms/demerits/comments', { id: `${demerit.id}|comments`, name: `demerit[${demerit.id}][comments]`, value: demerit.comments }) %>
                     <div class="col-12">
@@ -32,9 +32,8 @@
 <script src="/scripts/demerits/select-rule.js"></script>
 <script src="/scripts/demerits/toggle.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const rulesAsString = '<%- JSON.stringify(rules) %>';
-        const rules = JSON.parse(rulesAsString);
-        selectRule(rules);
-    });
+    const players = JSON.parse('<%- JSON.stringify(players) %>');
+    const rules = JSON.parse('<%- JSON.stringify(rules) %>');
+    const actions = JSON.parse('<%- JSON.stringify(actions) %>');
+    const titles = JSON.parse('<%- JSON.stringify(titles) %>');
 </script>

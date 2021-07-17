@@ -27,33 +27,29 @@ async function edit (req, res) {
 
 async function save (req, res) {
     const { drink } = req.body;
-    if (!drink) req.flash('error', 'Something went wrong');
-    else {
-        drink.player = await User.findById(drink.player);
-        await new Drink(drink).save();
-        req.flash('success', 'Drink saved');
-    };
+    if (drink) {
+        await Promise.all(drink.map(async d => await new Drink(d).save()));
+        req.flash('success', `Drink${drink.length > 1 ? 's' : ''} saved`);
+    } else req.flash('info', 'No changes made');
     res.redirect('/demerits');
 };
 
 async function update (req, res) {
     const { drink } = req.body;
-    if (!drink) {
-        req.flash('error', 'Something went wrong');
-        return res.redirect('/demerits');
-    };
-    for (const id of Object.keys(drink)) {
-        const submittedDrink = drink[id];
-        if (/Restore/.test(submittedDrink.operation)) await Drink.findByIdAndDelete(id);
-        else if (/Remove/.test(submittedDrink.operation)) {
-            const existingDrink = await Drink.findById(id);
-            existingDrink.player = await User.findById(submittedDrink.player);
-            existingDrink.when.date = submittedDrink.when.date;
-            existingDrink.value = submittedDrink.value;
-            await existingDrink.save();
+    if (drink) {
+        for (const id of Object.keys(drink)) {
+            const submittedDrink = drink[id];
+            if (/Restore/.test(submittedDrink.operation)) await Drink.findByIdAndDelete(id);
+            else if (/Remove/.test(submittedDrink.operation)) {
+                const existingDrink = await Drink.findById(id);
+                existingDrink.player = await User.findById(submittedDrink.player);
+                existingDrink.when.date = submittedDrink.when.date;
+                existingDrink.value = submittedDrink.value;
+                await existingDrink.save();
+            };
         };
-    };
-    req.flash('success', 'Drinks updated');
+        req.flash('success', 'Drinks updated');
+    } else req.flash('error', 'Something went wrong');
     res.redirect('/demerits')
 };
 
