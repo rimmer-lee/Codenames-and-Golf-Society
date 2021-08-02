@@ -1,0 +1,19 @@
+<div class="col-12">
+    <div class="row mx-0">
+        <div class="col-4 col-form-label d-flex align-items-center fw-bold">Gender</div>
+        <div class="col px-0">
+            <div class="row me-0">
+                <div class="btn-group" role="group" aria-label="Gender radio button group">        
+                    <% for (const gender of genders) { %>
+                    <input id="<%= id %>-<%= gender %>" class="btn-check" type="radio" name="<%= name %>" value="<%= gender %>"<%= gender === value ? " checked" : "" %>>
+                    <label for="<%= id %>-<%= gender %>" class="btn btn-outline-primary">
+                        <div class="d-flex p-0">
+                            <i class="mx-auto bi bi-gender-<%= gender %>"></i>
+                        </div>
+                    </label>    
+                    <% }; %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

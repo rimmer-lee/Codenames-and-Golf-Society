@@ -1,6 +1,6 @@
 <div class="col-12">
     <div class="row mx-0">
-        <%- include('./components/label', { id, label: 'Player' }) %>
+        <%- include('../components/label', { id, label: 'Player' }) %>
         <select id="<%= id %>" class="col form-select me-2" aria-label="players" name="<%= name %>" autofocus required>
             <% if (!selected) { %>
             <option value="" selected disabled>Select player</option>

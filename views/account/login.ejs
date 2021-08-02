@@ -1,0 +1,29 @@
+<% layout('layouts/boilerplate') %>    
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1>Sign In</h1>
+</div>
+<form class="row gy-3 needs-validation" method="POST" action="/login" novalidate>
+    <div class="col-12">
+        <div class="row d-flex">
+            <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <%- include('../partials/forms/account/email', { id: 'email', name: 'login[email]', value: '' }) %>
+                    <%- include('../partials/forms/account/password', { id: 'password', name: 'login[password]', value: '', options: 'autocomplete="current-password"' }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mb-3">
+        <div class="row px-2">
+            <a class="btn btn-warning col-5 container" href="<%= from %>">Back</a>
+            <input id="primary-button" class="btn btn-primary col-5 container" type="submit" value="Sign In">
+        </div>
+    </div>
+    <div class="form-check">
+        <input id="remember" class="form-check-input" type="checkbox">
+        <label for="remember" class="form-check-label">Remember Me</label>
+    </div>
+    <div>
+        <a href="/register">Not Yet Registered?</a>
+    </div>
+</form>

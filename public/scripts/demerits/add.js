@@ -83,7 +83,6 @@
 
         function selectElement(section, page, index) {
             const options = section === 'Player' ? players : rules;
-            console.log(players)
             const lowerSection = section.toLowerCase();
             const id = `${index}|${lowerSection}`
             const element = [

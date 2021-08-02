@@ -20,7 +20,7 @@ function titleObject(value) {
 
 async function create (req, res) {
     const date = formatDate('yyyy-mm-dd');
-    const users = await User.find().sort({ 'name.knownAs': 1 });
+    const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
     const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
     const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
     const players = users.map(user => ({ name: user.name.knownAs, id: user._id }));
@@ -54,7 +54,7 @@ async function edit (req, res) {
         endDate = new Date(y, 11, 31).setHours(23, 59, 59, 999);
     }
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).populate('player').populate('rule').populate('action.titles');
-    const users = await User.find();
+    const users = await User.find({ 'role': { $ne: 'super' } });
     const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
     const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
@@ -83,7 +83,6 @@ async function save (req, res) {
 
             // created by Lee by default for now
             d.history = [{ status: 'Created', updated: { by: d.player, date: Date.now() } }];
-            console.log(d)
             await new Demerit(d).save();
         }));
         req.flash('success', `Demerit${demerit.length > 1 ? 's' : ''} saved`);
@@ -102,7 +101,7 @@ async function show (req, res) {
     // const years = [ ...new Set(allDemerits.map(({ when }) => when.date.getFullYear())) ];
     const years = [2021]
 
-    const users = await User.find().sort({ 'name.knownAs': 1 });
+    const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
     const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
 
@@ -190,7 +189,7 @@ async function update (req, res) {
             existingDemerit.action.demerits = submittedDemerit.action.demerits;
             
             // approved and update by Lee by default for now
-            existingDemerit.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'name.knownAs' : 'Lee' }), date: Date.now() } });
+            existingDemerit.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'name.preferred' : 'Lee' }), date: Date.now() } });
 
             if (submittedDemerit.action && submittedDemerit.action.titles) {
                 submittedDemerit.action.titles = convertToArray(submittedDemerit.action.titles).map(title => titleObject(title));

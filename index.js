@@ -25,6 +25,8 @@ const ExpressError = require('./utilities/ExpressError');
 
 const User = require('./models/user');
 
+const { TITLES, ACTIONS, NAME_TITLES, GENDERS } = require('./constants');
+
 const app = express();
 const db = mongoose.connection;
 
@@ -34,6 +36,7 @@ const drinkRoutes = require('./routes/drinks');
 // const gameRoutes = require('./routes/games');
 const accountRoutes = require('./routes/account');
 const userRoutes = require('./routes/users');
+const user = require('./models/user');
 
 const port = process.env.PORT || 3000;
 const secret = process.env.SECRET || 'thisshouldbeabettersecret';
@@ -129,8 +132,10 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
-    res.locals.titles = [{ id: 'ace', value: 'Ace', icon: 'bi-suit-spade-fill' }, { id: 'flag-bitch', value: 'flag bitch', icon: 'bi-flag-fill' }, { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }];
-    res.locals.actions = [{ method: 'award', title: 'Award', class: 'success', tooltip: 'top' }, { method: 'revoke', title: 'Revoke', class: 'danger', tooltip: 'bottom' }];
+    res.locals.titles = TITLES;
+    res.locals.actions = ACTIONS;
+    res.locals.nameTitles = NAME_TITLES;
+    res.locals.genders = GENDERS;
     res.locals.success = req.flash('success');
     res.locals.info = req.flash('info');
     res.locals.error = req.flash('error');
@@ -148,11 +153,37 @@ app.use('/account', accountRoutes);
 app.use('/users', userRoutes);
 
 app.get('/login', (req, res) => {
-    res.send('this will be the login page')
+    res.render('account/login', { from: '/' });
+});
+
+app.post('/login', (req, res) => {
+    return res.send(req.body)
 });
 
 app.get('/register', (req, res) => {
-    res.send('this will be the register page')
+    const formatDate = require('./utilities/formatDate');
+    const date = formatDate('yyyy-mm-dd');
+    res.render('account/register', { date, from: '/' });
+});
+
+app.post('/register', async (req, res) => {
+
+    const { email, title, name, image, birthday, gender } = req.body.register;
+    const { full, preferred } = name;
+    const names = full.split(' ');
+    const user = {
+        name: { title, preferred },
+        // image,
+        email,
+        birthday: birthday,
+        gender
+    };
+    if (names.length > 0) user.name.first = names[0];
+    if (names.length > 1) user.name.last = names[names.length - 1];
+    if (names.length > 2) user.name.middle = names.slice(1, -1);
+    const u = await new User(user).save();
+    req.flash('success', `Welcome ${preferred}`);
+    res.redirect(`/account/${u.id}`);
 });
 
 app.get('/', (req, res) => res.render('home'));
@@ -163,19 +194,13 @@ if (process.env.NODE_ENV !== 'production') {
         await seed();
         res.redirect('/');
     });
-    app.get('/download', async (req, res) => {
-        const { download } = require('./seeds/seed');
-        const data = await download();
-        return res.send(data)
-        res.redirect('/');
-    })
 };
 
 app.all('*', (req, res, next) => next(new ExpressError(404, 'Page Not Found')));
 
 app.use((error, req, res, next) => {
     const { status = 500 } = error;
-    if (!error.message) error.message = 'Somehing went wrong';
+    if (!error.message) error.message = 'Something went wrong';
     res.status(status).render('error', { error });
 });
 

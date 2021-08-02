@@ -22,7 +22,7 @@ async function save (req, res) {
 };
 
 async function show (req, res) {
-    const users = await User.find().sort({ 'name.friendly': 1 });
+    const users = await User.find().sort({ 'name.preferred': 1 });
     res.render('users/index', { users });
 };
 

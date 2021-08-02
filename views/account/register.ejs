@@ -1,0 +1,32 @@
+<% layout('layouts/boilerplate') %>    
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1>Register</h1>
+</div>
+<form class="row gy-3 needs-validation check-password" method="POST" action="/register" novalidate>
+    <div class="col-12">
+        <div class="row d-flex">
+            <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                <div class="row gy-3 py-3">
+                    <%- include('../partials/forms/account/email', { id: 'email', name: 'register[email]', value: '' }) %>
+                    <%- include('../partials/forms/account/password', { id: 'password', name: 'register[password]', value: '', options: 'autocomplete="current-password"' }) %>
+                    <%- include('../partials/forms/account/password-check', { id: 'password-check' }) %>
+                    <%- include('../partials/forms/account/title', { id: 'title', name: 'register[title]', titles: nameTitles, value: '' }) %>
+                    <%- include('../partials/forms/account/full-name', { id: 'full-name', name: 'register[name][full]', value: '' }) %>
+                    <%- include('../partials/forms/account/preferred-name', { id: 'preferred-name', name: 'register[name][preferred]', value: '' }) %>
+                    <%- include('../partials/forms/account/image', { id: 'image', name: 'register[image]', value: '' }) %>
+                    <%- include('../partials/forms/account/birthday', { id: 'birthday', name: 'register[birthday]', date, value: '' }) %>
+                    <%- include('../partials/forms/account/gender', { id: 'gender', name: 'register[gender]', genders, value: '' }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mb-3">
+        <div class="row px-2">
+            <a class="btn btn-warning col-5 container" href="<%= from %>">Back</a>
+            <input id="primary-button" class="btn btn-primary col-5 container" type="submit" value="Register">
+        </div>
+    </div>
+    <div>
+        <a href="/login">Already Registered?</a>
+    </div>
+</form>

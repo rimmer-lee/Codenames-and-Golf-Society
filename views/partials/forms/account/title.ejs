@@ -1,0 +1,13 @@
+<div class="col-12">
+    <div class="row mx-0">
+        <%- include('../components/label', { id, label: 'Title' }) %>
+        <select id="<%= id %>" class="col form-select me-2" aria-label="titles" name="<%= name %>">
+            <% if (!value) { %>
+            <option value="" selected disabled>Select title</option>
+            <% }; %>
+            <% for (const title of titles) { %>
+            <option value="<%= title %>"<%= value === title ? " selected" : "" %>><%= title %></option>
+            <% }; %>
+        </select>
+    </div>
+</div>

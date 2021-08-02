@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// get titles from from elsewhere
-const titles = ['Ace', 'flag bitch', 'Karen'];
+const { TITLES, ACTIONS } = require('../constants');
 
 const formatDate = require('../utilities/formatDate');
 
@@ -11,12 +10,12 @@ const options = { toJSON: { virtuals: true } };
 const TitleSchema = new Schema({
     name: {
         type: String,
-        enum: titles,
+        enum: TITLES.map(({ value }) => value),
         required: true
     },
     method: {
         type: String,
-        enum: ['award', 'revoke']
+        enum: ACTIONS.map(({ method }) => method)
     },
     player: {
         type: Schema.Types.ObjectId,

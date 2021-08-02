@@ -79,7 +79,7 @@ const DemeritSchema = new Schema({
     ]
 }, options);
 
-// shared with drink schema
+// shared with drink and user schema
 DemeritSchema.virtual('when.formattedDate.datePicker').get(function () {
     return formatDate('yyyy-mm-dd', this.when.date);
 });

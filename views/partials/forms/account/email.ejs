@@ -1,0 +1,19 @@
+<div class="col-12">
+    <div class="row mx-0">
+        <%- include('../components/label', { id, label: 'Email' }) %>
+        <%- include('../components/input', { id, type: 'email', name, value, options: 'required' }) %>
+        <div class="invalid-feedback">
+            <div class="d-flex justify-content-end">
+                Please enter an email address.
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="row mx-0 form-floating">
+        <input id="email" class="col form-control" type="email" name="login[email]" placeholder="Email" required>
+        <label for="email" class="col-form-label fw-bold">
+            Email
+        </label>
+    </div> -->
+
+</div>
