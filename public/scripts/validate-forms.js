@@ -22,7 +22,6 @@
 
     for (const form of document.querySelectorAll('form.needs-validation')) {
         form.addEventListener('submit', e => {
-            const passwordCheck = form.querySelector('#password-check');
             let valid = true;
             for (const required of Array.from(form.querySelectorAll('*:required'))) {
                 if (!required.value) {
@@ -30,16 +29,18 @@
                     valid = false;
                 } else required.classList.add('is-valid');
             };
-            if (passwordCheck) {
-                // const invalidFeedback = form.getElementById('password-check-invalid-feedback');
-                if (!passwordCheck.value) {
-                    passwordCheck.classList.add('is-invalid')
-                    valid = false;
-                } else if (passwordCheck.value !== form.getElementById('password').value) {
-                    passwordCheck.classList.add('is-invalid')
-                    valid = false;
-                } else passwordCheck.classList.add('is-valid');
-            };
+            if (e.target.querySelector('#password').required) {
+                const passwordCheck = form.querySelector('#password-check');
+                if (passwordCheck) {
+                    if (!passwordCheck.value) {
+                        passwordCheck.classList.add('is-invalid')
+                        valid = false;
+                    } else if (passwordCheck.value !== form.getElementById('password').value) {
+                        passwordCheck.classList.add('is-invalid')
+                        valid = false;
+                    } else passwordCheck.classList.add('is-valid');
+                };
+            };            
             if (!valid) {
                 e.preventDefault();
                 e.stopPropagation();

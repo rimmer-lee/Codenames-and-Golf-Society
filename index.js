@@ -22,6 +22,7 @@ const path = require('path');
 const session = require('express-session');
 
 const ExpressError = require('./utilities/ExpressError');
+const createUserObject = require('./utilities/createUserObject');
 
 const User = require('./models/user');
 
@@ -168,20 +169,22 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
 
-    const { email, title, name, image, birthday, gender } = req.body.register;
-    const { full, preferred } = name;
-    const names = full.split(' ');
-    const user = {
-        name: { title, preferred },
-        // image,
-        email,
-        birthday: birthday,
-        gender
-    };
-    if (names.length > 0) user.name.first = names[0];
-    if (names.length > 1) user.name.last = names[names.length - 1];
-    if (names.length > 2) user.name.middle = names.slice(1, -1);
-    const u = await new User(user).save();
+    // const { email, name, image, birthday, gender } = req.body.register;
+    // const { full, title, preferred } = name;
+    // const names = full.split(' ');
+    // const user = {
+    //     name: { title, preferred },
+    //     // image,
+    //     email,
+    //     birthday: birthday,
+    //     gender
+    // };
+    // if (names.length > 0) user.name.first = names[0];
+    // if (names.length > 1) user.name.last = names[names.length - 1];
+    // if (names.length > 2) user.name.middle = names.slice(1, -1);
+    // const u = await new User(user).save();
+    
+    const u = await new User(createUserObject(req.body.register)).save();
     req.flash('success', `Welcome ${preferred}`);
     res.redirect(`/account/${u.id}`);
 });

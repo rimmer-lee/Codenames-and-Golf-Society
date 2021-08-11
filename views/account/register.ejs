@@ -8,9 +8,9 @@
             <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
                 <div class="row gy-3 py-3">
                     <%- include('../partials/forms/account/email', { id: 'email', name: 'register[email]', value: '' }) %>
-                    <%- include('../partials/forms/account/password', { id: 'password', name: 'register[password]', value: '', options: 'autocomplete="current-password"' }) %>
+                    <%- include('../partials/forms/account/register-password', { id: 'password', name: 'register[password]', value: '', options: 'autocomplete=current-password required' }) %>
                     <%- include('../partials/forms/account/password-check', { id: 'password-check' }) %>
-                    <%- include('../partials/forms/account/title', { id: 'title', name: 'register[title]', titles: nameTitles, value: '' }) %>
+                    <%- include('../partials/forms/account/title', { id: 'title', name: 'register[name][title]', titles: nameTitles, value: '' }) %>
                     <%- include('../partials/forms/account/full-name', { id: 'full-name', name: 'register[name][full]', value: '' }) %>
                     <%- include('../partials/forms/account/preferred-name', { id: 'preferred-name', name: 'register[name][preferred]', value: '' }) %>
                     <%- include('../partials/forms/account/image', { id: 'image', name: 'register[image]', value: '' }) %>

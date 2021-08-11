@@ -27,7 +27,7 @@ const UserSchema = new Schema({
     image: ImageSchema,
     email: {
         type: String,
-        // unique: true
+        unique: true
     },
     role: {
         type: String,
