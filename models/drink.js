@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 const DrinkSchema = new Schema({
     player: {
@@ -34,17 +34,13 @@ const DrinkSchema = new Schema({
     }
 });
 
-DrinkSchema.virtual('when.formattedDate.datePicker').get(function () {
-    return formatDate('yyyy-mm-dd', this.when.date);
-});
-
-DrinkSchema.virtual('when.formattedDate.friendly').get(function () {
-    return formatDate('dd/mm/yyyy', this.when.date);
-});
-
-DrinkSchema.virtual('when.formattedDate.date').get(function () {
+DrinkSchema.virtual('when.formattedDate').get(function () {
     const date = this.when.date;
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return {
+        datePicker: customDate('yyyy-mm-dd', date),
+        friendly: customDate('dd/mm/yyyy', date),
+        date: new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    };
 });
 
 DrinkSchema.pre('save', function(next) {

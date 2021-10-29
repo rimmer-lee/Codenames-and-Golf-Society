@@ -36,29 +36,14 @@
                     </div>
                     <div class="row">
                         <% for (const title of player.titles) { %>
-                        <% if (title === 'Ace') { %>
+                        <% const t = titles.find(({ value }) => title === value); %>
                         <div class="col d-flex p-0">
-                            <i class="mx-auto bi bi-suit-spade-fill"></i>
+                            <i class="mx-auto bi <%= t.icon %>"></i>
                         </div>
                         <!-- add link to titles page to see history of titles? -->
                         <!-- <a class="col d-flex p-0" href="">
-                            <i class="mx-auto bi bi-suit-spade-fill"></i>
+                            <i class="mx-auto bi <%= t.icon %>"></i>
                         </a> -->
-                        <% } else if (title === 'flag bitch') { %>
-                        <div class="col d-flex p-0">
-                            <i class="mx-auto bi bi-flag-fill"></i>
-                        </div>
-                        <!-- <a class="col d-flex p-0" href="">
-                            <i class="mx-auto bi bi-flag-fill"></i>
-                        </a> -->
-                        <% } else if (title === 'Karen') { %>
-                        <div class="col d-flex p-0">
-                            <i class="mx-auto bi bi-cone-striped"></i>
-                        </div>
-                        <!-- <a class="col d-flex p-0" href="">
-                            <i class="mx-auto bi bi-cone-striped"></i>
-                        </a> -->
-                        <% }; %>
                         <% }; %>
                     </div>
                 </th>
@@ -68,11 +53,11 @@
         <tbody>
             <tr>
                 <th class="table-secondary" colspan="<%= data.players.length + 1 %>" scope="row">
-                    <div class="row justify-content-end">
+                    <div class="row">
                         <div class="col d-flex align-items-center">Demerits</div>
                         <div class="col">
-                            <div class="d-flex align-items">
-                                <a class="btn btn-primary me-0 mx-auto" href="/demerits/new">New Demerit</a>
+                            <div class="d-flex">
+                                <a class="btn btn-primary me-0 ms-auto" href="/demerits/new">New Demerit</a>
                             </div>
                         </div>
                     </div>
@@ -88,9 +73,6 @@
                 <% for (const p of data.players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.id); %>
                 <% const value = d.demerits ? d.demerits : ""; %> 
-                
-                <% include('../partials/tables/demerits/cell', { value }) %>
-
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
@@ -104,29 +86,14 @@
                 <% }; %>
             </tr>
             <% }; %>
-
-            <% include('../partials/tables/demerits/row', { players: data.players, title: 'Total', property: 'demerits' }) %>
-
-            <tr>
-                <th scope="row">Total</th>
-                <% for (const player of data.players) { %>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <%= player.demerits %>
-                        </div>
-                    </div>
-                </td>
-                <% }; %>
-            </tr>
-
+            <%- include('../partials/tables/demerits/row', { players: data.players, title: 'Total', property: 'demerits' }) %>
             <tr>
                 <th class="table-secondary" colspan="<%= data.players.length + 1 %>" scope="row">
-                    <div class="row justify-content-end">
+                    <div class="row">
                         <div class="col d-flex align-items-center">Drinks</div>
                         <div class="col">
-                            <div class="d-flex align-items">
-                                <a class="btn btn-primary me-0 mx-auto" href="/demerits/drinks/new">New Drink</a>
+                            <div class="d-flex">
+                                <a class="btn btn-primary me-0 ms-auto" href="/demerits/drinks/new">New Drink</a>
                             </div>
                         </div>
                     </div>
@@ -142,9 +109,6 @@
                 <% for (const p of data.players) { %>
                 <% const d = drink.players.find(({ player }) => player === p.id); %>
                 <% const value = d.drinks ? d.drinks : ""; %>
-                
-                <% include('../partials/tables/demerits/cell', { value }) %>
-
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
@@ -158,37 +122,8 @@
                 <% }; %>
             </tr>
             <% }; %>
-
-            <% include('../partials/tables/demerits/row', { players: data.players, title: 'Owed', property: 'owed' }) %>
-
-            <tr>
-                <th scope="row">Owed</th>
-                <% for (const player of data.players) { %>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <%= player.owed %>
-                        </div>
-                    </div>
-                </td>
-                <% }; %>
-            </tr>
-
-            <% include('../partials/tables/demerits/row', { players: data.players, title: 'Balance', property: 'balance' }) %>
-
-            <tr>
-                <th scope="row">Balance</th>
-                <% for (const player of data.players) { %>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <%= player.balance %>
-                        </div>
-                    </div>
-                </td>
-                <% }; %>
-            </tr>
-
+            <%- include('../partials/tables/demerits/row', { players: data.players, title: 'Owed', property: 'owed' }) %>
+            <%- include('../partials/tables/demerits/row', { players: data.players, title: 'Balance', property: 'balance' }) %>
             <tr>
                 <th scope="row">BBQ</th>
                 <% for (const player of data.players) { %>

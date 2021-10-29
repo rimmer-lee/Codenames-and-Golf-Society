@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const { NAME_TITLES, GENDERS } = require('../constants');
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -24,7 +24,12 @@ const UserSchema = new Schema({
         middle: [ String ],
         last: String
     },
-    image: ImageSchema,
+    images: [ ImageSchema ],
+    username: {
+        type: String,
+        unique: true,
+        required: true
+    },
     email: {
         type: String,
         unique: true
@@ -45,10 +50,11 @@ const UserSchema = new Schema({
     gender: {
         type: String,
         enum: GENDERS
-    }
+    },
+    password: String
 }, options);
 
-UserSchema.plugin(passportLocalMongoose);
+UserSchema.plugin(passportLocalMongoose, { usernameQueryFields: [ 'email' ] });
 
 UserSchema.virtual('name.knownAs').get(function () {
     const { first, preferred } = this.name;
@@ -73,17 +79,13 @@ UserSchema.virtual('name.initialed').get(function () {
     return `${first[0]}. ${middle.length > 0 ? middle.map(m => `${m[0]}.`).join(' ') + ' ' : ''}${last}`;
 });
 
-UserSchema.virtual('formattedBirthday.datePicker').get(function () {
-    return formatDate('yyyy-mm-dd', this.birthday);
-});
-
-UserSchema.virtual('formattedBirthday.friendly').get(function () {
-    return formatDate('dd/mm/yyyy', this.birthday);
-});
-
-UserSchema.virtual('formattedBirthday.date').get(function () {
-    const date = this.birthday;
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+UserSchema.virtual('formattedBirthday').get(function () {
+    const birthday = this.birthday;
+    return {
+        datePicker: customDate('yyyy-mm-dd', birthday),
+        friendly: customDate('dd/mm/yyyy', birthday),
+        date: new Date(birthday.getFullYear(), birthday.getMonth(), birthday.getDate())
+    };
 });
 
 module.exports = mongoose.model('User', UserSchema);

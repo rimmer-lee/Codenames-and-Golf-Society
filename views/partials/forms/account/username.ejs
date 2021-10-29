@@ -1,0 +1,11 @@
+<div class="col-12">
+    <div class="row mx-0">
+        <%- include('../components/label', { id, label: 'Username' }) %>
+        <%- include('../components/input', { id, type: 'username', name, value, options: 'required' }) %>
+        <div class="invalid-feedback">
+            <div class="d-flex justify-content-end">
+                Please enter an email address.
+            </div>
+        </div>
+    </div>
+</div>

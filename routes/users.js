@@ -1,16 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
-const catchAsync = require('../utilities/catchAsync');
 const users = require('../controllers/users');
+const catchAsync = require('../utilities/catchAsync');
+const { isAdmin, isLoggedIn } = require('../middleware');
 
-router.route('/')
-    .get(users.show)
-    .post(catchAsync(users.save))
-    .put(catchAsync(users.update));
+router.route('/login')
+    .get((req, res) => res.render('account/login'))
+    .post(passport.authenticate('local', { failureFlash: 'Invalid username or password', failureRedirect: '/login' }), users.login);
 
-router.get('/edit/:id', catchAsync(users.edit));
+router.post('/logout', isLoggedIn, users.logout);
 
-router.get('/new', users.create);
+router.route('/register')
+    .get(users.showRegistration)
+    .post(catchAsync(users.register));
+
+router.route('/users')
+    .get(isLoggedIn, isAdmin, catchAsync(users.showUsers))
+    .put(isLoggedIn, isAdmin, catchAsync(users.updateUsers));
+
+router.post('/users/reset-password', isLoggedIn, isAdmin, catchAsync(users.reset));
 
 module.exports = router;

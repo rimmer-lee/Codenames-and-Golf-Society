@@ -7,26 +7,28 @@
         <div class="row d-flex">
             <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
                 <div class="row gy-3 py-3">
-                    <%- include('../partials/forms/account/email', { id: 'email', name: 'register[email]', value: '' }) %>
-                    <%- include('../partials/forms/account/register-password', { id: 'password', name: 'register[password]', value: '', options: 'autocomplete=current-password required' }) %>
+                    <%- include('../partials/forms/account/username', { id: 'username', name: 'username', value: '' }) %>
+                    <%- include('../partials/forms/account/email', { id: 'email', name: 'email', value: '' }) %>
+                    <%- include('../partials/forms/account/register-password', { id: 'new-password', label: 'Password', name: 'new-password', value: '', options: 'autocomplete=current-password required' }) %>
                     <%- include('../partials/forms/account/password-check', { id: 'password-check' }) %>
-                    <%- include('../partials/forms/account/title', { id: 'title', name: 'register[name][title]', titles: nameTitles, value: '' }) %>
-                    <%- include('../partials/forms/account/full-name', { id: 'full-name', name: 'register[name][full]', value: '' }) %>
-                    <%- include('../partials/forms/account/preferred-name', { id: 'preferred-name', name: 'register[name][preferred]', value: '' }) %>
-                    <%- include('../partials/forms/account/image', { id: 'image', name: 'register[image]', value: '' }) %>
-                    <%- include('../partials/forms/account/birthday', { id: 'birthday', name: 'register[birthday]', date, value: '' }) %>
-                    <%- include('../partials/forms/account/gender', { id: 'gender', name: 'register[gender]', genders, value: '' }) %>
+                    <%- include('../partials/forms/account/title', { id: 'title', name: 'name[title]', titles: nameTitles, value: '' }) %>
+                    <%- include('../partials/forms/account/full-name', { id: 'full-name', name: 'name[full]', value: '' }) %>
+                    <%- include('../partials/forms/account/preferred-name', { id: 'preferred-name', name: 'name[preferred]', value: '' }) %>
+                    <%- include('../partials/forms/account/image', { id: 'image', name: 'image', value: '' }) %>
+                    <%- include('../partials/forms/account/birthday', { id: 'birthday', name: 'birthday', date, value: '' }) %>
+                    <%- include('../partials/forms/account/gender', { id: 'gender', name: 'gender', genders, value: '' }) %>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-12 mb-3">
         <div class="row px-2">
-            <a class="btn btn-warning col-5 container" href="<%= from %>">Back</a>
+            <a class="btn btn-warning col-5 container" href="/">Home</a>
             <input id="primary-button" class="btn btn-primary col-5 container" type="submit" value="Register">
         </div>
     </div>
-    <div>
-        <a href="/login">Already Registered?</a>
-    </div>
 </form>
+<div class="col d-flex mb-3">
+    <a class="mx-auto" href="/login">Already Registered?</a>
+</div>
+<script src="/scripts/validate-forms.js"></script>

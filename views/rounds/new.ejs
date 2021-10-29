@@ -1,0 +1,441 @@
+<% layout('layouts/boilerplate') %>
+<div class="row my-3 pb-2 border-bottom border-1">
+    <h1>New Round</h1>
+</div>
+<form class="row gy-3 pb-3 needs-validation" method="POST" action="/rounds" novalidate>
+    <div class="col-12">
+        <div class="accordion">
+            <div class="accordion-item">
+                <h2 id="round-heading" class="accordion-header">
+                    <button id="round-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#round" aria-expanded="true" aria-controls="round">
+                        Round
+                    </button>
+                </h2>
+                <div id="round" class="accordion-collapse collapse show" aria-labelledby="round-heading">
+                    <div class="accordion-body p-3">
+
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= date %>" max="<%= date %>" required>
+                                <label for="date">Date</label>
+                                <div class="invalid-feedback">
+                                    <div class="d-flex justify-content-end">
+                                        Please select a date.
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>
+
+                        <!-- <div class="col">
+                            <div class="form-floating">
+                                <select id="game-select" class="form-select text-capitalize" aria-label="Round game" name="[round][game]">                                    
+                                </select>
+                                <label for="game-select">Game</label>
+                            </div>
+                        </div> -->
+
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 id="course-heading" class="accordion-header">
+                    <button id="course-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#course" aria-expanded="true" aria-controls="course">
+                        Course
+                    </button>
+                </h2>
+                <div id="course" class="accordion-collapse collapse show" aria-labelledby="course-heading">
+                    <div class="accordion-body p-3">
+                        <div class="row g-2">
+                            <div class="col">
+                                <div class="form-floating">
+                                    <select id="course-select" class="form-select text-capitalize" aria-label="course" name="[course][id]" required>
+                                        <option selected disabled>Select Course</option>
+                                        <!-- <option value="new">New Course</option> -->
+                                        <% for (const course of courses) { %>
+                                        <option value="<%= course.id %>"><%= course.name %></option>
+                                        <% }; %>
+                                    </select>
+                                    <label for="course-select">Course</label>
+                                    <div class="invalid-feedback">
+                                        <div class="d-flex justify-content-end">
+                                            Please select a course.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-none col-4 col-sm-5 col-md-6" visibility="hidden">
+                                <div class="form-floating">
+                                    <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]"></select>
+                                    <label for="tee-select">Tee</label>
+                                </div>
+                            </div>
+                            <div class="d-none col-12" visibility="hidden">
+                                <table id="tees" class="table table-sm table-bordered table-dark mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" rowspan="2">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Tee
+                                                </div>
+                                            </th>
+                                            <th scope="col" rowspan="2">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Par
+                                                </div>
+                                            </th>
+                                            <th scope="col" colspan="3">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Course Rating
+                                                </div>
+                                            </th>
+                                            <th scope="col" rowspan="2">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Bogey Rating
+                                                </div>
+                                            </th>
+                                            <th scope="col" colspan="3">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Slope Rating
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th scope="col">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    18
+                                                </div>
+                                            </th>
+                                            <th scope="col">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Front 9
+                                                </div>
+                                            </th>
+                                            <th scope="col">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Back 9
+                                                </div>
+                                            </th>
+                                            <th scope="col">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    18
+                                                </div>
+                                            </th>
+                                            <th scope="col">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Front 9
+                                                </div>
+                                            </th>
+                                            <th scope="col">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    Back 9
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 id="players-heading" class="accordion-header">
+                    <button id="players-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#players" aria-expanded="true" aria-controls="players">
+                        Players
+                    </button>
+                </h2>
+                <div id="players" class="accordion-collapse collapse show forced-accordion-bottom" aria-labelledby="players-heading">
+                    <div class="accordion-body p-3">
+                        <div class="row gy-2">
+
+                            <!-- make DRYer from here -->
+
+                            <div class="col-12">
+                                <div class="row g-2">
+                                    <div class="col d-flex">
+                                        <div class="form-floating flex-grow-1">
+                                            <select id="marker|id" class="form-select text-capitalize" name="[marker][id]"<%= currentUser ? " disabled" : " required" %>>
+                                                <% if (currentUser && currentUser.name) { %>
+                                                <option value="<%= currentUser.id %>" selected><%= currentUser.name.knownAs %></option>
+                                                <% } else { %>
+                                                <option selected disabled>Select Player</option>
+                                                <% for (const player of players) { %>
+                                                <option value="<%= player.id %>"><%= player.name.knownAs %></option>
+                                                <% }; %>
+                                                <% }; %>
+                                            </select>
+                                            <label for="marker|id">Marker</label>
+                                            <% if (currentUser) { %>
+                                            <input class="d-none" value=<%= currentUser.id %> name="[marker][id]" visibility="hidden">
+                                            <% } else { %>
+                                            <div class="invalid-feedback">
+                                                <div class="d-flex justify-content-end">
+                                                    Please select a marker.
+                                                </div>
+                                            </div>
+                                            <% }; %>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% for (const p of ['a', 'b', 'c']) { %>
+                            <div class="col-12">
+                                <div class="row g-2">
+                                    <div class="col d-flex">
+                                        <div class="form-floating flex-grow-1">
+                                            <select id="player-<%= p %>|id" class="form-select text-capitalize" name="[player-<%= p %>][id]">
+                                                <option selected disabled>Select Player</option>
+                                                <% for (const player of players) { %>
+                                                <% if (currentUser && player.id === currentUser.id) continue %>
+                                                <option value="<%= player.id %>"><%= player.name.knownAs %></option>
+                                                <% }; %>
+                                            </select>
+                                            <label for="player-<%= p %>|id">Player <%= p.toUpperCase() %></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }; %>
+
+                            <!-- to here -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item d-none" visibility="hidden">
+                <h2 id="scorecard-heading" class="accordion-header">
+                    <button id="scorecard-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard" aria-expanded="true" aria-controls="scorecard">
+                        Scorecard
+                    </button>
+                </h2>
+                <div id="scorecard" class="accordion-collapse collapse show" aria-labelledby="scorecard-heading">
+                    <div class="accordion-body p-3">
+                        <div class="row gy-3">
+                            <div class="col-12 d-none" visibility="hidden">
+                                <div class="border border-1 border-primary rounded p-3">
+                                    <div id="summary-score" class="row"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="border border-1 border-primary rounded p-3">
+                                    <div class="row gy-2">
+                                        <% for (let i = 1; i < 19; i++) { %>
+                                        <div id="hole-<%= i %>" class="<%= i > 1 ? "d-none " : "" %>col-12"<%= i > 1 ? " visibility=hidden" : "" %>>
+                                            <div class="row g-4">
+                                                <div class="col d-none" visibility="hidden">
+                                                    <div class="mb-2 border-bottom border-1">
+                                                        <h5>Hole <%= i %></h5>
+                                                    </div>
+                                                    <table class="table table-sm table-bordered table-dark hole mb-0 lh-lg">
+                                                        <thead>
+                                                            <tr>
+                                                                <% for (const header of ['Distance', 'Par', 'SI']) { %>
+                                                                <td scope="col">
+                                                                    <div class="d-flex justify-content-center align-items-center">
+                                                                        <%= header %>
+                                                                    </div>
+                                                                </td>
+                                                                <% }; %>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="col d-none" visibility="hidden">
+                                                    <div class="mb-2 border-bottom border-1">
+                                                        <h5>Players</h5>
+                                                    </div>                                                    
+                                                    <div id="players-<%= i %>" class="row gy-2"></div>                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }; %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 d-none" visibility="hidden">
+                                <ul class="d-flex justify-content-center pagination mb-0">
+                                    <li class="d-none page-item" data-hole="1" data-hole-end="9">
+                                        <div class="nine-holes page-link text-center px-1">
+                                            Front
+                                        </div>
+                                    </li>
+                                    <% for (let i = 1; i < 7; i++) { %>
+                                    <li class="page-item<%= i === 1 ? " active" : "" %>" data-hole="<%= i %>">
+                                        <div class="individual-hole page-link text-center px-0">
+                                            <%= i %>
+                                        </div>
+                                    </li>
+                                    <% }; %>
+                                    <li class="d-none page-item" data-hole="1" data-hole-end="6">
+                                        <div class="six-holes page-link text-center px-1">
+                                            1 - 6
+                                        </div>
+                                    </li>
+                                    <% for (let i = 7; i < 10; i++) { %>
+                                    <li class="d-none d-sm-block page-item" data-hole="<%= i %>">
+                                        <div class="individual-hole page-link text-center px-0">
+                                            <%= i %>
+                                        </div>
+                                    </li>
+                                    <% }; %>
+                                    <% for (let i = 10; i < 13; i++) { %>
+                                    <li class="d-none d-md-block page-item" data-hole="<%= i %>">
+                                        <div class="individual-hole page-link text-center px-0">
+                                            <%= i %>
+                                        </div>
+                                    </li>
+                                    <% }; %>
+                                    <li class="d-sm-none page-item" data-hole="7" data-hole-end="12">
+                                        <div class="six-holes page-link text-center px-1">
+                                            7 - 12
+                                        </div>
+                                    </li>
+                                    <% for (let i = 13; i < 19; i++) { %>
+                                    <li class="d-none d-md-block page-item" data-hole="<%= i %>">
+                                        <div class="individual-hole page-link text-center px-0">
+                                            <%= i %>
+                                        </div>
+                                    </li>
+                                    <% }; %>
+                                    <li class="d-sm-none page-item" data-hole="13" data-hole-end="18">
+                                        <div class="six-holes page-link text-center px-1">
+                                            13 - 18
+                                        </div>
+                                    </li>
+                                    <li class="d-none d-sm-block d-md-none page-item" data-hole="10" data-hole-end="18">
+                                        <div class="nine-holes page-link text-center px-1">
+                                            Back
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="button-parent" class="col-12">
+        <div class="row mx-2 gx-4">
+            <div class="col-4 d-flex">
+                <a class="btn btn-warning flex-fill" href="/rounds">Cancel</a>
+            </div>
+            <div class="col-4 d-flex">
+                <button id="reset" class="btn btn-success flex-fill" type="button" data-bs-toggle="modal" data-bs-target="#reset-modal">Reset</button>
+            </div>
+            <div class="col-4 d-flex">
+                <input class="btn btn-primary flex-fill" type="submit" value="Submit">
+            </div>            
+        </div>
+    </div>    
+    <!-- <div id="demerit-modal" class="modal fade" tabindex="-1" aria-labelledby="demerit-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="demerit-modal-label" class="modal-title">New demerit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">                    
+                    <div class="row gy-3">
+                        <div class="col-12">
+                            <div class="row">
+                                <label class="col-4 col-form-label d-flex align-items-center" for="demerit-demerits">Demerits</label>
+                                <input id="demerit-demerits" class="col form-control me-2" type="number" value="">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <label class="col-4 col-form-label d-flex align-items-center" for="demerit-rule">Rule</label>
+                                <select id="demerit-rule" class="col form-select me-2">
+                                    <option selected disabled>Select Rule</option>
+                                    <% for (const rule of rules) { %>
+                                    <option value="<%= rule.id %>"><%= rule.index %>. <%= rule.description[0] %></option>
+                                    <% }; %>
+                                </select>                                
+                            </div>
+                        </div>
+                        <div class="col-12 d-none" visibility="hidden">
+                            <div class="row mx-0 px-4">
+                                <p class="rule-description mb-0 text-overflow text-muted" readonly="true" rows="1"></p>
+                            </div>
+                        </div>
+                        <% for (const action of actions) { %>
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-4 col-form-label d-flex align-items-center"><%= action.title %> Title</div>
+                                <div class="col px-0">
+                                    <div class="row me-0">
+                                        <div class="btn-group" role="group" aria-label="Title checkbox toggle group">        
+                                            <% for (const title of titles) { %>
+                                            <% const reference = `demerit-${action.method}|${title.id}`; %>
+                                            <input id="<%= reference %>" class="btn-check" type="checkbox" value="<%= `${action.method}|${title.value}` %>">
+                                            <label for="<%= reference %>" class="btn btn-outline-<%= action.class %>">
+                                                <div class="d-flex p-0">
+                                                    <i class="mx-auto bi <%= title.icon %>"></i>
+                                                </div>
+                                            </label>
+                                            <% }; %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% }; %>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea id="demerit-comments" class="form-control" placeholder="Comments"></textarea>
+                                <label for="demerit-comments">Comments</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button id="demerit-submit" class="btn btn-primary" type="button" data-bs-dismiss="modal">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- edit demerit modal -->
+
+    <div id="reset-modal" class="modal fade" tabindex="-1" aria-labelledby="reset-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="reset-modal-label" class="modal-title">Are you sure you want to reset the round?</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">No</button>
+                    <button id="reset-submit" class="btn btn-danger" type="button" data-bs-dismiss="modal">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- confirm submit modal -->
+
+</form>
+<script>
+    const players = JSON.parse('<%- JSON.stringify(players) %>');
+    const rules = JSON.parse('<%- JSON.stringify(rules) %>');
+    const actions = JSON.parse('<%- JSON.stringify(actions) %>');
+    const titles = JSON.parse('<%- JSON.stringify(titles) %>');
+    const courses = JSON.parse('<%- JSON.stringify(courses) %>');
+    const teeColours = JSON.parse('<%- JSON.stringify(teeColours) %>');
+</script>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/rounds/accordion-buttons.js"></script>
+<script src="/scripts/rounds/change-date.js"></script>
+<script src="/scripts/rounds/handle-modals.js"></script>
+<script src="/scripts/rounds/pagination.js"></script>
+<script src="/scripts/rounds/register-service-worker.js"></script>
+<script src="/scripts/rounds/select-course.js"></script>
+<script src="/scripts/rounds/select-player.js"></script>
+<script src="/scripts/rounds/toggle-buttons.js"></script>
+<script src="/scripts/rounds/update.js"></script>
+<script src="/scripts/rounds/validate.js"></script>

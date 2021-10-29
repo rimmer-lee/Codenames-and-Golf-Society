@@ -1,6 +1,12 @@
 <tr>
     <th scope="row"><%= title %></th>
     <% for (const player of players) { %>
-    <%- include('cell', { value: player[property] }) %>
+    <td>
+        <div class="d-flex">
+            <div class="mx-auto">
+                <%= player[property] %>
+            </div>
+        </div>
+    </td>
     <% }; %>
 </tr>

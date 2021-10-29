@@ -1,9 +1,5 @@
-// login tutorial
-// https://www.youtube.com/watch?v=-RCnNyD0L-s
-
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
-const bodyParser = require('body-parser');
 const ejsMate = require('ejs-mate');
 const express = require('express');
 const flash = require('connect-flash');
@@ -22,27 +18,30 @@ const path = require('path');
 const session = require('express-session');
 
 const ExpressError = require('./utilities/ExpressError');
-const createUserObject = require('./utilities/createUserObject');
+// const catchAsync = require('./utilities/catchAsync');
+// const createUserObject = require('./utilities/createUserObject');
 
 const User = require('./models/user');
 
-const { TITLES, ACTIONS, NAME_TITLES, GENDERS } = require('./constants');
+const constants = require('./constants');
 
 const app = express();
 const db = mongoose.connection;
 
+const accountRoutes = require('./routes/account');
 const charterRoutes = require('./routes/charter');
+const courseRoutes = require('./routes/courses');
 const demeritRoutes = require('./routes/demerits');
 const drinkRoutes = require('./routes/drinks');
 // const gameRoutes = require('./routes/games');
-const accountRoutes = require('./routes/account');
+const playerRoutes = require('./routes/players');
+const roundRoutes = require('./routes/rounds');
 const userRoutes = require('./routes/users');
-const user = require('./models/user');
 
 const port = process.env.PORT || 3000;
 const secret = process.env.SECRET || 'thisshouldbeabettersecret';
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/codenames-and-golf-society'; // DB_URL=mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority
-const sessionDuration = 60 * 60 * 24 * 7;
+const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -52,7 +51,7 @@ const store = MongoStore.create({
 
 const sessionConfig = {
     store,
-    name: 'session',
+    name: 'cgs',
     secret,
     resave: false,
     saveUninitialized: true,
@@ -62,26 +61,6 @@ const sessionConfig = {
         expires: Date.now() + sessionDuration,
         maxAge: sessionDuration
     }
-};
-
-const safeUrls = {
-    connect: [],
-    font: [
-        'https://cdn.jsdelivr.net/',
-        'https://fonts.gstatic.com'
-    ],
-    image: [],
-    object: [],
-    style: [
-        'https://cdn.jsdelivr.net/',
-        'https://stackpath.bootstrapcdn.com/',
-        'https://fonts.googleapis.com/'
-    ],
-    script: [
-        'https://cdn.jsdelivr.net/',
-        'https://stackpath.bootstrapcdn.com/',
-    ],
-    worker: []
 };
 
 mongoose.connect(dbUrl, {
@@ -103,19 +82,19 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(session(sessionConfig));
 app.use(flash());
 app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", ...safeUrls.connect],
-        scriptSrc: ["'unsafe-inline'", "'self'", ...safeUrls.script],
-        styleSrc: ["'self'", "'unsafe-inline'", ...safeUrls.style],
-        workerSrc: ["'self'", "blob:", ...safeUrls.worker],
-        objectSrc: [...safeUrls.object],
-        imgSrc: ["'self'", "blob:", "data:", ...safeUrls.image],
-        fontSrc: ["'self'", ...safeUrls.font]
+        connectSrc: ["'self'", ...constants.SAFEURLS.connect],
+        scriptSrc: ["'unsafe-inline'", "'self'", ...constants.SAFEURLS.script],
+        styleSrc: ["'self'", "'unsafe-inline'", ...constants.SAFEURLS.style],
+        workerSrc: ["'self'", "blob:", ...constants.SAFEURLS.worker],
+        objectSrc: [...constants.SAFEURLS.object],
+        imgSrc: ["'self'", "blob:", "data:", ...constants.SAFEURLS.image],
+        fontSrc: ["'self'", ...constants.SAFEURLS.font]
     }
 }));
 app.use(passport.initialize());
@@ -131,12 +110,14 @@ passport.deserializeUser(User.deserializeUser());
 
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
+    res.locals.titles = constants.TITLES;
+    res.locals.actions = constants.ACTIONS;
+    res.locals.nameTitles = constants.NAME_TITLES;
+    res.locals.genders = constants.GENDERS;
+    res.locals.roles = constants.ROLES;
+    res.locals.teeColours = constants.TEE_COLOURS
     res.locals.currentUser = req.user;
-    res.locals.titles = TITLES;
-    res.locals.actions = ACTIONS;
-    res.locals.nameTitles = NAME_TITLES;
-    res.locals.genders = GENDERS;
     res.locals.success = req.flash('success');
     res.locals.info = req.flash('info');
     res.locals.error = req.flash('error');
@@ -144,50 +125,13 @@ app.use((req, res, next) => {
 });
 
 app.use('/charter', charterRoutes);
-
 app.use('/demerits', demeritRoutes);
-
 app.use('/demerits/drinks', drinkRoutes);
-
 app.use('/account', accountRoutes);
-
-app.use('/users', userRoutes);
-
-app.get('/login', (req, res) => {
-    res.render('account/login', { from: '/' });
-});
-
-app.post('/login', (req, res) => {
-    return res.send(req.body)
-});
-
-app.get('/register', (req, res) => {
-    const formatDate = require('./utilities/formatDate');
-    const date = formatDate('yyyy-mm-dd');
-    res.render('account/register', { date, from: '/' });
-});
-
-app.post('/register', async (req, res) => {
-
-    // const { email, name, image, birthday, gender } = req.body.register;
-    // const { full, title, preferred } = name;
-    // const names = full.split(' ');
-    // const user = {
-    //     name: { title, preferred },
-    //     // image,
-    //     email,
-    //     birthday: birthday,
-    //     gender
-    // };
-    // if (names.length > 0) user.name.first = names[0];
-    // if (names.length > 1) user.name.last = names[names.length - 1];
-    // if (names.length > 2) user.name.middle = names.slice(1, -1);
-    // const u = await new User(user).save();
-    
-    const u = await new User(createUserObject(req.body.register)).save();
-    req.flash('success', `Welcome ${preferred}`);
-    res.redirect(`/account/${u.id}`);
-});
+app.use('/rounds', roundRoutes);
+app.use('/rounds/courses', courseRoutes);
+app.use('/players', playerRoutes);
+app.use('/', userRoutes);
 
 app.get('/', (req, res) => res.render('home'));
 
@@ -199,7 +143,11 @@ if (process.env.NODE_ENV !== 'production') {
     });
 };
 
-app.all('*', (req, res, next) => next(new ExpressError(404, 'Page Not Found')));
+app.all('*', (req, res, next) => {
+    if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
+    req.flash('error', 'Page not found');
+    res.redirect('/');    
+});
 
 app.use((error, req, res, next) => {
     const { status = 500 } = error;
@@ -208,3 +156,14 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port ${port}`));
+
+// accordion table - might be useful in display individual played rounds
+// https://stackoverflow.com/questions/24148631/creating-accordion-table-with-bootstrap/47527536
+// https://stackoverflow.com/questions/16389775/twitter-bootstrap-use-collapse-js-on-table-cells-almost-done
+
+// https://ncrdb.usga.org/
+
+// set width of options to equal width of select - useful for any drop down
+// https://stackoverflow.com/questions/36676701/set-width-at-option-of-select-box
+// https://stackoverflow.com/questions/29508534/fix-width-of-drop-down-menu-in-select-option
+// https://stackoverflow.com/questions/10672586/how-to-make-select-elements-shrink-to-max-width-percent-style-within-fieldset

@@ -10,7 +10,7 @@
         <% }; %>
     </div>
     <div class="col-12">
-        <h6 class="text-muted mb-0">Created by <%= charter.created.user || 'someone who wants to remain anonymous' %> on <%= charter.created.dateParts.fullDate %></h6>
+        <h6 class="text-muted mb-0">Created <%= charter.created.user ? `by ${charter.created.user}` : '' %> on <%= charter.created.fullDate %></h6>
     </div>
 </div>
 <form class="row gy-3 mb-3 mx-0" method="POST" action="/charter">

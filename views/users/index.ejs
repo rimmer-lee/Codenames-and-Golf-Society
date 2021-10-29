@@ -1,81 +1,111 @@
 <% layout('layouts/boilerplate') %>
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1 class="col">Users</h1>
-    <!-- <div class="col">
-        <div class="d-flex align-items">
-            <a class="btn btn-primary me-0 mx-auto" href="/users/new">New User</a>
-        </div>
-    </div>     -->
 </div>
 <section>
-    <table id="user" class="table table-bordered table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            Name
+    <form class="table-responsive" method="POST" action="/users?_method=PUT">
+        <table id="user" class="table table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                Username
+                            </div>
                         </div>
-                    </div>
-                </th>
-                <th scope="col">
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            Email
+                    </th>
+                    <th scope="col">
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                Email
+                            </div>
                         </div>
-                    </div>
-                </th>
-                <th scope="col">
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            Role
+                    </th>
+                    <th scope="col">
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                Role
+                            </div>
                         </div>
-                    </div>
-                </th>
-                <th scope="col">
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            Status
+                    </th>
+                    <th scope="col">
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                Active?
+                            </div>
                         </div>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <% for (const user of users) { %>
-            <tr <%= user.status === 'inactive' ? "class=table-active" : "" %>>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <a href="/users/edit/<%= user._id %>">
-                                <%= user.name.friendly %>
-                            </a>
+                    </th>
+                    <% if (currentUser.role === 'super') { %>
+                    <th scope="col">
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                Reset Password
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <%= user.email %>
+                    </th>
+                    <% }; %>
+                </tr>
+            </thead>
+            <tbody>
+                <% for (const user of users) { %>
+                <% if (user.role === 'super') continue %>
+                <tr class="<%= user.status === 'inactive' ? "table-active" : "" %>">
+                    <td>
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                <!-- <a href="/users/edit/<%= user._id %>"> -->
+                                    <%= user.username %>
+                                <!-- </a> -->
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td class="capitalise">
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <%= user.role %>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                <%= user.email %>
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td class="capitalise">
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <%= user.status %>
+                    </td>
+                    <td>
+                        <label for="<%= user.id %>|role" class="col-form-label d-none"></label>
+                        <% if (user.role === 'founder' || user.role === 'founder') { %>
+                        <input id="<%= user.id %>|role" class="form-control text-capitalize text-center" name="users[<%= user.id %>][role]" value="<%= user.role %>" disabled>
+                        <% } else { %>
+                        <select id="<%= user.id %>|role" class="form-select text-capitalize" aria-label="roles" name="users[<%= user.id %>][role]">
+                            <% for (const role of roles) { %>
+                            <% if (role === 'super' || role === 'founder') continue %>
+                            <option value="<%= role %>"<%= user.role === role ? " selected" : "" %>><%= role %></option>
+                            <% }; %>
+                        </select>
+                        <% }; %>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-center">
+                            <label for="<%= user.id %>|active" class="form-check-label d-none"></label>
+                            <input id="<%= user.id %>|active" class="form-check-input" type="checkbox" name="users[<%= user.id %>][status]" <%= user.status === 'active' ? " checked" : "" %><%= user.role === 'super' || user.role === 'founder' ? " disabled" : "" %>>
                         </div>
-                    </div>
-                </td>
-            </tr>
-            <% }; %>
-        </tbody>
-    </table>
+                    </td>
+                    <% if (currentUser.role === 'super') { %>
+                    <td>
+                        <div class="d-flex">
+                            <div class="mx-auto">
+                                <input id="<%= user.id %>|reset" class="btn btn-success form-control text-capitalize text-center" type="button" value="Reset">
+                            </div>
+                        </div>
+                    </td>
+                    <% }; %>
+                </tr>
+                <% }; %>
+            </tbody>
+        </table>
+        <div id ="button-parent" class="row px-2 mx-0 mb-3 d-none">
+            <a class="btn btn-warning col-5 container" href="/users">Cancel</a>
+            <input class="btn btn-primary col-5 container" type="submit" value="Save Changes">
+        </div>
+    </form>
 </section>
+<script>
+    const users = JSON.parse('<%- JSON.stringify(users) %>');
+</script>
+<script src="/scripts/users/changes.js"></script>
+<script src="/scripts/users/reset-password.js"></script>

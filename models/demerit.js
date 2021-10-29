@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const Title = require('./title');
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -79,18 +79,13 @@ const DemeritSchema = new Schema({
     ]
 }, options);
 
-// shared with drink and user schema
-DemeritSchema.virtual('when.formattedDate.datePicker').get(function () {
-    return formatDate('yyyy-mm-dd', this.when.date);
-});
-
-DemeritSchema.virtual('when.formattedDate.friendly').get(function () {
-    return formatDate('dd/mm/yyyy', this.when.date);
-});
-
-DemeritSchema.virtual('when.formattedDate.date').get(function () {
+DemeritSchema.virtual('when.formattedDate').get(function () {
     const date = this.when.date;
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return {
+        datePicker: customDate('yyyy-mm-dd', date),
+        friendly: customDate('dd/mm/yyyy', date),
+        date: new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    };
 });
 
 DemeritSchema.post('findOneAndDelete', async function(demerit) {

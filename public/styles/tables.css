@@ -11,7 +11,7 @@
 }
 
 #user tr > * {
-    width: 25%;
+    width: auto;
 }
 
 /* need optimising to fit in the table cell */
@@ -19,4 +19,34 @@ table img {
     object-fit: cover;
     width: 100%;
     height: 100px;
+}
+
+#tees td {
+    width: calc(100% / 9);
+    /* height: calc(40px + 2px / 3); */
+}
+
+.hole td {
+    width: 33%;
+    /* height: calc(40px + 2px / 3); */
+}
+
+.player-table td {
+    width: 33%;
+}
+
+#tees tr.table-light input,
+.hole tr.table-light input {
+    /* background: rgba(255, 255, 255); */
+    background-color: var(--bs-table-bg);
+}
+
+#tees tr.table-warning input,
+.hole tr.table-warning input {
+    background-color: var(--bs-table-bg);
+}
+
+#tees tr.table-danger input,
+.hole tr.table-danger input {
+    background-color: var(--bs-table-bg);
 }

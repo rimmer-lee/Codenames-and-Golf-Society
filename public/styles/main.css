@@ -10,6 +10,11 @@ html, body {
     margin: 0;
 }
 
+main.container {
+    min-height: calc(100vh - 56px - 60px - 16px);
+    /* footer - header - white space below header (approx.) */
+}
+
 textarea.form-control {
     min-height: 100%;
 }
@@ -37,10 +42,11 @@ textarea {
 
 #home-logo-background {
     background-color: rgb(253, 253, 253);
+    min-height: calc(100vh - 60px - 56px);
 }
 
 #home-logo {
-    height: 88vh;
+    height: calc(100vh - 60px - 56px);
     width: 100%;
     object-fit: contain;
 }
@@ -64,8 +70,13 @@ a {
     overflow: hidden;
 } */
 
-.capitalise {
-    text-transform: capitalize;
+.input-group .form-floating input {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+table select {
+    text-align-last: center; 
 }
 
 select option {
@@ -109,3 +120,78 @@ select option {
     overflow: hidden;
     margin: 0;
 } */
+
+.accordion .form-floating > .form-control,
+.accordion .form-floating > .form-select {
+    height: calc(3.7rem + 2px);
+}
+
+
+li.page-item {
+    cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* #course > div > div > div.col-12 > div > div.col.btn-group > label.btn.btn-outline-light.text-capitalize {
+    color: black;
+    border-color: black;
+} */
+
+.f-over {
+    color: var(--bs-danger);
+}
+
+.f-under {
+    color: var(--bs-success);
+}
+
+.f-level {
+    color: var(--bs-gray);
+}
+
+/* .valid {
+    color: ;
+    background-color: ;
+}
+
+.invalid {
+    color: ;
+    background-color: ;
+} */
+
+li.page-item.left-hole .page-link {
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+}
+
+li.page-item.right-hole .page-link {
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+}
+
+.individual-hole {
+    min-width: 30px;
+}
+
+.nine-holes {
+    min-width: 56px;
+}
+
+.six-holes {
+    min-width: 60px;
+}
+
+.forced-accordion-bottom {
+    border-bottom-width: 1px;
+    border-bottom-right-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+}

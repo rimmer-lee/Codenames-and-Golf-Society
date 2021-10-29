@@ -1,5 +1,60 @@
 <% layout('layouts/boilerplate') %>
-<div class="row my-3 pb-2 border-bottom border-1">
-    <h1>Account</h1>
+<form method="POST" action="/account?_method=PUT" novalidate>
+    <div class="row my-3 pb-2 border-bottom border-1">
+        <div class="col">
+            <h1 class="d-inline me-2">Account</h1>
+        </div>
+        <div class="col">
+            <div class="d-flex justify-content-end">
+                <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" readonly>
+                <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" readonly>
+                <input id="delete" class="btn btn-danger me-2" type="button"  data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly>
+            </div>
+        </div>
+    </div>
+    <div class="row gy-3 needs-validation check-password mb-3">
+        <div class="col-12">
+            <div class="row d-flex">
+                <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
+                    <div class="row gy-3 py-3">
+                        <%- include('../partials/forms/account/username', { id: 'username', name: 'username', value: currentUser.username }) %>
+                        <%- include('../partials/forms/account/email', { id: 'email', name: 'email', value: currentUser.email }) %>
+                        <%- include('../partials/forms/account/title', { id: 'title', name: 'name[title]', titles: nameTitles, value: currentUser.name.title }) %>
+                        <%- include('../partials/forms/account/full-name', { id: 'full-name', name: 'name[full]', value: currentUser.name.full }) %>
+                        <%- include('../partials/forms/account/preferred-name', { id: 'preferred-name', name: 'name[preferred]', value: currentUser.name.preferred }) %>
+                        <%- include('../partials/forms/account/image', { id: 'image', name: 'image', value: currentUser.images }) %>
+                        <%- include('../partials/forms/account/birthday', { id: 'birthday', name: 'birthday', date, value: birthday }) %>
+                        <%- include('../partials/forms/account/gender', { id: 'gender', name: 'gender', genders, value: currentUser.gender }) %>
+                        <div class="col-12">
+                            <div class="row mx-0">
+                                <a class="col btn btn-secondary" href="/account/change-password">Change Password</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div id="delete-modal" class="modal fade" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="delete-modal-label" class="modal-title">Are you sure you want to delete your account?</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">No</button>
+                <form method="POST" action="/account?_method=DELETE">
+                    <button id="delete-submit" class="btn btn-danger" type="submit">Yes</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
-<%= user %>
+<script>
+    const user = JSON.parse('<%- JSON.stringify(currentUser) %>');
+</script>
+<script src="/scripts/account/changes.js"></script>
+<script src="scripts/account/check-values.js"></script>
+<script src="/scripts/validate-forms.js"></script>

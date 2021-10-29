@@ -10,7 +10,6 @@
   "author": "Lee Rimmer",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^4.2.2",
     "dotenv": "^8.2.0",

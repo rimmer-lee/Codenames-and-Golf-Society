@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const { TITLES, ACTIONS } = require('../constants');
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -41,17 +41,13 @@ const TitleSchema = new Schema({
     }
 }, options);
 
-TitleSchema.virtual('when.formattedDate.datePicker').get(function () {
-    return formatDate('yyyy-mm-dd', this.when.date);
-});
-
-TitleSchema.virtual('when.formattedDate.friendly').get(function () {
-    return formatDate('dd/mm/yyyy', this.when.date);
-});
-
-TitleSchema.virtual('when.formattedDate.date').get(function () {
+TitleSchema.virtual('when.formattedDate').get(function () {
     const date = this.when.date;
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return {
+        datePicker: customDate('yyyy-mm-dd', date),
+        friendly: customDate('dd/mm/yyyy', date),
+        date: new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    };
 });
 
 module.exports = mongoose.model('Title', TitleSchema);

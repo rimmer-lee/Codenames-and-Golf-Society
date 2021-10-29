@@ -65,21 +65,8 @@ async function save (req, res) {
                 const regex = new RegExp(`${regexRuleKey}\\|t`);
                 return regex.test(formKey);
             }).map(key => {
-
-                // const titlesMap = {
-                //     a: 'award',
-                //     r: 'revoke',
-                //     'flag-bitch': 'flag bitch',
-                //     karen: 'Karen',
-                //     ace: 'Ace'
-                // };
-
-                // const method = titlesMap[key.match('t(a|r)-')[1]];
                 const method = res.locals.actions.find(({ method }) => method[0] === key.match('t(a|r)-')[1]).method;
-
-                // const title = titlesMap[key.match('(?:ta|tr)-(.*)')[1]];
                 const title = res.locals.titles.find(({ id }) => id === key.match('(?:ta|tr)-(.*)')[1]).value;
-
                 return { method, title };
             });
             const action = { demerits };
@@ -113,7 +100,7 @@ async function save (req, res) {
     const endDate = new Date(y, 11, 31).setHours(23, 59, 59, 999);
     const charters = await Charter.find({ 'created.date': { $gte: startDate, $lte: endDate } });
     const created = {
-        by: await User.findOne({ 'name.knownAs': 'Lee' }),
+        by: await User.findById(currentUser.id),
         version: `${y}.${charters.length}`
     };
     const status = 'Approved';

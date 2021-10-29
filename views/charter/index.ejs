@@ -5,6 +5,11 @@
         <% if (charter.created.version) { %>
         <h6 class="d-inline text-muted">v.<%= charter.created.version %></h6>
         <% }; %>
+    </div>    
+    <div class="col">
+        <div class="d-flex">
+            <a class="btn btn-primary me-0 ms-auto" href="/charter/edit">Edit</a>
+        </div>
     </div>
 </div>
 <% if (charter.sections) { %>
