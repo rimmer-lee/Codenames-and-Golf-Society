@@ -80,7 +80,8 @@ UserSchema.virtual('name.initialed').get(function () {
 });
 
 UserSchema.virtual('formattedBirthday').get(function () {
-    const birthday = this.birthday;
+    const { birthday } = this;
+    if (!birthday) return null;
     return {
         datePicker: customDate('yyyy-mm-dd', birthday),
         friendly: customDate('dd/mm/yyyy', birthday),
