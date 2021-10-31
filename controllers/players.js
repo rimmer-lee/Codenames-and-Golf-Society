@@ -1,3 +1,4 @@
+const demerit = require('../models/demerit');
 const Demerit = require('../models/demerit');
 const Drink = require('../models/drink');
 const Round = require('../models/round');
@@ -16,51 +17,36 @@ async function show (req, res) {
     res.render('players/index', { players });
 };
 
-async function view (req, res) {
-    
+async function view (req, res) {    
     const { id } = req.params;
     const demerits = await Demerit.find({ 'player': id }).populate('action.titles');
     const drinks = await Drink.find({ 'player': id });
     const player = await User.findById(id);
     const rounds = await Round.find({ 'scores.player': id }).populate('scores.player').populate('course');
-
     const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
     const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
-    const roundDates = [ ...new Set(rounds.map(({ formattedDate }) => formattedDate.friendly)) ];
-    
-    // player.demerits = demeritDates.map(date => {
-    //     const demeritsForDate = demerits.filter(({ when }) => when.formattedDate.friendly === date);
-    //     return {
-    //         date,
-    //         demerits: demeritsForDate.reduce((accumulate, { action }) => accumulate + action.demerits, 0),
-    //         titles: demeritsForDate.map(({ action }) => [ ...action.titles ]).map(title => ({ method: title.method, name: title.name }))
-    //     };
-    // });
-
-    // // .titles.map(title => ({ method: title.method, name: title.name }))
-    // for (const demerit of player.demerits) {
-    //     for (const title of demerit.titles) console.log(title)
-    // }
-
+    player.demerits = demeritDates.map(date => {
+        const demeritsForDate = demerits.filter(({ when }) => when.formattedDate.friendly === date);
+        const titles = [];
+        for (const demeritForDate of demeritsForDate) {
+            for (const title of demeritForDate.action.titles) {
+                const { method, name } = title;
+                titles.push({ method, name })
+            };
+        };
+        return {
+            date,
+            demerits: demeritsForDate.reduce((accumulate, { action }) => accumulate + action.demerits, 0),
+            titles
+        };
+    });
     player.drinks = drinkDates.map(date => {
         const drinksForDate = drinks.filter(({ when }) => when.formattedDate.friendly === date);
         return {
             date,
             drinks: drinksForDate.reduce((accumulate, { value }) => accumulate + value, 0)
         };
-    }),
-    // player.rounds = roundDates.map(date => {
-    //     const roundsForDate = rounds.filter(({ formattedDate }) => formattedDate.friendly === date);
-    //     return {
-    //         date,
-    //         players: users.map(({ _id }) => {
-    //             const player = String(_id);
-    //             const drinks = drinksForDate.filter(drink => String(drink.player._id) === player).reduce((accumulate, { value }) => accumulate + value, 0)
-    //             return { player, drinks };
-    //         })
-    //     };
-    // })
-
+    });
     res.render('players/view', { player, rounds });
 }; 
 

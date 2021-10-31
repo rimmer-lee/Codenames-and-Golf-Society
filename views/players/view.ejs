@@ -82,7 +82,15 @@
                     <td>
                         <div class="d-flex justify-content-center align-items-center">
                             <div>
-                                
+                                <% for (const title of demerit.titles) { %>
+                                <% const a = actions.find(({ method }) => method === title.method); %>
+                                <% const t = titles.find(({ value }) => value === title.name); %>
+                                <div class="btn btn-<%= a.class %> me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= a.title %> <%= t.value %>">
+                                    <div class="d-flex p-0">
+                                        <i class="mx-auto bi <%= t.icon %>"></i>
+                                    </div>
+                                </div>
+                                <% }; %>
                             </div>
                         </div>
                     </td>
