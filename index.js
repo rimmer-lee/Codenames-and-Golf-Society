@@ -127,21 +127,21 @@ app.use(async (req, res, next) => {
 app.use('/charter', charterRoutes);
 app.use('/demerits', demeritRoutes);
 app.use('/demerits/drinks', drinkRoutes);
-app.use('/account', accountRoutes);
-app.use('/rounds', roundRoutes);
-app.use('/rounds/courses', courseRoutes);
 app.use('/players', playerRoutes);
-app.use('/', userRoutes);
-
-app.get('/', (req, res) => res.render('home'));
 
 if (process.env.NODE_ENV !== 'production') {
+    app.use('/account', accountRoutes);
+    app.use('/rounds', roundRoutes);
+    app.use('/rounds/courses', courseRoutes);
+    app.use('/', userRoutes);
     app.get('/reseed', async (req, res) => {
         const { seed } = require('./seeds/seed');
         await seed();
         res.redirect('/');
     });
 };
+
+app.get('/', (req, res) => res.render('home'));
 
 app.all('*', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
