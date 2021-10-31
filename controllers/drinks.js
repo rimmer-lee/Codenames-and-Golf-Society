@@ -1,10 +1,10 @@
 const Drink = require('../models/drink');
 const User = require('../models/user');
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 async function create (req, res) {
-    const date = formatDate('yyyy-mm-dd');
+    const date = customDate('yyyy-mm-dd');
     const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
     const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     res.render('demerits/drinks/new', { date, players });

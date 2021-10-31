@@ -5,7 +5,7 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 function convertToArray(value) {
     if (!value) return [];
@@ -19,7 +19,7 @@ function titleObject(value) {
 };
 
 async function create (req, res) {
-    const date = formatDate('yyyy-mm-dd');
+    const date = customDate('yyyy-mm-dd');
     const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
     const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
     const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
