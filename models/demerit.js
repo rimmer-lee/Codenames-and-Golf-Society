@@ -80,7 +80,7 @@ const DemeritSchema = new Schema({
 }, options);
 
 DemeritSchema.virtual('when.formattedDate').get(function () {
-    const date = this.when.date;
+    const { date } = this.when;
     return {
         datePicker: customDate('yyyy-mm-dd', date),
         friendly: customDate('dd/mm/yyyy', date),

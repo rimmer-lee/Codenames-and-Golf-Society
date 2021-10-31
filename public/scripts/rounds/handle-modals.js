@@ -40,4 +40,11 @@ document.getElementById('reset-submit').addEventListener('click', () => {
     for (const player of ['marker', 'player-a', 'player-b', 'player-c']) {
         resetElement(`${player}|id`, selectPlayer);
     };
+    for (const accordionItem of document.querySelectorAll('.accordion-item')) {
+        const accordionButton = accordionItem.querySelector('button.accordion-button');
+        accordionItem.querySelector('.accordion-collapse.collapse').classList.add('show');
+        accordionButton.setAttribute('aria-expanded', 'true');
+        accordionButton.classList.remove('collapsed');
+        handleAccordionClick.call(accordionButton);
+    };
 });

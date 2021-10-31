@@ -4,9 +4,9 @@ function customDate(format, date = new Date()) {
     const numberOfDays = delimiterArray.find(value => /d/.test(value)).length;
     const numberOfMonths = delimiterArray.find(value => /m/.test(value)).length;
     const numberOfYears = delimiterArray.find(value => /y/.test(value)).length;
-    const days = String(date.getUTCDate()).padStart(numberOfDays, '0');
-    const months = String(date.getUTCMonth() + 1).padStart(numberOfMonths, '0');
-    const years = String(date.getUTCFullYear()).substring(4 - numberOfYears);
+    const days = String(date.getDate()).padStart(numberOfDays, '0');
+    const months = String(date.getMonth() + 1).padStart(numberOfMonths, '0');
+    const years = String(date.getFullYear()).substring(4 - numberOfYears);
     return format.replace(/d{1,2}/, days).replace(/m{1,2}/, months).replace(/y{2,4}/, years);
 };
 
