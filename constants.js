@@ -12,7 +12,7 @@ const TEE_COLOURS = [
     { colour: 'red', class: 'danger' },
     { colour: 'green', class: 'success' }
 ];
-const SAFEURLS = {
+const SAFE_URLS = {
     connect: [
         'https://cdn.jsdelivr.net/'
     ],
@@ -34,4 +34,4 @@ const SAFEURLS = {
     worker: []
 };
 
-module.exports = { TITLES, ACTIONS, NAME_TITLES, GENDERS, ROLES, TEE_COLOURS, SAFEURLS };
+module.exports = { TITLES, ACTIONS, NAME_TITLES, GENDERS, ROLES, TEE_COLOURS, SAFE_URLS };

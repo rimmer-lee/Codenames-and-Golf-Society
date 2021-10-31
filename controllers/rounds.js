@@ -5,10 +5,10 @@ const Rule = require('../models/rule');
 const Course = require('../models/course');
 const Round = require('../models/round');
 
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 async function create (req, res) {
-    const date = formatDate('yyyy-mm-dd');
+    const date = customDate('yyyy-mm-dd');
     const players = await User.find({ role: { $ne: 'super' }, status: 'active' });
     const rules = await Rule.find();
     const courses = await Course.find();

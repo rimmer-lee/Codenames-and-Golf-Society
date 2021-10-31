@@ -45,15 +45,13 @@ self.addEventListener('fetch', e => {
 self.addEventListener('activate', e => {
     e.waitUntil(
         caches.keys()
-            .then(keyList => Promise.all(keyList.map(key => {
-                if (CACHE_NAME === key) caches.delete(key);
-            })))
+            .then(cacheNames => Promise.all(
+                cacheNames.filter(cacheName => cacheName !== CACHE_NAME).map(cacheName => caches.delete(cacheName))
+            ))
             .then(() => self.clients.claim())
     );
     e.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log(cache)
-            })
+            .then(cache => cache.addAll(FILES_TO_CACHE))
     );
 });

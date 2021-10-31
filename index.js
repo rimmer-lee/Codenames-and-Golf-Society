@@ -73,7 +73,7 @@ mongoose.connect(dbUrl, {
 db.on('error', console.error.bind(console, 'Connection error:'));
 db.once('open', () => console.log('Database connected'));
 
-store.on('error', (e) => console.error('Session store error', e));
+store.on('error', e => console.error('Session store error', e));
 
 app.engine('ejs', ejsMate);
 
@@ -88,13 +88,13 @@ app.use(flash());
 app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", ...constants.SAFEURLS.connect],
-        scriptSrc: ["'unsafe-inline'", "'self'", ...constants.SAFEURLS.script],
-        styleSrc: ["'self'", "'unsafe-inline'", ...constants.SAFEURLS.style],
-        workerSrc: ["'self'", "blob:", ...constants.SAFEURLS.worker],
-        objectSrc: [...constants.SAFEURLS.object],
-        imgSrc: ["'self'", "blob:", "data:", ...constants.SAFEURLS.image],
-        fontSrc: ["'self'", ...constants.SAFEURLS.font]
+        connectSrc: ["'self'", ...constants.SAFE_URLS.connect],
+        scriptSrc: ["'unsafe-inline'", "'self'", ...constants.SAFE_URLS.script],
+        styleSrc: ["'self'", "'unsafe-inline'", ...constants.SAFE_URLS.style],
+        workerSrc: ["'self'", "blob:", ...constants.SAFE_URLS.worker],
+        objectSrc: [...constants.SAFE_URLS.object],
+        imgSrc: ["'self'", "blob:", "data:", ...constants.SAFE_URLS.image],
+        fontSrc: ["'self'", ...constants.SAFE_URLS.font]
     }
 }));
 app.use(passport.initialize());
