@@ -134,6 +134,8 @@ app.use('/players', playerRoutes);
 
 app.get('/', (req, res) => res.render('home'));
 
+// below routes are available only locally or with cookie 'testing'
+
 app.use(devFeatures)
 
 app.use('/account', accountRoutes);
@@ -143,6 +145,14 @@ app.use('/', userRoutes);
 app.get('/reseed', async (req, res) => {
     const { seed } = require('./seeds/seed');
     await seed();
+    res.redirect('/');
+});
+
+// above routes are available only locally or with cookie 'testing'
+
+app.get('/set-cookie', (req, res) => {
+    const { name, value = true} = req.query;
+    if (name) res.cookie(name, value); 
     res.redirect('/');
 });
 
