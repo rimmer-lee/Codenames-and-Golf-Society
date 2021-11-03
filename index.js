@@ -134,6 +134,12 @@ app.use('/players', playerRoutes);
 
 app.get('/', (req, res) => res.render('home'));
 
+app.get('/set-cookie', (req, res) => {
+    const { name, value = true} = req.query;
+    if (name) res.cookie(name, value); 
+    res.redirect('/');
+});
+
 // below routes are available only locally or with cookie 'testing'
 
 app.use(devFeatures)
@@ -149,12 +155,6 @@ app.get('/reseed', async (req, res) => {
 });
 
 // above routes are available only locally or with cookie 'testing'
-
-app.get('/set-cookie', (req, res) => {
-    const { name, value = true} = req.query;
-    if (name) res.cookie(name, value); 
-    res.redirect('/');
-});
 
 app.all('*', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
