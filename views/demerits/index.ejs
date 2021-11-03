@@ -14,6 +14,7 @@
         </div>
     </div> -->
 </div>
+<% if (data.players.length > 0) { %>
 <section>
     <table id="demerit" class="table table-bordered">
         <thead class="table-dark">
@@ -141,3 +142,8 @@
         </tbody>
     </table>
 </section>
+<% } else { %>
+<div>
+    There are currently no players to add demerits for
+</div>
+<% }; %>

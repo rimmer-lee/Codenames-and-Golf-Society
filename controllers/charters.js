@@ -7,6 +7,10 @@ async function getLatestCharter() {
     return charter;
 };
 
+function create (req, res) {
+    res.render('charter/new');
+};
+
 async function edit (req, res) {
     const charter = await getLatestCharter();
     res.render('charter/edit', { charter });
@@ -114,4 +118,4 @@ async function show (req, res) {
     res.render('charter/index', { charter });
 };
 
-module.exports = { edit, save, show };
+module.exports = { create, edit, save, show };

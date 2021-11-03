@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const ejsMate = require('ejs-mate');
 const express = require('express');
 const flash = require('connect-flash');
+const cookieParser = require('cookie-parser');
 
 // alternative
 // https://www.youtube.com/watch?v=PNtFSVU-YTI
@@ -24,6 +25,7 @@ const ExpressError = require('./utilities/ExpressError');
 const User = require('./models/user');
 
 const constants = require('./constants');
+const { devFeatures } = require('./middleware');
 
 const app = express();
 const db = mongoose.connection;
@@ -99,6 +101,7 @@ app.use(helmet.contentSecurityPolicy({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cookieParser());
 
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
@@ -129,19 +132,19 @@ app.use('/demerits', demeritRoutes);
 app.use('/demerits/drinks', drinkRoutes);
 app.use('/players', playerRoutes);
 
-if (process.env.NODE_ENV !== 'production') {
-    app.use('/account', accountRoutes);
-    app.use('/rounds', roundRoutes);
-    app.use('/rounds/courses', courseRoutes);
-    app.use('/', userRoutes);
-    app.get('/reseed', async (req, res) => {
-        const { seed } = require('./seeds/seed');
-        await seed();
-        res.redirect('/');
-    });
-};
-
 app.get('/', (req, res) => res.render('home'));
+
+app.use(devFeatures)
+
+app.use('/account', accountRoutes);
+app.use('/rounds', roundRoutes);
+app.use('/rounds/courses', courseRoutes);
+app.use('/', userRoutes);
+app.get('/reseed', async (req, res) => {
+    const { seed } = require('./seeds/seed');
+    await seed();
+    res.redirect('/');
+});
 
 app.all('*', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
