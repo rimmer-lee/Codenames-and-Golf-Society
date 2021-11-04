@@ -20,6 +20,7 @@ const session = require('express-session');
 
 const ExpressError = require('./utilities/ExpressError');
 
+const Course = require('./models/course');
 const User = require('./models/user');
 
 const constants = require('./constants');
@@ -130,16 +131,29 @@ app.use('/charter', charterRoutes);
 app.use('/demerits', demeritRoutes);
 app.use('/demerits/drinks', drinkRoutes);
 app.use('/players', playerRoutes);
+app.use('/', userRoutes);
 
 app.get('/', (req, res) => res.render('home'));
 
-app.get('/add-user-passwords', async (req, res) => {
-   const users = await User.find();
-   for (const user of users) {
-       const u = await user.setPassword(user.username);
-       await u.save();
-   };
-   return res.redirect('/');
+// app.get('/add-user-passwords', async (req, res) => {
+//    const users = await User.find();
+//    for (const user of users) {
+//        const u = await user.setPassword(user.username);
+//        await u.save();
+//    };
+//    return res.redirect('/');
+// });
+
+app.get('/create-courses', async (req, res) => {
+    const { courses } = require('./seeds/base');
+    const defaultUser = await User.findOne({ 'name.preferred': 'The Machine' });
+    for (const course of courses) {
+        const existingCourse = await Course.find({ 'name': course.name });
+        if (existingCourse.length > 0) continue;
+        course.created = { by: defaultUser };
+        await new Course(course).save();
+    };
+    res.redirect('/');
 });
 
 app.get('/set-cookie', (req, res) => {
@@ -155,7 +169,6 @@ app.use(devFeatures)
 app.use('/account', accountRoutes);
 app.use('/rounds', roundRoutes);
 app.use('/rounds/courses', courseRoutes);
-app.use('/', userRoutes);
 app.get('/reseed', async (req, res) => {
     const { seed } = require('./seeds/seed');
     await seed();

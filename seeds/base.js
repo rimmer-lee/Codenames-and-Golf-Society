@@ -1410,6 +1410,392 @@ const courses = [
                 ]
             }
         ]
+    },
+    {
+        name: 'Caddington',
+        tees: [
+            {
+                colour: 'white',
+                ratings: {
+                    course: {
+                        full: 69.7,
+                        front: 34.1,
+                        back: 35.6
+                    },
+                    bogey: 91.7,
+                    slope: {
+                        full: 119,
+                        front: 111,
+                        back: 126
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 473,
+                        strokeIndex: 17,
+                        par: 5
+                    },
+                    {
+                        index: 2,
+                        distance: 123,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 3,
+                        distance: 394,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 214,
+                        strokeIndex: 9,
+                        par: 3
+                    },
+                    {
+                        index: 5,
+                        distance: 311,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 381,
+                        strokeIndex: 7,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 150,
+                        strokeIndex: 11,
+                        par: 3
+                    },
+                    {
+                        index: 8,
+                        distance: 431,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 418,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 10,
+                        distance: 150,
+                        strokeIndex: 6,
+                        par: 3
+                    },
+                    {
+                        index: 11,
+                        distance: 355,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 368,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 476,
+                        strokeIndex: 12,
+                        par: 5
+                    },
+                    {
+                        index: 14,
+                        distance: 226,
+                        strokeIndex: 4,
+                        par: 3
+                    },
+                    {
+                        index: 15,
+                        distance: 426,
+                        strokeIndex: 18,
+                        par: 5
+                    },
+                    {
+                        index: 16,
+                        distance: 270,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 17,
+                        distance: 475,
+                        strokeIndex: 14,
+                        par: 5
+                    },
+                    {
+                        index: 18,
+                        distance: 379,
+                        strokeIndex: 10,
+                        par: 4
+                    }
+                ]
+            },
+            {
+                colour: 'blue',
+                ratings: {
+                    course: {
+                        full: 68.2,
+                        front: 33.5,
+                        back: 34.7
+                    },
+                    bogey: 90.3,
+                    slope: {
+                        full: 119,
+                        front: 111,
+                        back: 127
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 460,
+                        strokeIndex: 17,
+                        par: 5
+                    },
+                    {
+                        index: 2,
+                        distance: 131,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 3,
+                        distance: 383,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 201,
+                        strokeIndex: 9,
+                        par: 3
+                    },
+                    {
+                        index: 5,
+                        distance: 296,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 368,
+                        strokeIndex: 7,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 140,
+                        strokeIndex: 11,
+                        par: 3
+                    },
+                    {
+                        index: 8,
+                        distance: 378,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 410,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 10,
+                        distance: 143,
+                        strokeIndex: 6,
+                        par: 3
+                    },
+                    {
+                        index: 11,
+                        distance: 350,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 361,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 455,
+                        strokeIndex: 12,
+                        par: 5
+                    },
+                    {
+                        index: 14,
+                        distance: 219,
+                        strokeIndex: 4,
+                        par: 3
+                    },
+                    {
+                        index: 15,
+                        distance: 420,
+                        strokeIndex: 18,
+                        par: 5
+                    },
+                    {
+                        index: 16,
+                        distance: 250,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 17,
+                        distance: 458,
+                        strokeIndex: 14,
+                        par: 5
+                    },
+                    {
+                        index: 18,
+                        distance: 371,
+                        strokeIndex: 10,
+                        par: 4
+                    }
+                ]
+            },
+            {
+                colour: 'red',
+                ratings: {
+                    course: {
+                        full: 70.7,
+                        front: 34.8,
+                        back: 35.9
+                    },
+                    bogey: 99.3,
+                    slope: {
+                        full: 121,
+                        front: 122,
+                        back: 120
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 403,
+                        strokeIndex: 17,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 110,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 3,
+                        distance: 337,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 158,
+                        strokeIndex: 9,
+                        par: 3
+                    },
+                    {
+                        index: 5,
+                        distance: 262,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 357,
+                        strokeIndex: 7,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 132,
+                        strokeIndex: 11,
+                        par: 3
+                    },
+                    {
+                        index: 8,
+                        distance: 372,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 402,
+                        strokeIndex: 1,
+                        par: 5
+                    },
+                    {
+                        index: 10,
+                        distance: 137,
+                        strokeIndex: 6,
+                        par: 3
+                    },
+                    {
+                        index: 11,
+                        distance: 342,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 355,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 317,
+                        strokeIndex: 12,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 160,
+                        strokeIndex: 4,
+                        par: 3
+                    },
+                    {
+                        index: 15,
+                        distance: 388,
+                        strokeIndex: 18,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 221,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 17,
+                        distance: 364,
+                        strokeIndex: 14,
+                        par: 5
+                    },
+                    {
+                        index: 18,
+                        distance: 334,
+                        strokeIndex: 10,
+                        par: 4
+                    }
+                ]
+            }
+        ]
     }
 ];
 
