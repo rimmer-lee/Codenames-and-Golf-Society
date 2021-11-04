@@ -40,7 +40,7 @@ const CharterSchema = new Schema({
 }, options);
 
 CharterSchema.virtual('created.fullDate').get(function () {
-    const date = this.created.date;
+    const { date } = this.created;
     return `${formatDate.fullDate(date)} ${formatDate.time(date)}`;
 });
 

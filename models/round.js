@@ -59,7 +59,7 @@ const RoundSchema = new Schema({
 });
 
 RoundSchema.virtual('formattedDate').get(function () {
-    const date = this.date;
+    const { date } = this;
     return {
         datePicker: formatDate.customDate('yyyy-mm-dd', date),
         friendly: formatDate.customDate('dd/mm/yyyy', date),

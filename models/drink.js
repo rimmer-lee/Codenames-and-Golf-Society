@@ -35,7 +35,7 @@ const DrinkSchema = new Schema({
 });
 
 DrinkSchema.virtual('when.formattedDate').get(function () {
-    const date = this.when.date;
+    const { date } = this.when;
     return {
         datePicker: customDate('yyyy-mm-dd', date),
         friendly: customDate('dd/mm/yyyy', date),

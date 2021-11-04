@@ -269,7 +269,7 @@ const demerits = [
     },
     {
         player: 'Thomas Rimmer',
-        when: { hole: 6, date: new Date(2021, 3, 14) },
+        when: { hole: 6, date: new Date(2021, 3, 15) },
         rule: 18,
         action: { demerits: 1 },
         status: 'Approved',
@@ -278,14 +278,14 @@ const demerits = [
                 status: 'Created',
                 updated: {
                     by: 'The Machine',
-                    date: new Date(2021, 3, 14)
+                    date: new Date(2021, 3, 15)
                 }
             }
         ]
     },
     {
         player: 'Martin Nash',
-        when: { hole: 6, date: new Date(2021, 3, 14) },
+        when: { hole: 6, date: new Date(2021, 3, 15) },
         rule: 18,
         action: { demerits: 1 },
         status: 'Approved',
@@ -294,7 +294,7 @@ const demerits = [
                 status: 'Created',
                 updated: {
                     by: 'The Machine',
-                    date: new Date(2021, 3, 14)
+                    date: new Date(2021, 3, 15)
                 }
             }
         ]
@@ -639,91 +639,778 @@ const rounds = [
 ];
 
 const courses = [
-
-    // const HoleSchema = new Schema({
-    //     name: String,
-    //     index: {
-    //         type: Number,
-    //         min: 1,
-    //         max: 18
-    //     },
-    //     distance: Number,
-    //     strokeIndex: {
-    //         type: Number,
-    //         min: 1,
-    //         max: 18
-    //     },
-    //     par: {
-    //         type: Number,
-    //         min: 3,
-    //         max: 5
-    //     }
-    // });
-    
-    // const TeeSchema = new Schema({
-    //     colour: {
-    //         type: String,
-    //         enum: TEE_COLOURS.map(({ colour }) => colour)
-    //     },
-    //     ratings: {
-    //         course: {
-    //             full: Number,
-    //             front: Number,
-    //             back: Number,
-    //         },
-    //         bogey: Number,
-    //         slope: {
-    //             full: {
-    //                 type: Number,
-    //                 min: 55,
-    //                 max: 155
-    //             },
-    //             front: {
-    //                 type: Number,
-    //                 min: 55,
-    //                 max: 155
-    //             },
-    //             back: {
-    //                 type: Number,
-    //                 min: 55,
-    //                 max: 155
-    //             }
-    //         }   
-    //     },
-    //     measure: {
-    //         type: String,
-    //         enum: [ 'yards' ]
-    //     },
-    //     holes: [ HoleSchema ]
-    // });
-    
-    // const CourseSchema = new Schema({
-    //     created: {
-    //         date: {
-    //             type: Date,
-    //             default: Date.now(),
-    //             required: true
-    //         },
-    //         by: {
-    //             type: Schema.Types.ObjectId,
-    //             ref: 'User',
-    //             required: true
-    //         },
-    //         comments: String
-    //     },
-    //     name: String,
-    //     geometry: {
-    //         type: {
-    //             type: String,
-    //             enum: [ 'Point' ]
-    //         },
-    //         coordinates: {
-    //             type: [ Number ]
-    //         }
-    //     },
-    //     tees: [ TeeSchema ]
-    // });
-
+    {
+        name: 'Stocks',
+        tees: [
+            {
+                colour: 'white',
+                ratings: {
+                    course: {
+                        full: 72.8,
+                        front: 36.9,
+                        back: 35.9
+                    },
+                    bogey: 96.6,
+                    slope: {
+                        full: 128,
+                        front: 127,
+                        back: 129
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 382,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 424,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 3,
+                        distance: 369,
+                        strokeIndex: 9,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 519,
+                        strokeIndex: 13,
+                        par: 5
+                    },
+                    {
+                        index: 5,
+                        distance: 515,
+                        strokeIndex: 7,
+                        par: 5
+                    },
+                    {
+                        index: 6,
+                        distance: 436,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 161,
+                        strokeIndex: 17,
+                        par: 3
+                    },
+                    {
+                        index: 8,
+                        distance: 471,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 191,
+                        strokeIndex: 15,
+                        par: 3
+                    },
+                    {
+                        index: 10,
+                        distance: 288,
+                        strokeIndex: 12,
+                        par: 4
+                    },
+                    {
+                        index: 11,
+                        distance: 357,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 130,
+                        strokeIndex: 14,
+                        par: 3
+                    },
+                    {
+                        index: 13,
+                        distance: 369,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 329,
+                        strokeIndex: 18,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 377,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 489,
+                        strokeIndex: 8,
+                        par: 5
+                    },
+                    {
+                        index: 17,
+                        distance: 368,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 18,
+                        distance: 538,
+                        strokeIndex: 10,
+                        par: 5
+                    }
+                ]
+            },
+            {
+                colour: 'yellow',
+                ratings: {
+                    course: {
+                        full: 70.7,
+                        front: 35.8,
+                        back: 34.9
+                    },
+                    bogey: 93.4,
+                    slope: {
+                        full: 123,
+                        front: 122,
+                        back: 123
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 382,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 397,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 3,
+                        distance: 331,
+                        strokeIndex: 9,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 498,
+                        strokeIndex: 13,
+                        par: 5
+                    },
+                    {
+                        index: 5,
+                        distance: 490,
+                        strokeIndex: 7,
+                        par: 5
+                    },
+                    {
+                        index: 6,
+                        distance: 416,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 135,
+                        strokeIndex: 17,
+                        par: 3
+                    },
+                    {
+                        index: 8,
+                        distance: 423,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 166,
+                        strokeIndex: 15,
+                        par: 3
+                    },
+                    {
+                        index: 10,
+                        distance: 288,
+                        strokeIndex: 12,
+                        par: 4
+                    },
+                    {
+                        index: 11,
+                        distance: 337,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 128,
+                        strokeIndex: 14,
+                        par: 3
+                    },
+                    {
+                        index: 13,
+                        distance: 358,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 288,
+                        strokeIndex: 18,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 351,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 470,
+                        strokeIndex: 8,
+                        par: 5
+                    },
+                    {
+                        index: 17,
+                        distance: 327,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 18,
+                        distance: 471,
+                        strokeIndex: 10,
+                        par: 5
+                    }
+                ]
+            },
+            {
+                colour: 'red',
+                ratings: {
+                    course: {
+                        full: 72.3,
+                        front: 37,
+                        back: 35.3
+                    },
+                    bogey: 101.3,
+                    slope: {
+                        full: 123,
+                        front: 122,
+                        back: 124
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 341,
+                        strokeIndex: 9,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 343,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 3,
+                        distance: 299,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 457,
+                        strokeIndex: 13,
+                        par: 5
+                    },
+                    {
+                        index: 5,
+                        distance: 418,
+                        strokeIndex: 7,
+                        par: 5
+                    },
+                    {
+                        index: 6,
+                        distance: 393,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 111,
+                        strokeIndex: 17,
+                        par: 3
+                    },
+                    {
+                        index: 8,
+                        distance: 369,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 142,
+                        strokeIndex: 15,
+                        par: 3
+                    },
+                    {
+                        index: 10,
+                        distance: 231,
+                        strokeIndex: 12,
+                        par: 4
+                    },
+                    {
+                        index: 11,
+                        distance: 282,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 144,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 13,
+                        distance: 340,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 277,
+                        strokeIndex: 14,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 294,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 400,
+                        strokeIndex: 8,
+                        par: 5
+                    },
+                    {
+                        index: 17,
+                        distance: 266,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 18,
+                        distance: 412,
+                        strokeIndex: 10,
+                        par: 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        name: 'Weston Turville',
+        tees: [
+            {
+                colour: 'white',
+                ratings: {
+                    course: {
+                        full: 68.8,
+                        front: 33.5,
+                        back: 35.3
+                    },
+                    bogey: 91.2,
+                    slope: {
+                        full: 121,
+                        front: 114,
+                        back: 127
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 395,
+                        strokeIndex: 10,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 395,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 3,
+                        distance: 172,
+                        strokeIndex: 12,
+                        par: 3
+                    },
+                    {
+                        index: 4,
+                        distance: 124,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 5,
+                        distance: 418,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 168,
+                        strokeIndex: 6,
+                        par: 3
+                    },
+                    {
+                        index: 7,
+                        distance: 479,
+                        strokeIndex: 14,
+                        par: 5
+                    },
+                    {
+                        index: 8,
+                        distance: 325,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 326,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 10,
+                        distance: 203,
+                        strokeIndex: 7,
+                        par: 3
+                    },
+                    {
+                        index: 11,
+                        distance: 514,
+                        strokeIndex: 17,
+                        par: 5
+                    },
+                    {
+                        index: 12,
+                        distance: 378,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 404,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 343,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 428,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 178,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 17,
+                        distance: 363,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 18,
+                        distance: 395,
+                        strokeIndex: 9,
+                        par: 4
+                    }
+                ]
+            },
+            {
+                colour: 'yellow',
+                ratings: {
+                    course: {
+                        full: 67.6,
+                        front: 32.9,
+                        back: 34.7
+                    },
+                    bogey: 89.5,
+                    slope: {
+                        full: 118,
+                        front: 114,
+                        back: 122
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 350,
+                        strokeIndex: 10,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 381,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 3,
+                        distance: 161,
+                        strokeIndex: 12,
+                        par: 3
+                    },
+                    {
+                        index: 4,
+                        distance: 117,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 5,
+                        distance: 408,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 166,
+                        strokeIndex: 6,
+                        par: 3
+                    },
+                    {
+                        index: 7,
+                        distance: 471,
+                        strokeIndex: 14,
+                        par: 5
+                    },
+                    {
+                        index: 8,
+                        distance: 320,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 323,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 10,
+                        distance: 189,
+                        strokeIndex: 7,
+                        par: 3
+                    },
+                    {
+                        index: 11,
+                        distance: 503,
+                        strokeIndex: 17,
+                        par: 5
+                    },
+                    {
+                        index: 12,
+                        distance: 363,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 389,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 323,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 411,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 167,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 17,
+                        distance: 316,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 18,
+                        distance: 387,
+                        strokeIndex: 9,
+                        par: 4
+                    }
+                ]
+            },
+            {
+                colour: 'red',
+                ratings: {
+                    course: {
+                        full: 71.0,
+                        front: 34.8,
+                        back: 36.2
+                    },
+                    bogey: 100.4,
+                    slope: {
+                        full: 125,
+                        front: 123,
+                        back: 126
+                    }
+                },
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 338,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 2,
+                        distance: 348,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 3,
+                        distance: 153,
+                        strokeIndex: 16,
+                        par: 3
+                    },
+                    {
+                        index: 4,
+                        distance: 105,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 5,
+                        distance: 397,
+                        strokeIndex: 10,
+                        par: 5
+                    },
+                    {
+                        index: 6,
+                        distance: 151,
+                        strokeIndex: 14,
+                        par: 3
+                    },
+                    {
+                        index: 7,
+                        distance: 445,
+                        strokeIndex: 2,
+                        par: 5
+                    },
+                    {
+                        index: 8,
+                        distance: 315,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 9,
+                        distance: 313,
+                        strokeIndex: 12,
+                        par: 4
+                    },
+                    {
+                        index: 10,
+                        distance: 152,
+                        strokeIndex: 15,
+                        par: 3
+                    },
+                    {
+                        index: 11,
+                        distance: 494,
+                        strokeIndex: 5,
+                        par: 5
+                    },
+                    {
+                        index: 12,
+                        distance: 347,
+                        strokeIndex: 9,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 376,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 238,
+                        strokeIndex: 17,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 359,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 16,
+                        distance: 140,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 17,
+                        distance: 317,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 18,
+                        distance: 381,
+                        strokeIndex: 7,
+                        par: 4
+                    }
+                ]
+            }
+        ]
+    }
 ];
 
 module.exports = { courses, demerits, drinks, rounds, sections, users };

@@ -1,7 +1,7 @@
 const User = require('../models/user');
 
 const createUserObject = require('../utilities/createUserObject');
-const formatDate = require('../utilities/formatDate');
+const { customDate } = require('../utilities/formatDate');
 
 async function checkValues (req, res) {
     function capitalise(word) {
@@ -14,9 +14,9 @@ async function checkValues (req, res) {
 };
 
 async function show (req, res) {
-    let { birthday } = await User.findById(req.user._id);
-    if (birthday) birthday = formatDate('yyyy-mm-dd', birthday);
-    res.render('account/index', { date: formatDate('yyyy-mm-dd'), birthday });
+    let { birthday, formattedBirthday } = await User.findById(req.user._id);
+    if (birthday) birthday = formattedBirthday.datePicker;
+    res.render('account/index', { date: customDate('yyyy-mm-dd'), birthday });
 };
 
 async function update (req, res) {

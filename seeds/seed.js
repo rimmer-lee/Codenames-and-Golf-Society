@@ -28,11 +28,11 @@ async function seed() {
     if (t.length > 0) await Title.collection.drop();
     if (u.length > 0) await User.collection.drop();
     await Promise.all(users.map(async user => {
-        const u = await new User(user);
-        await User.register(u, u.username);
+        // const u = await new User(user);
+        // await User.register(u, u.username);
+        await new User(user).save();
     }));
     const defaultUser = await User.findOne({ 'name.preferred': 'The Machine' });
-    console.log(defaultUser)
     for (const section of sections) {
         if (section.rules && section.rules.length > 0) section.rules = await Promise.all(section.rules.map(async rule => await new Rule(rule).save()));
     };
@@ -47,6 +47,10 @@ async function seed() {
     for (const drink of drinks) {
         drink.player = await User.findOne({ 'name.first': drink.player.split(' ')[0], 'name.last': drink.player.split(' ')[1] });
         await new Drink(drink).save();
+    };
+    for (const course of courses) {
+        course.created = { by: defaultUser };
+        await new Course(course).save();
     };
 };
 

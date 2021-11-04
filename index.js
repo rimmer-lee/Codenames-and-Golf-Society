@@ -19,8 +19,6 @@ const path = require('path');
 const session = require('express-session');
 
 const ExpressError = require('./utilities/ExpressError');
-// const catchAsync = require('./utilities/catchAsync');
-// const createUserObject = require('./utilities/createUserObject');
 
 const User = require('./models/user');
 
@@ -104,6 +102,7 @@ app.use(passport.session());
 app.use(cookieParser());
 
 passport.use(new LocalStrategy(User.authenticate()));
+
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -133,6 +132,15 @@ app.use('/demerits/drinks', drinkRoutes);
 app.use('/players', playerRoutes);
 
 app.get('/', (req, res) => res.render('home'));
+
+app.get('/add-user-passwords', async (req, res) => {
+   const users = await User.find();
+   for (const user of users) {
+       const u = await user.setPassword(user.username);
+       await u.save();
+   };
+   return res.redirect('/');
+});
 
 app.get('/set-cookie', (req, res) => {
     const { name, value = true} = req.query;

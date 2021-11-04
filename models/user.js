@@ -85,7 +85,7 @@ UserSchema.virtual('formattedBirthday').get(function () {
     return {
         datePicker: customDate('yyyy-mm-dd', birthday),
         friendly: customDate('dd/mm/yyyy', birthday),
-        date: new Date(birthday.getFullYear(), birthday.getMonth(), birthday.getDate())
+        date: new Date(birthday.getUTCFullYear(), birthday.getUTCMonth(), birthday.getUTCDate())
     };
 });
 
