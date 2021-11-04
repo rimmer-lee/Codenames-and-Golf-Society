@@ -24,36 +24,36 @@ function selectPlayer() {
     for (const playerSelect of playerSelects) {
         const id = playerSelect.id.split('|')[0];
         const currentSelectedIndex = playerSelect.selectedIndex;
-        if (id !== 'marker' && playerSelect.value !== 'Select Player') {
-            function resetSelectPlayer() {
-                this.closest('.row').querySelector('select').selectedIndex = 0;
-                updateData();
-                selectPlayer();                
-            };
-
-            // need to enable tooltips
-            
-            const removePlayerElementObject = {
-                classList: ['d-flex', 'remove-player', 'ps-2'],
-                children: [
-                    {
-                        classList: ['btn', 'btn-danger', 'd-flex', 'align-items-center'],
-                        attributes: [
-                            { id: 'data-bs-placement', value: 'left' },
-                            { id: 'title', value: 'Remove Player' }
-                        ],
-                        addEventListener: [{ listener: resetSelectPlayer }],
-                        children: [
-                            {
-                                classList: ['btn-close', 'btn-close-white'],
-                                attributes: [{ id: 'aria-label', value: 'remove' }]
-                            }
-                        ]
-                    }
-                ]
-            };
-            playerSelect.closest('.col').insertBefore(createElement(removePlayerElementObject), null);
+        if (playerSelect.value === 'Select Player' ||
+            document.querySelector(`input[value="${playerSelect[currentSelectedIndex].value}"]`)) continue;
+        function resetSelectPlayer() {
+            this.closest('.row').querySelector('select').selectedIndex = 0;
+            updateData();
+            selectPlayer();                
         };
+
+        // need to enable tooltips
+        
+        const removePlayerElementObject = {
+            classList: ['d-flex', 'remove-player', 'ps-2'],
+            children: [
+                {
+                    classList: ['btn', 'btn-danger', 'd-flex', 'align-items-center'],
+                    attributes: [
+                        { id: 'data-bs-placement', value: 'left' },
+                        { id: 'title', value: 'Remove Player' }
+                    ],
+                    addEventListener: [{ listener: resetSelectPlayer }],
+                    children: [
+                        {
+                            classList: ['btn-close', 'btn-close-white'],
+                            attributes: [{ id: 'aria-label', value: 'remove' }]
+                        }
+                    ]
+                }
+            ]
+        };
+        playerSelect.closest('.col').insertBefore(createElement(removePlayerElementObject), null);
         // if (selectValues.length > 1 && playerSelect.value !== 'Select Player') {
         //     const teamRadiosElementObject = {
         //         classList: ['col-12', 'team'],
