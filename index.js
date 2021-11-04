@@ -144,21 +144,9 @@ app.get('/', (req, res) => res.render('home'));
 //    return res.redirect('/');
 // });
 
-app.get('/create-machine', async (req, res) => {
-    const user = {
-        name: { preferred: 'The Machine' },
-        username: 'machine',
-        email: 'the@machine.com',
-        role: 'super',
-        status: 'active'
-    };
-    await new User(user).save();
-    res.redirect('/');
-});
-
 app.get('/create-courses', async (req, res) => {
     const { courses } = require(path.join(__dirname, 'seeds', 'base'));
-    const defaultUser = await User.findOne({ 'name.preferred': 'The Machine' });
+    const defaultUser = await User.findOne({ 'username': 'machine' });
     for (const course of courses) {
         const existingCourse = await Course.find({ 'name': course.name });
         if (existingCourse.length > 0) continue;
