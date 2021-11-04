@@ -18,26 +18,26 @@ const passport = require('passport');
 const path = require('path');
 const session = require('express-session');
 
-const ExpressError = require('./utilities/ExpressError');
+const ExpressError = require(path.join(__dirname, 'utilities', 'ExpressError'));
 
-const Course = require('./models/course');
-const User = require('./models/user');
+const Course = require(path.join(__dirname, 'models', 'course'));
+const User = require(path.join(__dirname, 'models', 'user'));
 
-const constants = require('./constants');
-const { devFeatures } = require('./middleware');
+const constants = require(path.join(__dirname, 'constants'));
+const { devFeatures } = require(path.join(__dirname, 'middleware'));
 
 const app = express();
 const db = mongoose.connection;
 
-const accountRoutes = require('./routes/account');
-const charterRoutes = require('./routes/charter');
-const courseRoutes = require('./routes/courses');
-const demeritRoutes = require('./routes/demerits');
-const drinkRoutes = require('./routes/drinks');
-// const gameRoutes = require('./routes/games');
-const playerRoutes = require('./routes/players');
-const roundRoutes = require('./routes/rounds');
-const userRoutes = require('./routes/users');
+const accountRoutes = require(path.join(__dirname, 'routes', 'account'));
+const charterRoutes = require(path.join(__dirname, 'routes', 'charter'));
+const courseRoutes = require(path.join(__dirname, 'routes', 'courses'));
+const demeritRoutes = require(path.join(__dirname, 'routes', 'demerits'));
+const drinkRoutes = require(path.join(__dirname, 'routes', 'drinks'));
+// const gameRoutes = require(path.join(__dirname, 'routes', 'games'));
+const playerRoutes = require(path.join(__dirname, 'routes', 'players'));
+const roundRoutes = require(path.join(__dirname, 'routes', 'rounds'));
+const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 
 const port = process.env.PORT || 3000;
 const secret = process.env.SECRET || 'thisshouldbeabettersecret';
@@ -144,8 +144,20 @@ app.get('/', (req, res) => res.render('home'));
 //    return res.redirect('/');
 // });
 
+app.get('/create-machine', async (req, res) => {
+    const user = {
+        name: { preferred: 'The Machine' },
+        username: 'machine',
+        email: 'the@machine.com',
+        role: 'super',
+        status: 'active'
+    };
+    await new User(user).save();
+    res.redirect('/');
+});
+
 app.get('/create-courses', async (req, res) => {
-    const { courses } = require('./seeds/base');
+    const { courses } = require(path.join(__dirname, 'seeds', 'base'));
     const defaultUser = await User.findOne({ 'name.preferred': 'The Machine' });
     for (const course of courses) {
         const existingCourse = await Course.find({ 'name': course.name });
