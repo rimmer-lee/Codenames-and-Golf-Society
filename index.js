@@ -135,6 +135,20 @@ app.use('/', userRoutes);
 
 app.get('/', (req, res) => res.render('home'));
 
+app.get('/set-cookie', (req, res) => {
+    const { name, value = true} = req.query;
+    if (name) res.cookie(name, value, { maxAge: 24 * 60 * 60 * 1000 }); 
+    res.redirect('/');
+});
+
+// below routes are available only locally or with cookie 'testing'
+
+app.use(devFeatures)
+
+app.use('/account', accountRoutes);
+app.use('/rounds', roundRoutes);
+app.use('/rounds/courses', courseRoutes);
+
 // app.get('/add-user-passwords', async (req, res) => {
 //    const users = await User.find();
 //    for (const user of users) {
@@ -155,20 +169,6 @@ app.get('/create-courses', async (req, res) => {
     };
     res.redirect('/');
 });
-
-app.get('/set-cookie', (req, res) => {
-    const { name, value = true} = req.query;
-    if (name) res.cookie(name, value); 
-    res.redirect('/');
-});
-
-// below routes are available only locally or with cookie 'testing'
-
-app.use(devFeatures)
-
-app.use('/account', accountRoutes);
-app.use('/rounds', roundRoutes);
-app.use('/rounds/courses', courseRoutes);
 
 // above routes are available only locally or with cookie 'testing'
 
