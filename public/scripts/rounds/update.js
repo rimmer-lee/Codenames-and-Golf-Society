@@ -6,15 +6,17 @@ function changeScores() {
     for (const key of Object.keys(holes)) {
         const score = holes[key];
         total += +score;
-        if (score > 0) par += +score - tee.holes[+key - 1].par;
+        
+        // tee.holes doesn't exist if course not selected
+        if (score > 0 && tee) par += +score - tee.holes[+key - 1].par;
+
     };
     document.getElementById(`${player}|score`).innerText = total;
     updateParElement(player, par);
 };
 
 function getTee() {
-    const courseSelect = document.getElementById('course-select');
-    const courseId = courseSelect.selectedOptions[0].value;
+    const courseId = document.getElementById('course-select').value;
     const course = courses.find(({ _id }) => _id == courseId);
     if (!course) return undefined;
     const teeSelect = document.getElementById('tee-select');    
@@ -29,9 +31,9 @@ function updateData() {
     function createNestedObject (base, element) {
         const pathArray = element.name.slice(0, -1).replace(/\[/g, '').split(']');
         const value = element.value;
-        const lastName = arguments.length === 2 ? pathArray.pop() : false;
+        const lastName = pathArray.pop();
         for (let i = 0; i < pathArray.length; i++) base = base[pathArray[i]] = base[pathArray[i]] || {};
-        if (lastName) base = base[lastName] = value;
+        base = base[lastName] = value;
         return base;
     };
     
@@ -40,8 +42,8 @@ function updateData() {
         const option = select.selectedOptions[0];
         if (option && !(/^select\s/i).test(option.innerText)) createNestedObject(round, select);
     };
-    for (const input of document.querySelectorAll('form input:not([type="radio"])')) {
-        if (round[input.id.split('|')[0]]) createNestedObject(round, input);
+    for (const input of document.querySelectorAll('form input:not([type="radio"]):not([type="submit"])')) {
+        createNestedObject(round, input)
     };
     for (const radio of document.querySelectorAll('form input[type="radio"]')) {
         if (radio.checked) createNestedObject(round, radio);
@@ -74,7 +76,10 @@ function updateScores() {
             const scoreElement = document.querySelector(`[name="[${player}][hole][${i}]"]`);
             if (score) {
                 total += +score;
-                par += +score - tee.holes[i - 1].par;
+
+                // tee.holes doesn't exist if course not selected
+                if (tee) par += +score - tee.holes[i - 1].par;
+
                 if (scoreElement) scoreElement.value = score;
             };
         };
@@ -106,8 +111,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const selectedTee = teeSelect.querySelector('[selected]')
             if (selectedTee) selectedTee.removeAttribute('selected');
             Array.from(teeSelect.children).find(({ value }) => value === round.course.tee).setAttribute('selected', true);
+            selectTee.call(teeSelect);
         };
     };
+    if (round.round && round.round.date) document.getElementById('date').value = round.round.date;
     for (const player of ['marker', 'player-a', 'player-b', 'player-c']) {
         if (round[player]) updateSelect(`${player}|id`, player, selectPlayer);
     };
@@ -115,3 +122,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 for (const select of document.querySelectorAll('form select')) select.addEventListener('input', updateData);
+document.getElementById('date').addEventListener('input', updateData);
+document.getElementById('date').addEventListener('blur', updateData);

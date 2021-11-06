@@ -94,6 +94,7 @@ function selectCourse() {
             for (const value of ['tee', 'par', 'courseRating-full', 'courseRating-front', 'courseRating-back', 'bogeyRating', 'slopeRating-full', 'slopeRating-front', 'slopeRating-back']) {
                 const tableDataElementObject = {
                     type: 'td',
+                    classList: [],
                     children: [
                         {
                             classList: ['d-flex', 'justify-content-center'],
@@ -112,6 +113,10 @@ function selectCourse() {
                         }
                     ]
                 };
+                let classesToAssign = [];
+
+                // d-none d-md-table-cell
+
                 let valueToAssign;
                 switch (value) {
                     case 'tee':
@@ -125,24 +130,30 @@ function selectCourse() {
                         valueToAssign = tee.ratings.course.full;
                         break;
                     case 'courseRating-front':
+                        classesToAssign = ['d-none', 'd-md-table-cell'];
                         valueToAssign = tee.ratings.course.front;
                         break;
                     case 'courseRating-back':
+                        classesToAssign = ['d-none', 'd-md-table-cell'];
                         valueToAssign = tee.ratings.course.back;
                         break;
                     case 'bogeyRating':
+                        classesToAssign = ['d-none', 'd-md-table-cell'];
                         valueToAssign = tee.ratings.bogey;
                         break;
                     case 'slopeRating-full':
                         valueToAssign = tee.ratings.slope.full;
                         break;
                     case 'slopeRating-front':
+                        classesToAssign = ['d-none', 'd-md-table-cell'];
                         valueToAssign = tee.ratings.slope.front;
                         break;
                     case 'slopeRating-back':
+                        classesToAssign = ['d-none', 'd-md-table-cell'];
                         valueToAssign = tee.ratings.slope.back;
                         break;
                 };
+                tableDataElementObject.classList.push( ...classesToAssign );
                 tableDataElementObject.children[0].children[0].attributes.find(({ id }) => id === 'value').value = valueToAssign;
                 tableRowElementObject.children.push(tableDataElementObject);
             };
@@ -160,6 +171,7 @@ function selectCourse() {
     } else if (this.value === 'new') {
         // for (const ratingElement of ratingElements) ratingElement.value = '';
     };
+    selectTee.call(document.getElementById('tee-select'));
 };
 
 document.getElementById('course-select').addEventListener('change', selectCourse);

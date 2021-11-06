@@ -1,13 +1,30 @@
+/* Bootstrap Extra Small (xs) */
 @media (max-width: 576px) {
     table,
-    table *.btn {
-        font-size: 10px;
+    table *.btn,
+    table input.form-control {
+        font-size: 0.8rem;
+    }
+}
+
+/* Bootstrap Extra Small (xs) and Small (sm) */
+@media (max-width: 767px) {
+    #tees td {
+        width: calc(100% / 4);
+    }
+}
+
+/* Bootstrap Medium (md) */
+@media (min-width: 768px) {
+    #tees td {
+        width: calc(100% / 9);
     }
 }
 
 /* update so widith grows/shrinks with number of users */
 #demerit tr > *:not(:first-child) {
     width: 15%;
+    /* width: calc(100% / var(--users)) */
 }
 
 #user tr > * {
@@ -21,14 +38,14 @@ table img {
     height: 100px;
 }
 
-#tees td {
-    width: calc(100% / 9);
-    /* height: calc(40px + 2px / 3); */
-}
-
 .hole td {
     width: 33%;
     /* height: calc(40px + 2px / 3); */
+}
+
+.hole td input {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .player-table td {

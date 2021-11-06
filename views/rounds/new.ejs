@@ -72,62 +72,78 @@
                             <div class="d-none col-12" visibility="hidden">
                                 <table id="tees" class="table table-sm table-bordered table-dark mb-0">
                                     <thead>
-                                        <tr>
+                                        <tr class="d-none d-md-table-row">
                                             <th scope="col" rowspan="2">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="text-center">
                                                     Tee
                                                 </div>
                                             </th>
                                             <th scope="col" rowspan="2">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="text-center">
                                                     Par
                                                 </div>
                                             </th>
                                             <th scope="col" colspan="3">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="text-center">
                                                     Course Rating
                                                 </div>
                                             </th>
                                             <th scope="col" rowspan="2">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="text-center">
                                                     Bogey Rating
                                                 </div>
                                             </th>
                                             <th scope="col" colspan="3">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="text-center">
                                                     Slope Rating
                                                 </div>
                                             </th>
                                         </tr>
                                         <tr>
+                                            <th class="d-table-cell d-md-none" scope="col">
+                                                <div class="text-center">
+                                                    Tee
+                                                </div>
+                                            </th>
+                                            <th class="d-table-cell d-md-none" scope="col">
+                                                <div class="text-center">
+                                                    Par
+                                                </div>
+                                            </th>
                                             <th scope="col">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="d-none d-md-block text-center">
                                                     18
                                                 </div>
+                                                <div class="d-block d-md-none text-center">
+                                                    Course
+                                                </div>
                                             </th>
-                                            <th scope="col">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    Front 9
+                                            <th class="d-none d-md-table-cell" scope="col">
+                                                <div class="text-center">
+                                                    Front
+                                                </div>
+                                            </th>
+                                            <th class="d-none d-md-table-cell" scope="col">
+                                                <div class="text-center">
+                                                    Back
                                                 </div>
                                             </th>
                                             <th scope="col">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    Back 9
-                                                </div>
-                                            </th>
-                                            <th scope="col">
-                                                <div class="d-flex justify-content-center align-items-center">
+                                                <div class="d-none d-md-block text-center">
                                                     18
                                                 </div>
-                                            </th>
-                                            <th scope="col">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    Front 9
+                                                <div class="d-block d-md-none text-center">
+                                                    Slope
                                                 </div>
                                             </th>
-                                            <th scope="col">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    Back 9
+                                            <th class="d-none d-md-table-cell" scope="col">
+                                                <div class="text-center">
+                                                    Front
+                                                </div>
+                                            </th>
+                                            <th class="d-none d-md-table-cell" scope="col">
+                                                <div class="text-center">
+                                                    Back
                                                 </div>
                                             </th>
                                         </tr>
@@ -231,13 +247,24 @@
                                                     <table class="table table-sm table-bordered table-dark hole mb-0 lh-lg">
                                                         <thead>
                                                             <tr>
-                                                                <% for (const header of ['Distance', 'Par', 'SI']) { %>
                                                                 <td scope="col">
-                                                                    <div class="d-flex justify-content-center align-items-center">
-                                                                        <%= header %>
+                                                                    <div class="d-none d-md-block text-center distance-long">
+                                                                        Yards
+                                                                    </div>
+                                                                    <div class="d-block d-md-none text-center distance-long">
+                                                                        Yds
                                                                     </div>
                                                                 </td>
-                                                                <% }; %>
+                                                                <td scope="col">
+                                                                    <div class="text-center">
+                                                                        Par
+                                                                    </div>
+                                                                </td>
+                                                                <td scope="col">
+                                                                    <div class="text-center">
+                                                                        SI
+                                                                    </div>
+                                                                </td>
                                                             </tr>
                                                         </thead>
                                                         <tbody></tbody>
@@ -436,6 +463,7 @@
 <script src="/scripts/rounds/register-service-worker.js"></script>
 <script src="/scripts/rounds/select-course.js"></script>
 <script src="/scripts/rounds/select-player.js"></script>
+<script src="/scripts/rounds/select-tee.js"></script>
 <script src="/scripts/rounds/toggle-buttons.js"></script>
 <script src="/scripts/rounds/update.js"></script>
 <script src="/scripts/rounds/validate.js"></script>

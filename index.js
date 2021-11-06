@@ -169,13 +169,16 @@ app.use(devFeatures)
 app.use('/account', accountRoutes);
 app.use('/rounds', roundRoutes);
 app.use('/rounds/courses', courseRoutes);
-app.get('/reseed', async (req, res) => {
-    const { seed } = require('./seeds/seed');
-    await seed();
-    res.redirect('/');
-});
 
 // above routes are available only locally or with cookie 'testing'
+
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/reseed', async (req, res) => {
+        const { seed } = require('./seeds/seed');
+        await seed();
+        res.redirect('/');
+    });
+};
 
 app.all('*', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
