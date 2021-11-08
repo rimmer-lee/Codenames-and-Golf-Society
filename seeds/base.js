@@ -641,19 +641,19 @@ const rounds = [
         date: new Date(2021, 10, 6),
         scores: [
             {
-                player: 'Lee',
+                player: 'Thomas Rimmer',
                 shots: [ 6, 4, 5, 4, 8, 5, 4, 6, 5, 4, 5, 5, 7, 5, 6, 6, 6, 6 ]
             },
             {
-                player: 'Joe',
+                player: 'Joseph Burrows',
                 shots: [ 6, 4, 5, 4, 4, 5, 4, 8, 5, 4, 4, 4, 4, 4, 6, 5, 5, 5 ]
             },
             {
-                player: 'Martin',
+                player: 'Martin Nash',
                 shots: [ 7, 3, 6, 6, 6, 5, 5, 5, 8, 5, 5, 8, 6, 5, 7, 4, 6, 5 ]
             },
             {
-                player: 'Oli',
+                player: 'Oliver Nash',
                 shots: [ 6, 4, 4, 4, 5, 6, 4, 6, 6, 3, 7, 6, 5, 5, 6, 6, 4, 4 ]
             }
         ]

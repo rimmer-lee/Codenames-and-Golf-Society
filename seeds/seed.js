@@ -56,7 +56,7 @@ async function seed() {
         round.created = { by: defaultUser };
         round.lastModified = { by: defaultUser };
         round.course = await Course.findOne({ 'name': round.course });
-        for (const score of round.scores) score.player = await User.findOne({ 'name.preferred': score.player });
+        for (const score of round.scores) score.player = await User.findOne({ 'name.first': score.player.split(' ')[0], 'name.last': score.player.split(' ')[1] });
         await new Round(round).save();
     };
 };
