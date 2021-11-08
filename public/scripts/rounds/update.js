@@ -6,10 +6,7 @@ function changeScores() {
     for (const key of Object.keys(holes)) {
         const score = holes[key];
         total += +score;
-        
-        // tee.holes doesn't exist if course not selected
         if (score > 0 && tee) par += +score - tee.holes[+key - 1].par;
-
     };
     document.getElementById(`${player}|score`).innerText = total;
     updateParElement(player, par);
@@ -76,10 +73,7 @@ function updateScores() {
             const scoreElement = document.querySelector(`[name="[${player}][hole][${i}]"]`);
             if (score) {
                 total += +score;
-
-                // tee.holes doesn't exist if course not selected
                 if (tee) par += +score - tee.holes[i - 1].par;
-
                 if (scoreElement) scoreElement.value = score;
             };
         };

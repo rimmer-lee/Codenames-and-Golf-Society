@@ -21,6 +21,10 @@
     }
 }
 
+#round td {
+    width: calc(100% / 8);
+}
+
 /* update so widith grows/shrinks with number of users */
 #demerit tr > *:not(:first-child) {
     width: 15%;

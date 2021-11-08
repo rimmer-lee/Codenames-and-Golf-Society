@@ -127,10 +127,12 @@ app.use(async (req, res, next) => {
     next();
 });
 
+app.use('/account', accountRoutes);
 app.use('/charter', charterRoutes);
 app.use('/demerits', demeritRoutes);
 app.use('/demerits/drinks', drinkRoutes);
 app.use('/players', playerRoutes);
+app.use('/rounds', roundRoutes);
 app.use('/', userRoutes);
 
 app.get('/', (req, res) => res.render('home'));
@@ -145,8 +147,6 @@ app.get('/set-cookie', (req, res) => {
 
 app.use(devFeatures)
 
-app.use('/account', accountRoutes);
-app.use('/rounds', roundRoutes);
 app.use('/rounds/courses', courseRoutes);
 
 // app.get('/add-user-passwords', async (req, res) => {

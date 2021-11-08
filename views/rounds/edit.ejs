@@ -6,7 +6,7 @@
     <h1><%= round.course.name %> (<%= round.tee %>) on <span class="d-none d-md-inline"><%= round.formattedDate.full %></span><span class="d-md-none"><%= round.formattedDate.friendly %></span></h1>
 </div>
 <form class="needs-validation" method="POST" action="/rounds/edit/<%= round.id %>" novalidate>
-    <table class="table table-bordered table-striped">
+    <table id="round" class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
                 <th scope="col">
@@ -15,7 +15,7 @@
                     </div>
                 </th>
                 <th scope="col">
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center text-capitalize">
                         <%= round.course.tees.find(({ colour }) => colour === round.tee).measure || 'Yards' %>
                     </div>
                 </th>

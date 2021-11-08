@@ -40,9 +40,15 @@ function selectCourse() {
                             classList: ['d-flex', 'justify-content-center'],
                             children: [
                                 {
+                                    type: 'label',
+                                    classList: ['d-none', 'form-label'],
+                                    attributes: [{ id: 'for', value: `${tee.colour}-${i}|${value}` }]
+                                },
+                                {
                                     type: 'input',
                                     classList: ['form-control', 'text-center'],
                                     attributes: [
+                                        { id: 'id', value: `${tee.colour}-${i}|${value}` },
                                         { id: 'type', value: 'number' },
                                         { id: 'name', value: `[course][hole][${i}][${tee.colour}][${value}]` },
                                         { id: 'data-hole', value: i },
@@ -57,15 +63,15 @@ function selectCourse() {
                 };
                 switch (value) {
                     case 'distance':
-                        dataElementObject.children[0].children[0].attributes.push({ id: 'min', value: '1' });
+                        dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' });
                         break;
                     case 'par':
-                        dataElementObject.children[0].children[0].attributes.push({ id: 'min', value: '3' });
-                        dataElementObject.children[0].children[0].attributes.push({ id: 'max', value: '5' });
+                        dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '3' });
+                        dataElementObject.children[0].children[1].attributes.push({ id: 'max', value: '5' });
                         break;
                     case 'strokeIndex':
-                        dataElementObject.children[0].children[0].attributes.push({ id: 'min', value: '1' });
-                        dataElementObject.children[0].children[0].attributes.push({ id: 'max', value: '18' });
+                        dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' });
+                        dataElementObject.children[0].children[1].attributes.push({ id: 'max', value: '18' });
                         break;
                 };
                 newElementObject.children.push(dataElementObject);
@@ -100,9 +106,15 @@ function selectCourse() {
                             classList: ['d-flex', 'justify-content-center'],
                             children: [
                                 {
+                                    type: 'label',
+                                    classList: ['d-none', 'form-label'],
+                                    attributes: [{ id: 'for', value: `${tee.colour}|${value}` }]
+                                },
+                                {
                                     type: 'input',
                                     classList: ['form-control', 'text-center', 'text-capitalize'],
                                     attributes: [
+                                        { id: 'id', value: `${tee.colour}|${value}` },
                                         { id: 'type', value: 'number' },
                                         { id: 'name', value: `[course][tee][${tee.colour}][${value}]` },
                                         { id: 'value', value: '' },
@@ -114,13 +126,10 @@ function selectCourse() {
                     ]
                 };
                 let classesToAssign = [];
-
-                // d-none d-md-table-cell
-
                 let valueToAssign;
                 switch (value) {
                     case 'tee':
-                        tableDataElementObject.children[0].children[0].attributes.find(({ id }) => id === 'type').value = 'text';
+                        tableDataElementObject.children[0].children[1].attributes.find(({ id }) => id === 'type').value = 'text';
                         valueToAssign = tee.colour;
                         break;
                     case 'par':
@@ -154,7 +163,7 @@ function selectCourse() {
                         break;
                 };
                 tableDataElementObject.classList.push( ...classesToAssign );
-                tableDataElementObject.children[0].children[0].attributes.find(({ id }) => id === 'value').value = valueToAssign;
+                tableDataElementObject.children[0].children[1].attributes.find(({ id }) => id === 'value').value = valueToAssign;
                 tableRowElementObject.children.push(tableDataElementObject);
             };
             teeElement.insertBefore(createElement(tableRowElementObject), null);

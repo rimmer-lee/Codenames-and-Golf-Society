@@ -28,9 +28,9 @@ async function seed() {
     if (t.length > 0) await Title.collection.drop();
     if (u.length > 0) await User.collection.drop();
     await Promise.all(users.map(async user => {
-        // const u = await new User(user);
-        // await User.register(u, u.username);
-        await new User(user).save();
+        const u = await new User(user);
+        await User.register(u, u.username);
+        // await new User(user).save();
     }));
     const defaultUser = await User.findOne({ 'name.preferred': 'The Machine' });
     for (const section of sections) {
@@ -51,6 +51,9 @@ async function seed() {
     for (const course of courses) {
         course.created = { by: defaultUser };
         await new Course(course).save();
+    };
+    for (const round of rounds) {
+
     };
 };
 
