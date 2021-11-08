@@ -85,11 +85,6 @@ function updateScores() {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    let round = JSON.parse(window.localStorage.getItem('round'));
-    if (!round) {
-        updateData();
-        round = JSON.parse(window.localStorage.getItem('round'));
-    };
     function updateSelect(id, property, callback) {
         const element = document.querySelector(`[id="${id}"]`);
         const selectedElement = element.querySelector('[selected]');
@@ -97,6 +92,11 @@ document.addEventListener('DOMContentLoaded', function () {
         Array.from(element.children).find(({ value }) => value === round[property].id).setAttribute('selected', true);
         if (callback) callback.call(element);
         if (element.hasAttribute('required')) validation.call(element);
+    };
+    let round = JSON.parse(window.localStorage.getItem('round'));
+    if (!round) {
+        updateData();
+        round = JSON.parse(window.localStorage.getItem('round'));
     };
     if (round.course && round.course.id) {
         updateSelect('course-select', 'course', selectCourse);
