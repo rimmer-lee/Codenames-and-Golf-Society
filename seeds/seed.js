@@ -53,7 +53,11 @@ async function seed() {
         await new Course(course).save();
     };
     for (const round of rounds) {
-
+        round.created = { by: defaultUser };
+        round.lastModified = { by: defaultUser };
+        round.course = await Course.findOne({ 'name': round.course });
+        for (const score of round.scores) score.player = await User.findOne({ 'name.preferred': score.player });
+        await new Round(round).save();
     };
 };
 
