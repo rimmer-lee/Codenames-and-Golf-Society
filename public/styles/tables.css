@@ -5,6 +5,10 @@
     table input.form-control {
         font-size: 0.8rem;
     }
+    table#round,
+    table#round input.form-control {
+        font-size: 0.8rem;   
+    }
 }
 
 /* Bootstrap Extra Small (xs) and Small (sm) */
@@ -23,6 +27,11 @@
 
 #round td {
     width: calc(100% / 8);
+}
+
+table#round input.form-control {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 /* update so widith grows/shrinks with number of users */

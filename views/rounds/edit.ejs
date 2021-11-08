@@ -3,7 +3,7 @@
 <% const tableClass = `table-${teeColours.find(({ colour }) => colour === round.tee).class}`; %>
 <% const tee = round.course.tees.find(({ colour }) => colour === round.tee); %>
 <div class="row my-3 pb-2 border-bottom border-1">
-    <h1><%= round.course.name %> (<%= round.tee %>) on <span class="d-none d-md-inline"><%= round.formattedDate.full %></span><span class="d-md-none"><%= round.formattedDate.friendly %></span></h1>
+    <h1><%= round.course.name %> (<%= round.tee %>) on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
 </div>
 <form class="needs-validation" method="POST" action="/rounds/edit/<%= round.id %>" novalidate>
     <table id="round" class="table table-bordered table-striped">
