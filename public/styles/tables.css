@@ -5,8 +5,8 @@
     table input.form-control {
         font-size: 0.8rem;
     }
-    table#round,
-    table#round input.form-control {
+    #round,
+    #round input.form-control {
         font-size: 0.8rem;   
     }
 }
@@ -27,6 +27,11 @@
 
 #round td {
     width: calc(100% / 8);
+}
+
+#round > tbody > tr > td:first-child {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 table#round input.form-control {
