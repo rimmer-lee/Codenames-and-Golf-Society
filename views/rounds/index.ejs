@@ -45,7 +45,7 @@
                     <% for (const score of round.scores) { %>
                     <div class="d-flex justify-content-center align-items-center">
                         <a href="/players/<%= score.player.id %>">
-                            <%= score.player %>
+                            <%= score.player.name.preferred %>
                         </a>
                     </div>
                     <% }; %>
