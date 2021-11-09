@@ -1,246 +1,302 @@
 <% layout('layouts/boilerplate') %>
-<% const players = ['Marker', 'A', 'B', 'C']; %>
 <% const tableClass = `table-${teeColours.find(({ colour }) => colour === round.tee).class}`; %>
 <% const tee = round.course.tees.find(({ colour }) => colour === round.tee); %>
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1><%= round.course.name %> (<%= round.tee %>) on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
 </div>
-<form class="needs-validation" method="POST" action="/rounds/edit/<%= round.id %>" novalidate>
-    <table id="round" class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">
-                    <div class="d-flex justify-content-center">
-                        Hole
+<div class="row gy-2 gx-3">
+    <% for (let i = 0; i < staticPlayers.length; i++) { %>
+    <div class="col-6">
+        <div class="row g-2">
+            <div class="col d-flex">
+                <div class="form-floating flex-grow-1">
+                    
+                    <!-- <select id="player-<%= staticPlayers[i] %>|id" class="form-select text-capitalize" name="[player-<%= staticPlayers[i] %>][id]"> -->
+                    <select id="player-<%= staticPlayers[i] %>|id" class="form-select text-capitalize" name="[player-<%= staticPlayers[i] %>][id]" disabled>
+
+                        <option <%= !round.scores[i] ? 'selected ' : '' %>disabled>Select Player</option>
+                        <% for (const player of players) { %>
+                        <% if (round.scores.some(score => score.player.id === player.id) && player.id !== round.scores[i].player.id) continue; %>
+                        <option <%= player.id === round.scores[i].player.id ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
+                        <% }; %>
+                    </select>
+                    <label for="player-<%= staticPlayers[i] %>|id"><%= staticPlayers[i] %></label>
+                </div>
+                <!-- <% if (round.scores[i]) { %>
+                <div class="d-flex remove-player ps-2">
+                    <div class="btn btn-danger d-flex align-items-center" data-bs-placement="left" title="Remove Player">
+                        <div class="btn-close btn-close-white" aria-label="remove"></div>
                     </div>
-                </th>
-                <th scope="col">
-                    <div class="d-none d-md-block text-center text-capitalize distance-long">
-                        <%= round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards' %>
-                    </div>
-                    <div class="d-block d-md-none text-center text-capitalize distance-long">
-                        <%= (round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards').replace('yards', 'yrds') %>
-                    </div>
-                </th>
-                <th scope="col">
-                    <div class="d-flex justify-content-center">
-                        Par
-                    </div>
-                </th>
-                <th scope="col">
-                    <div class="d-flex justify-content-center">
-                        SI
-                    </div>
-                </th>
-                <% players.forEach((player, i) => { %>
-                <th scope="col">
-                    <div class="d-none d-md-block text-center text-capitalize">
-                        <%= `${player !== 'Marker' ? 'Player ' : ''}${players[i]}` %>
-                    </div>
-                    <div class="d-block d-md-none text-center text-capitalize ">
-                        <%= players[i][0] %>
-                    </div>
-                </th>
-                <% }); %>
-                <!-- <th scope="col">
-                    <div class="d-flex justify-content-center">
-                        Nett
-                    </div>
-                </th>
-                <th scope="col">
-                    <div class="d-flex flex-column">
-                        <div class="d-flex justify-content-center">
-                            W=+
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            L=-
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            H=0
-                        </div>
-                    </div>
-                </th> -->
-            </tr>
-        </thead>
-        <tbody>
-            <% for (let i = 1; i < 10; i++) { %>
-            <tr>
-                <td class="text-center">
-                    <%= i %>
-                </td>
-                <td class="<%= tableClass %>">
-                    <div class="d-flex justify-content-center">
-                        <label for="hole-<%= i %>|distance" class="form-label d-none"></label>
-                        <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>">
-                    </div>
-                </td>
-                <td class="<%= tableClass %>">
-                    <div class="d-flex justify-content-center">
-                        <label for="hole-<%= i %>|par" class="form-label d-none"></label>
-                        <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>">
-                    </div>
-                </td>
-                <td class="<%= tableClass %>">
-                    <div class="d-flex justify-content-center">
-                        <label for="hole-<%= i %>|stroke-index" class="form-label d-none"></label>
-                        <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>">
-                    </div>
-                </td>
-                <% players.forEach((player, j) => { %>
-                <% const p = `${player !== 'Marker' ? 'player-' : ''}${player}`; %>
-                <td>
-                    <div class="d-flex justify-content-center">
-                        <label for="<%= p %>|hole-<%= i %>" class="form-label d-none"></label>
-                        <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] ? round.scores[j].shots[i - 1] : '' %>">
-                    </div>
-                </td>
-                <% }); %>
-                <!-- <td>
-                    <div class="d-flex justify-content-center">
-                        <label for="nett|hole-<%= i %>" class="form-label d-none"></label>
-                        <input id="nett|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[nett][hole]<%= i %>">
-                    </div>
-                </td>
-                <td>
-                    <div class="d-flex justify-content-center">
-                        <label for="game|hole-<%= i %>" class="form-label d-none"></label>
-                        <input id="game|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[game][hole]<%= i %>">
-                    </div>
-                </td> -->
-            </tr>
-            <% }; %>
-            <tr class="table-dark">
-                <td class="text-center text-uppercase">
-                    Out
-                </td>
-                <td class="text-center">
-                    <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.distance : sum, 0) %>
-                </td>
-                <td class="text-center">
-                    <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.par : sum, 0) %>
-                </td>
-                <td></td>
-                <% for (let j = 0; j < 4; j++) { %>
-                <td class="text-center">
-                    <% if (!round.scores[j]) continue; %>
-                    <%= round.scores[j].shots.reduce((sum, value, index) => index < 9 ? sum + value : sum, 0) %>
-                </td>
-                <% }; %>
-                <!-- <td></td>
-                <td></td> -->
-            </tr>
-            <% for (let i = 10; i < 19; i++) { %>
-            <tr>
-                <td class="text-center">
-                    <%= i %>
-                </td>
-                <td class="<%= tableClass %>">
-                    <div class="d-flex justify-content-center">
-                        <label for="hole-<%= i %>|distance" class="form-label d-none"></label>
-                        <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>">
-                    </div>
-                </td>
-                <td class="<%= tableClass %>">
-                    <div class="d-flex justify-content-center">
-                        <label for="hole-<%= i %>|par" class="form-label d-none"></label>
-                        <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>">
-                    </div>
-                </td>
-                <td class="<%= tableClass %>">
-                    <div class="d-flex justify-content-center">
-                        <label for="hole-<%= i %>|stroke-index" class="form-label d-none"></label>
-                        <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>">
-                    </div>
-                </td>
-                <% players.forEach((player, j) => { %>
-                <% const p = `${player !== 'Marker' ? 'player-' : ''}${player}`; %>
-                <td>
-                    <div class="d-flex justify-content-center">
-                        <label for="<%= p %>|hole-<%= i %>" class="form-label d-none"></label>
-                        <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] ? round.scores[j].shots[i - 1] : '' %>">
-                    </div>
-                </td>
-                <% }); %>
-                <!-- <td>
-                    <div class="d-flex justify-content-center">
-                        <label for="nett|hole-<%= i %>" class="form-label d-none"></label>
-                        <input id="nett|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[nett][hole]<%= i %>">
-                    </div>
-                </td>
-                <td>
-                    <div class="d-flex justify-content-center">
-                        <label for="game|hole-<%= i %>" class="form-label d-none"></label>
-                        <input id="game|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[game][hole]<%= i %>">
-                    </div>
-                </td> -->
-            </tr>
-            <% }; %>
-            <tr class="table-dark">
-                <td class="text-center text-uppercase">
-                    In
-                </td>
-                <td class="text-center">
-                    <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.distance : sum, 0) %>
-                </td>
-                <td class="text-center">
-                    <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.par : sum, 0) %>
-                </td>
-                <td></td>
-                <% for (let j = 0; j < 4; j++) { %>
-                <td class="text-center">
-                    <% if (!round.scores[j]) continue; %>
-                    <%= round.scores[j].shots.reduce((sum, value, index) => index > 8 ? sum + value : sum, 0) %>
-                </td>
-                <% }; %>
-                <!-- <td></td>
-                <td></td> -->
-            </tr>
-            <tr class="table-dark">
-                <td class="text-center text-uppercase">
-                    Total
-                </td>
-                <td class="text-center">
-                    <%= tee.holes.reduce((sum, hole) => sum + hole.distance, 0) %>
-                </td>
-                <td class="text-center">
-                    <%= tee.holes.reduce((sum, hole) => sum + hole.par, 0) %>
-                </td>
-                <td></td>
-                <% for (let j = 0; j < 4; j++) { %>
-                <td class="text-center">
-                    <% if (!round.scores[j]) continue; %>
-                    <%= round.scores[j].shots.reduce((sum, value) => sum + value, 0) %>
-                </td>
-                <% }; %>
-                <!-- <td></td>
-                <td></td> -->
-            </tr>
-            <!-- <tr>
-                <td colspan="6">
-                    <div class="d-flex justify-content-end text-uppercase">
-                        Handicap
-                    </div>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="3"></td>
-            </tr>
-            <tr>
-                <td colspan="6">
-                    <div class="d-flex justify-content-end text-uppercase">
-                        Nett
-                    </div>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="3"></td>
-            </tr> -->
-        </tbody>
-    </table>
-</form>
+                </div>
+                <% }; %> -->
+            </div>
+        </div>
+    </div>
+    <% }; %>
+    <div class="col-12">
+        <form class="needs-validation" method="POST" action="/rounds/edit/<%= round.id %>" novalidate>
+            <table id="round" class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">
+                            <div class="d-flex justify-content-center">
+                                Hole
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-none d-md-block text-center text-capitalize distance-long">
+                                <%= round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards' %>
+                            </div>
+                            <div class="d-block d-md-none text-center text-capitalize distance-long">
+                                <%= (round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards').replace('yards', 'yrds') %>
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex justify-content-center">
+                                Par
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex justify-content-center">
+                                SI
+                            </div>
+                        </th>
+                        <% for (const staticPlayer of staticPlayers) { %>
+                        <th scope="col">
+                            <div class="d-none d-md-block text-center text-capitalize">
+                                <%= staticPlayer %>
+                            </div>
+                            <div class="d-block d-md-none text-center text-capitalize ">
+                                <%= staticPlayer.split(' ')[1] %>
+                            </div>
+                        </th>
+                        <% }; %>
+                        <!-- <th scope="col">
+                            <div class="d-flex justify-content-center">
+                                Nett
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex flex-column">
+                                <div class="d-flex justify-content-center">
+                                    W=+
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    L=-
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    H=0
+                                </div>
+                            </div>
+                        </th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i = 1; i < 10; i++) { %>
+                    <tr>
+                        <td class="text-center">
+                            <%= i %>
+                        </td>
+                        <td class="<%= tableClass %>">
+                            <div class="d-flex justify-content-center">
+                                <label for="hole-<%= i %>|distance" class="form-label d-none"></label>
+                                
+                                <!-- <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>"> -->
+                                <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>" disabled>
+
+                            </div>
+                        </td>
+                        <td class="<%= tableClass %>">
+                            <div class="d-flex justify-content-center">
+                                <label for="hole-<%= i %>|par" class="form-label d-none"></label>
+                                
+                                <!-- <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>"> -->
+                                <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>" disabled>
+
+                            </div>
+                        </td>
+                        <td class="<%= tableClass %>">
+                            <div class="d-flex justify-content-center">
+                                <label for="hole-<%= i %>|stroke-index" class="form-label d-none"></label>
+                                
+                                <!-- <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>"> -->
+                                <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>" disabled>
+
+                            </div>
+                        </td>
+                        <% staticPlayers.forEach((staticPlayer, j) => { %>
+                        <% const p = staticPlayer.toLowerCase().replace(/\s/g, '-'); %>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <label for="<%= p %>|hole-<%= i %>" class="form-label d-none"></label>
+                                
+                                <!-- <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] ? round.scores[j].shots[i - 1] : '' %>"> -->
+                                <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] ? round.scores[j].shots[i - 1] : '' %>" disabled>
+
+                            </div>
+                        </td>
+                        <% }); %>
+                        <!-- <td>
+                            <div class="d-flex justify-content-center">
+                                <label for="nett|hole-<%= i %>" class="form-label d-none"></label>
+                                <input id="nett|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[nett][hole]<%= i %>">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <label for="game|hole-<%= i %>" class="form-label d-none"></label>
+                                <input id="game|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[game][hole]<%= i %>">
+                            </div>
+                        </td> -->
+                    </tr>
+                    <% }; %>
+                    <tr class="table-dark">
+                        <td class="text-center text-uppercase">
+                            Out
+                        </td>
+                        <td class="text-center">
+                            <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.distance : sum, 0) %>
+                        </td>
+                        <td class="text-center">
+                            <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.par : sum, 0) %>
+                        </td>
+                        <td></td>
+                        <% for (let j = 0; j < staticPlayers.length; j++) { %>
+                        <td class="text-center">
+                            <% if (!round.scores[j]) continue; %>
+                            <%= round.scores[j].shots.reduce((sum, value, index) => index < 9 ? sum + value : sum, 0) %>
+                        </td>
+                        <% }; %>
+                        <!-- <td></td>
+                        <td></td> -->
+                    </tr>
+                    <% for (let i = 10; i < 19; i++) { %>
+                    <tr>
+                        <td class="text-center">
+                            <%= i %>
+                        </td>
+                        <td class="<%= tableClass %>">
+                            <div class="d-flex justify-content-center">
+                                <label for="hole-<%= i %>|distance" class="form-label d-none"></label>
+                                
+                                <!-- <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>"> -->
+                                <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>" disabled>
+
+                            </div>
+                        </td>
+                        <td class="<%= tableClass %>">
+                            <div class="d-flex justify-content-center">
+                                <label for="hole-<%= i %>|par" class="form-label d-none"></label>
+                                
+                                <!-- <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>"> -->
+                                <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>" disabled>
+
+                            </div>
+                        </td>
+                        <td class="<%= tableClass %>">
+                            <div class="d-flex justify-content-center">
+                                <label for="hole-<%= i %>|stroke-index" class="form-label d-none"></label>
+                                
+                                <!-- <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>"> -->
+                                <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>" disabled>
+
+
+                            </div>
+                        </td>
+                        <% staticPlayers.forEach((staticPlayer, j) => { %>
+                        <% const p = staticPlayer.toLowerCase().replace(/\s/g, '-'); %>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <label for="<%= p %>|hole-<%= i %>" class="form-label d-none"></label>
+                                
+                                <!-- <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] ? round.scores[j].shots[i - 1] : '' %>"> -->
+                                <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] ? round.scores[j].shots[i - 1] : '' %>" disabled>
+
+                            </div>
+                        </td>
+                        <% }); %>
+                        <!-- <td>
+                            <div class="d-flex justify-content-center">
+                                <label for="nett|hole-<%= i %>" class="form-label d-none"></label>
+                                <input id="nett|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[nett][hole]<%= i %>">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <label for="game|hole-<%= i %>" class="form-label d-none"></label>
+                                <input id="game|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[game][hole]<%= i %>">
+                            </div>
+                        </td> -->
+                    </tr>
+                    <% }; %>
+                    <tr class="table-dark">
+                        <td class="text-center text-uppercase">
+                            In
+                        </td>
+                        <td class="text-center">
+                            <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.distance : sum, 0) %>
+                        </td>
+                        <td class="text-center">
+                            <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.par : sum, 0) %>
+                        </td>
+                        <td></td>
+                        <% for (let j = 0; j < staticPlayers.length; j++) { %>
+                        <td class="text-center">
+                            <% if (!round.scores[j]) continue; %>
+                            <%= round.scores[j].shots.reduce((sum, value, index) => index > 8 ? sum + value : sum, 0) %>
+                        </td>
+                        <% }; %>
+                        <!-- <td></td>
+                        <td></td> -->
+                    </tr>
+                    <tr class="table-dark">
+                        <td class="text-center text-uppercase">
+                            Total
+                        </td>
+                        <td class="text-center">
+                            <%= tee.holes.reduce((sum, hole) => sum + hole.distance, 0) %>
+                        </td>
+                        <td class="text-center">
+                            <%= tee.holes.reduce((sum, hole) => sum + hole.par, 0) %>
+                        </td>
+                        <td></td>
+                        <% for (let j = 0; j < staticPlayers.length; j++) { %>
+                        <td class="text-center">
+                            <% if (!round.scores[j]) continue; %>
+                            <%= round.scores[j].shots.reduce((sum, value) => sum + value, 0) %>
+                        </td>
+                        <% }; %>
+                        <!-- <td></td>
+                        <td></td> -->
+                    </tr>
+                    <!-- <tr>
+                        <td colspan="6">
+                            <div class="d-flex justify-content-end text-uppercase">
+                                Handicap
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <div class="d-flex justify-content-end text-uppercase">
+                                Nett
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td colspan="3"></td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>

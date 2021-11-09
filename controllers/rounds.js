@@ -68,7 +68,8 @@ async function update (req, res) {
 
 async function view (req, res) {
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
-    res.render('rounds/edit', { round });
+    const players = await User.find({ role: { $ne: 'super' }, status: 'active' });
+    res.render('rounds/edit', { round, staticPlayers: ['Marker', 'Player A', 'Player B', 'Player C'], players });
 }; 
 
 module.exports = { create, edit, remove, save, serviceWorker, show, submit, update, view };
