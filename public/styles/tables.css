@@ -5,8 +5,8 @@
     table input.form-control {
         font-size: 0.8rem;
     }
-    #round,
-    #round input.form-control {
+    table#round,
+    table#round input.form-control {
         font-size: 0.8rem;   
     }
 }
