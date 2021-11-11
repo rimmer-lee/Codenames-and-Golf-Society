@@ -143,6 +143,18 @@ app.get('/set-cookie', (req, res) => {
     res.redirect('/');
 });
 
+app.get('/create-courses', async (req, res) => {
+    const { courses } = require(path.join(__dirname, 'seeds', 'base'));
+    const defaultUser = await User.findOne({ 'username': 'machine' });
+    for (const course of courses) {
+        const existingCourse = await Course.find({ 'name': course.name });
+        if (existingCourse.length > 0) continue;
+        course.created = { by: defaultUser };
+        await new Course(course).save();
+    };
+    res.redirect('/');
+});
+
 // below routes are available only locally or with cookie 'testing'
 
 app.use(devFeatures)
@@ -157,18 +169,6 @@ app.use('/rounds/courses', courseRoutes);
 //    };
 //    return res.redirect('/');
 // });
-
-app.get('/create-courses', async (req, res) => {
-    const { courses } = require(path.join(__dirname, 'seeds', 'base'));
-    const defaultUser = await User.findOne({ 'username': 'machine' });
-    for (const course of courses) {
-        const existingCourse = await Course.find({ 'name': course.name });
-        if (existingCourse.length > 0) continue;
-        course.created = { by: defaultUser };
-        await new Course(course).save();
-    };
-    res.redirect('/');
-});
 
 // above routes are available only locally or with cookie 'testing'
 
