@@ -23,17 +23,82 @@ function selectPlayer() {
     while (summary.children.length > 0) summary.children[0].remove();
     for (const playerSelect of playerSelects) {
         const id = playerSelect.id.split('|')[0];
-        const currentSelectedIndex = playerSelect.selectedIndex;
-        if (playerSelect.value === 'Select Player' ||
-            document.querySelector(`input[value="${playerSelect[currentSelectedIndex].value}"]`)) continue;
-        function resetSelectPlayer() {
-            this.closest('.row').querySelector('select').selectedIndex = 0;
-            updateData();
-            selectPlayer();                
-        };
+        const currentSelectedPlayer = playerSelect[playerSelect.selectedIndex].value;
+        if (!document.querySelector(`input[value="${currentSelectedPlayer}"]`)) {
+            function resetSelectPlayer() {
+                this.closest('.row').querySelector('select').selectedIndex = 0;
+                selectPlayer();                
+            };
 
-        // need to enable tooltips
+            // if (selectValues.length > 1 && playerSelect.value !== 'Select Player') {
+            //     const teamRadiosElementObject = {
+            //         classList: ['col-12', 'team'],
+            //         children: [
+            //             {
+            //                 classList: ['row', 'mx-0'],
+            //                 children: [
+            //                     {
+            //                         classList: ['col-3', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold', 'ps-3'],
+            //                         innerText: 'Team'
+            //                     },
+            //                     {
+            //                         classList: ['col', 'd-flex', 'justify-content-between', 'align-items-center'],
+            //                         children: []
+            //                     }
+            //                 ]
+            //             }
+            //         ]
+            //     };
+            //     const teams = ['None', 'A', 'B', 'C', 'D'];
+            //     for (let i = 0; i < selectValues.length + 1; i++) {
+            //         const value = `${id}|team-${teams[i].toLowerCase()}`;
+            //         const radioButton = {
+            //             classList: ['form-check', 'form-check-inline'],
+            //             children: [
+            //                 {
+            //                     type: 'input',
+            //                     classList: ['form-check-input'],
+            //                     attributes: [
+            //                         { id: 'id', value },
+            //                         { id: 'type', value: 'radio' },
+            //                         { id: 'name', value: `[${id}][team]` },
+            //                         { id: 'value', value: teams[i].toLowerCase() }
+            //                     ],
+            //                     addEventListener: [{ type: 'input', listener: updateData }]
+            //                 },
+            //                 {
+            //                     type: 'label',
+            //                     classList: ['form-check-label'],
+            //                     attributes: [{ id: 'for', value }],
+            //                     innerText: teams[i]
+            //                 }
+            //             ]
+            //         };
+            //         if (i === 0) radioButton.children[0].attributes.push({ id: 'checked', value: 'true' });
+            //         teamRadiosElementObject.children[0].children[1].children.push(radioButton);
+            //     };
+            //     playerSelect.closest('.row').insertBefore(createElement(teamRadiosElementObject), null);
+            // };
+
+            for (const option of playerSelect.querySelectorAll('option')) option.remove();
+            function createOption(attributes = [], text) {
+                const option = document.createElement('option');
+                for (const attribute of attributes) option.setAttribute(attribute.id, attribute.value)
+                option.innerText = text;
+                playerSelect.appendChild(option)
+            };
+            const optionAttributes = [{ id: 'disabled', value: 'true' }];
+            if (currentSelectedPlayer === 'Select Player') optionAttributes.push({ id: 'selected', value: 'true' });
+            createOption(optionAttributes, 'Select Player');
+            for (const player of players) {
+                if (selectValues.some(selectValue => selectValue.value === player.id)) continue;
+                if (currentSelectedPlayer === player.id) createOption([{ id: 'selected', value: 'true' }, { id: 'value', value: player.id }], player.name.knownAs);
+                else createOption([{ id: 'value', value: player.id }], player.name.knownAs);
+            };
+        };
+        if (playerSelect.value === 'Select Player') continue;
         
+        // need to enable tooltips
         const removePlayerElementObject = {
             classList: ['d-flex', 'remove-player', 'ps-2'],
             children: [
@@ -53,81 +118,10 @@ function selectPlayer() {
                 }
             ]
         };
-        playerSelect.closest('.col').insertBefore(createElement(removePlayerElementObject), null);
-        // if (selectValues.length > 1 && playerSelect.value !== 'Select Player') {
-        //     const teamRadiosElementObject = {
-        //         classList: ['col-12', 'team'],
-        //         children: [
-        //             {
-        //                 classList: ['row', 'mx-0'],
-        //                 children: [
-        //                     {
-        //                         classList: ['col-3', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold', 'ps-3'],
-        //                         innerText: 'Team'
-        //                     },
-        //                     {
-        //                         classList: ['col', 'd-flex', 'justify-content-between', 'align-items-center'],
-        //                         children: []
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     };
-        //     const teams = ['None', 'A', 'B', 'C', 'D'];
-        //     for (let i = 0; i < selectValues.length + 1; i++) {
-        //         const value = `${id}|team-${teams[i].toLowerCase()}`;
-        //         const radioButton = {
-        //             classList: ['form-check', 'form-check-inline'],
-        //             children: [
-        //                 {
-        //                     type: 'input',
-        //                     classList: ['form-check-input'],
-        //                     attributes: [
-        //                         { id: 'id', value },
-        //                         { id: 'type', value: 'radio' },
-        //                         { id: 'name', value: `[${id}][team]` },
-        //                         { id: 'value', value: teams[i].toLowerCase() }
-        //                     ],
-        //                     addEventListener: [{ type: 'input', listener: updateData }]
-        //                 },
-        //                 {
-        //                     type: 'label',
-        //                     classList: ['form-check-label'],
-        //                     attributes: [{ id: 'for', value }],
-        //                     innerText: teams[i]
-        //                 }
-        //             ]
-        //         };
-        //         if (i === 0) radioButton.children[0].attributes.push({ id: 'checked', value: 'true' });
-        //         teamRadiosElementObject.children[0].children[1].children.push(radioButton);
-        //     };
-        //     playerSelect.closest('.row').insertBefore(createElement(teamRadiosElementObject), null);
-        // };
-        if (playerSelect.id === this.id || playerSelect.value !== 'Select Player') continue;
-        for (const option of playerSelect.querySelectorAll('option')) option.remove();
-        function createOption(attributes = [], text) {
-            const option = document.createElement('option');
-            for (const attribute of attributes) option.setAttribute(attribute.id, attribute.value)
-            option.innerText = text;
-            playerSelect.appendChild(option)
-        };
-        const optionAttributes = [{ id: 'disabled', value: 'true' }];
-        if (currentSelectedIndex === 0 ) optionAttributes.push({ id: 'selected', value: 'true' });
-        createOption(optionAttributes, 'Select Player');
-        players.forEach((player, i) => {
-            if (currentSelectedIndex === i + 1) createOption([{ id: 'selected', value: 'true' }, { id: 'value', value: player.id }], player.name.knownAs);
-            else createOption([{ id: 'value', value: player.id }], player.name.knownAs);
-        });
-    };
-    for (const playerSelect of playerSelects) {
-        Array.from(playerSelect.children).forEach(child => {
-            if (selectValues.some(selectValue => selectValue.value === child.value && selectValue.id.split('|')[0] !== playerSelect.id.split('|')[0])) child.remove();
-        });
-        if (playerSelect.value === 'Select Player') continue;
-        const player = playerSelect.id.split('|')[0];
+
         const playerSummaryElementObject = {
             type: 'h4',
-            classList: ['col-6', 'col-md', 'd-flex', 'justify-content-center', 'mb-0'],
+            classList: ['col', 'd-flex', 'justify-content-center', 'mb-0'],
             children: [
                 {
                     classList: ['pe-2'],
@@ -137,7 +131,7 @@ function selectPlayer() {
                     children: [
                         {
                             type: 'span',
-                            attributes: [{ id: 'id', value: `${player}|score` }],
+                            attributes: [{ id: 'id', value: `${id}|score` }],
                             innerText: '0'
                         },
                         {
@@ -147,7 +141,7 @@ function selectPlayer() {
                         {
                             type: 'span',
                             classList: ['f-level'],
-                            attributes: [{ id: 'id', value: `${player}|par` }],
+                            attributes: [{ id: 'id', value: `${id}|par` }],
                             innerText: '0'
                         },
                         {
@@ -159,6 +153,7 @@ function selectPlayer() {
                 }
             ]
         };
+        playerSelect.closest('.col').insertBefore(createElement(removePlayerElementObject), null);
         summary.insertBefore(createElement(playerSummaryElementObject), null);
     };
     for (const playersSection of document.querySelectorAll('[id^="players-"]:not([id$="heading"]):not([id$="button"])')) {
@@ -233,6 +228,7 @@ function selectPlayer() {
             playersSection.insertBefore(createElement(playerScoreElementObject), null);
         };
     };
+    updateData();
     updateScores();
 };
 

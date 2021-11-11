@@ -31,7 +31,7 @@ document.getElementById('reset-submit').addEventListener('click', () => {
     function resetElement(id, callback) {
         const element = document.getElementById(id);
         element.querySelector('[selected]').removeAttribute('selected');
-        element.firstElementChild.setAttribute('selected', true);        
+        element.firstElementChild.setAttribute('selected', true);
         callback.call(element);
         if (element.hasAttribute('required')) resetValidation.call(element);
     };
@@ -47,4 +47,5 @@ document.getElementById('reset-submit').addEventListener('click', () => {
         accordionButton.classList.remove('collapsed');
         handleAccordionClick.call(accordionButton);
     };
+    updateData();
 });

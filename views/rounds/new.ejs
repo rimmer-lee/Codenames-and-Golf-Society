@@ -29,6 +29,9 @@
                         <!-- <div class="col">
                             <div class="form-floating">
                                 <select id="game-select" class="form-select text-capitalize" aria-label="Round game" name="[round][game]">
+                                    <% for (const game of ['Match Play', 'Stroke Play']) { %>
+                                    <option value="<%= game %>"><%= game %></option>
+                                    <% }; %>
                                 </select>
                                 <label for="game-select">Game</label>
                             </div>
