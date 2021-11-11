@@ -51,11 +51,14 @@
                             </div>
                         </th>
                         <th scope="col">
-                            <div class="d-none d-md-block text-center text-capitalize distance-long">
+                            <div class="d-none d-md-block text-center text-capitalize">
                                 <%= round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards' %>
                             </div>
-                            <div class="d-block d-md-none text-center text-capitalize distance-long">
-                                <%= (round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards').replace('yards', 'yrds') %>
+                            <div class="d-block d-md-none text-center text-capitalize">
+
+                                <!-- find a better way to shorten measure property -->
+                                <%= (round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards').replace('yards', 'yrds').replace('metres', 'mtrs').replace('metres', 'mtrs') %>
+                                
                             </div>
                         </th>
                         <th scope="col">
