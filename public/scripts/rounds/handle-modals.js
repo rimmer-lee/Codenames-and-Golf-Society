@@ -18,14 +18,14 @@ function demeritModalClick() {
     demeritButton.setAttribute('data-hole', bsHole);
 };
 
-// document.getElementById('demerit-submit').addEventListener('click', () => {
-//     const demerits = document.getElementById('demerit-demerits');
-//     const rule = document.getElementById('demerit-rule');
-//     const titles = document.querySelectorAll('input[type="checkbox"][id^="demerit-"]');
-//     const comments = document.getElementById('demerit-comments')
-//     const button = document.getElementById('demerit-submit')    
+document.getElementById('demerit-submit').addEventListener('click', () => {
+    const demerits = document.getElementById('demerit-demerits');
+    const rule = document.getElementById('demerit-rule');
+    const titles = document.querySelectorAll('input[type="checkbox"][id^="demerit-"]');
+    const comments = document.getElementById('demerit-comments');
+    const button = document.getElementById('demerit-submit');
 
-// });
+});
 
 document.getElementById('reset-submit').addEventListener('click', () => {
     function resetElement(id, callback) {

@@ -125,7 +125,16 @@ function selectPlayer() {
             children: [
                 {
                     classList: ['pe-2'],
-                    innerText: players.find(({ id }) => id === playerSelect.value).name.knownAs
+                    children: [
+                        {
+                            classList: ['d-inline', 'd-md-none'],
+                            innerText: players.find(({ id }) => id === playerSelect.value).name.initials
+                        },
+                        {
+                            classList: ['d-none', 'd-md-inline'],
+                            innerText: players.find(({ id }) => id === playerSelect.value).name.knownAs
+                        }
+                    ]                    
                 },
                 {
                     children: [
@@ -162,8 +171,9 @@ function selectPlayer() {
         toggleElement(playersSection.closest('[class*="col"]'), selectValues.length > 0);
         for (const playerSelect of playerSelects) {
             const playerName = playerSelect.selectedOptions[0].innerText;
+            const player = players.find(({ id }) => id === playerSelect.value);
             if (playerName === 'Select Player') continue;
-            const player = playerSelect.id.split('|')[0];
+            const id = playerSelect.id.split('|')[0];
             const playerScoreElementObject = {
                 classList: ['col-12'],
                 children: [
@@ -171,27 +181,31 @@ function selectPlayer() {
                         classList: ['row'],
                         children: [
                             {
-                                classList: ['col', 'd-flex', 'align-items-center', 'justify-content-center'],
-                                attributes: [{ id: 'data-player', value: `${player}` }],
-                                innerText: playerName
+                                classList: ['col', 'd-flex', 'd-md-none', 'align-items-center', 'justify-content-center'],
+                                attributes: [{ id: 'data-player', value: `${id}` }],
+                                innerText: player.name.initials
                             },
                             {
-                                // classList: ['col-3'],
-                                classList: ['col'],
+                                classList: ['col', 'd-none', 'd-md-flex', 'align-items-center', 'justify-content-center'],
+                                attributes: [{ id: 'data-player', value: `${id}` }],
+                                innerText: player.name.knownAs
+                            },
+                            {
+                                classList: ['col', 'col-md-3', 'px-0'],
                                 children: [
                                     {
                                         type: 'label',
                                         classList: ['form-label', 'd-none'],
-                                        attributes: [{ id: 'for', value: `${player}|hole-${hole}` }]
+                                        attributes: [{ id: 'for', value: `${id}|hole-${hole}` }]
                                     },
                                     {
                                         type: 'input',
                                         classList: ['form-control', 'text-center'],
                                         attributes: [
-                                            { id: 'id', value: `${player}|hole-${hole}` },
+                                            { id: 'id', value: `${id}|hole-${hole}` },
                                             { id: 'type', value: 'number' },
                                             { id: 'min', value: '1' },
-                                            { id: 'name', value: `[${player}][hole][${hole}]` }
+                                            { id: 'name', value: `[${id}][hole][${hole}]` }
                                         ],
                                         addEventListener: [
                                             { type: 'input', listener: updateData },
@@ -200,27 +214,53 @@ function selectPlayer() {
                                     }
                                 ]
                             },
-                            // {
-                            //     classList: ['col-5', 'd-flex'],
-                            //     children: [
-                            //         {
-                            //             type: 'button',
-                            //             classList: ['btn', 'btn-primary', 'mx-auto'],
-                            //             attributes: [
-                            //                 { id: 'data-bs-toggle', value: 'modal' },
-                            //                 { id: 'data-bs-target', value: '#demerit-modal' },
-                            //                 { id: 'data-bs-player', value: player },
-                            //                 { id: 'data-bs-player-name', value: playerName },
-                            //                 { id: 'data-bs-hole', value: hole }
-                            //             ],
-                            //             addEventListener: [
-                            //                 { listener: function (e) { e.preventDefault() } },
-                            //                 { event: 'show.bs.modal', listener: demeritModalClick }
-                            //             ],
-                            //             innerText: 'Demerit'
-                            //         }
-                            //     ]
-                            // }
+                            {
+                                classList: ['col-5', 'd-none', 'd-md-flex'],
+                                children: [
+                                    {
+                                        type: 'button',
+                                        classList: ['btn', 'btn-primary', 'mx-auto'],
+                                        attributes: [
+                                            { id: 'data-bs-toggle', value: 'modal' },
+                                            { id: 'data-bs-target', value: '#demerit-modal' },
+                                            { id: 'data-bs-player', value: id },
+                                            { id: 'data-bs-player-name', value: playerName },
+                                            { id: 'data-bs-hole', value: hole }
+                                        ],
+                                        addEventListener: [
+                                            { listener: function (e) { e.preventDefault() } },
+                                            { event: 'show.bs.modal', listener: demeritModalClick }
+                                        ],
+                                        innerText: 'Demerit'
+                                    }
+                                ]
+                            },
+                            {
+                                classList: ['col', 'd-flex', 'd-md-none', 'align-items-center', 'justify-content-center'],
+                                children: [
+                                    {
+                                        children: [
+                                            {
+                                                classList: ['btn', 'btn-success', 'p-1', 'plus'],
+                                                attributes: [
+                                                    { id: 'data-bs-toggle', value: 'modal' },
+                                                    { id: 'data-bs-target', value: '#demerit-modal' },
+                                                    { id: 'data-bs-player', value: id },
+                                                    { id: 'data-bs-player-name', value: playerName },
+                                                    { id: 'data-bs-hole', value: hole }
+                                                ],
+                                                children: [
+                                                    {
+                                                        classList: ['btn-close', 'btn-close-white'],
+                                                        attributes: [{ id: 'aria-label', value: 'new' }]
+                                                    }
+                                                ],
+                                                addEventListener: [ { event: 'show.bs.modal', listener: demeritModalClick } ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     }
                 ]

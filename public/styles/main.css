@@ -1,5 +1,11 @@
 @import 'tables.css';
 
+@media (max-width: 576px) {
+    #summary-score h4 {
+        font-size: 0.8rem;
+    }
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
 }

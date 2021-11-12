@@ -79,6 +79,12 @@ UserSchema.virtual('name.initialed').get(function () {
     return `${first[0]}. ${middle.length > 0 ? middle.map(m => `${m[0]}.`).join(' ') + ' ' : ''}${last}`;
 });
 
+UserSchema.virtual('name.initials').get(function () {
+    const { knownAs = '', last = '' } = this.name;
+    if (!knownAs && !last) return;
+    return `${knownAs[0]}${last[0]}`;
+});
+
 UserSchema.virtual('formattedBirthday').get(function () {
     const { birthday } = this;
     if (!birthday) return null;

@@ -345,7 +345,7 @@
     <div id="button-parent" class="col-12">
         <div class="row mx-2 gx-4">
             <div class="col-4 d-flex">
-                <a class="btn btn-warning flex-fill" href="/rounds">Cancel</a>
+                <a class="btn btn-warning flex-fill" href="/rounds">Back</a>
             </div>
             <div class="col-4 d-flex">
                 <button id="reset" class="btn btn-success flex-fill" type="button" data-bs-toggle="modal" data-bs-target="#reset-modal">Reset</button>
@@ -355,7 +355,7 @@
             </div>
         </div>
     </div>
-    <!-- <div id="demerit-modal" class="modal fade" tabindex="-1" aria-labelledby="demerit-modal-label" aria-hidden="true">
+    <div id="demerit-modal" class="modal fade" tabindex="-1" aria-labelledby="demerit-modal-label" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -375,7 +375,7 @@
                                 <label class="col-4 col-form-label d-flex align-items-center" for="demerit-rule">Rule</label>
                                 <select id="demerit-rule" class="col form-select me-2">
                                     <option selected disabled>Select Rule</option>
-                                    <% for (const rule of rules) { %>
+                                    <% for (const rule of rules.sort((a, b) => a.index - b.index)) { %>
                                     <option value="<%= rule.id %>"><%= rule.index %>. <%= rule.description[0] %></option>
                                     <% }; %>
                                 </select>
@@ -422,7 +422,7 @@
                 </div>
             </div>
         </div>
-    </div> -->
+    </div>
 
     <!-- edit demerit modal -->
 
