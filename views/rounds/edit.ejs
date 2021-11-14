@@ -23,7 +23,7 @@
 
                         <option <%= !round.scores[i] ? 'selected ' : '' %>disabled>Select Player</option>
                         <% for (const player of players) { %>
-                        <% if (round.scores.some(score => score.player.id === player.id) && player.id !== round.scores[i].player.id) continue; %>
+                        <% if (round.scores[i] && round.scores.some(score => score.player.id === player.id) && player.id !== round.scores[i].player.id) continue; %>
                         <option <%= (round.scores[i] && player.id === round.scores[i].player.id) ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
                         <% }; %>
                     </select>
