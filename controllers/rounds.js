@@ -53,7 +53,7 @@ function serviceWorker (req, res) {
 };
 
 async function show (req, res) {
-    const rounds = await Round.find().populate('scores.player').populate('course');
+    const rounds = await Round.find().sort({ 'date': -1 }).populate('scores.player').populate('course');
     res.render('rounds/index', { rounds });
 };
 

@@ -24,7 +24,7 @@
                         <option <%= !round.scores[i] ? 'selected ' : '' %>disabled>Select Player</option>
                         <% for (const player of players) { %>
                         <% if (round.scores.some(score => score.player.id === player.id) && player.id !== round.scores[i].player.id) continue; %>
-                        <option <%= player.id === round.scores[i].player.id ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
+                        <option <%= (round.scores[i] && player.id === round.scores[i].player.id) ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
                         <% }; %>
                     </select>
                     <label for="player-<%= staticPlayers[i] %>|id"><%= staticPlayers[i] %></label>
@@ -58,7 +58,7 @@
 
                                 <!-- find a better way to shorten measure property -->
                                 <%= (round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards').replace('yards', 'yrds').replace('metres', 'mtrs').replace('metres', 'mtrs') %>
-                                
+
                             </div>
                         </th>
                         <th scope="col">
