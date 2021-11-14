@@ -22,7 +22,8 @@ function getTee() {
 };
 
 function updateData() {
-    
+    updateScores();
+
     // https://stackoverflow.com/questions/5484673/javascript-how-to-dynamically-create-nested-objects-using-object-names-given-by
     // cleaner solution - https://stackoverflow.com/questions/7640727/javascript-nested-objects-from-string
     function createNestedObject (base, element) {
@@ -46,7 +47,6 @@ function updateData() {
         if (radio.checked) createNestedObject(round, radio);
     };
     window.localStorage.setItem('round', JSON.stringify(round));
-    updateScores();
 };
 
 function updateParElement(player, par) {

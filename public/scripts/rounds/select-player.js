@@ -27,7 +27,7 @@ function selectPlayer() {
         if (!document.querySelector(`input[value="${currentSelectedPlayer}"]`)) {
             function resetSelectPlayer() {
                 this.closest('.row').querySelector('select').selectedIndex = 0;
-                selectPlayer();                
+                selectPlayer();
             };
 
             // if (selectValues.length > 1 && playerSelect.value !== 'Select Player') {
@@ -167,7 +167,11 @@ function selectPlayer() {
     };
     for (const playersSection of document.querySelectorAll('[id^="players-"]:not([id$="heading"]):not([id$="button"])')) {
         const hole = playersSection.id.split('-')[1];
+
+        // do we need to remove the children
+        // if yes, can we create them for all players and updateScores()?
         while (playersSection.children.length > 0) playersSection.children[0].remove();
+
         toggleElement(playersSection.closest('[class*="col"]'), selectValues.length > 0);
         for (const playerSelect of playerSelects) {
             const playerName = playerSelect.selectedOptions[0].innerText;
@@ -269,7 +273,6 @@ function selectPlayer() {
         };
     };
     updateData();
-    updateScores();
 };
 
 for (const playerSelect of document.querySelectorAll('select.form-select[id$="|id"]')) playerSelect.addEventListener('change', selectPlayer);
