@@ -13,7 +13,7 @@ function demeritModalClick() {
             ordinal = 'rd';
             break;
     };
-    document.getElementById('demerit-modal-label').innerText = `New Demerit for ${bsPlayerName} on the ${bsHole}${ordinal} Hole`;
+    document.getElementById('demerit-modal-label').innerText = `Demerit for ${bsPlayerName} on the ${bsHole}${ordinal} Hole`;
     demeritButton.setAttribute('data-player', bsPlayer);
     demeritButton.setAttribute('data-hole', bsHole);
 };
@@ -24,6 +24,12 @@ document.getElementById('demerit-submit').addEventListener('click', () => {
     const titles = document.querySelectorAll('input[type="checkbox"][id^="demerit-"]');
     const comments = document.getElementById('demerit-comments');
     const button = document.getElementById('demerit-submit');
+    button.setAttribute('data-demerits', demerits.value);
+    button.setAttribute('data-rule', rule.value);
+    button.setAttribute('data-comments', comments.value);
+    // for (const title of titles) {
+    //     button.setAttribute(``, )
+    // };
 
 });
 

@@ -4,7 +4,7 @@
 <div class="row my-3 pb-2 border-bottom border-1">
 
     <!-- capitalise first letter of tee value -->
-    <h1><%= round.course.name %> (<%= round.tee %>) on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
+    <h1><%= round.course.name %> on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
 
 </div>
 
@@ -45,10 +45,8 @@
             <table id="round" class="table table-bordered table-striped">
                 <thead class="table-dark">
                     <tr>
-                        <th scope="col">
-                            <div class="d-flex justify-content-center">
-                                Hole
-                            </div>
+                        <th class="text-center align-middle" scope="col">
+                            Hole
                         </th>
                         <th scope="col">
                             <div class="d-none d-md-block text-center text-capitalize">
@@ -61,15 +59,11 @@
 
                             </div>
                         </th>
-                        <th scope="col">
-                            <div class="d-flex justify-content-center">
-                                Par
-                            </div>
+                        <th class="text-center align-middle" scope="col">
+                            Par
                         </th>
-                        <th scope="col">
-                            <div class="d-flex justify-content-center">
-                                SI
-                            </div>
+                        <th class="text-center align-middle" scope="col">
+                            SI
                         </th>
                         <% for (const staticPlayer of staticPlayers) { %>
                         <th scope="col">
@@ -81,10 +75,8 @@
                             </div>
                         </th>
                         <% }; %>
-                        <!-- <th scope="col">
-                            <div class="d-flex justify-content-center">
-                                Nett
-                            </div>
+                        <!-- <th class="text-center align-middle" scope="col">
+                            Nett
                         </th>
                         <th scope="col">
                             <div class="d-flex flex-column">
@@ -104,7 +96,7 @@
                 <tbody>
                     <% for (let i = 1; i < 10; i++) { %>
                     <tr>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= i %>
                         </td>
                         <td class="<%= tableClass %>">
@@ -161,18 +153,18 @@
                     </tr>
                     <% }; %>
                     <tr class="table-dark">
-                        <td class="text-center text-uppercase">
+                        <td class="text-center align-middle text-uppercase">
                             Out
                         </td>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.distance : sum, 0) %>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.par : sum, 0) %>
                         </td>
                         <td></td>
                         <% for (let j = 0; j < staticPlayers.length; j++) { %>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <% if (!round.scores[j]) continue; %>
                             <%= round.scores[j].shots.reduce((sum, value, index) => index < 9 ? sum + value : sum, 0) || '' %>
                         </td>
@@ -182,7 +174,7 @@
                     </tr>
                     <% for (let i = 10; i < 19; i++) { %>
                     <tr>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= i %>
                         </td>
                         <td class="<%= tableClass %>">
@@ -240,18 +232,18 @@
                     </tr>
                     <% }; %>
                     <tr class="table-dark">
-                        <td class="text-center text-uppercase">
+                        <td class="text-center align-middle text-uppercase">
                             In
                         </td>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.distance : sum, 0) %>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.par : sum, 0) %>
                         </td>
                         <td></td>
                         <% for (let j = 0; j < staticPlayers.length; j++) { %>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <% if (!round.scores[j]) continue; %>
                             <%= round.scores[j].shots.reduce((sum, value, index) => index > 8 ? sum + value : sum, 0) || '' %>
                         </td>
@@ -260,18 +252,18 @@
                         <td></td> -->
                     </tr>
                     <tr class="table-dark">
-                        <td class="text-center text-uppercase">
+                        <td class="text-center align-middle text-uppercase">
                             Total
                         </td>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= tee.holes.reduce((sum, hole) => sum + hole.distance, 0) %>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <%= tee.holes.reduce((sum, hole) => sum + hole.par, 0) %>
                         </td>
                         <td></td>
                         <% for (let j = 0; j < staticPlayers.length; j++) { %>
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                             <% if (!round.scores[j]) continue; %>
                             <%= round.scores[j].shots.reduce((sum, value) => sum + value, 0) || '' %>
                         </td>
@@ -280,10 +272,8 @@
                         <td></td> -->
                     </tr>
                     <!-- <tr>
-                        <td colspan="6">
-                            <div class="d-flex justify-content-end text-uppercase">
-                                Handicap
-                            </div>
+                        <td class="text-center align-middle text-uppercase" colspan="6">
+                            Handicap
                         </td>
                         <td></td>
                         <td></td>
@@ -293,10 +283,8 @@
                         <td colspan="3"></td>
                     </tr>
                     <tr>
-                        <td colspan="6">
-                            <div class="d-flex justify-content-end text-uppercase">
-                                Nett
-                            </div>
+                        <td class="text-center align-middle text-uppercase" colspan="6">
+                            Nett
                         </td>
                         <td></td>
                         <td></td>
