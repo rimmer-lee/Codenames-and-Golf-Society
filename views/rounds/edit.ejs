@@ -174,7 +174,8 @@
                         <% for (let j = 0; j < staticPlayers.length; j++) { %>
                         <td class="text-center">
                             <% if (!round.scores[j]) continue; %>
-                            <%= round.scores[j].shots.reduce((sum, value, index) => index < 9 ? sum + value : sum, 0) %>
+                            <% const out =  round.scores[j].shots.reduce((sum, value, index) => index < 9 ? sum + value : sum, 0); %>
+                            <% out ? out : ''; %>
                         </td>
                         <% }; %>
                         <!-- <td></td>
@@ -253,7 +254,8 @@
                         <% for (let j = 0; j < staticPlayers.length; j++) { %>
                         <td class="text-center">
                             <% if (!round.scores[j]) continue; %>
-                            <%= round.scores[j].shots.reduce((sum, value, index) => index > 8 ? sum + value : sum, 0) %>
+                            <% const in = round.scores[j].shots.reduce((sum, value, index) => index > 8 ? sum + value : sum, 0); %>
+                            <%= in || ''; %>
                         </td>
                         <% }; %>
                         <!-- <td></td>
@@ -273,7 +275,8 @@
                         <% for (let j = 0; j < staticPlayers.length; j++) { %>
                         <td class="text-center">
                             <% if (!round.scores[j]) continue; %>
-                            <%= round.scores[j].shots.reduce((sum, value) => sum + value, 0) %>
+                            <% const total = round.scores[j].shots.reduce((sum, value) => sum + value, 0); %>
+                            <%= total ? total : ''; %>
                         </td>
                         <% }; %>
                         <!-- <td></td>
