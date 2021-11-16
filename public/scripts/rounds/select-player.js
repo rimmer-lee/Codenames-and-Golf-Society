@@ -128,7 +128,7 @@ function selectPlayer() {
                     children: [
                         {
                             classList: ['d-inline', 'd-md-none'],
-                            innerText: players.find(({ id }) => id === playerSelect.value).name.initials
+                            innerText: players.find(({ id }) => id === playerSelect.value).name.initials.short
                         },
                         {
                             classList: ['d-none', 'd-md-inline'],
@@ -187,7 +187,7 @@ function selectPlayer() {
                             {
                                 classList: ['col', 'd-flex', 'd-md-none', 'align-items-center', 'justify-content-center'],
                                 attributes: [{ id: 'data-player', value: `${id}` }],
-                                innerText: player.name.initials
+                                innerText: player.name.initials.short
                             },
                             {
                                 classList: ['col', 'd-none', 'd-md-flex', 'align-items-center', 'justify-content-center'],
