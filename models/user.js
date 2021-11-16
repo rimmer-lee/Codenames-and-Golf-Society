@@ -80,9 +80,12 @@ UserSchema.virtual('name.initialed').get(function () {
 });
 
 UserSchema.virtual('name.initials').get(function () {
-    const { knownAs = '', last = '' } = this.name;
+    const { knownAs = '', first = '', middle = [], last = '' } = this.name;
     if (!knownAs && !last) return;
-    return `${knownAs[0]}${last[0]}`;
+    return {
+        short: `${knownAs[0]}${last[0]}`,
+        full: `${first[0]}${middle.length > 0 ? middle.map(m => m[0]) : ''}${last[0]}`
+    }
 });
 
 UserSchema.virtual('formattedBirthday').get(function () {
