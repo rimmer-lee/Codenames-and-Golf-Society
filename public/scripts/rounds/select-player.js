@@ -167,11 +167,7 @@ function selectPlayer() {
     };
     for (const playersSection of document.querySelectorAll('[id^="players-"]:not([id$="heading"]):not([id$="button"])')) {
         const hole = playersSection.id.split('-')[1];
-
-        // do we need to remove the children
-        // if yes, can we create them for all players and updateScores()?
         while (playersSection.children.length > 0) playersSection.children[0].remove();
-
         toggleElement(playersSection.closest('[class*="col"]'), selectValues.length > 0);
         for (const playerSelect of playerSelects) {
             const playerName = playerSelect.selectedOptions[0].innerText;
