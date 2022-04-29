@@ -7,7 +7,7 @@
             <% }; %>
             <% for (const rule of rules) { %>
             <!-- find the optimum number of characters -->
-            <option value="<%= rule.id %>"<%= selected === String(rule.id) ? " selected" : "" %>><%= `${rule.index}. ${rule.description[0]}` %></option>
+            <option value="<%= rule.id %>"<%= selected === String(rule.id) ? " selected" : "" %>><%= `${rule.index}. ${decodeURI(rule.description[0])}` %></option>
             <!-- <option value="<%= rule.id %>"<%= selected === String(rule.id) ? " selected" : "" %>><%= `${rule.index}. ${rule.description[0].substring(0,23)}${rule.description[0].length > 20 ? '...' : ''}` %></option> -->
             <% }; %>
         </select>

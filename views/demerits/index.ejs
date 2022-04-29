@@ -22,20 +22,15 @@
                 <th scope="col"></th>
                 <% for (const player of data.players) { %>
                 <th class="align-top" scope="col">
-                    <div class="row">
-                        <div class="d-flex">
-                            <div class="mx-auto">
-                                <div>
-                                    <%= player.name.knownAs %>
-                                </div>
-                                <!-- need to update year value -->
-                                <!-- <a href="/demerits/edit?y=<%= years[0] %>&p=<%= player.id %>">
-                                    <%= player.name.knownAs %>
-                                </a> -->
+                    <div class="d-flex flex-column">
+                        <div class="text-center">
+                            <div class="d-none d-md-block">
+                                <%= player.name.knownAs %>
+                            </div>
+                            <div class="d-md-none">
+                                <%= player.name.initials.short %>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
                         <% for (const title of player.titles) { %>
                         <% const t = titles.find(({ value }) => title === value); %>
                         <div class="col d-flex p-0">
@@ -73,7 +68,7 @@
                 </th>
                 <% for (const p of data.players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.id); %>
-                <% const value = d.demerits ? d.demerits : ""; %> 
+                <% const value = d.demerits ? d.demerits : ""; %>
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">

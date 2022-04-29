@@ -36,22 +36,7 @@
         </div>
     </div>
 </form>
-<div id="delete-modal" class="modal fade" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="delete-modal-label" class="modal-title">Are you sure you want to delete your account?</h5>
-                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">No</button>
-                <form method="POST" action="/account?_method=DELETE">
-                    <button id="delete-submit" class="btn btn-danger" type="submit">Yes</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<%- include('../partials/modals/delete', { item: 'your account', path: '/account' }) %>
 <script>
     const user = JSON.parse('<%- JSON.stringify(currentUser) %>');
 </script>

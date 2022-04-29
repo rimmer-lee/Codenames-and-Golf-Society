@@ -1,4 +1,4 @@
-<% layout('layouts/boilerplate') %>    
+<% layout('layouts/boilerplate') %>
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Register</h1>
 </div>
@@ -7,6 +7,10 @@
         <div class="row d-flex">
             <div class="col-11 col-md-8 col-lg-6 border border-3 rounded-3 mx-auto px-3">
                 <div class="row gy-3 py-3">
+
+                    <!-- reorder so that full name is first field -->
+                    <!-- check whether player already exists by matching with entered name -->
+
                     <%- include('../partials/forms/account/username', { id: 'username', name: 'username', value: '' }) %>
                     <%- include('../partials/forms/account/email', { id: 'email', name: 'email', value: '' }) %>
                     <%- include('../partials/forms/account/register-password', { id: 'new-password', label: 'Password', name: 'new-password', value: '', options: 'autocomplete=current-password required' }) %>

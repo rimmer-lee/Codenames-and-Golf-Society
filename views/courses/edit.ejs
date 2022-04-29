@@ -1,0 +1,86 @@
+<% layout('layouts/boilerplate') %>
+<form class="needs-validation" method="POST" action="/rounds/courses/<%= course.id %>?_method=PUT" novalidate>
+    <div class="row gy-3">
+        <div class="col-12">
+            <div class="row my-3 pb-2 border-bottom border-1">
+                <div class="col">
+                    <h1 class="d-inline"><%= course.name %></h1>
+                </div>
+                <div class="col">
+                    <div class="d-flex justify-content-end">
+                        <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" readonly>
+                        <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                <% for (const tee of course.tees) { %>
+                <div class="col">
+                    <div class="row mx-0">
+                        <label for="<%= `${tee.id}|colour` %>" class="col-4 form-label d-flex align-items-center fw-bold mb-0">
+                            <%= tee.name %>
+                        </label>
+                        <select id="<%= `${tee.id}|colour` %>" class="col form-select text-capitalize" name="<%= `[${tee.id}][colour]` %>">
+                            <% for (const teeColour of teeColours) { %>
+                            <option value="<%= teeColour.colour %>"<%= tee.colour.name === teeColour.colour ? " selected": "" %>><%= teeColour.colour %></option>
+                            <% }; %>
+                        </select>
+                    </div>
+                </div>
+                <% }; %>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="table-responsive">
+                <table id="course" class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="text-center align-middle" scope="col" rowspan="2">
+                                Hole
+                            </th>
+                            <% for (const tee of course.tees) { %>
+                            <th class="text-center align-middle" scope="col" colspan="3">
+                                <%= tee.name %>
+                            </th>
+                            <% }; %>
+                        </tr>
+                        <tr>
+                            <% for (const tee of course.tees) { %>
+                            <th scope="col">
+                                <div class="d-none d-md-block text-center text-capitalize">
+                                    <%= tee.measure.full %>
+                                </div>
+                                <div class="d-block d-md-none text-center text-capitalize">
+                                    <%= tee.measure.short %>
+                                </div>
+                            </th>
+                            <th class="text-center align-middle" scope="col">
+                                Par
+                            </th>
+                            <th class="text-center align-middle" scope="col">
+                                SI
+                            </th>
+                            <% }; %>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%- include('../partials/tables/courses/holes', { start: 1, end: 9, tees: course.tees }) %>
+                        <%- include('../partials/tables/courses/totals', { title: 'Out', property: 'front', tees: course.tees }) %>
+                        <%- include('../partials/tables/courses/holes', { start: 10, end: 18, tees: course.tees }) %>
+                        <%- include('../partials/tables/courses/totals', { title: 'In', property: 'back', tees: course.tees }) %>
+                        <%- include('../partials/tables/courses/totals', { title: 'Total', property: 'full', tees: course.tees }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+<%- include('../partials/modals/delete', { item: course.name, path: `/rounds/courses/${course.id}` }) %>
+<script>
+    const course = JSON.parse('<%- JSON.stringify(course) %>');
+    const teeColours = JSON.parse('<%- JSON.stringify(teeColours) %>');
+</script>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/courses/event-handlers.js"></script>

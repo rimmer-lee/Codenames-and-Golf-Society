@@ -17,8 +17,4 @@ router.route('/:id')
     .put(catchAsync(rounds.update))
     .delete(catchAsync(rounds.remove));
 
-router.route('/:id/edit')
-    .get(catchAsync(rounds.edit))
-    .post(catchAsync(rounds.submit));
-
 module.exports = router;

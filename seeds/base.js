@@ -121,7 +121,7 @@ const sections = [
                         { method: 'award', title: 'Ace' },
                         { method: 'revoke', title: 'Karen' },
                         { method: 'revoke', title: 'flag bitch' }
-                    ] 
+                    ]
                 }
             },
             {
@@ -558,9 +558,7 @@ const users = [
     {
         name: {
             preferred: 'Lee',
-            first: 'Thomas',
-            middle: [ 'Lee' ],
-            last: 'Rimmer'
+            full: 'Thomas Lee Rimmer'
         },
         username: 'lee',
         email: 'lee@rimmer.com',
@@ -579,9 +577,7 @@ const users = [
     {
         name: {
             preferred: 'Joe',
-            first: 'Joseph',
-            middle: [ 'Edward', 'Carew' ],
-            last: 'Burrows'
+            full: 'Joseph Edward Carew Burrows'
         },
         username: 'joe',
         email: 'joe@burrows.com',
@@ -593,9 +589,7 @@ const users = [
     {
         name: {
             preferred: 'Jonny',
-            first: 'Jonathan',
-            middle: [ 'Elliot' ],
-            last: 'Martin'
+            full: 'Jonathan Elliot Martin'
         },
         username: 'jonny',
         email: 'jonny@martin.com',
@@ -606,10 +600,7 @@ const users = [
     },
     {
         name: {
-            first: 'Martin',
-            middle: [ 'James' ],
-            last: 'Nash',
-            status: 'active'
+            full: 'Martin James Nash'
         },
         username: 'martin',
         email: 'martin@nash.com',
@@ -621,9 +612,7 @@ const users = [
     {
         name: {
             preferred: 'Oli',
-            first: 'Oliver',
-            middle: [ 'George' ],
-            last: 'Nash'
+            full: 'Oliver George Nash'
         },
         username: 'oli',
         email: 'oli@nash.com',
@@ -656,29 +645,386 @@ const rounds = [
                 player: 'Oliver Nash',
                 shots: [ 6, 4, 4, 4, 5, 6, 4, 6, 6, 3, 7, 6, 5, 5, 6, 6, 4, 4 ]
             }
+        ],
+        games: [
+            {
+                handicap: false,
+                method: 'Combined',
+                name: 'Match Play',
+                players: [
+                    { player: 'Thomas Rimmer', team: 'a' },
+                    { player: 'Joseph Burrows', team: 'a' },
+                    { player: 'Martin Nash', team: 'b' },
+                    { player: 'Oliver Nash', team: 'b' }
+                ]
+            },
+            {
+                handicap: false,
+                name: 'Skins',
+                players: [
+                    { player: 'Thomas Rimmer' },
+                    { player: 'Joseph Burrows' }
+                ]
+            }
         ]
     }
 ];
 
 const courses = [
     {
+        randa: 21692,
+        name: 'Aylesbury Vale',
+        tees: [
+            {
+                name: 'White',
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 499,
+                        strokeIndex: 11,
+                        par: 5
+                    },
+                    {
+                        index: 2,
+                        distance: 167,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 3,
+                        distance: 427,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 320,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 5,
+                        distance: 377,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 402,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 340,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 8,
+                        distance: 217,
+                        strokeIndex: 9,
+                        par: 3
+                    },
+                    {
+                        index: 9,
+                        distance: 495,
+                        strokeIndex: 17,
+                        par: 5
+                    },
+                    {
+                        index: 10,
+                        distance: 453,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 11,
+                        distance: 362,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 503,
+                        strokeIndex: 12,
+                        par: 5
+                    },
+                    {
+                        index: 13,
+                        distance: 414,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 447,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 170,
+                        strokeIndex: 10,
+                        par: 3
+                    },
+                    {
+                        index: 16,
+                        distance: 302,
+                        strokeIndex: 13,
+                        par: 4
+                    },
+                    {
+                        index: 17,
+                        distance: 164,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 18,
+                        distance: 534,
+                        strokeIndex: 7,
+                        par: 5
+                    }
+                ]
+            },
+            {
+                name: 'Yellow',
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 497,
+                        strokeIndex: 11,
+                        par: 5
+                    },
+                    {
+                        index: 2,
+                        distance: 164,
+                        strokeIndex: 13,
+                        par: 3
+                    },
+                    {
+                        index: 3,
+                        distance: 417,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 309,
+                        strokeIndex: 15,
+                        par: 4
+                    },
+                    {
+                        index: 5,
+                        distance: 373,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 399,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 339,
+                        strokeIndex: 16,
+                        par: 4
+                    },
+                    {
+                        index: 8,
+                        distance: 177,
+                        strokeIndex: 9,
+                        par: 3
+                    },
+                    {
+                        index: 9,
+                        distance: 490,
+                        strokeIndex: 17,
+                        par: 5
+                    },
+                    {
+                        index: 10,
+                        distance: 448,
+                        strokeIndex: 5,
+                        par: 4
+                    },
+                    {
+                        index: 11,
+                        distance: 360,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 498,
+                        strokeIndex: 12,
+                        par: 5
+                    },
+                    {
+                        index: 13,
+                        distance: 408,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 14,
+                        distance: 447,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 166,
+                        strokeIndex: 10,
+                        par: 3
+                    },
+                    {
+                        index: 16,
+                        distance: 302,
+                        strokeIndex: 13,
+                        par: 4
+                    },
+                    {
+                        index: 17,
+                        distance: 156,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 18,
+                        distance: 524,
+                        strokeIndex: 7,
+                        par: 5
+                    }
+                ]
+            },
+            {
+                name: 'Red',
+                measure: 'yards',
+                holes: [
+                    {
+                        index: 1,
+                        distance: 483,
+                        strokeIndex: 10,
+                        par: 5
+                    },
+                    {
+                        index: 2,
+                        distance: 151,
+                        strokeIndex: 15,
+                        par: 3
+                    },
+                    {
+                        index: 3,
+                        distance: 340,
+                        strokeIndex: 6,
+                        par: 4
+                    },
+                    {
+                        index: 4,
+                        distance: 265,
+                        strokeIndex: 12,
+                        par: 4
+                    },
+                    {
+                        index: 5,
+                        distance: 361,
+                        strokeIndex: 2,
+                        par: 4
+                    },
+                    {
+                        index: 6,
+                        distance: 340,
+                        strokeIndex: 4,
+                        par: 4
+                    },
+                    {
+                        index: 7,
+                        distance: 275,
+                        strokeIndex: 14,
+                        par: 4
+                    },
+                    {
+                        index: 8,
+                        distance: 139,
+                        strokeIndex: 17,
+                        par: 3
+                    },
+                    {
+                        index: 9,
+                        distance: 468,
+                        strokeIndex: 9,
+                        par: 5
+                    },
+                    {
+                        index: 10,
+                        distance: 421,
+                        strokeIndex: 13,
+                        par: 5
+                    },
+                    {
+                        index: 11,
+                        distance: 277,
+                        strokeIndex: 11,
+                        par: 4
+                    },
+                    {
+                        index: 12,
+                        distance: 364,
+                        strokeIndex: 1,
+                        par: 4
+                    },
+                    {
+                        index: 13,
+                        distance: 389,
+                        strokeIndex: 5,
+                        par: 5
+                    },
+                    {
+                        index: 14,
+                        distance: 359,
+                        strokeIndex: 3,
+                        par: 4
+                    },
+                    {
+                        index: 15,
+                        distance: 135,
+                        strokeIndex: 16,
+                        par: 3
+                    },
+                    {
+                        index: 16,
+                        distance: 273,
+                        strokeIndex: 8,
+                        par: 4
+                    },
+                    {
+                        index: 17,
+                        distance: 137,
+                        strokeIndex: 18,
+                        par: 3
+                    },
+                    {
+                        index: 18,
+                        distance: 462,
+                        strokeIndex: 7,
+                        par: 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        randa: 20083,
         name: 'Stocks',
         tees: [
             {
-                colour: 'white',
-                ratings: {
-                    course: {
-                        full: 72.8,
-                        front: 36.9,
-                        back: 35.9
-                    },
-                    bogey: 96.6,
-                    slope: {
-                        full: 128,
-                        front: 127,
-                        back: 129
-                    }
-                },
+                name: 'White',
                 measure: 'yards',
                 holes: [
                     {
@@ -792,20 +1138,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'yellow',
-                ratings: {
-                    course: {
-                        full: 70.7,
-                        front: 35.8,
-                        back: 34.9
-                    },
-                    bogey: 93.4,
-                    slope: {
-                        full: 123,
-                        front: 122,
-                        back: 123
-                    }
-                },
+                name: 'Yellow',
                 measure: 'yards',
                 holes: [
                     {
@@ -919,20 +1252,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'red',
-                ratings: {
-                    course: {
-                        full: 72.3,
-                        front: 37,
-                        back: 35.3
-                    },
-                    bogey: 101.3,
-                    slope: {
-                        full: 123,
-                        front: 122,
-                        back: 124
-                    }
-                },
+                name: 'Red',
                 measure: 'yards',
                 holes: [
                     {
@@ -1048,23 +1368,11 @@ const courses = [
         ]
     },
     {
+        randa: 22167,
         name: 'Weston Turville',
         tees: [
             {
-                colour: 'white',
-                ratings: {
-                    course: {
-                        full: 68.8,
-                        front: 33.5,
-                        back: 35.3
-                    },
-                    bogey: 91.2,
-                    slope: {
-                        full: 121,
-                        front: 114,
-                        back: 127
-                    }
-                },
+                name: 'White',
                 measure: 'yards',
                 holes: [
                     {
@@ -1178,20 +1486,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'yellow',
-                ratings: {
-                    course: {
-                        full: 67.6,
-                        front: 32.9,
-                        back: 34.7
-                    },
-                    bogey: 89.5,
-                    slope: {
-                        full: 118,
-                        front: 114,
-                        back: 122
-                    }
-                },
+                name: 'Yellow',
                 measure: 'yards',
                 holes: [
                     {
@@ -1305,20 +1600,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'red',
-                ratings: {
-                    course: {
-                        full: 71.0,
-                        front: 34.8,
-                        back: 36.2
-                    },
-                    bogey: 100.4,
-                    slope: {
-                        full: 125,
-                        front: 123,
-                        back: 126
-                    }
-                },
+                name: 'Red',
                 measure: 'yards',
                 holes: [
                     {
@@ -1434,23 +1716,11 @@ const courses = [
         ]
     },
     {
+        randa: 21494,
         name: 'Caddington',
         tees: [
             {
-                colour: 'white',
-                ratings: {
-                    course: {
-                        full: 69.7,
-                        front: 34.1,
-                        back: 35.6
-                    },
-                    bogey: 91.7,
-                    slope: {
-                        full: 119,
-                        front: 111,
-                        back: 126
-                    }
-                },
+                name: 'White',
                 measure: 'yards',
                 holes: [
                     {
@@ -1564,20 +1834,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'blue',
-                ratings: {
-                    course: {
-                        full: 68.2,
-                        front: 33.5,
-                        back: 34.7
-                    },
-                    bogey: 90.3,
-                    slope: {
-                        full: 119,
-                        front: 111,
-                        back: 127
-                    }
-                },
+                name: 'Blue',
                 measure: 'yards',
                 holes: [
                     {
@@ -1691,20 +1948,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'red',
-                ratings: {
-                    course: {
-                        full: 70.7,
-                        front: 34.8,
-                        back: 35.9
-                    },
-                    bogey: 99.3,
-                    slope: {
-                        full: 121,
-                        front: 122,
-                        back: 120
-                    }
-                },
+                name: 'Red 2019',
                 measure: 'yards',
                 holes: [
                     {
@@ -1820,23 +2064,11 @@ const courses = [
         ]
     },
     {
+        randa: 20324,
         name: 'Tilsworth',
         tees: [
             {
-                colour: 'white',
-                ratings: {
-                    course: {
-                        full: 64.9,
-                        front: 33.9,
-                        back: 31.0
-                    },
-                    bogey: 86.1,
-                    slope: {
-                        full: 115,
-                        front: 122,
-                        back: 107
-                    }
-                },
+                name: 'White',
                 measure: 'yards',
                 holes: [
                     {
@@ -1950,20 +2182,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'yellow',
-                ratings: {
-                    course: {
-                        full: 64.4,
-                        front: 33.6,
-                        back: 30.8
-                    },
-                    bogey: 84.8,
-                    slope: {
-                        full: 110,
-                        front: 118,
-                        back: 101
-                    }
-                },
+                name: 'Yellow',
                 measure: 'yards',
                 holes: [
                     {
@@ -2077,20 +2296,7 @@ const courses = [
                 ]
             },
             {
-                colour: 'red',
-                ratings: {
-                    course: {
-                        full: 66.7,
-                        front: 35.1,
-                        back: 31.6
-                    },
-                    bogey: 94.1,
-                    slope: {
-                        full: 117,
-                        front: 124,
-                        back: 109
-                    }
-                },
+                name: 'Red',
                 measure: 'yards',
                 holes: [
                     {

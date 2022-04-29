@@ -34,7 +34,10 @@
 <script src="/scripts/validate-forms.js"></script>
 <script>
     const players = JSON.parse('<%- JSON.stringify(players) %>');
-    const rules = JSON.parse('<%- JSON.stringify(rules) %>');
     const actions = JSON.parse('<%- JSON.stringify(actions) %>');
     const titles = JSON.parse('<%- JSON.stringify(titles) %>');
+    const rules = JSON.parse('<%- JSON.stringify(rules) %>').map(rule => {
+        rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
+        return rule;
+    });
 </script>

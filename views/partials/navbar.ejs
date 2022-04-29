@@ -13,15 +13,16 @@
                 <a class="nav-link" href="/users">Users</a>
                 <% }; %> -->
                 <a class="nav-link" href="/rounds">Rounds</a>
+                <a class="nav-link" href="/rounds/courses">Courses</a>
                 <!-- <a class="nav-link" href="/games">Games</a> -->
             </div>
             <hr class="d-block d-lg-none d-xl-none d-xxl-none">
             <div class="navbar-nav mx-3">
                 <% if (currentUser)  { %>
-                <%- include('icon', { classes: 'bi-person-fill btn-outline-success', link: 'account', text: 'Account' }) %>                
+                <%- include('icon', { classes: 'bi-person-fill btn-outline-success', link: 'account', text: 'Account' }) %>
                 <form method="POST" action="/logout">
                     <label class="nav-link py-0 d-none d-lg-inline d-xl-inline d-xxl-inline">
-                        <input class="d-none" type="submit" value="">    
+                        <input class="d-none" type="submit" value="">
                         <i class="btn btn-outline-danger rounded-circle bi bi-person-dash-fill fs-5"></i>
                     </label>
                     <input class="btn nav-link d-inline d-lg-none d-xl-none d-xxl-none" type="submit" value="Logout">

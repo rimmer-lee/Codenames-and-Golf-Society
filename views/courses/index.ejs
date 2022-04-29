@@ -1,0 +1,161 @@
+<% layout('layouts/boilerplate') %>
+<div class="row my-3 pb-2 border-bottom border-1">
+    <div class="col">
+        <h1 class="d-inline">Courses</h1>
+    </div>
+    <!-- <div class="col">
+        <div class="d-flex justify-content-end">
+            <a class="btn btn-primary" href="/rounds/courses/add">Add</a>
+        </div>
+    </div> -->
+</div>
+<div class="row gy-4">
+    <% for (const course of courses) { %>
+    <div class="col-12">
+        <div class="row">
+            <div class="col-12">
+                <div class="row mb-2">
+                    <div class="col">
+                        <h3 class="text-decoration-underline"><%= course.name %></h1>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex justify-content-end">
+                            <a class="btn btn-warning" href="/rounds/courses/<%= course.id %>">Edit</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <table class="course-tees table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr class="d-none d-lg-table-row">
+                            <th scope="col" rowspan="2">
+                                <div class="text-center">
+                                    Tee
+                                </div>
+                            </th>
+                            <th scope="col" colspan="3">
+                                <div class="text-center">
+                                    Par
+                                </div>
+                            </th>
+                            <th scope="col" colspan="3">
+                                <div class="text-center">
+                                    Course Rating
+                                </div>
+                            </th>
+                            <th scope="col" rowspan="2">
+                                <div class="text-center">
+                                    Bogey Rating
+                                </div>
+                            </th>
+                            <th scope="col" colspan="3">
+                                <div class="text-center">
+                                    Slope Rating
+                                </div>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="d-table-cell d-lg-none" scope="col">
+                                <div class="text-center">
+                                    Tee
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="d-none d-lg-block text-center">
+                                    18
+                                </div>
+                                <div class="d-block d-lg-none text-center">
+                                    Par
+                                </div>
+                            </th>
+                            <th class="d-none d-lg-table-cell" scope="col">
+                                <div class="text-center">
+                                    Front
+                                </div>
+                            </th>
+                            <th class="d-none d-lg-table-cell" scope="col">
+                                <div class="text-center">
+                                    Back
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="d-none d-lg-block text-center">
+                                    18
+                                </div>
+                                <div class="d-block d-lg-none text-center">
+                                    Course
+                                </div>
+                            </th>
+                            <th class="d-none d-lg-table-cell" scope="col">
+                                <div class="text-center">
+                                    Front
+                                </div>
+                            </th>
+                            <th class="d-none d-lg-table-cell" scope="col">
+                                <div class="text-center">
+                                    Back
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="d-none d-lg-block text-center">
+                                    18
+                                </div>
+                                <div class="d-block d-lg-none text-center">
+                                    Slope
+                                </div>
+                            </th>
+                            <th class="d-none d-lg-table-cell" scope="col">
+                                <div class="text-center">
+                                    Front
+                                </div>
+                            </th>
+                            <th class="d-none d-lg-table-cell" scope="col">
+                                <div class="text-center">
+                                    Back
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for (const tee of course.tees) { %>
+                        <tr class="<%= tee.colour %>">
+                            <td class="align-middle">
+                                <div class="d-none d-md-block text-center">
+                                    <%= tee.name.long %>
+                                </div>
+                                <div class="d-block d-md-none text-center">
+                                    <%= tee.name.short %>
+                                </div>
+                            </td>
+                            <% for (const column of ['par', 'course', 'bogey', 'slope']) { %>
+                            <% if (column === 'bogey') { %>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee[column] %>
+                                </div>
+                            </td>
+                            <% continue; %>
+                            <% }; %>
+                            <td class="align-middle">
+                                <div class="text-center">
+                                    <%= tee[column].full %>
+                                </div>
+                            </td>
+                            <% for (const breakdown of ['front', 'back']) { %>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee[column][breakdown] %>
+                                </div>
+                            </td>
+                            <% }; %>
+                            <% }; %>
+                        </tr>
+                        <% }; %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <% }; %>
+</div>

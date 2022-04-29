@@ -3,8 +3,8 @@
     <div class="col">
         <h1 class="d-inline me-2">Charter</h1>
         <% if (charter) { %>
-        <% if (charter.created.version) { %>
-        <h6 class="d-inline text-muted">v.<%= charter.created.version %></h6>
+        <% if (charter.version) { %>
+        <h6 class="d-inline text-muted">v.<%= charter.version %></h6>
         <% }; %>
         <% }; %>
     </div>
@@ -58,7 +58,7 @@
                                             <div class="col d-flex justify-content-end">Demerits</div>
                                             <div class="col"><%= rule.action.demerits %></div>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                     <% }; %>
                                     <% if (rule.action.titles && rule.action.titles.length > 0) { %>
                                     <div class="col mb-2">
@@ -76,7 +76,7 @@
                                                 <% }; %>
                                             </div>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                     <% }; %>
                                 </div>
                             </div>

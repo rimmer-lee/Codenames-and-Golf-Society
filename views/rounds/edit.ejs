@@ -1,299 +1,604 @@
 <% layout('layouts/boilerplate') %>
-<% const tableClass = `table-${teeColours.find(({ colour }) => colour === round.tee).class}`; %>
-<% const tee = round.course.tees.find(({ colour }) => colour === round.tee); %>
-<div class="row my-3 pb-2 border-bottom border-1">
+<form class="mb-3" method="POST" action="/rounds/<%= round.id %>?_method=PUT" novalidate>
+    <div class="d-flex my-3 pb-2 border-bottom border-1">
+        <div class="flex-grow-1">
+            <h1 class="d-inline me-2"><%= round.course.name %> on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
+        </div>
+        <!-- <div>
+            <div class="d-flex justify-content-end">
+                <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" readonly>
+                <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" readonly>
+                <input id="delete" class="btn btn-danger me-2" type="button"  data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly>
+            </div>
+        </div> -->
+    </div>
 
-    <!-- capitalise first letter of tee value -->
-    <h1><%= round.course.name %> on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
+    <!-- provide summary score of player (and team) alongside player dropdown (and team radio buttons) -->
+    <!-- show demerits -->
 
-</div>
-
-<!-- show demerits -->
-
-<div class="row gy-2 gx-3">
-    <% for (let i = 0; i < staticPlayers.length; i++) { %>
-    <div class="col-6">
-        <div class="row g-2">
-            <div class="col d-flex">
-                <div class="form-floating flex-grow-1">
-                    
-                    <!-- <select id="player-<%= staticPlayers[i] %>|id" class="form-select text-capitalize" name="[player-<%= staticPlayers[i] %>][id]"> -->
-                    <select id="player-<%= staticPlayers[i] %>|id" class="form-select text-capitalize" name="[player-<%= staticPlayers[i] %>][id]" disabled>
-
-                        <option <%= !round.scores[i] ? 'selected ' : '' %>disabled>Select Player</option>
-                        <% for (const player of players) { %>
-                        <% if (round.scores[i] && round.scores.some(score => score.player.id === player.id) && player.id !== round.scores[i].player.id) continue; %>
-                        <option <%= (round.scores[i] && player.id === round.scores[i].player.id) ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
-                        <% }; %>
-                    </select>
-                    <label for="player-<%= staticPlayers[i] %>|id"><%= staticPlayers[i] %></label>
-                </div>
-                <!-- <% if (round.scores[i]) { %>
-                <div class="d-flex remove-player ps-2">
-                    <div class="btn btn-danger d-flex align-items-center" data-bs-placement="left" title="Remove Player">
-                        <div class="btn-close btn-close-white" aria-label="remove"></div>
+    <div class="row">
+        <div class="col-12">
+            <div id="accordion" class="accordion">
+                <div class="accordion-item">
+                    <h2 id="round-accordion-item-heading" class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#round-accordion-item-body-parent" aria-expanded="false" aria-controls="round-accordion-item-body-parent">
+                            Round
+                        </button>
+                    </h2>
+                    <div id="round-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="round-accordion-item-heading">
+                        <div class="accordion-body p-3">
+                            <div class="row gy-2">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= round.formattedDate.datePicker %>" max="<%= date %>" required disabled>
+                                        <label for="date">Date</label>
+                                        <div class="invalid-feedback">
+                                            <div class="d-flex justify-content-end">
+                                                Please select a date.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="row mx-0 border border-1 rounded py-2" style="background-color: #e9ecef; color: rgba(33,37,41, 0.65)">
+                                        <div class="col d-flex">
+                                            <h6 class="my-auto">
+                                                Games
+                                            </h6>
+                                        </div>
+                                        <div class="col">
+                                            <div class="d-flex justify-content-around">
+                                                <% for (const game of games) { %>
+                                                <div class="form-check">
+                                                    <input id="game-<%= game.name %>" class="form-check-input" type="checkbox" value="<%= game.name %>" name="[round][game][<%= game.name %>]"<%= round.games.includes(game.name) ? ' checked' : '' %> disabled>
+                                                    <label for="game-<%= game.name %>" class="form-check-label"><%= game.name %></label>
+                                                </div>
+                                                <% }; %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <% }; %> -->
+                <div class="accordion-item">
+                    <h2 id="course-accordion-item-heading" class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#course-accordion-item-body-parent" aria-expanded="false" aria-controls="course-accordion-item-body-parent">
+                            Course
+                        </button>
+                    </h2>
+                    <div id="course-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="course-accordion-item-heading">
+                        <div class="accordion-body p-3">
+                            <div class="row g-2">
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <select id="course-select" class="form-select text-capitalize text-wrap" aria-label="course" name="[course][id]" required disabled>
+                                            <option disabled>Select Course</option>
+                                            <% for (const course of courses) { %>
+                                            <option value="<%= course.id %>"<%= course.id === round.course.id ? ' selected' : '' %>><%= course.name %></option>
+                                            <% }; %>
+                                        </select>
+                                        <label for="course-select">Course</label>
+                                        <div class="invalid-feedback">
+                                            <div class="d-flex justify-content-end">
+                                                Please select a course.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="form-floating">
+                                        <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]" disabled>
+                                            <% for (const t of tees) { %>
+                                            <option value="<%= t.id %>"<%= t._id == tee._id ? ' selected' : '' %>><%= t.name.long %></option>
+                                            <% }; %>
+                                        </select>
+                                        <label for="tee-select">Tee</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <table id="tees" class="table table-sm table-bordered mb-0">
+                                        <thead class="table-dark">
+                                            <tr class="d-none d-lg-table-row">
+                                                <th scope="col" rowspan="2">
+                                                    <div class="text-center">
+                                                        Tee
+                                                    </div>
+                                                </th>
+                                                <th scope="col" rowspan="2">
+                                                    <div class="text-center">
+                                                        Par
+                                                    </div>
+                                                </th>
+                                                <th scope="col" colspan="3">
+                                                    <div class="text-center">
+                                                        Course Rating
+                                                    </div>
+                                                </th>
+                                                <th scope="col" rowspan="2">
+                                                    <div class="text-center">
+                                                        Bogey Rating
+                                                    </div>
+                                                </th>
+                                                <th scope="col" colspan="3">
+                                                    <div class="text-center">
+                                                        Slope Rating
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th class="d-table-cell d-lg-none" scope="col">
+                                                    <div class="text-center">
+                                                        Tee
+                                                    </div>
+                                                </th>
+                                                <th class="d-table-cell d-lg-none" scope="col">
+                                                    <div class="text-center">
+                                                        Par
+                                                    </div>
+                                                </th>
+                                                <th scope="col">
+                                                    <div class="d-none d-lg-block text-center">
+                                                        Full
+                                                    </div>
+                                                    <div class="d-block d-lg-none text-center">
+                                                        Course
+                                                    </div>
+                                                </th>
+                                                <th class="d-none d-lg-table-cell" scope="col">
+                                                    <div class="text-center">
+                                                        Front
+                                                    </div>
+                                                </th>
+                                                <th class="d-none d-lg-table-cell" scope="col">
+                                                    <div class="text-center">
+                                                        Back
+                                                    </div>
+                                                </th>
+                                                <th scope="col">
+                                                    <div class="d-none d-lg-block text-center">
+                                                        Full
+                                                    </div>
+                                                    <div class="d-block d-lg-none text-center">
+                                                        Slope
+                                                    </div>
+                                                </th>
+                                                <th class="d-none d-lg-table-cell" scope="col">
+                                                    <div class="text-center">
+                                                        Front
+                                                    </div>
+                                                </th>
+                                                <th class="d-none d-lg-table-cell" scope="col">
+                                                    <div class="text-center">
+                                                        Back
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% for (const tee of tees) { %>
+                                            <tr>
+                                                <td class="align-middle">
+                                                    <div class="d-none d-md-block text-center">
+                                                        <%= tee.name.long %>
+                                                    </div>
+                                                    <div class="d-block d-md-none text-center">
+                                                        <%= tee.name.short %>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <%= tee.par.full %>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <%= tee.ratings.course.full.toFixed(1) %>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                    <%= tee.ratings.course.front.toFixed(1) %>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                    <%= tee.ratings.course.back.toFixed(1) %>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                    <%= tee.ratings.bogey.toFixed(1) %>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <%= tee.ratings.slope.full %>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                    <%= tee.ratings.slope.front %>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                    <%= tee.ratings.slope.back %>
+                                                </td>
+                                            </tr>
+                                            <% }; %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 id="players-accordion-item-heading" class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#players-accordion-item-body-parent" aria-expanded="false" aria-controls="players-accordion-item-body-parent">
+                            Players
+                        </button>
+                    </h2>
+                    <div id="players-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="players-accordion-item-heading">
+                        <div class="accordion-body p-3">
+                            <div class="row gy-2">
+                                <% for (const score of scores) { %>
+                                <div class="col-12">
+                                    <div class="d-flex">
+                                        <div class="row flex-grow-1 gx-2">
+                                            <div class="col">
+                                                <div class="form-floating">
+                                                    <select id="player-<%= score.player.id %>|id" class="form-select text-capitalize" name="[player-<%= score.player.id %>][id]" disabled>
+                                                        <% for (const player of players) { %>
+                                                        <% if (scores.some(score => score.player.id === player.id) && player.id !== score.player.id) continue; %>
+                                                        <option <%= (player.id === score.player.id) ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
+                                                        <% }; %>
+                                                    </select>
+                                                    <label for="player-<%= score.player.id %>|id">Select Player</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 col-md-2">
+                                                <div class="form-floating">
+                                                    <input id="player-<%= score.player.id %>|handicap" class="form-control text-center" type="number" placeholder="Handicap" name="[player-<%= score.player.id %>][handicap]" value="<%= score.handicap %>" max="54" disabled>
+                                                    <label for="player-<%= score.player.id %>|handicap">Handicap</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- <div class="d-flex remove-player ps-2">
+                                            <div class="btn btn-danger d-flex align-items-center" data-bs-placement="left" title="Remove Player">
+                                                <div class="btn-close btn-close-white" aria-label="remove"></div>
+                                            </div>
+                                        </div> -->
+
+                                    </div>
+                                </div>
+                                <% }; %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- issue with contents with .accordion-body disappearing  -->
+                <div class="accordion-item">
+                    <h2 id="scorecard-accordion-item-heading" class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard-accordion-item-body-parent" aria-expanded="false" aria-controls="scorecard-accordion-item-body-parent">
+                            Scorecard
+                        </button>
+                    </h2>
+                    <div id="scorecard-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="scorecard-accordion-item-heading">
+                        <div class="accordion-body p-3">
+                            <div class="table-responsive">
+                                <table id="round" class="table table-bordered table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="text-center align-middle" scope="col">
+                                                <div class="d-none d-md-block text-center">
+                                                    Hole
+                                                </div>
+                                            </th>
+                                            <th scope="col">
+                                                <div class="d-none d-md-block text-center text-capitalize">
+                                                    <%= tee.measure.full %>
+                                                </div>
+                                                <div class="d-block d-md-none text-center text-capitalize">
+                                                    <%= tee.measure.short %>
+                                                </div>
+                                            </th>
+                                            <th class="text-center align-middle" scope="col">
+                                                Par
+                                            </th>
+                                            <th class="text-center align-middle" scope="col">
+                                                SI
+                                            </th>
+                                            <% for (const score of scores) { %>
+                                            <th scope="col">
+                                                <div class="d-none d-md-block text-center text-capitalize">
+                                                    <%= score.player.name.knownAs %>
+                                                </div>
+                                                <div class="d-block d-md-none text-center text-capitalize ">
+                                                    <%= score.player.name.initials.short %>
+                                                </div>
+                                            </th>
+                                            <% }; %>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <%- include('../partials/tables/rounds/table-row', { start: 1, end: 9 }) %>
+                                        <tr class="table-dark">
+                                            <td class="text-center align-middle text-uppercase">
+                                                <div class="d-none d-md-block">
+                                                    Out
+                                                </div>
+                                                <div class="d-block d-md-none">
+                                                    O
+                                                </div>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <%= tee.distance.front %>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <%= tee.par.front %>
+                                            </td>
+                                            <td></td>
+                                            <% for (const score of scores) { %>
+                                            <td class="text-center align-middle">
+                                                <%= score.scores.shots.front %>
+                                            </td>
+                                            <% }; %>
+                                        </tr>
+                                        <%- include('../partials/tables/rounds/table-row', { start: 10, end: 18 }) %>
+                                        <tr class="table-dark">
+                                            <td class="text-center align-middle text-uppercase">
+                                                <div class="d-none d-md-block">
+                                                    In
+                                                </div>
+                                                <div class="d-block d-md-none">
+                                                    I
+                                                </div>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <%= tee.distance.back %>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <%= tee.par.back %>
+                                            </td>
+                                            <td></td>
+                                            <% for (const score of scores) { %>
+                                            <td class="text-center align-middle">
+                                                <%= score.scores.shots.back %>
+                                            </td>
+                                            <% }; %>
+                                        </tr>
+                                        <tr class="table-dark">
+                                            <td class="text-center align-middle text-uppercase">
+                                                <div class="d-none d-md-block">
+                                                    Total
+                                                </div>
+                                                <div class="d-none d-sm-block d-md-none">
+                                                    Tot
+                                                </div>
+                                                <div class="d-block d-sm-none">
+                                                    T
+                                                </div>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <%= tee.distance.full %>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <%= tee.par.full %>
+                                            </td>
+                                            <td></td>
+                                            <% for (const score of scores) { %>
+                                            <td class="text-center align-middle">
+                                                <%= score.scores.shots.full %>
+                                            </td>
+                                            <% }; %>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 id="summary-accordion-item-heading" class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#summary-accordion-item-body-parent" aria-expanded="true" aria-controls="summary-accordion-item-body-parent">
+                            Summary
+                        </button>
+                    </h2>
+                    <div id="summary-accordion-item-body-parent" class="accordion-collapse collapse show" aria-labelledby="summary-accordion-item-heading">
+                        <div class="accordion-body p-3">
+                            <div class="row gy-4">
+                                <div class="col-12">
+                                    <div class="row gy-2">
+                                        <div class="col-12">
+                                            <h4 class="text-decoration-underline">Individual</h4>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-striped mb-0 summary">
+                                                    <thead class="table-dark">
+                                                        <tr class="d-none d-lg-table-row">
+                                                            <th scope="col" rowspan="2">
+                                                                <div class="text-center">
+                                                                    Player
+                                                                </div>
+                                                            </th>
+                                                            <th scope="col" colspan="3">
+                                                                <div class="text-center">
+                                                                    Shots
+                                                                </div>
+                                                            </th>
+                                                            <th scope="col" colspan="3">
+                                                                <div class="text-center">
+                                                                    Par
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="d-table-cell d-lg-none" scope="col">
+                                                                <div class="text-center">
+                                                                    Player
+                                                                </div>
+                                                            </th>
+                                                            <% for (const property of ['Shots', 'Par']) { %>
+                                                            <th class="d-none d-lg-table-cell" scope="col">
+                                                                <div class="text-center">
+                                                                    Front
+                                                                </div>
+                                                            </th>
+                                                            <th class="d-none d-lg-table-cell" scope="col">
+                                                                <div class="text-center">
+                                                                    Back
+                                                                </div>
+                                                            </th>
+                                                            <th scope="col">
+                                                                <div class="d-none d-lg-block text-center">
+                                                                    Full
+                                                                </div>
+                                                                <div class="d-block d-lg-none text-center">
+                                                                    <%= property %>
+                                                                </div>
+                                                            </th>
+                                                            <% }; %>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% for (const score of scores) { %>
+                                                        <tr>
+                                                            <td class="align-middle">
+                                                                <div class="d-none d-md-block text-center">
+                                                                    <%= score.player.name.knownAs %>
+                                                                </div>
+                                                                <div class="d-block d-md-none text-center">
+                                                                    <%= score.player.name.initials.short %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle d-none d-lg-table-cell">
+                                                                <div class="text-center">
+                                                                    <%= score.scores.shots.front %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle d-none d-lg-table-cell">
+                                                                <div class="text-center">
+                                                                    <%= score.scores.shots.back %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle">
+                                                                <div class="text-center">
+                                                                    <%= score.scores.shots.full %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle d-none d-lg-table-cell">
+                                                                <div class="text-center">
+                                                                    <%= score.scores.par.front %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle d-none d-lg-table-cell">
+                                                                <div class="text-center">
+                                                                    <%= score.scores.par.back %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle">
+                                                                <div class="text-center">
+                                                                    <%= score.scores.par.full %>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <% }; %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% for (const game of round.games) { %>
+                                <div class="col-12">
+                                    <div class="row gy-2">
+                                        <div class="col-12">
+                                            <h4 class="text-decoration-underline"><%= game.handicap ? `Nett ` : '' %><%= game.method ? `${game.method} ` : '' %><%= game.name %></h4>
+                                        </div>
+                                        <!-- <div class="col-12">
+                                            <%= game.summary %>
+                                        </div> -->
+                                        <div class="col-12">
+                                            <div class="table-responsive">
+                                                <table id="team-summary" class="table table-bordered table-striped mb-0 summary">
+                                                    <thead class="table-dark">
+                                                        <tr class="d-none d-lg-table-row">
+                                                            <th scope="col" rowspan="2">
+                                                                <div class="text-center">
+                                                                    <%= game.team ? 'Team' : 'Player' %>
+                                                                </div>
+                                                            </th>
+                                                            <th scope="col" colspan="3">
+                                                                <div class="text-center">
+                                                                    Score
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="d-table-cell d-lg-none" scope="col">
+                                                                <div class="text-center">
+                                                                    <%= game.team ? 'Team' : 'Player' %>
+                                                                </div>
+                                                            </th>
+                                                            <th class="d-none d-lg-table-cell" scope="col">
+                                                                <div class="text-center">
+                                                                    Front
+                                                                </div>
+                                                            </th>
+                                                            <th class="d-none d-lg-table-cell" scope="col">
+                                                                <div class="text-center">
+                                                                    Back
+                                                                </div>
+                                                            </th>
+                                                            <th scope="col">
+                                                                <div class="d-none d-lg-block text-center">
+                                                                    Full
+                                                                </div>
+                                                                <div class="d-block d-lg-none text-center">
+                                                                    Score
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% for (const score of game.scores) { %>
+                                                        <tr>
+                                                            <td class="align-middle">
+                                                                <% if (game.team) { %>
+                                                                <div class="text-center">
+                                                                    <%= score.id %>
+                                                                </div>
+                                                                <% } else { %>
+                                                                <div class="d-none d-md-block text-center">
+                                                                    <%= score.name.knownAs %>
+                                                                </div>
+                                                                <div class="d-block d-md-none text-center">
+                                                                    <%= score.name.initials.short %>
+                                                                </div>
+                                                                <% }; %>
+                                                            </td>
+                                                            <td class="align-middle d-none d-lg-table-cell">
+                                                                <div class="text-center">
+                                                                    <%= score.totals.front %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle d-none d-lg-table-cell">
+                                                                <div class="text-center">
+                                                                    <%= score.totals.back %>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle">
+                                                                <div class="text-center">
+                                                                    <%= score.totals.full %>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <% }; %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }; %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-    <% }; %>
-    <div class="col-12">
-        <form class="needs-validation" method="POST" action="/rounds/edit/<%= round.id %>" novalidate>
-            <table id="round" class="table table-bordered table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="text-center align-middle" scope="col">
-                            Hole
-                        </th>
-                        <th scope="col">
-                            <div class="d-none d-md-block text-center text-capitalize">
-                                <%= round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards' %>
-                            </div>
-                            <div class="d-block d-md-none text-center text-capitalize">
-
-                                <!-- find a better way to shorten measure property -->
-                                <%= (round.course.tees.find(({ colour }) => colour === round.tee).measure || 'yards').replace('yards', 'yrds').replace('metres', 'mtrs').replace('metres', 'mtrs') %>
-
-                            </div>
-                        </th>
-                        <th class="text-center align-middle" scope="col">
-                            Par
-                        </th>
-                        <th class="text-center align-middle" scope="col">
-                            SI
-                        </th>
-                        <% for (const staticPlayer of staticPlayers) { %>
-                        <th scope="col">
-                            <div class="d-none d-md-block text-center text-capitalize">
-                                <%= staticPlayer %>
-                            </div>
-                            <div class="d-block d-md-none text-center text-capitalize ">
-                                <%= staticPlayer.split(' ')[1] ? staticPlayer.split(' ')[1] : staticPlayer.split(' ')[0][0] %>
-                            </div>
-                        </th>
-                        <% }; %>
-                        <!-- <th class="text-center align-middle" scope="col">
-                            Nett
-                        </th>
-                        <th scope="col">
-                            <div class="d-flex flex-column">
-                                <div class="d-flex justify-content-center">
-                                    W=+
-                                </div>
-                                <div class="d-flex justify-content-center">
-                                    L=-
-                                </div>
-                                <div class="d-flex justify-content-center">
-                                    H=0
-                                </div>
-                            </div>
-                        </th> -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for (let i = 1; i < 10; i++) { %>
-                    <tr>
-                        <td class="text-center align-middle">
-                            <%= i %>
-                        </td>
-                        <td class="<%= tableClass %>">
-                            <div class="d-flex justify-content-center">
-                                <label for="hole-<%= i %>|distance" class="form-label d-none"></label>
-                                
-                                <!-- <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>"> -->
-                                <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>" disabled>
-
-                            </div>
-                        </td>
-                        <td class="<%= tableClass %>">
-                            <div class="d-flex justify-content-center">
-                                <label for="hole-<%= i %>|par" class="form-label d-none"></label>
-                                
-                                <!-- <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>"> -->
-                                <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>" disabled>
-
-                            </div>
-                        </td>
-                        <td class="<%= tableClass %>">
-                            <div class="d-flex justify-content-center">
-                                <label for="hole-<%= i %>|stroke-index" class="form-label d-none"></label>
-                                
-                                <!-- <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>"> -->
-                                <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>" disabled>
-
-                            </div>
-                        </td>
-                        <% staticPlayers.forEach((staticPlayer, j) => { %>
-                        <% const p = staticPlayer.toLowerCase().replace(/\s/g, '-'); %>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <label for="<%= p %>|hole-<%= i %>" class="form-label d-none"></label>
-                                
-                                <!-- <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] && round.scores[j].shots[i - 1] || '' %>""> -->
-                                <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] && round.scores[j].shots[i - 1] || '' %>" disabled>
-
-                            </div>
-                        </td>
-                        <% }); %>
-                        <!-- <td>
-                            <div class="d-flex justify-content-center">
-                                <label for="nett|hole-<%= i %>" class="form-label d-none"></label>
-                                <input id="nett|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[nett][hole]<%= i %>">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <label for="game|hole-<%= i %>" class="form-label d-none"></label>
-                                <input id="game|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[game][hole]<%= i %>">
-                            </div>
-                        </td> -->
-                    </tr>
-                    <% }; %>
-                    <tr class="table-dark">
-                        <td class="text-center align-middle text-uppercase">
-                            Out
-                        </td>
-                        <td class="text-center align-middle">
-                            <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.distance : sum, 0) %>
-                        </td>
-                        <td class="text-center align-middle">
-                            <%= tee.holes.reduce((sum, hole) => hole.index < 10 ? sum + hole.par : sum, 0) %>
-                        </td>
-                        <td></td>
-                        <% for (let j = 0; j < staticPlayers.length; j++) { %>
-                        <td class="text-center align-middle">
-                            <% if (!round.scores[j]) continue; %>
-                            <%= round.scores[j].shots.reduce((sum, value, index) => index < 9 ? sum + value : sum, 0) || '' %>
-                        </td>
-                        <% }; %>
-                        <!-- <td></td>
-                        <td></td> -->
-                    </tr>
-                    <% for (let i = 10; i < 19; i++) { %>
-                    <tr>
-                        <td class="text-center align-middle">
-                            <%= i %>
-                        </td>
-                        <td class="<%= tableClass %>">
-                            <div class="d-flex justify-content-center">
-                                <label for="hole-<%= i %>|distance" class="form-label d-none"></label>
-                                
-                                <!-- <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>"> -->
-                                <input id="hole-<%= i %>|distance" class="form-control text-center" type="number" min="1" max="18" name="[hole][distance]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].distance %>" disabled>
-
-                            </div>
-                        </td>
-                        <td class="<%= tableClass %>">
-                            <div class="d-flex justify-content-center">
-                                <label for="hole-<%= i %>|par" class="form-label d-none"></label>
-                                
-                                <!-- <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>"> -->
-                                <input id="hole-<%= i %>|par" class="form-control text-center" type="number" min="1" max="18" name="[hole][par]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].par %>" disabled>
-
-                            </div>
-                        </td>
-                        <td class="<%= tableClass %>">
-                            <div class="d-flex justify-content-center">
-                                <label for="hole-<%= i %>|stroke-index" class="form-label d-none"></label>
-                                
-                                <!-- <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>"> -->
-                                <input id="hole-<%= i %>|stroke-index" class="form-control text-center" type="number" min="1" max="18" name="[hole][strokeIndex]" value="<%= round.course.tees.find(({ colour }) => colour === round.tee).holes[i - 1].strokeIndex %>" disabled>
-
-
-                            </div>
-                        </td>
-                        <% staticPlayers.forEach((staticPlayer, j) => { %>
-                        <% const p = staticPlayer.toLowerCase().replace(/\s/g, '-'); %>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <label for="<%= p %>|hole-<%= i %>" class="form-label d-none"></label>
-                                
-                                <!-- <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] && round.scores[j].shots[i - 1] || '' %>""> -->
-                                <input id="<%= p %>|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[<%= p %>][hole]" value="<%= round.scores[j] && round.scores[j].shots[i - 1] || '' %>" disabled>
-
-                            </div>
-                        </td>
-                        <% }); %>
-                        <!-- <td>
-                            <div class="d-flex justify-content-center">
-                                <label for="nett|hole-<%= i %>" class="form-label d-none"></label>
-                                <input id="nett|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[nett][hole]<%= i %>">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <label for="game|hole-<%= i %>" class="form-label d-none"></label>
-                                <input id="game|hole-<%= i %>" class="form-control text-center" type="number" min="1" name="[game][hole]<%= i %>">
-                            </div>
-                        </td> -->
-                    </tr>
-                    <% }; %>
-                    <tr class="table-dark">
-                        <td class="text-center align-middle text-uppercase">
-                            In
-                        </td>
-                        <td class="text-center align-middle">
-                            <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.distance : sum, 0) %>
-                        </td>
-                        <td class="text-center align-middle">
-                            <%= tee.holes.reduce((sum, hole) => hole.index > 9 ? sum + hole.par : sum, 0) %>
-                        </td>
-                        <td></td>
-                        <% for (let j = 0; j < staticPlayers.length; j++) { %>
-                        <td class="text-center align-middle">
-                            <% if (!round.scores[j]) continue; %>
-                            <%= round.scores[j].shots.reduce((sum, value, index) => index > 8 ? sum + value : sum, 0) || '' %>
-                        </td>
-                        <% }; %>
-                        <!-- <td></td>
-                        <td></td> -->
-                    </tr>
-                    <tr class="table-dark">
-                        <td class="text-center align-middle text-uppercase">
-                            Total
-                        </td>
-                        <td class="text-center align-middle">
-                            <%= tee.holes.reduce((sum, hole) => sum + hole.distance, 0) %>
-                        </td>
-                        <td class="text-center align-middle">
-                            <%= tee.holes.reduce((sum, hole) => sum + hole.par, 0) %>
-                        </td>
-                        <td></td>
-                        <% for (let j = 0; j < staticPlayers.length; j++) { %>
-                        <td class="text-center align-middle">
-                            <% if (!round.scores[j]) continue; %>
-                            <%= round.scores[j].shots.reduce((sum, value) => sum + value, 0) || '' %>
-                        </td>
-                        <% }; %>
-                        <!-- <td></td>
-                        <td></td> -->
-                    </tr>
-                    <!-- <tr>
-                        <td class="text-center align-middle text-uppercase" colspan="6">
-                            Handicap
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td colspan="3"></td>
-                    </tr>
-                    <tr>
-                        <td class="text-center align-middle text-uppercase" colspan="6">
-                            Nett
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td colspan="3"></td>
-                    </tr> -->
-                </tbody>
-            </table>
-        </form>
-    </div>
-</div>
+</form>
+<%- include('../partials/modals/delete', { item: 'round', path: `/rounds/${round.id}` }) %>

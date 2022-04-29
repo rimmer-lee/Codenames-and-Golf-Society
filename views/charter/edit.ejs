@@ -6,7 +6,7 @@
     <div class="col-12 mb-2">
         <h1 class="d-inline me-2">Edit Charter</h1>
         <% if (charter.created.version) { %>
-        <h6 class="d-inline text-muted">v.<%= charter.created.version %></h6>
+        <h6 class="d-inline text-muted">v.<%= charter.version %></h6>
         <% }; %>
     </div>
     <div class="col-12">
@@ -49,14 +49,14 @@
                                     <div>
                                         <div class="btn btn-success p-1 plus" data-type="button" data-operation="new" data-section="description" data-bs-toggle="tooltip" data-bs-placement="left" title="New Description">
                                             <div class="btn-close btn-close-white" aria-label="new"></div>
-                                        </div>  
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <% }); %>
-                    <% } else { %>                        
+                    <% } else { %>
                     <div class="col-12">
                         <div class="row">
                             <div class="col-3 col-md-2 d-flex align-items-center">
@@ -88,7 +88,7 @@
                                     </div>
                                     <li class="col px-0">
                                         <div class="row gy-2">
-                                            <% for (const description of rule.description) { %>                                                    
+                                            <% for (const description of rule.description) { %>
                                             <div class="col-12">
                                                 <div class="d-flex justify-content-end ps-0 pe-2">
                                                     <label class="col-form-label d-none" visibility="hidden">Rules</label>
@@ -102,12 +102,12 @@
                                                         <div>
                                                             <div class="btn btn-success p-1 plus" data-type="button" data-operation="new" data-section="rule" data-bs-toggle="tooltip" data-bs-placement="left" title="New Rule">
                                                                 <div class="btn-close btn-close-white" aria-label="new"></div>
-                                                            </div>  
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <% }; %>                                                    
+                                            <% }; %>
                                             <% if (rule.breakdown && rule.breakdown.length > 0) { %>
                                             <%- include('../partials/forms/charter/edit/breakdown', { breakdowns: rule.breakdown, level: 1 }) %>
                                             <% }; %>
@@ -148,7 +148,7 @@
                                         <div class="row me-0">
                                             <div class="col d-flex justify-content-end">
                                                 <div class="col-form-label ps-3 fw-bold"><%= action.title %> Title</div>
-                                            </div>                    
+                                            </div>
                                             <div class="col-6 btn-group px-0" role="group" aria-label="Title checkbox toggle group">
                                                 <% for (const title of titles) { %>
                                                 <input class="btn-check" type="checkbox" autocomplete="off" value="<%= title.value %>"<%= rule.action && rule.action.titles && rule.action.titles.find(t => t.title === title.value && t.method === action.method) ? " checked" : "" %> data-method="<%= action.method %>">
@@ -160,7 +160,7 @@
                                                 <% }; %>
                                             </div>
                                             <div class="col small-width"></div>
-                                        </div>                                                
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                     <% }); %>
-                    <% } else { %>                    
+                    <% } else { %>
                     <div class="col-12">
                         <div class="row">
                             <div class="col-3 col-md-2 d-flex align-items-center">

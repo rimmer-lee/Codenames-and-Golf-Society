@@ -1,3 +1,5 @@
+// update the Date prototype
+
 function customDate(format, date = new Date()) {
     const delimiter = format.match(/\W/);
     const delimiterArray = format.split(delimiter);
@@ -35,7 +37,7 @@ function time(date = new Date()) {
     return date.toLocaleTimeString([], {
         timeZone: 'UTC',
         hour12: true,
-        hour: 'numeric',
+        hour: '2-digit',
         minute: '2-digit'
     }).toLowerCase();
 };

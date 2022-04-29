@@ -7,42 +7,27 @@
         <div class="accordion">
             <div class="accordion-item">
                 <h2 id="round-heading" class="accordion-header">
-                    <button id="round-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#round" aria-expanded="true" aria-controls="round">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#round" aria-expanded="true" aria-controls="round" title="Round">
                         Round
                     </button>
                 </h2>
                 <div id="round" class="accordion-collapse collapse show" aria-labelledby="round-heading">
                     <div class="accordion-body p-3">
-
-                        <div class="col-12">
-                            <div class="form-floating">
-                                <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= date %>" max="<%= date %>" required>
-                                <label for="date">Date</label>
-                                <div class="invalid-feedback">
-                                    <div class="d-flex justify-content-end">
-                                        Please select a date.
-                                    </div>
+                        <div class="form-floating">
+                            <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= date %>" max="<%= date %>" required>
+                            <label for="date">Date</label>
+                            <div class="invalid-feedback">
+                                <div class="d-flex justify-content-end">
+                                    Please select a date.
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <div class="col">
-                            <div class="form-floating">
-                                <select id="game-select" class="form-select text-capitalize" aria-label="Round game" name="[round][game]">
-                                    <% for (const game of ['Match Play', 'Stroke Play']) { %>
-                                    <option value="<%= game %>"><%= game %></option>
-                                    <% }; %>
-                                </select>
-                                <label for="game-select">Game</label>
-                            </div>
-                        </div> -->
-
                     </div>
                 </div>
             </div>
             <div class="accordion-item">
                 <h2 id="course-heading" class="accordion-header">
-                    <button id="course-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#course" aria-expanded="true" aria-controls="course">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#course" aria-expanded="true" aria-controls="course" title="Course">
                         Course
                     </button>
                 </h2>
@@ -51,9 +36,8 @@
                         <div class="row g-2">
                             <div class="col">
                                 <div class="form-floating">
-                                    <select id="course-select" class="form-select text-capitalize" aria-label="course" name="[course][id]" required>
+                                    <select id="course-select" class="form-select text-capitalize text-wrap" aria-label="course" name="[course][id]" required>
                                         <option selected disabled>Select Course</option>
-                                        <!-- <option value="new">New Course</option> -->
                                         <% for (const course of courses) { %>
                                         <option value="<%= course.id %>"><%= course.name %></option>
                                         <% }; %>
@@ -66,16 +50,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-none col-4 col-sm-5 col-md-6" visibility="hidden">
+                            <div class="d-none col-12 col-md-4" visibility="hidden">
                                 <div class="form-floating">
                                     <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]"></select>
                                     <label for="tee-select">Tee</label>
                                 </div>
                             </div>
                             <div class="d-none col-12" visibility="hidden">
-                                <table id="tees" class="table table-sm table-bordered table-dark mb-0">
-                                    <thead>
-                                        <tr class="d-none d-md-table-row">
+                                <table id="tees" class="table table-sm table-bordered mb-0">
+                                    <thead class="table-dark">
+                                        <tr class="d-none d-lg-table-row">
                                             <th scope="col" rowspan="2">
                                                 <div class="text-center">
                                                     Tee
@@ -103,48 +87,48 @@
                                             </th>
                                         </tr>
                                         <tr>
-                                            <th class="d-table-cell d-md-none" scope="col">
+                                            <th class="d-table-cell d-lg-none" scope="col">
                                                 <div class="text-center">
                                                     Tee
                                                 </div>
                                             </th>
-                                            <th class="d-table-cell d-md-none" scope="col">
+                                            <th class="d-table-cell d-lg-none" scope="col">
                                                 <div class="text-center">
                                                     Par
                                                 </div>
                                             </th>
                                             <th scope="col">
-                                                <div class="d-none d-md-block text-center">
+                                                <div class="d-none d-lg-block text-center">
                                                     18
                                                 </div>
-                                                <div class="d-block d-md-none text-center">
+                                                <div class="d-block d-lg-none text-center">
                                                     Course
                                                 </div>
                                             </th>
-                                            <th class="d-none d-md-table-cell" scope="col">
+                                            <th class="d-none d-lg-table-cell" scope="col">
                                                 <div class="text-center">
                                                     Front
                                                 </div>
                                             </th>
-                                            <th class="d-none d-md-table-cell" scope="col">
+                                            <th class="d-none d-lg-table-cell" scope="col">
                                                 <div class="text-center">
                                                     Back
                                                 </div>
                                             </th>
                                             <th scope="col">
-                                                <div class="d-none d-md-block text-center">
+                                                <div class="d-none d-lg-block text-center">
                                                     18
                                                 </div>
-                                                <div class="d-block d-md-none text-center">
+                                                <div class="d-block d-lg-none text-center">
                                                     Slope
                                                 </div>
                                             </th>
-                                            <th class="d-none d-md-table-cell" scope="col">
+                                            <th class="d-none d-lg-table-cell" scope="col">
                                                 <div class="text-center">
                                                     Front
                                                 </div>
                                             </th>
-                                            <th class="d-none d-md-table-cell" scope="col">
+                                            <th class="d-none d-lg-table-cell" scope="col">
                                                 <div class="text-center">
                                                     Back
                                                 </div>
@@ -160,66 +144,75 @@
             </div>
             <div class="accordion-item">
                 <h2 id="players-heading" class="accordion-header">
-                    <button id="players-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#players" aria-expanded="true" aria-controls="players">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#players" aria-expanded="true" aria-controls="players" title="Players">
                         Players
                     </button>
                 </h2>
                 <div id="players" class="accordion-collapse collapse show forced-accordion-bottom" aria-labelledby="players-heading">
                     <div class="accordion-body p-3">
-                        <div class="row gy-2">
-                            <div class="col-12">
-                                <div class="row g-2">
-                                    <div class="col d-flex">
-                                        <div class="form-floating flex-grow-1">
-                                            <select id="marker|id" class="form-select text-capitalize" name="[marker][id]"<%= currentUser ? " disabled" : " required" %>>
-                                                <% if (currentUser && currentUser.name) { %>
-                                                <option value="<%= currentUser.id %>" selected><%= currentUser.name.knownAs %></option>
+                        <div class="row gy-3">
+                            <div class="col-12 d-flex">
+                                <div class="flex-grow-1">
+                                    <div class="row g-2">
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <select id="marker|id" class="form-select text-capitalize" name="[marker][id]"<%= currentUser ? " disabled" : " required" %>>
+                                                    <% if (currentUser) { %>
+                                                    <option value="<%= currentUser.id %>" selected><%= currentUser.name.knownAs %></option>
+                                                    <% } else { %>
+                                                    <option selected disabled>Select Player</option>
+                                                    <% for (const player of players) { %>
+                                                    <option value="<%= player.id %>"><%= player.name.knownAs %></option>
+                                                    <% }; %>
+                                                    <% if (!currentUser) { %>
+                                                    <option value="new">New Player</option>
+                                                    <% }; %>
+                                                    <% }; %>
+                                                </select>
+                                                <label for="marker|id" class="text-capitalize">Marker</label>
+                                                <% if (currentUser) { %>
+                                                <input class="d-none" value=<%= currentUser.id %> name="[marker][id]" visibility="hidden">
                                                 <% } else { %>
-                                                <option selected disabled>Select Player</option>
-                                                <% for (const player of players) { %>
-                                                <option value="<%= player.id %>"><%= player.name.knownAs %></option>
-                                                <% }; %>
-                                                <% }; %>
-                                            </select>
-                                            <label for="marker|id">Marker</label>
-                                            <% if (currentUser) { %>
-                                            <input class="d-none" value=<%= currentUser.id %> name="[marker][id]" visibility="hidden">
-                                            <% } else { %>
-                                            <div class="invalid-feedback">
-                                                <div class="d-flex justify-content-end">
-                                                    Please select a marker.
+                                                <div class="invalid-feedback">
+                                                    <div class="d-flex justify-content-end">
+                                                        Please select a marker.
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <% }; %>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <% for (const p of ['a', 'b', 'c']) { %>
-                            <div class="col-12">
-                                <div class="row g-2">
-                                    <div class="col d-flex">
-                                        <div class="form-floating flex-grow-1">
-                                            <select id="player-<%= p %>|id" class="form-select text-capitalize" name="[player-<%= p %>][id]">
-                                                <option selected disabled>Select Player</option>
-                                                <% for (const player of players) { %>
-                                                <% if (currentUser && player.id === currentUser.id) continue %>
-                                                <option value="<%= player.id %>"><%= player.name.knownAs %></option>
                                                 <% }; %>
-                                            </select>
-                                            <label for="player-<%= p %>|id">Player <%= p.toUpperCase() %></label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <% }; %>
+                            <div class="col-12 mt-3">
+                                <button id="add-player" class="btn btn-success w-100" type="button">Add Player</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 id="game-heading" class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#game" aria-expanded="true" aria-controls="game" title="Games">
+                        Games
+                    </button>
+                </h2>
+                <div id="game" class="accordion-collapse collapse show" aria-labelledby="game-heading">
+                    <div class="accordion-body p-3">
+                        <div class="row gy-3">
+                            <div class="col-12 d-none" visibility="hidden">
+                                <div class="accordion"></div>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button id="play-game" class="btn btn-success w-100" type="button">Play Game</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="accordion-item d-none" visibility="hidden">
                 <h2 id="scorecard-heading" class="accordion-header">
-                    <button id="scorecard-button" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard" aria-expanded="true" aria-controls="scorecard">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard" aria-expanded="true" aria-controls="scorecard" title="Scorecard">
                         Scorecard
                     </button>
                 </h2>
@@ -236,19 +229,24 @@
                                     <div class="row gy-2">
                                         <% for (let i = 1; i < 19; i++) { %>
                                         <div id="hole-<%= i %>" class="<%= i > 1 ? "d-none " : "" %>col-12"<%= i > 1 ? " visibility=hidden" : "" %>>
-                                            <div class="row g-4">
+                                            <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
                                                 <div class="col d-none" visibility="hidden">
                                                     <div class="mb-2 border-bottom border-1">
                                                         <h5>Hole <%= i %></h5>
                                                     </div>
-                                                    <table class="table table-sm table-bordered table-dark hole mb-0 lh-lg">
-                                                        <thead>
+                                                    <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                        <thead class="table-dark">
                                                             <tr>
+                                                                <td scope="col">
+                                                                    <div class="text-center">
+                                                                        Tee
+                                                                    </div>
+                                                                </td>
                                                                 <td scope="col">
                                                                     <div class="d-none d-md-block text-center distance-long">
                                                                         Yards
                                                                     </div>
-                                                                    <div class="d-block d-md-none text-center distance-long">
+                                                                    <div class="d-block d-md-none text-center distance-short">
                                                                         Yds
                                                                     </div>
                                                                 </td>
@@ -348,119 +346,205 @@
                 <a class="btn btn-warning flex-fill" href="/rounds">Back</a>
             </div>
             <div class="col-4 d-flex">
-                <button id="reset" class="btn btn-success flex-fill" type="button" data-bs-toggle="modal" data-bs-target="#reset-modal">Reset</button>
+                <button id="reset" class="btn btn-primary flex-fill" type="button" data-bs-toggle="modal" data-bs-target="#reset-modal">Reset</button>
             </div>
             <div class="col-4 d-flex">
-                <input class="btn btn-primary flex-fill" type="submit" value="Submit">
+                <button id="submit" class="btn btn-success flex-fill" type="button" data-bs-toggle="modal" data-bs-target="#confirmation-modal">Submit</button>
             </div>
         </div>
     </div>
-    <div id="demerit-modal" class="modal fade" tabindex="-1" aria-labelledby="demerit-modal-label" aria-hidden="true">
+    <div id="confirmation-modal" class="modal fade" tabindex="-1" aria-labelledby="confirmation-label" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 id="demerit-modal-label" class="modal-title">New demerit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row gy-3">
-                        <div class="col-12">
-                            <div class="row">
-                                <label class="col-4 col-form-label d-flex align-items-center" for="demerit-demerits">Demerits</label>
-                                <input id="demerit-demerits" class="col form-control me-2" type="number" value="">
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="row">
-                                <label class="col-4 col-form-label d-flex align-items-center" for="demerit-rule">Rule</label>
-                                <select id="demerit-rule" class="col form-select me-2">
-                                    <option selected disabled>Select Rule</option>
-                                    <% for (const rule of rules.sort((a, b) => a.index - b.index)) { %>
-                                    <option value="<%= rule.id %>"><%= rule.index %>. <%= rule.description[0] %></option>
-                                    <% }; %>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-12 d-none" visibility="hidden">
-                            <div class="row mx-0 px-4">
-                                <p class="rule-description mb-0 text-overflow text-muted" readonly="true" rows="1"></p>
-                            </div>
-                        </div>
-                        <% for (const action of actions) { %>
-                        <div class="col-12">
-                            <div class="row">
-                                <div class="col-4 col-form-label d-flex align-items-center"><%= action.title %> Title</div>
-                                <div class="col px-0">
-                                    <div class="row me-0">
-                                        <div class="btn-group" role="group" aria-label="Title checkbox toggle group">
-                                            <% for (const title of titles) { %>
-                                            <% const reference = `demerit-${action.method}|${title.id}`; %>
-                                            <input id="<%= reference %>" class="btn-check" type="checkbox" value="<%= `${action.method}|${title.value}` %>">
-                                            <label for="<%= reference %>" class="btn btn-outline-<%= action.class %>">
-                                                <div class="d-flex p-0">
-                                                    <i class="mx-auto bi <%= title.icon %>"></i>
-                                                </div>
-                                            </label>
-                                            <% }; %>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <% }; %>
-                        <div class="col-12">
-                            <div class="form-floating">
-                                <textarea id="demerit-comments" class="form-control" placeholder="Comments"></textarea>
-                                <label for="demerit-comments">Comments</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-warning" type="button" data-bs-dismiss="modal">Cancel</button>
-                    <button id="demerit-submit" class="btn btn-primary" type="button" data-bs-dismiss="modal">Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- edit demerit modal -->
-
-    <div id="reset-modal" class="modal fade" tabindex="-1" aria-labelledby="reset-modal-label" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 id="reset-modal-label" class="modal-title">Are you sure you want to reset the round?</h5>
+                    <h5 id="confirmation-label" class="modal-title">Are you sure you want to submit the round?</h5>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">No</button>
-                    <button id="reset-submit" class="btn btn-danger" type="button" data-bs-dismiss="modal">Yes</button>
+                    <input id="submit-confirmation" class="btn btn-success" type="submit" value="Yes">
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- confirm submit modal -->
-
 </form>
+<div id="course-search-modal" class="modal fade" tabindex="-1" aria-labelledby="course-search-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="course-search-modal-label" class="modal-title">Find course</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row gx-2 gy-3">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <select id="country-select" class="form-select text-capitalize" aria-label="country">
+                                <option selected>Select country</option>
+                                <% for (const country of countryCodes) { %>
+                                <option value="<%= country.name %>"><%= country.name %></option>
+                                <% }; %>
+                            </select>
+                            <label for="country-select">Country</label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-none" visibility="hidden">
+                        <div class="form-floating">
+                            <select id="region-select" class="form-select text-capitalize" aria-label="region">
+                                <option selected>Select region</option>
+                            </select>
+                            <label for="region-select">Region</label>
+                            <div class="invalid-feedback">
+                                <div class="d-flex justify-content-end">
+                                    Please select a region.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 d-none" visibility="hidden">
+                        <div class="form-floating">
+                            <input id="city" class="form-control" type="text" placeholder="City/Town">
+                            <label for="city">City/Town</label>
+                            <div class="invalid-feedback">
+                                <div class="d-flex justify-content-end">
+                                    Please enter a city/town.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <input id="course-name" class="form-control" type="text" placeholder="Club/Course Name">
+                            <label for="course-name">Club/Course Name</label>
+                            <div class="invalid-feedback">
+                                <div class="d-flex justify-content-end">
+                                    Please enter a club/course name.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex justify-content-between">
+                        <button id="search-course" class="btn btn-primary" type="button">Search</button>
+                        <div class="d-flex align-items-center fw-lighter">
+                            Powered by The R&A
+                        </div>
+                    </div>
+                    <div class="col-12 d-none" visibility="hidden">
+                        <div id="feedback" class="d-flex justify-content-end invalid-feedback">
+                            No new courses found.
+                        </div>
+                    </div>
+                    <div class="col-12 d-none" visibility="hidden">
+                        <table id="courses" class="table table-sm table-striped table-hover table-bordered mb-0">
+                            <thead class="table-dark">
+                                <th scope="col">
+                                    <div class="text-center">
+                                        Name
+                                    </div>
+                                </th>
+                                <th class="d-none d-md-table-cell" scope="col">
+                                    <div class="text-center">
+                                        City/Town
+                                    </div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text-center">
+                                        Region
+                                    </div>
+                                </th>
+                                <th class="d-none d-lg-table-cell" scope="col">
+                                    <div class="text-center">
+                                        Country
+                                    </div>
+                                </th>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="new-player-modal" class="modal fade" tabindex="-1" aria-labelledby="new-player-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="new-player-modal-label" class="modal-title">New Player</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row gx-2 gy-3">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <input id="player-name" class="form-control" type="text" placeholder="Full Name">
+                            <label for="player-name">Name</label>
+                            <div class="invalid-feedback">
+                                <div class="d-flex justify-content-end">
+                                    Please enter the player's name.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <input id="player-handicap" class="form-control" type="number" max="54.0" step="0.1" placeholder="Handicap">
+                            <label for="player-handicap">Handicap</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="add-new-player" class="btn btn-success" type="button">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="reset-modal" class="modal fade" tabindex="-1" aria-labelledby="reset-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="reset-modal-label" class="modal-title">Are you sure you want to reset the round?</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">No</button>
+                <button id="reset-submit" class="btn btn-danger" type="button" data-bs-dismiss="modal">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
-    const players = JSON.parse('<%- JSON.stringify(players) %>');
-    const rules = JSON.parse('<%- JSON.stringify(rules) %>');
     const actions = JSON.parse('<%- JSON.stringify(actions) %>');
-    const titles = JSON.parse('<%- JSON.stringify(titles) %>');
-    const courses = JSON.parse('<%- JSON.stringify(courses) %>');
+    const games = JSON.parse('<%- JSON.stringify(games) %>');
     const teeColours = JSON.parse('<%- JSON.stringify(teeColours) %>');
+    const titles = JSON.parse('<%- JSON.stringify(titles) %>');
+    const rules = JSON.parse('<%- JSON.stringify(rules) %>').map(rule => {
+        rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
+        return rule;
+    });
+    let courses = JSON.parse('<%- JSON.stringify(courses) %>');
+    let players = JSON.parse('<%- JSON.stringify(players) %>');
 </script>
 <script src="/scripts/create-element.js"></script>
+<script src="/scripts/rounds/shared-functions.js"></script>
+<script src="/scripts/rounds/demerits/add.js"></script>
+<script src="/scripts/rounds/demerits/remove.js"></script>
+<script src="/scripts/rounds/demerits/select-rule.js"></script>
+<script src="/scripts/rounds/demerits/update-references.js"></script>
+<script src="/scripts/rounds/demerits/validate.js"></script>
 <script src="/scripts/rounds/accordion-buttons.js"></script>
 <script src="/scripts/rounds/change-date.js"></script>
+<script src="/scripts/rounds/connection.js"></script>
 <script src="/scripts/rounds/handle-modals.js"></script>
 <script src="/scripts/rounds/pagination.js"></script>
 <script src="/scripts/rounds/register-service-worker.js"></script>
 <script src="/scripts/rounds/select-course.js"></script>
-<script src="/scripts/rounds/select-player.js"></script>
-<script src="/scripts/rounds/select-tee.js"></script>
-<script src="/scripts/rounds/toggle-buttons.js"></script>
+<script src="/scripts/rounds/select-game.js"></script>
 <script src="/scripts/rounds/update.js"></script>
+<script src="/scripts/rounds/select-tee.js"></script>
 <script src="/scripts/rounds/validate.js"></script>
+<script src="/scripts/rounds/select-player.js"></script>

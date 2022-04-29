@@ -1,5 +1,13 @@
-<div class="col-12<%= !description ? " d-none" : "" %>"<%= !description ? " visibility=hidden" : "" %>>
+<% if (description) { %>
+<div class="col-12">
     <div class="row mx-0 px-4">
-        <p class="rule-description mb-0 text-overflow text-muted" readonly="true" rows="1"><%= description ? description : '' %></p>
+        <p class="rule-description mb-0 text-overflow text-muted" readonly="true" rows="1"><%= decodeURI(description) %></p>
     </div>
 </div>
+<% } else { %>
+<div class="col-12 d-none" visibility="hidden">
+    <div class="row mx-0 px-4">
+        <p class="rule-description mb-0 text-overflow text-muted" readonly="true" rows="1"></p>
+    </div>
+</div>
+<% }; %>

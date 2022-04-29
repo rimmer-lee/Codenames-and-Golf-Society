@@ -2,62 +2,96 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1><%= player.name.friendly %></h1>
 </div>
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 gy-3 gx-5 mb-3">
-    <div>
-        <h4>
-            Rounds
-        </h4>
-        <% if (rounds.length > 0) { %>
-        <table class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
-            <thead>
-                <tr>
-                    <% for (const header of ['Date', 'Course', 'Player']) { %>
-                    <td class="text-center" scope="col">
-                        <%= header %>
-                    </td>
-                    <% }; %>
-                </tr>
-            </thead>
-            <tbody class="table-light">
-                <% for (const round of rounds) { %>
-                <tr>
-                    <td class="text-center">
-                        <a href="/rounds/<%= round.id %>">
-                            <%= round.formattedDate.friendly %>
-                        </a>
-                    </td>
-                    <td class="text-center">
-                        <!-- <a href="/courses/<%= round.course.id %>"> -->
-                            <%= round.course.name %>
-                        <!-- </a> -->
-                    </td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <% for (const score of round.scores) { %>
-                            <% if (score.player.id === player.id) continue; %>
-                            <div class="d-flex justify-content-center align-items-center">
-                                <a href="/players/<%= score.player.id %>">
-                                    <%= score.player.name.knownAs %>
-                                </a>
-                            </div>
-                            <% }; %>
-                        </div>
-                    </td>
-                </tr>        
-                <% }; %>
-            </tbody>
-        </table>
-        <% } else { %>
-        <div>
-            No rounds played
-        </div>
+<nav>
+    <div class="nav nav-tabs nav-fill mb-2" role="tablist">
+        <% if (rounds.mostRecent.length > 0) { %>
+        <button id="rounds-tab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab" aria-controls="rounds" aria-selected="true">Rounds</button>
+        <% }; %>
+        <% if (demerits.mostRecent.length > 0) { %>
+        <button id="demerits-tab" class="nav-link" data-bs-toggle="tab" data-bs-target="#demerits" type="button" role="tab" aria-controls="demerits" aria-selected="false">Demerits</button>
+        <% }; %>
+        <% if (drinks.mostRecent.length > 0) { %>
+        <button id="drinks-tab" class="nav-link" data-bs-toggle="tab" data-bs-target="#drinks" type="button" role="tab" aria-controls="drinks" aria-selected="false">Drinks</button>
         <% }; %>
     </div>
-    <div>
+</nav>
+<div class="tab-content">
+    <% if (rounds.mostRecent.length > 0) { %>
+    <div id="rounds" class="tab-pane fade show active" role="tabpanel" aria-labelledby="rounds-tab">
+        <div class="row gy-4">
+            <div class="col-12">
+                <h4>
+                    General
+                </h4>
+                <div class="row">
+                    <div class="col text-center">
+                        <h6 class="text-decoration-underline">Handicap</h6>
+                        <div></div>
+                    </div>
+                    <div class="col text-center">
+                        <h6 class="text-decoration-underline">Number of Rounds</h6>
+                        <div></div>
+                    </div>
+                    <div class="col text-center">
+                        <h6 class="text-decoration-underline">Average Score</h6>
+                        <!-- last x number of rounds -->
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <h4>
+                    Best Performances
+                </h4>
+                <div class="row">
+                    <div class="col text-center">
+                        <h6 class="text-decoration-underline">Shots</h6>
+                        <div><%= rounds.best.shots.score %><%= rounds.best.shots.count > 1 ? ` (${rounds.best.shots.count})` : '' %></div>
+                    </div>
+                    <div class="col text-center">
+                        <h6 class="text-decoration-underline">Par</h6>
+                        <div><span class="<%= rounds.best.par.class %>"><%= rounds.best.par.par %></span><%= rounds.best.par.count > 1 ? ` (${rounds.best.par.count})` : '' %></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <h4>
+                    Latest Rounds
+                </h4>
+                <ul>
+                    <% for (const round of rounds.mostRecent) { %>
+                    <li>
+                        <a href="/rounds/<%= round.id %>">
+                            <span class="d-none d-lg-inline"><%= round.date.full %></span><span class="d-lg-none"><%= round.date.friendly %></span> at <%= round.course %> - <%= round.score %> (<span class="<%= round.class %>"><%= round.par %></span>)
+                        </a>
+                    </li>
+                    <% }; %>
+                </ul>
+            </div>
+            <div class="col-12">
+                <h4>
+                    Favourite
+                </h4>
+                <ul>
+                    <li>
+                        Course<%= rounds.favourite.course.plural %> - <%= rounds.favourite.course.string %> (<%= rounds.favourite.course.count %>)
+                    </li>
+                    <li>
+                        Playing Partner<%= rounds.favourite.partner.plural %> - <%= rounds.favourite.partner.string %> (<%= rounds.favourite.partner.count %>)
+                    </li>
+                    <!-- <li>
+                        Teammate<%= rounds.favourite.teammate.plural %> - <%= rounds.favourite.teammate.string %>
+                    </li> -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    <% }; %>
+    <% if (demerits.mostRecent.length > 0) { %>
+    <div id="demerits" class="tab-pane fade" role="tabpanel" aria-labelledby="demerits-tab">
         <h4>
             Demerits
         </h4>
-        <% if (player.demerits.length > 0) { %>
         <table class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
             <thead>
                 <tr>
@@ -69,7 +103,7 @@
                 </tr>
             </thead>
             <tbody class="table-light">
-                <% for (const demerit of player.demerits) { %>
+                <% for (const demerit of demerits.mostRecent) { %>
                 <tr>
                     <td class="text-center">
                         <a href="/demerits/edit?d=<%= demerit.date %>">
@@ -80,35 +114,29 @@
                         <%= demerit.demerits %>
                     </td>
                     <td>
-                        <div class="d-flex justify-content-center align-items-center">
+                        <div class="d-flex justify-content-evenly align-items-center">
+                            <% for (const title of demerit.titles) { %>
                             <div>
-                                <% for (const title of demerit.titles) { %>
-                                <% const a = actions.find(({ method }) => method === title.method); %>
-                                <% const t = titles.find(({ value }) => value === title.name); %>
-                                <div class="btn btn-<%= a.class %> me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= a.title %> <%= t.value %>">
+                                <div class="btn btn-<%= title.class %>" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= title.action %> <%= title.name %>">
                                     <div class="d-flex p-0">
-                                        <i class="mx-auto bi <%= t.icon %>"></i>
+                                        <i class="mx-auto bi <%= title.icon %>"></i>
                                     </div>
                                 </div>
-                                <% }; %>
                             </div>
+                            <% }; %>
                         </div>
                     </td>
-                </tr>        
+                </tr>
                 <% }; %>
             </tbody>
         </table>
-        <% } else { %>
-        <div>
-            No demerits earned
-        </div>
-        <% }; %>
     </div>
-    <div>
+    <% }; %>
+    <% if (drinks.mostRecent.length > 0) { %>
+    <div id="drinks" class="tab-pane fade" role="tabpanel" aria-labelledby="contact-tab">
         <h4>
             Drinks
         </h4>
-        <% if (player.drinks.length > 0) { %>
         <table class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
             <thead>
                 <tr>
@@ -120,7 +148,7 @@
                 </tr>
             </thead>
             <tbody class="table-light">
-                <% for (const drink of player.drinks) { %>
+                <% for (const drink of drinks.mostRecent) { %>
                 <tr>
                     <td class="text-center">
                         <a href="/demerits/drinks/edit?d=<%= drink.date %>">
@@ -130,14 +158,10 @@
                     <td class="text-center">
                         <%= drink.drinks %>
                     </td>
-                </tr>        
+                </tr>
                 <% }; %>
             </tbody>
         </table>
-        <% } else { %>
-        <div>
-            No drinks bought
-        </div>
-        <% }; %>
     </div>
+    <% }; %>
 </div>

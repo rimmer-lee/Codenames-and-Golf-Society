@@ -35,7 +35,7 @@
             </td>
             <td>
                 <div class="d-flex justify-content-center align-items-center">
-                    <a href="/courses/<%= round.course.id %>">
+                    <a href="/rounds/courses/<%= round.course.id %>">
                         <%= round.course.name %>
                     </a>
                 </div>
@@ -51,7 +51,7 @@
                     <% }; %>
                 </div>
             </td>
-        </tr>        
+        </tr>
         <% }; %>
     </tbody>
 </table>
@@ -60,3 +60,6 @@
     No rounds played
 </div>
 <% }; %>
+<script>
+    for (const localStorage of JSON.parse('<%- JSON.stringify(localStorage) %>')) window.localStorage.removeItem(localStorage);
+</script>

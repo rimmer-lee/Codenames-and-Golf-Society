@@ -1,0 +1,26 @@
+<% for (let i = start; i <= end; i++) { %>
+<tr>
+    <td class="text-center align-middle">
+        <%= i %>
+    </td>
+    <% for (const tee of tees) { %>
+    <% for (const variable of ['distance', 'par']) { %>
+    <td class="<%= tee.colour.class %>">
+        <div class="d-flex justify-content-center">
+            <label for="<%= `${tee.id}|${i}|${variable}` %>" class="form-label d-none"><%= `${variable[0].toUpperCase()}${variable.slice(1, )} ${i}` %></label>
+            <input id="<%= `${tee.id}|${i}|${variable}` %>" class="form-control text-center" type="number"<%= variable === "par" ? " min=3 max=5" : "" %> name="<%= `[${tee.id}][hole][${variable}]` %>" value="<%= tee.holes[i - 1][variable] %>">
+        </div>
+    </td>
+    <%} ; %>
+    <td class="<%= tee.colour.class %>">
+        <select id="<%= `${tee.id}|${i}|strokeIndex` %>" class="form-select" name="[<%= tee.id %>][hole][strokeIndex]">
+            <option value=""<%= tee.holes[i - 1].strokeIndex === "" ? " selected" : "" %>></option>
+            <% for (let index = 1; index < 19; index++) { %>
+            <option value="<%= index %>"<%= tee.holes[i - 1].strokeIndex === index ? " selected" : "" %>><%= index %></option>
+            <% }; %>
+        </select>
+        <label for="<%= `${tee.id}|${i}|strokeIndex` %>" class="form-label d-none">Stroke Index <%= i %></label>
+    </td>
+    <% }; %>
+</tr>
+<% }; %>

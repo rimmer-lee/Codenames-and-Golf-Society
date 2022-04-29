@@ -2,11 +2,12 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1>Players</h1>
 </div>
+<!-- add a new player button -->
 <% if (players.length > 0) { %>
 <table class="table table-sm table-bordered table-dark mb-0 lh-lg">
     <thead>
         <tr>
-            <% for (const header of ['Name', 'Rounds', 'Demerits', 'Drinks']) { %>
+            <% for (const header of ['Name', 'Rounds', 'Demerits', 'Titles', 'Drinks']) { %>
             <td scope="col">
                 <div class="d-flex justify-content-center align-items-center">
                     <%= header %>
@@ -33,6 +34,19 @@
             <td>
                 <div class="d-flex justify-content-center align-items-center">
                     <%= player.demerits %>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex justify-content-evenly align-items-center">
+                    <% for (const title of player.titles) { %>
+                    <div>
+                        <div class="btn btn-<%= title.class %>" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= title.title %> <%= title.value %>">
+                            <div class="d-flex p-0">
+                                <i class="mx-auto bi <%= title.icon %>"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <% }; %>
                 </div>
             </td>
             <td>
