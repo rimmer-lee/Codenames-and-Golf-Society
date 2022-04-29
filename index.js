@@ -20,7 +20,6 @@ const session = require('express-session');
 
 const ExpressError = require(path.join(__dirname, 'utilities', 'ExpressError'));
 
-const Course = require(path.join(__dirname, 'models', 'course'));
 const User = require(path.join(__dirname, 'models', 'user'));
 
 const constants = require(path.join(__dirname, 'constants'));
@@ -41,7 +40,8 @@ const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 
 const port = process.env.PORT || 3000;
 const secret = process.env.SECRET || 'thisshouldbeabettersecret';
-const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/codenames-and-golf-society'; // DB_URL=mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/codenames-and-golf-society';
+// const dbUrl = process.env.DB_URL || 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
 const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({
@@ -68,7 +68,9 @@ mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    // ssl: true,
+    // sslValidate: true
 });
 
 db.on('error', console.error.bind(console, 'Connection error:'));
@@ -114,12 +116,16 @@ passport.deserializeUser(User.deserializeUser());
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
 app.use(async (req, res, next) => {
-    res.locals.titles = constants.TITLES;
     res.locals.actions = constants.ACTIONS;
-    res.locals.nameTitles = constants.NAME_TITLES;
+    res.locals.countryCodes = constants.COUNTRY_CODES;
+    res.locals.games = constants.GAMES;
     res.locals.genders = constants.GENDERS;
+    res.locals.nameTitles = constants.NAME_TITLES;
+    res.locals.parClasses = constants.PAR_CLASSES;
     res.locals.roles = constants.ROLES;
-    res.locals.teeColours = constants.TEE_COLOURS
+    res.locals.roundTypes = constants.ROUND_TYPES;
+    res.locals.teeColours = constants.TEE_COLOURS;
+    res.locals.titles = constants.TITLES;
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.info = req.flash('info');
@@ -132,6 +138,7 @@ app.use('/charter', charterRoutes);
 app.use('/demerits', demeritRoutes);
 app.use('/demerits/drinks', drinkRoutes);
 app.use('/players', playerRoutes);
+app.use('/rounds/courses', courseRoutes);
 app.use('/rounds', roundRoutes);
 app.use('/', userRoutes);
 
@@ -139,19 +146,7 @@ app.get('/', (req, res) => res.render('home'));
 
 app.get('/set-cookie', (req, res) => {
     const { name, value = true} = req.query;
-    if (name) res.cookie(name, value, { maxAge: 24 * 60 * 60 * 1000 }); 
-    res.redirect('/');
-});
-
-app.get('/create-courses', async (req, res) => {
-    const { courses } = require(path.join(__dirname, 'seeds', 'base'));
-    const defaultUser = await User.findOne({ 'username': 'machine' });
-    for (const course of courses) {
-        const existingCourse = await Course.find({ 'name': course.name });
-        if (existingCourse.length > 0) continue;
-        course.created = { by: defaultUser };
-        await new Course(course).save();
-    };
+    if (name) res.cookie(name, value, { maxAge: 24 * 60 * 60 * 1000 });
     res.redirect('/');
 });
 
@@ -159,7 +154,27 @@ app.get('/create-courses', async (req, res) => {
 
 app.use(devFeatures)
 
-app.use('/rounds/courses', courseRoutes);
+// these should be moved to a separate route file
+
+// app.get('/delete-rules', async (req, res) => {
+//     const Charter = require(path.join(__dirname, 'models', 'charter'));
+//     const Rule = require(path.join(__dirname, 'models', 'rule'));
+//     const charters = await Charter.find();
+//     const rules = await Rule.find();
+//     const charterRules = charters.map(({ sections }) => sections.filter(({ rules }) => rules.length > 0).map(({ rules }) => rules)).flat(3);
+//     for (const rule of rules) {
+//         if (!charterRules.some(id => id == rule.id)) await rule.delete();
+//     };
+//     res.redirect('/')
+// });
+
+// app.get('/test/course/:id', async (req, res) => {
+//     const Course = require(path.join(__dirname, 'models', 'course'));
+//     const course = await Course.findById(req.params.id);
+//     await course.save();
+//     req.flash('success', `${course.name} saved`);
+//     return res.redirect('/');
+// });
 
 // app.get('/add-user-passwords', async (req, res) => {
 //    const users = await User.find();
@@ -168,6 +183,54 @@ app.use('/rounds/courses', courseRoutes);
 //        await u.save();
 //    };
 //    return res.redirect('/');
+// });
+
+// app.get('/update/machine', async (req, res) => {
+//     const theMachine = await User.findOne({ 'username': 'machine' });
+//     for (const property of ['birthday', 'gender', 'handicap', 'images', 'name']) theMachine[property] = undefined;
+//     await theMachine.save();
+//     res.redirect('/');
+// });
+
+// app.get('/update/courses', async (req, res) => {
+//     const Course = require(path.join(__dirname, 'models', 'course'));
+//     const Round = require(path.join(__dirname, 'models', 'round'));
+//     const Tee = require(path.join(__dirname, 'models', 'tee'));
+//     const courses = await Course.find();
+//     for (const course of courses) {
+//         const rounds = await Round.find({ 'course': course._id }).populate('course');
+//         for (const round of rounds) {
+//             const tee = course.tees.find(({ name }) => name.toLowerCase() == round.tee.toLowerCase());
+//             round.tee = `${tee.name}|${tee.gender}`;
+//         };
+//         course.tees = await Promise.all(course.tees.map(async tee => {
+//             tee._id = undefined;
+//             return await new Tee(tee).save();
+//         }));
+//         for (const round of rounds) {
+//             round.tee = course.tees.find(({ gender, name }) => `${name}|${gender}` === round.tee);
+//             await round.save();
+//         };
+//         await course.save();
+//     };
+//     return res.redirect('/');
+// });
+
+// app.get('/update/rounds', async (req, res) => {
+//     const Round = require(path.join(__dirname, 'models', 'round'));
+//     const rounds = await Round.find().populate('course');
+//     for (const round of rounds) await round.save();
+//     res.redirect('/');
+// });
+
+// app.get('/update/users', async (req, res) => {
+//     const users = await User.find();
+//     for (const user of users) {
+//         const { first = '', middle = [], last = '' } = user.name;
+//         user.name.full = `${first} ${middle.join(' ')} ${last}`;
+//         await user.save();
+//     };
+//     res.redirect('/');
 // });
 
 // above routes are available only locally or with cookie 'testing'
@@ -183,7 +246,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.all('*', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
     req.flash('error', 'Page not found');
-    res.redirect('/');    
+    res.redirect('/');
 });
 
 app.use((error, req, res, next) => {
@@ -204,3 +267,71 @@ app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port 
 // https://stackoverflow.com/questions/36676701/set-width-at-option-of-select-box
 // https://stackoverflow.com/questions/29508534/fix-width-of-drop-down-menu-in-select-option
 // https://stackoverflow.com/questions/10672586/how-to-make-select-elements-shrink-to-max-width-percent-style-within-fieldset
+
+
+// https://rapidapi.com/golfambit-golfambit-default/api/golf-course-finder/
+
+
+// async function readImage() {
+//     const Jimp = require('jimp');
+//     const tesseract = require('node-tesseract-ocr');
+
+//     const config = {
+//         lang: 'eng',
+//         oem: 1,
+//         psm: 3,
+//         tessedit_char_whitelist: '0123456789',
+//         preserve_interword_spaces: '0',
+//     };
+
+//     const image = Jimp.read('windmill hill.jpeg')
+//         .then(image => {
+//             image
+//                 // .color([{apply: 'desaturate', params: [90]}])
+//                 .greyscale()
+//                 .contrast(1)
+//                 .write('image.jpg');
+//         })
+//         .then(async () => {
+//             const result = await tesseract.recognize('image.jpg', config);
+//             console.log(result);
+
+//         })
+//         .catch(error => console.error(error));
+// };
+
+// readImage();
+
+
+
+// add handicap entry into /rounds/new
+
+// add game selection into /rounds/new
+
+// consolidate rounds on the same day, same course, same tee
+
+// handle non-connectivity in externalApis
+
+// resolve birthday date issue in /account
+
+// for courses edit and new, add labels for tee and tee display colour
+
+// Calculate handicaps
+
+// Tabbed input is shown on /rounds/new
+
+// Voting/Approval required for submitted demerits
+
+// Sort functionality in tables
+
+// Push notifications
+
+// get scorecard and geo location data - see course controller
+
+// add save/submit buttons to top of form
+//    - have them floating?
+
+// make sortPlayersByFriendlyName more generic
+//    - pass a delimited strong to define the path to the properties to be sorted by
+
+// put flash message in container on home screen i.e. for when logging out
