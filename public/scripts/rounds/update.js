@@ -91,9 +91,7 @@ function updateData() {
         if (option && !(/^select\s/i).test(option.innerText)) createNestedObject(round, select);
     };
     for (const input of document.querySelectorAll('form input:not([type="button"]):not([type="submit"]):not(.update-data-ignore)')) {
-        if (input.type === 'radio' || input.type === 'checkbox') {
-            if (!input.checked) continue;
-        };
+        if ((input.type === 'radio' || input.type === 'checkbox') && !input.checked) continue;
         createNestedObject(round, input);
     };
     window.localStorage.setItem('round', JSON.stringify(round));
