@@ -1,4 +1,3 @@
-const Charter = require('../models/charter');
 const Demerit = require('../models/demerit');
 const Drink = require('../models/drink');
 const Rule = require('../models/rule');
@@ -7,6 +6,8 @@ const User = require('../models/user');
 
 const { customDate } = require('../utilities/formatDate');
 
+const { TITLES } = require('../constants');
+
 function convertToArray(value) {
     if (!value) return [];
     if (Array.isArray(value)) return value;
@@ -14,16 +15,15 @@ function convertToArray(value) {
 };
 
 function titleObject(value) {
-    const values = value.match(/(award|revoke)\|(.+)/);
-    return { method: values[1], title: values[2] };
+    const [ , method, title ] = value.match(/(award|revoke)\|(.+)/);
+    return { method, title };
 };
 
 async function create (req, res) {
     const date = customDate('yyyy-mm-dd');
-    const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
-    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
-    const players = users.map(user => ({ name: user.name.knownAs, id: user._id }));
+    const allPlayers = await User.findMembers();
+    const rules = await Rule.getLatest();
+    const players = allPlayers.map(player => ({ name: player.name.knownAs, id: player._id }));
     res.render('demerits/new', { date, players, rules });
 };
 
@@ -54,13 +54,12 @@ async function edit (req, res) {
         endDate = new Date(y, 11, 31).setHours(23, 59, 59, 999);
     }
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).populate('player').populate('rule').populate('action.titles');
-    const users = await User.find({ 'role': { $ne: 'super' } });
-    const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
-    const charter = await Charter.findOne().sort({ 'lastModified.date': -1 }).populate('sections.rules');
-    const rules = charter.sections.find(({ rules }) => rules && rules.length).rules;
+    const allPlayers = await User.findMembers();
+    const players = allPlayers.map(player => ({ name: player.name.knownAs, id: String(player._id) }));
+    const rules = await Rule.getLatest();
     if (!p) return res.render('demerits/edit', { data: demerits, players, rules });
     const data = demerits.filter(({ player }) => String(player._id) === p);
-    res.render('demerits/edit', { data, players, rules });    
+    res.render('demerits/edit', { data, players, rules });
 };
 
 async function save (req, res) {
@@ -94,26 +93,27 @@ async function show (req, res) {
 
     // make editable based on dropdown or replicate with AJAX
     const currentYear = new Date().getFullYear();
-    const startDate = new Date(currentYear, 0, 1);
+    const startDate = new Date (2021, 0, 1); // new Date(currentYear, 0, 1);
     const endDate = new Date(currentYear, 11, 31);
-    
+
     // const allDemerits = await Demerit.find().sort({ date: 1 });
     // const years = [ ...new Set(allDemerits.map(({ when }) => when.date.getFullYear())) ];
     const years = [2021]
 
-    const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
+    const allPlayers = await User.findMembers();
+
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
     const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
 
     const allTitles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
-    const titles = res.locals.titles.map(({ value }) => value);
+    const titles = TITLES.map(({ value }) => value);
     const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
     const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
     const data = {
-        players: users.map(user => {
+        players: allPlayers.map(player => {
             return {
-                id: String(user._id),
-                name: user.name,
+                id: String(player._id),
+                name: player.name,
                 titles: [],
                 bbq: false
             };
@@ -122,18 +122,18 @@ async function show (req, res) {
             const demeritsForDate = demerits.filter(({ when }) => when.formattedDate.friendly === demeritDate);
             return {
                 date: demeritDate,
-                players: users.map(({ _id }) => {
+                players: allPlayers.map(({ _id }) => {
                     const player = String(_id);
                     const demerits = demeritsForDate.filter(demerit => String(demerit.player._id) === player).reduce((accumulate, { action }) => accumulate + action.demerits, 0);
                     return { player, demerits };
                 })
             };
-        }),        
+        }),
         drinks: drinkDates.map(drinkDate => {
             const drinksForDate = drinks.filter(({ when }) => when.formattedDate.friendly === drinkDate);
             return {
                 date: drinkDate,
-                players: users.map(({ _id }) => {
+                players: allPlayers.map(({ _id }) => {
                     const player = String(_id);
                     const drinks = drinksForDate.filter(drink => String(drink.player._id) === player).reduce((accumulate, { value }) => accumulate + value, 0)
                     return { player, drinks };
@@ -154,10 +154,10 @@ async function show (req, res) {
     for (const title of titles) {
         const filterTitles = allTitles.filter(({ name }) => name === title);
         if (!filterTitles) continue;
-        for (const [index, filterTitle] of filterTitles.entries()) {
+        for (const filterTitle of filterTitles) {
             if (filterTitle.method === 'award') {
-                if (!filterTitles.slice(0, index).filter(({ player }) => String(player) === String(filterTitle.player)).find(({ method }) => method === 'revoke')) {
-                    const holder = data.players.find(({ id }) => String(filterTitle.player) === id);
+                if (!filterTitles.filter(({ player }) => player == filterTitle.player).find(({ method }) => method === 'revoke')) {
+                    const holder = data.players.find(({ id }) => filterTitle.player == id);
                     if (holder) holder.titles.push(title);
                 };
                 break;
@@ -187,9 +187,9 @@ async function update (req, res) {
             if (existingDemerit.comments) delete existingDemerit.comments;
             if (submittedDemerit.comments && submittedDemerit.comments !== '') existingDemerit.comments = submittedDemerit.comments;
             existingDemerit.action.demerits = submittedDemerit.action.demerits;
-            
+
             // approved and update by Lee by default for now
-            existingDemerit.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'name.preferred' : 'Lee' }), date: Date.now() } });
+            existingDemerit.history.push({ status: 'Approved', updated: { by: await User.findOne({ 'role' : 'super' }), date: Date.now() } });
 
             if (submittedDemerit.action && submittedDemerit.action.titles) {
                 submittedDemerit.action.titles = convertToArray(submittedDemerit.action.titles).map(title => titleObject(title));
@@ -203,7 +203,7 @@ async function update (req, res) {
                             foundExistingTitle.method = foundSubmittedTitle.method;
                             foundExistingTitle.player = submittedDemerit.player;
                             await foundExistingTitle.save();
-                        } else await Title.findByIdAndDelete(existingDemeritTitle._id);                        
+                        } else await Title.findByIdAndDelete(existingDemeritTitle._id);
                     };
                 };
                 for (const submittedDemeritTitle of submittedDemerit.action.titles) {

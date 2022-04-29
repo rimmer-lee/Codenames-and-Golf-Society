@@ -2,21 +2,21 @@ const Charter = require('../models/charter');
 const Rule = require('../models/rule');
 const User = require('../models/user');
 
-async function getLatestCharter() {
-    const charter = await (await Charter.findOne().sort({ 'created.date': -1 }).populate('sections.rules'));
-    return charter;
-};
-
 function create (req, res) {
     res.render('charter/new');
 };
 
 async function edit (req, res) {
-    const charter = await getLatestCharter();
+    const charter = await Charter.findLatest();
     res.render('charter/edit', { charter });
 };
 
 async function save (req, res) {
+    const created = { by: await User.findById(req.user._id) };
+
+    // set value for now
+    const status = 'Approved';
+
     const formKeys = Object.keys(req.body);
     const sectionKeys = [ ...new Set(formKeys.map(formKey => formKey.match(/s\d+|/)[0])) ];
     const sections = sectionKeys.map(sectionKey => {
@@ -32,8 +32,7 @@ async function save (req, res) {
             const regex = new RegExp(`${sectionKey}\\|r\\d+`);
             return ruleKey.match(regex)[0];
         })) ];
-        const rules = ruleKeys.map(ruleKey => {            
-
+        const rules = ruleKeys.map(ruleKey => {
             function createBreakdownObject(key) {
                 const allBreakdowns = formKeys.filter(formKey => {
                     const regex = new RegExp(`${key}\\|b`);
@@ -58,7 +57,6 @@ async function save (req, res) {
                 });
                 return breakdown;
             };
-            
             const regexRuleKey = ruleKey.replace(/\|/g, '\\|');
             const description = formKeys.filter(formKey => {
                 const regex = new RegExp(`${regexRuleKey}\\|d`);
@@ -97,24 +95,12 @@ async function save (req, res) {
             section.rules = await Promise.all(section.rules.map(async rule => await new Rule(rule).save()));
         };
     };
-    
-    // set values for now
-    const y = new Date().getFullYear();
-    const startDate = new Date(y, 0, 1).setHours(0, 0, 0, 0);
-    const endDate = new Date(y, 11, 31).setHours(23, 59, 59, 999);
-    const charters = await Charter.find({ 'created.date': { $gte: startDate, $lte: endDate } });
-    const created = {
-        by: await User.findById(currentUser.id),
-        version: `${y}.${charters.length}`
-    };
-    const status = 'Approved';
-
     await new Charter({ created, sections, status }).save();
     res.redirect('/charter');
 };
 
 async function show (req, res) {
-    const charter = await getLatestCharter();
+    const charter = await Charter.findLatest();
     res.render('charter/index', { charter });
 };
 

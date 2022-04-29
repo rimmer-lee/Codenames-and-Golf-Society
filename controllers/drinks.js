@@ -5,8 +5,8 @@ const { customDate } = require('../utilities/formatDate');
 
 async function create (req, res) {
     const date = customDate('yyyy-mm-dd');
-    const users = await User.find({ 'role': { $ne: 'super' } }).sort({ 'name.friendly': 1 });
-    const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
+    const allPlayers = await User.findMembers();
+    const players = allPlayers.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     res.render('demerits/drinks/new', { date, players });
 };
 
@@ -18,8 +18,8 @@ async function edit (req, res) {
     const startDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(0, 0, 0, 0);
     const endDate = new Date(dateParts[3], dateParts[2] - 1, dateParts[1]).setHours(23, 59, 59, 999);
     const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).populate('player');
-    const users = await User.find({ 'role': { $ne: 'super' } });
-    const players = users.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
+    const allPlayers = await User.findMembers();
+    const players = allPlayers.map(user => ({ name: user.name.knownAs, id: String(user._id) }));
     if (!p) return res.render('demerits/drinks/edit', { data: drinks, players });
     const data = drinks.filter(({ player }) => String(player._id) === p);
     res.render('demerits/drinks/edit', { data, players });
