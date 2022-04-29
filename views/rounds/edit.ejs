@@ -26,35 +26,12 @@
                     </h2>
                     <div id="round-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="round-accordion-item-heading">
                         <div class="accordion-body p-3">
-                            <div class="row gy-2">
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= round.formattedDate.datePicker %>" max="<%= date %>" required disabled>
-                                        <label for="date">Date</label>
-                                        <div class="invalid-feedback">
-                                            <div class="d-flex justify-content-end">
-                                                Please select a date.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="row mx-0 border border-1 rounded py-2" style="background-color: #e9ecef; color: rgba(33,37,41, 0.65)">
-                                        <div class="col d-flex">
-                                            <h6 class="my-auto">
-                                                Games
-                                            </h6>
-                                        </div>
-                                        <div class="col">
-                                            <div class="d-flex justify-content-around">
-                                                <% for (const game of games) { %>
-                                                <div class="form-check">
-                                                    <input id="game-<%= game.name %>" class="form-check-input" type="checkbox" value="<%= game.name %>" name="[round][game][<%= game.name %>]"<%= round.games.includes(game.name) ? ' checked' : '' %> disabled>
-                                                    <label for="game-<%= game.name %>" class="form-check-label"><%= game.name %></label>
-                                                </div>
-                                                <% }; %>
-                                            </div>
-                                        </div>
+                            <div class="form-floating">
+                                <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= round.formattedDate.datePicker %>" max="<%= date %>" required disabled>
+                                <label for="date">Date</label>
+                                <div class="invalid-feedback">
+                                    <div class="d-flex justify-content-end">
+                                        Please select a date.
                                     </div>
                                 </div>
                             </div>
@@ -264,8 +241,24 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- issue with contents with .accordion-body disappearing  -->
+                <div class="accordion-item">
+                    <h2 id="game-accordion-item-heading" class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#game-accordion-item-body-parent" aria-expanded="false" aria-controls="game-accordion-item-body-parent">
+                            Games
+                        </button>
+                    </h2>
+                    <div id="game-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="game-accordion-item-heading">
+                        <div class="accordion-body p-3">
+                            <div class="row gy-3">
+                                <% for (const game of round.games) { %>
+                                <div class="col-12">
+                                    <%= `${game.handicap ? 'Nett ' : ''}${game.method ? `${game.method} ` : ''}${game.name}` %>
+                                </div>
+                                <% }; %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="accordion-item">
                     <h2 id="scorecard-accordion-item-heading" class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard-accordion-item-body-parent" aria-expanded="false" aria-controls="scorecard-accordion-item-body-parent">
