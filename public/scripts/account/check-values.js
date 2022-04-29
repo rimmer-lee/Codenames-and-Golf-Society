@@ -7,6 +7,9 @@ function checkValue() {
         element.removeEventListener('change', validation);
         return;
     };
+
+    // update to use fetch
+
     const xhttp = new XMLHttpRequest();
     element.setAttribute('required', true);
     element.addEventListener('change', validation);

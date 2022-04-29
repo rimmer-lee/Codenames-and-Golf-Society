@@ -1,14 +1,13 @@
 /* Bootstrap Extra Small (xs) */
 @media (max-width: 576px) {
-    table,
+    /* table,
     table *.btn,
-    table input.form-control {
+    table .form-control {
         font-size: 0.8rem;
-    }
-    table#round,
-    table#round input.form-control {
-        font-size: 0.8rem;   
-    }
+    } */
+    .course-tees td {
+        width: calc(100% / 4);
+    };
 }
 
 /* Bootstrap Extra Small (xs) and Small (sm) */
@@ -25,6 +24,13 @@
     }
 }
 
+/* Bootstrap Large (lg) */
+@media (min-width: 992px) {
+    .course-tees td {
+        width: calc(100% / 11);
+    };
+};
+
 #round td {
     width: calc(100% / 8);
 }
@@ -39,7 +45,7 @@ table#round input.form-control {
     padding-right: 0;
 }
 
-/* update so widith grows/shrinks with number of users */
+/* update so width grows/shrinks with number of users */
 #demerit tr > *:not(:first-child) {
     width: 15%;
     /* width: calc(100% / var(--users)) */
@@ -57,7 +63,8 @@ table img {
 }
 
 .hole td {
-    width: 33%;
+    /* resize column accordingly to best fit data */
+    width: 25%;
     /* height: calc(40px + 2px / 3); */
 }
 
@@ -70,18 +77,15 @@ table img {
     width: 33%;
 }
 
-#tees tr.table-light input,
-.hole tr.table-light input {
-    /* background: rgba(255, 255, 255); */
-    background-color: var(--bs-table-bg);
+.hole tr input {
+    opacity: 80%;
 }
 
-#tees tr.table-warning input,
-.hole tr.table-warning input {
-    background-color: var(--bs-table-bg);
-}
-
-#tees tr.table-danger input,
-.hole tr.table-danger input {
-    background-color: var(--bs-table-bg);
+table#course td *,
+table#course td,
+table#round td *,
+table#round td,
+table.summary td *,
+table.summary td {
+    min-width: 60px;
 }

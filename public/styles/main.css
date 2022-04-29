@@ -1,17 +1,5 @@
 @import 'tables.css';
 
-@media (max-width: 576px) {
-    #summary-score h4 {
-        font-size: 2.75vw;
-    }
-}
-
-@media (min-width: 577px) and (max-width: 767px) {
-    #summary-score h4 {
-        font-size: 0.9rem;
-    }
-}
-
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -23,8 +11,7 @@ html, body {
 }
 
 main.container {
-    min-height: calc(100vh - 56px - 60px - 16px);
-    /* footer - header - white space below header (approx.) */
+    min-height: calc(100vh - 128px);
 }
 
 textarea.form-control {
@@ -64,6 +51,7 @@ textarea {
 }
 
 .plus {
+    /* content: \002b; */
     transform: rotate(45deg);
     border-radius: 50%;
 }
@@ -88,7 +76,7 @@ a {
   }
 
 table select {
-    text-align-last: center; 
+    text-align-last: center;
 }
 
 select option {
@@ -206,4 +194,43 @@ li.page-item.right-hole .page-link {
     border-bottom-width: 1px;
     border-bottom-right-radius: .25rem;
     border-bottom-left-radius: .25rem;
+}
+
+.spin::after {
+    animation: 1.5s linear infinite spinner;
+    animation-play-state: inherit;
+    border: solid 5px #cfd0d1;
+    border-bottom-color: #1c87c9;
+    border-radius: 50%;
+    content: "";
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    will-change: transform;
+}
+
+@keyframes spinner {
+    0% {
+        transform: translate3d(-50%, -50%, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    }
+}
+
+.game-element {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.game-handicap {
+    min-height: 56px;
+}
+
+.accordion > .accordion-item .accordion > .accordion-item > .accordion-header > button:not(.collapsed) {
+    color: #0B58CB;
+    background-color: #B3D2FF;
 }
