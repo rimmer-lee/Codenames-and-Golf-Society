@@ -23,7 +23,8 @@ const DemeritSchema = new Schema({
         created: {
             type: Date,
             default: Date.now(),
-            required: true
+            required: true,
+            immutable: true
         }
     },
     player: {
@@ -60,7 +61,7 @@ const DemeritSchema = new Schema({
             status: {
                 type: String,
                 enum: ['Created', 'Submitted', 'Approved'],
-                reqrired: true
+                required: true
             },
             updated: {
                 by: {

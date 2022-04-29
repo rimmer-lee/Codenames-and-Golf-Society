@@ -24,7 +24,8 @@ const DrinkSchema = new Schema({
         created: {
             type: Date,
             default: Date.now(),
-            required: true
+            required: true,
+            immutable: true
         },
         updated: {
             type: Date,

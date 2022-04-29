@@ -8,7 +8,12 @@ const options = { toJSON: { virtuals: true } };
 const SectionSchema = new Schema({
     title: String,
     description: [ String ],
-    rules: [{ type: Schema.Types.ObjectId, ref: 'Rule' }]
+    rules: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Rule'
+        }
+    ]
 });
 
 const CharterSchema = new Schema({
@@ -16,26 +21,27 @@ const CharterSchema = new Schema({
         date: {
             type: Date,
             default: Date.now(),
-            required: true
+            required: true,
+            immutable: true
         },
         by: {
             type: Schema.Types.ObjectId,
             ref: 'User',
             required: true
         },
-        comments: String,
-        // format of year and iteration e.g. 2021.2
-        version: {
-            type: String,
-            required: true,
-            // unique: true
-        }
+        comments: String
     },
     sections: [ SectionSchema ],
     status: {
         type: String,
         enum: ['Submitted', 'Approved'],
         required: true
+    },
+    version: {
+        type: Number,
+        required: true,
+        unique: true,
+        immutable: true
     }
 }, options);
 
@@ -44,4 +50,16 @@ CharterSchema.virtual('created.fullDate').get(function () {
     return `${formatDate.fullDate(date)} ${formatDate.time(date)}`;
 });
 
-module.exports = mongoose.model('Charter', CharterSchema);
+CharterSchema.pre('validate', async function(next) {
+    const charters = await Charter.find();
+    this.version = ++charters.length;
+    next();
+});
+
+CharterSchema.statics.findLatest = async function() {
+    return await this.findOne().sort({ 'version': -1 }).populate('sections.rules');
+};
+
+const Charter = mongoose.model('Charter', CharterSchema)
+
+module.exports = Charter;

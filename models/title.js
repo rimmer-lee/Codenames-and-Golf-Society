@@ -36,7 +36,8 @@ const TitleSchema = new Schema({
         created: {
             type: Date,
             default: Date.now(),
-            required: true
+            required: true,
+            immutable: true
         }
     }
 }, options);
@@ -48,6 +49,11 @@ TitleSchema.virtual('when.formattedDate').get(function () {
         friendly: customDate('dd/mm/yyyy', date),
         date: new Date(date.getFullYear(), date.getMonth(), date.getDate())
     };
+});
+
+TitleSchema.pre('save', function(next) {
+    this.when.updated = Date.now();
+    next();
 });
 
 module.exports = mongoose.model('Title', TitleSchema);
