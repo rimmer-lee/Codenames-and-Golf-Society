@@ -163,14 +163,15 @@ function selectCourse() {
     const teeElementParent = teeElement.closest('[class*="col"]');
     const teeSelect = document.getElementById('tee-select');
     const teeSelectParent = teeSelect.closest('[class*="col"]');
-    const scorecardAccordionItem = document.getElementById('scorecard-heading').closest('.accordion-item');
+    // const scorecardAccordionItem = document.getElementById('scorecard-heading').closest('.accordion-item');
+    const holeOneParentColumn = document.getElementById('hole-1').closest('.row').closest('.col-12');
     const paginationParentElement = document.querySelector('ul').closest('[class*="col"]');
-    const playersAccordion = document.getElementById('players');
+    // const playersAccordion = document.getElementById('players');
     toggleElement(teeElementParent, false);
     toggleElement(teeSelectParent, false);
-    toggleElement(scorecardAccordionItem, false);
+    toggleElement(holeOneParentColumn, false);
     toggleElement(paginationParentElement, false);
-    playersAccordion.classList.add('forced-accordion-bottom');
+    // playersAccordion.classList.add('forced-accordion-bottom');
     while (teeElement.children.length > 0) teeElement.children[0].remove();
     while (teeSelect.children.length > 0) teeSelect.children[0].remove();
     for (let i = 1; i < 19; i++) {
@@ -263,9 +264,9 @@ function selectCourse() {
     if (course) {
         toggleElement(teeElementParent);
         toggleElement(teeSelectParent);
-        toggleElement(scorecardAccordionItem);
+        toggleElement(holeOneParentColumn);
         toggleElement(paginationParentElement);
-        playersAccordion.classList.remove('forced-accordion-bottom');
+        // playersAccordion.classList.remove('forced-accordion-bottom');
         for (const tee of course.tees) {
             const optionElementObject = {
                 type: 'option',
