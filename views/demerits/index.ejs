@@ -4,7 +4,7 @@
     <h1 class="col">Demerits</h1>
     <div class="col">
         <div class="row">
-            <label class="col d-flex align-items-center justify-content-end" for="year">Year</label>
+            <label class="col fw-bold d-flex align-items-center justify-content-end" for="year">Year</label>
             <!-- need to add listener for a change event (for AJAX) or submit the change as a form to trigger a page load -->
             <select id="year" class="col form-select" aria-label="player">
                 <% for (const year of years) { %>
@@ -20,8 +20,8 @@
         <thead class="table-dark">
             <tr>
                 <th scope="col"></th>
-                <% for (const player of data[0].players) { %>
-                <th class="align-top" scope="col">
+                <% for (const player of data[1].players) { %>
+                <th class="align-top" scope="col" data-player>
                     <div class="d-flex flex-column">
                         <div class="text-center">
                             <div class="d-none d-md-block">
@@ -48,7 +48,7 @@
         </thead>
         <tbody>
             <tr>
-                <th class="table-secondary" colspan="<%= data[0].players.length + 1 %>" scope="row">
+                <th id="new-demerit-head" class="table-secondary" colspan="<%= data[1].players.length + 1 %>" scope="row">
                     <div class="row">
                         <div class="col d-flex align-items-center">Demerits</div>
                         <div class="col">
@@ -59,14 +59,14 @@
                     </div>
                 </th>
             </tr>
-            <% for (const demerit of data[0].demerits) { %>
-            <tr>
+            <% for (const demerit of data[1].demerits) { %>
+            <tr data-date>
                 <th class="d-flex justify-content-end" scope="row">
                     <a href="/demerits/edit?d=<%= demerit.date %>">
                         <%= demerit.date %>
                     </a>
                 </th>
-                <% for (const p of data[0].players) { %>
+                <% for (const p of data[1].players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.id); %>
                 <td>
                     <div class="d-flex">
@@ -77,13 +77,12 @@
                         </div>
                     </div>
                 </td>
-
                 <% }; %>
             </tr>
             <% }; %>
-            <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Total', property: 'demerits' }) %>
+            <%- include('../partials/tables/demerits/row', { players: data[1].players, title: 'Total', property: 'demerits' }) %>
             <tr>
-                <th class="table-secondary" colspan="<%= data[0].players.length + 1 %>" scope="row">
+                <th id="new-drink-head" class="table-secondary" colspan="<%= data[1].players.length + 1 %>" scope="row">
                     <div class="row">
                         <div class="col d-flex align-items-center">Drinks</div>
                         <div class="col">
@@ -94,14 +93,14 @@
                     </div>
                 </th>
             </tr>
-            <% for (const drink of data[0].drinks) { %>
-            <tr>
+            <% for (const drink of data[1].drinks) { %>
+            <tr data-date>
                 <th class="d-flex justify-content-end" scope="row">
                     <a href="/demerits/drinks/edit?d=<%= drink.date %>">
                         <%= drink.date %>
                     </a>
                 </th>
-                <% for (const p of data[0].players) { %>
+                <% for (const p of data[1].players) { %>
                 <% const d = drink.players.find(({ player }) => player === p.id); %>
                 <td>
                     <div class="d-flex">
@@ -115,24 +114,29 @@
                 <% }; %>
             </tr>
             <% }; %>
-            <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Owed', property: 'owed' }) %>
-            <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Balance', property: 'balance' }) %>
-            <tr>
+            <%- include('../partials/tables/demerits/row', { players: data[1].players, title: 'Owed', property: 'owed' }) %>
+            <%- include('../partials/tables/demerits/row', { players: data[1].players, title: 'Balance', property: 'balance' }) %>
+            <tr id ="bbq-row">
                 <th scope="row">BBQ</th>
-                <% for (const player of data[0].players) { %>
-                    <td>
-                        <div class="d-flex">
-                            <div class="mx-auto">
-                                <% if (player.bbq) { %>
-                                <img src="/images/bbq.png" alt="bbq">
-                                <% }; %>
-                            </div>
+                <% for (const player of data[1].players) { %>
+                <td data-player>
+                    <div class="d-flex">
+                        <div class="mx-auto">
+                            <% if (player.bbq) { %>
+                            <img src="/images/bbq.png" alt="bbq">
+                            <% }; %>
                         </div>
-                    </td>
+                    </div>
+                </td>
                 <% }; %>
             </tr>
         </tbody>
     </table>
 </section>
 <% }; %>
+<script>
+    const data = JSON.parse('<%- JSON.stringify(data) %>');
+    const allTitles = JSON.parse('<%- JSON.stringify(titles) %>');
+</script>
+<script src="/scripts/create-element.js"></script>
 <script src="/scripts/demerits/change-year.js"></script>

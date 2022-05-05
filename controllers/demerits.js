@@ -122,6 +122,7 @@ async function show (req, res) {
         const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
         const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
         const data = {
+            year,
             players: allPlayers.map(player => {
                 return {
                     id: String(player._id),
@@ -130,10 +131,10 @@ async function show (req, res) {
                     bbq: false
                 };
             }),
-            demerits: demeritDates.map(demeritDate => {
-                const demeritsForDate = demerits.filter(({ when }) => when.formattedDate.friendly === demeritDate);
+            demerits: demeritDates.map(date => {
+                const demeritsForDate = demerits.filter(({ when }) => when.formattedDate.friendly === date);
                 return {
-                    date: demeritDate,
+                    date,
                     players: allPlayers.map(({ _id }) => {
                         const player = String(_id);
                         const demerits = demeritsForDate.filter(demerit => String(demerit.player._id) === player).reduce((accumulate, { action }) => accumulate + action.demerits, 0);
@@ -141,10 +142,10 @@ async function show (req, res) {
                     })
                 };
             }),
-            drinks: drinkDates.map(drinkDate => {
-                const drinksForDate = drinks.filter(({ when }) => when.formattedDate.friendly === drinkDate);
+            drinks: drinkDates.map(date => {
+                const drinksForDate = drinks.filter(({ when }) => when.formattedDate.friendly === date);
                 return {
-                    date: drinkDate,
+                    date,
                     players: allPlayers.map(({ _id }) => {
                         const player = String(_id);
                         const drinks = drinksForDate.filter(drink => String(drink.player._id) === player).reduce((accumulate, { value }) => accumulate + value, 0)
