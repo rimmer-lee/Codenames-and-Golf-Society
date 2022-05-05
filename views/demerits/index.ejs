@@ -2,25 +2,25 @@
 <!-- add tooltips -->
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1 class="col">Demerits</h1>
-    <!-- <div class="col">
+    <div class="col">
         <div class="row">
-            <label class="col d-flex align-items-center justify-content-end" for="year">Year</label> -->
+            <label class="col d-flex align-items-center justify-content-end" for="year">Year</label>
             <!-- need to add listener for a change event (for AJAX) or submit the change as a form to trigger a page load -->
-            <!-- <select id="year" class="col form-select" aria-label="player">
-                <% years.forEach((year, index) => { %>
-                <option value="<%= year %>" <%= index === 1 ? "selected" : "" %>><%= year %></option>
-                <% }); %>
+            <select id="year" class="col form-select" aria-label="player">
+                <% for (const year of years) { %>
+                <option value="<%= year.year %>" <%= year.current ? "selected" : "" %>><%= year.year %></option>
+                <% }; %>
             </select>
         </div>
-    </div> -->
+    </div>
 </div>
-<% if (data.players.length > 0) { %>
+<% if (data.length > 0) { %>
 <section>
     <table id="demerit" class="table table-bordered">
         <thead class="table-dark">
             <tr>
                 <th scope="col"></th>
-                <% for (const player of data.players) { %>
+                <% for (const player of data[0].players) { %>
                 <th class="align-top" scope="col">
                     <div class="d-flex flex-column">
                         <div class="text-center">
@@ -48,7 +48,7 @@
         </thead>
         <tbody>
             <tr>
-                <th class="table-secondary" colspan="<%= data.players.length + 1 %>" scope="row">
+                <th class="table-secondary" colspan="<%= data[0].players.length + 1 %>" scope="row">
                     <div class="row">
                         <div class="col d-flex align-items-center">Demerits</div>
                         <div class="col">
@@ -59,21 +59,20 @@
                     </div>
                 </th>
             </tr>
-            <% for (const demerit of data.demerits) { %>
+            <% for (const demerit of data[0].demerits) { %>
             <tr>
                 <th class="d-flex justify-content-end" scope="row">
                     <a href="/demerits/edit?d=<%= demerit.date %>">
                         <%= demerit.date %>
                     </a>
                 </th>
-                <% for (const p of data.players) { %>
+                <% for (const p of data[0].players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.id); %>
-                <% const value = d.demerits ? d.demerits : ""; %>
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
                             <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.id %>">
-                                <%= value %>
+                                <%= d.demerits || '' %>
                             </a>
                         </div>
                     </div>
@@ -82,9 +81,9 @@
                 <% }; %>
             </tr>
             <% }; %>
-            <%- include('../partials/tables/demerits/row', { players: data.players, title: 'Total', property: 'demerits' }) %>
+            <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Total', property: 'demerits' }) %>
             <tr>
-                <th class="table-secondary" colspan="<%= data.players.length + 1 %>" scope="row">
+                <th class="table-secondary" colspan="<%= data[0].players.length + 1 %>" scope="row">
                     <div class="row">
                         <div class="col d-flex align-items-center">Drinks</div>
                         <div class="col">
@@ -95,34 +94,32 @@
                     </div>
                 </th>
             </tr>
-            <% for (const drink of data.drinks) { %>
+            <% for (const drink of data[0].drinks) { %>
             <tr>
                 <th class="d-flex justify-content-end" scope="row">
                     <a href="/demerits/drinks/edit?d=<%= drink.date %>">
                         <%= drink.date %>
                     </a>
                 </th>
-                <% for (const p of data.players) { %>
+                <% for (const p of data[0].players) { %>
                 <% const d = drink.players.find(({ player }) => player === p.id); %>
-                <% const value = d.drinks ? d.drinks : ""; %>
                 <td>
                     <div class="d-flex">
                         <div class="mx-auto">
                             <a href="/demerits/drinks/edit?d=<%= drink.date %>&p=<%= p.id %>">
-                                <%= value %>
+                                <%= d.drinks || '' %>
                             </a>
                         </div>
                     </div>
                 </td>
-
                 <% }; %>
             </tr>
             <% }; %>
-            <%- include('../partials/tables/demerits/row', { players: data.players, title: 'Owed', property: 'owed' }) %>
-            <%- include('../partials/tables/demerits/row', { players: data.players, title: 'Balance', property: 'balance' }) %>
+            <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Owed', property: 'owed' }) %>
+            <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Balance', property: 'balance' }) %>
             <tr>
                 <th scope="row">BBQ</th>
-                <% for (const player of data.players) { %>
+                <% for (const player of data[0].players) { %>
                     <td>
                         <div class="d-flex">
                             <div class="mx-auto">
@@ -137,8 +134,4 @@
         </tbody>
     </table>
 </section>
-<% } else { %>
-<div>
-    There are currently no players to add demerits for
-</div>
 <% }; %>
