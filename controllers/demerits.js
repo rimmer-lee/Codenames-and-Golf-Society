@@ -121,6 +121,8 @@ async function show (req, res) {
         const titles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
         const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
         const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
+
+        // should we move demerits and drinks into objects in players array?
         const data = {
             year,
             players: allPlayers.map(player => {
@@ -154,14 +156,15 @@ async function show (req, res) {
                 };
             }),
         };
+
         for (const player of data.players) {
             player.demerits = demerits.filter(demerit => String(demerit.player._id) === player.id).reduce((accumulate, { action }) => accumulate + action.demerits, 0);
             if (player.demerits < 0) player.demerits = 0;
             player.bought = drinks.filter(drink => String(drink.player._id) === player.id).reduce((accumulate, drink) => accumulate + drink.value, 0);
             player.owed = Math.floor(player.demerits / 5);
-            player.balance = player.owed - player.bought
-            if (player.demerits >= 20) player.bbq = true;
+            player.balance = player.owed - player.bought;
         };
+        for (const player of data.players) player.bbq = player.demerits === Math.max( ...data.players.map(({ demerits }) => +demerits) )
         for (const title of allTitles) {
             const filterTitles = titles.filter(({ name }) => name === title);
             if (!filterTitles) continue;
