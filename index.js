@@ -301,6 +301,7 @@ app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port 
 
 
 // consolidate rounds on the same day, same course, same tee
+//    - capture the playing ID (marker, player-a, etc.) and the playing group to the scores schema
 
 // handle non-connectivity in externalApis
 
