@@ -257,10 +257,6 @@ app.use((error, req, res, next) => {
 
 app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port ${port}`));
 
-// accordion table - might be useful in display individual played rounds
-// https://stackoverflow.com/questions/24148631/creating-accordion-table-with-bootstrap/47527536
-// https://stackoverflow.com/questions/16389775/twitter-bootstrap-use-collapse-js-on-table-cells-almost-done
-
 // https://ncrdb.usga.org/
 
 // set width of options to equal width of select - useful for any drop down
@@ -304,10 +300,6 @@ app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port 
 
 
 
-// add handicap entry into /rounds/new
-
-// add game selection into /rounds/new
-
 // consolidate rounds on the same day, same course, same tee
 
 // handle non-connectivity in externalApis
@@ -330,8 +322,5 @@ app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port 
 
 // add save/submit buttons to top of form
 //    - have them floating?
-
-// make sortPlayersByFriendlyName more generic
-//    - pass a delimited strong to define the path to the properties to be sorted by
 
 // put flash message in container on home screen i.e. for when logging out
