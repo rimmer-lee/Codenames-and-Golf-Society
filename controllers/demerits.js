@@ -164,7 +164,7 @@ async function show (req, res) {
             player.owed = Math.floor(player.demerits / 5);
             player.balance = player.owed - player.bought;
         };
-        for (const player of data.players) player.bbq = player.demerits === Math.max( ...data.players.map(({ demerits }) => +demerits) )
+        for (const player of data.players) player.bbq = player.demerits > 0 && player.demerits === Math.max( ...data.players.map(({ demerits }) => +demerits) )
         for (const title of allTitles) {
             const filterTitles = titles.filter(({ name }) => name === title);
             if (!filterTitles) continue;
