@@ -112,26 +112,30 @@ document.getElementById('year').addEventListener('change', function() {
             });
         };
         for (const property of ['demerits', 'owed', 'balance', 'bbq']) {
-            const innerText = (function() {
-                const value = player[property];
-                if (typeof value === 'boolean') return value ;
-                return value || '0';
-            })();
-            document.getElementById(`${property}-row`).insertBefore(createElement({
+            const value = player[property];
+            const dataElement = {
                 type: 'td',
                 attributes: [{ id: 'data-player' }],
                 children: [
                     {
                         classList: ['d-flex'],
-                        children: [
-                            {
-                                classList: ['mx-auto'],
-                                innerText
-                            }
-                        ]
+                        children: [{ classList: ['mx-auto'] }]
                     }
                 ]
-            }), null);
+            };
+            if (property !== 'bbq') dataElement.children[0].children[0].innerText = value || 0;
+            else if (value) {
+                dataElement.children[0].children[0].children = [
+                    {
+                        type: 'img',
+                        attributes: [
+                            { id: 'src', value: '/images/bbq.png' },
+                            { id: 'alt', value: 'bbq'}
+                        ]
+                    }
+                ];
+            };
+            document.getElementById(`${property}-row`).insertBefore(createElement(dataElement), null);
         };
         playerHeadingRow.insertBefore(createElement(playerElement), null);
     };
