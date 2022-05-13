@@ -3,9 +3,8 @@
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1 class="col">Demerits</h1>
     <div class="col">
-        <div class="row">
+        <div class="row mx-0">
             <label class="col fw-bold d-flex align-items-center justify-content-end" for="year">Year</label>
-            <!-- need to add listener for a change event (for AJAX) or submit the change as a form to trigger a page load -->
             <select id="year" class="col form-select" aria-label="player">
                 <% for (const year of years) { %>
                 <option value="<%= year.year %>" <%= year.current ? "selected" : "" %>><%= year.year %></option>
@@ -68,14 +67,10 @@
                 </th>
                 <% for (const p of data[0].players) { %>
                 <% const d = demerit.players.find(({ player }) => player === p.id); %>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.id %>">
-                                <%= d.demerits || '' %>
-                            </a>
-                        </div>
-                    </div>
+                <td class="text-center">
+                    <a href="/demerits/edit?d=<%= demerit.date %>&p=<%= p.id %>">
+                        <%= d.demerits || '' %>
+                    </a>
                 </td>
                 <% }; %>
             </tr>
@@ -102,14 +97,10 @@
                 </th>
                 <% for (const p of data[0].players) { %>
                 <% const d = drink.players.find(({ player }) => player === p.id); %>
-                <td>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <a href="/demerits/drinks/edit?d=<%= drink.date %>&p=<%= p.id %>">
-                                <%= d.drinks || '' %>
-                            </a>
-                        </div>
-                    </div>
+                <td class="text-center">
+                    <a href="/demerits/drinks/edit?d=<%= drink.date %>&p=<%= p.id %>">
+                        <%= d.drinks || '' %>
+                    </a>
                 </td>
                 <% }; %>
             </tr>
@@ -120,13 +111,9 @@
                 <th scope="row">BBQ</th>
                 <% for (const player of data[0].players) { %>
                 <td data-player>
-                    <div class="d-flex">
-                        <div class="mx-auto">
-                            <% if (player.bbq) { %>
-                            <img src="/images/bbq.png" alt="bbq">
-                            <% }; %>
-                        </div>
-                    </div>
+                    <% if (player.bbq) { %>
+                    <img class="img-fluid" src="/images/bbq.png" alt="bbq">
+                    <% }; %>
                 </td>
                 <% }; %>
             </tr>

@@ -33,21 +33,12 @@ document.getElementById('year').addEventListener('change', function() {
                 const total = o.players.find(({ player }) => player === id)[property];
                 element.children.push({
                     type: 'td',
+                    classList: ['text-center'],
                     children: [
                         {
-                            classList: ['d-flex'],
-                            children: [
-                                {
-                                    classList: ['mx-auto'],
-                                    children: [
-                                        {
-                                            type: 'a',
-                                            attributes: [{ id: 'href', value: `${value}&p=${id}` }],
-                                            innerText: total || ''
-                                        }
-                                    ]
-                                }
-                            ]
+                            type: 'a',
+                            attributes: [{ id: 'href', value: `${value}&p=${id}` }],
+                            innerText: total || ''
                         }
                     ]
                 });
@@ -115,19 +106,16 @@ document.getElementById('year').addEventListener('change', function() {
             const value = player[property];
             const dataElement = {
                 type: 'td',
-                attributes: [{ id: 'data-player' }],
-                children: [
-                    {
-                        classList: ['d-flex'],
-                        children: [{ classList: ['mx-auto'] }]
-                    }
-                ]
+                attributes: [{ id: 'data-player' }]
             };
-            if (property !== 'bbq') dataElement.children[0].children[0].innerText = value || 0;
-            else if (value) {
-                dataElement.children[0].children[0].children = [
+            if (property !== 'bbq') {
+                dataElement.classList = ['text-center'];
+                dataElement.innerText = value || 0;
+            } else if (value) {
+                dataElement.children = [
                     {
                         type: 'img',
+                        classList: ['img-fluid'],
                         attributes: [
                             { id: 'src', value: '/images/bbq.png' },
                             { id: 'alt', value: 'bbq'}

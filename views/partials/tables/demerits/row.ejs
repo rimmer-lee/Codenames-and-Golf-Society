@@ -1,12 +1,8 @@
 <tr id="<%= `${property.toLowerCase()}-row` %>">
     <th scope="row"><%= title %></th>
     <% for (const player of players) { %>
-    <td data-player>
-        <div class="d-flex">
-            <div class="mx-auto">
-                <%= player[property] %>
-            </div>
-        </div>
+    <td class="text-center" data-player>
+        <%= player[property] %>
     </td>
     <% }; %>
 </tr>
