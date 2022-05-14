@@ -60,6 +60,6 @@ CharterSchema.statics.findLatest = async function() {
     return await this.findOne().sort({ 'version': -1 }).populate('sections.rules');
 };
 
-const Charter = mongoose.model('Charter', CharterSchema)
+const Charter = mongoose.model('Charter', CharterSchema);
 
 module.exports = Charter;
