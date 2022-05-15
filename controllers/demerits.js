@@ -109,6 +109,8 @@ async function show (req, res) {
     const allPlayers = await User.findMembers();
     const allTitles = TITLES.map(({ value }) => value);
     const data = await Promise.all(years.map(async ({ year }) => {
+
+        // move to utilities
         const { endDate, startDate } = (function() {
             const startMonth = (function() {
                 if (year === 2021) return 0;
@@ -119,6 +121,7 @@ async function show (req, res) {
                 startDate: new Date (year, startMonth, 1)
             };
         })();
+
         const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
         const titles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
