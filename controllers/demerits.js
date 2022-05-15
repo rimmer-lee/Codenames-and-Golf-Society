@@ -33,6 +33,8 @@ async function edit (req, res) {
         req.flash('error', 'Something went wrong');
         return res.redirect('/demerits');
     };
+
+    // I'm not sure that this is correct
     const { endDate, startDate } = (function() {
         if (date) {
             const dateParts = date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
@@ -52,6 +54,7 @@ async function edit (req, res) {
         };
         return {};
     })();
+
     if (!endDate && !startDate) {
         req.flash('error', 'Something went wrong');
         return res.redirect('/demerits');
