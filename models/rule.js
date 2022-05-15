@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const Charter = require('./charter');
 
 const { TITLES, ACTIONS } = require('../constants');
+const charterDates = require('../utilities/charterDates');
 
 const BreakdownSchema = new Schema({
     description: [ String ],
@@ -39,19 +40,7 @@ RuleSchema.statics.getAll = async function() {
         const year = +version.split('.')[0];
         const versionYear = new RegExp(year);
         if (rules.some(({ version }) => versionYear.test(version))) continue;
-
-        // use from utilities - currently copied from /controllers/demerits.js
-        const { endDate, startDate } = (function() {
-            const startMonth = (function() {
-                if (year === 2021) return 0;
-                return 3;
-            })();
-            return {
-                endDate: new Date(year + 1, 2, 31),
-                startDate: new Date (year, startMonth, 1)
-            };
-        })();
-
+        const { endDate, startDate } = charterDates(year);
         rules.push({
             endDate,
             rules: sections.find(({ rules }) => rules && rules.length > 0).rules,
