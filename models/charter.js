@@ -38,7 +38,7 @@ const CharterSchema = new Schema({
         required: true
     },
     version: {
-        type: Number,
+        type: String,
         required: true,
         unique: true,
         immutable: true
@@ -51,8 +51,9 @@ CharterSchema.virtual('created.fullDate').get(function () {
 });
 
 CharterSchema.pre('validate', async function(next) {
-    const charters = await Charter.find();
-    this.version = ++charters.length;
+    const year = this.created.date.getFullYear();
+    const charters = await Charter.find({ version: `/^${year}/` });
+    this.version = `${year}.${charters.length}`;
     next();
 });
 
