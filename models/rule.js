@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const Charter = require('./charter');
 
 const { TITLES, ACTIONS } = require('../constants');
-const charterDates = require('../utilities/charterDates');
+const seasonDates = require('../utilities/seasonDates');
 
 const BreakdownSchema = new Schema({
     description: [ String ],
@@ -40,7 +40,7 @@ RuleSchema.statics.getAll = async function() {
         const year = +version.split('.')[0];
         const versionYear = new RegExp(year);
         if (rules.some(({ version }) => versionYear.test(version))) continue;
-        const { endDate, startDate } = charterDates(year);
+        const { endDate, startDate } = seasonDates(year);
         rules.push({
             endDate,
             rules: sections.find(({ rules }) => rules && rules.length > 0).rules,

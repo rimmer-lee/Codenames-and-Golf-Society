@@ -4,7 +4,7 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const charterDates = require('../utilities/charterDates');
+const seasonDates = require('../utilities/seasonDates');
 const { customDate } = require('../utilities/formatDate');
 
 const { TITLES } = require('../constants');
@@ -112,7 +112,7 @@ async function show (req, res) {
     const data = await Promise.all(years.map(async ({ year }) => {
 
         // move to utilities
-        const { endDate, startDate } = charterDates(year);
+        const { endDate, startDate } = seasonDates(year);
 
         const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
