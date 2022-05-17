@@ -17,24 +17,28 @@ const scoresObject = {
 };
 
 const ScoreSchema = new Schema({
+
+    // can use handicap object from user model
+    handicap: Number,
+
     player: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    shots: [ Number ],
-    scores: {
-        nett: [ Number ],
-        shots: scoresObject,
-        par: scoresObject
+    playingGroup: {
+        index: Number,
+        player: String
     },
     roundType: {
         type: String,
         enum: ROUND_TYPES.map(({ name }) => name)
     },
-
-    // can use handicap object from user model
-    handicap: Number
-
+    scores: {
+        nett: [ Number ],
+        shots: scoresObject,
+        par: scoresObject
+    },
+    shots: [ Number ]
 }, options);
 
 const RoundSchema = new Schema({
