@@ -1,16 +1,14 @@
-(function () {
-    for (const ruleSelector of document.querySelectorAll('[id*=rule')) {
-        ruleSelector.addEventListener('change', updateDescription, { once: false });
-    };
-})();
+for (const ruleSelector of document.querySelectorAll('[id$=rule')) {
+    ruleSelector.addEventListener('change', updateDescription);
+};
 
 function updateDescription() {
-    const section = this.closest('[class~="border"]');
-    const ruleDescription = section.querySelector('[class~="rule-description"]');
+    const [ index ] = this.id.split('|');
+    const ruleDescription = this.closest('[class~="border"]').querySelector('[class~="rule-description"]');
     const ruleDescriptionParent = ruleDescription.closest('[class~="col-12"]');
-    const demerit = section.querySelector('[id*="demerit"]');
-    const rule = rules.find(({ _id }) => _id == this.value);
-    for (const checkbox of section.querySelectorAll('[type="checkbox"]')) checkbox.checked = false;
+    const demerit = document.getElementById(`${index}|demerit`);
+    const rule = rules.map(({ rules }) => rules).flat().find(({ _id }) => _id == this.value);
+    for (const checkbox of document.querySelectorAll(`[type="checkbox"][id^="${index}|"]`)) checkbox.checked = false;
     if (!rule) {
         ruleDescriptionParent.classList.add('d-none');
         ruleDescriptionParent.setAttribute('visibility', 'hidden');
@@ -25,7 +23,7 @@ function updateDescription() {
         else demerit.value = 0;
         if (rule.action.titles) {
             for (const title of rule.action.titles) {
-                section.querySelector(`[type="checkbox"][value="${title.method}|${title.title}"]`).checked = true;
+                document.getElementById(`${index}|${title.method}|${title.title}`.toLowerCase()).checked = true;
             };
         };
     };

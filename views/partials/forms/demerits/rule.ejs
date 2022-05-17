@@ -2,9 +2,7 @@
     <div class="row mx-0">
         <%- include('../components/label', { id, label: 'Rule' }) %>
         <select id="<%= id %>" class="col form-select me-2" aria-label="rules" name="<%= name %>" required>
-            <% if (!selected) { %>
-            <option value="" selected disabled>Select rule</option>
-            <% }; %>
+            <option <%= selected ? "" : "selected" %> disabled>Select rule</option>
             <% for (const rule of rules) { %>
             <!-- find the optimum number of characters -->
             <option value="<%= rule.id %>"<%= selected === String(rule.id) ? " selected" : "" %>><%= `${rule.index}. ${decodeURI(rule.description[0])}` %></option>

@@ -40,11 +40,16 @@ RuleSchema.statics.getAll = async function() {
         const year = +version.split('.')[0];
         const versionYear = new RegExp(year);
         if (rules.some(({ version }) => versionYear.test(version))) continue;
-        const { endDate, startDate } = seasonDates(year);
+        const { endDate: end, startDate: start } = seasonDates(year);
         rules.push({
-            endDate,
-            rules: sections.find(({ rules }) => rules && rules.length > 0).rules,
-            startDate,
+            date: { end, start },
+
+            // duplicated in getLatest static
+            rules: sections.find(({ rules }) => rules && rules.length > 0).rules.map(rule => {
+                rule.description = rule.description.map(description => encodeURI(description.replace(/'/g, '`')));
+                return rule;
+            }),
+
             version
         });
     };
@@ -53,10 +58,13 @@ RuleSchema.statics.getAll = async function() {
 
 RuleSchema.statics.getLatest = async function() {
     const charter = await Charter.findLatest();
+
+    // duplicated in getAll static
     return charter.sections.find(({ rules }) => rules.length > 0).rules.map(rule => {
         rule.description = rule.description.map(description => encodeURI(description.replace(/'/g, '`')));
         return rule;
     });
+
 };
 
 module.exports = mongoose.model('Rule', RuleSchema);

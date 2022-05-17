@@ -23,7 +23,7 @@ function titleObject(value) {
 async function create (req, res) {
     const date = customDate('yyyy-mm-dd');
     const members = await User.findMembers();
-    const rules = await Rule.getLatest();
+    const rules = await Rule.getAll();
     const players = members.map(player => ({ name: player.name.knownAs, id: player._id }));
     res.render('demerits/new', { date, players, rules });
 };
@@ -63,7 +63,7 @@ async function edit (req, res) {
     const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).populate('player').populate('rule').populate('action.titles');
     const members = await User.findMembers();
     const players = members.map(player => ({ name: player.name.knownAs, id: String(player._id) }));
-    const rules = await Rule.getLatest();
+    const rules = await Rule.getAll();
     if (!player) return res.render('demerits/edit', { data: demerits, players, rules });
     const data = demerits.filter(demerit => String(demerit.player._id) === player);
     res.render('demerits/edit', { data, players, rules });
@@ -110,10 +110,7 @@ async function show (req, res) {
     const allPlayers = await User.findMembers();
     const allTitles = TITLES.map(({ value }) => value);
     const data = await Promise.all(years.map(async ({ year }) => {
-
-        // move to utilities
         const { endDate, startDate } = seasonDates(year);
-
         const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
         const titles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });

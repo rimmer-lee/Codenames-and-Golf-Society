@@ -12,8 +12,8 @@
                     <%- include('../partials/forms/demerits/hole', { id: `${demerit.id}|hole`, name: `demerit[${demerit.id}][when][hole]`, value: demerit.when.hole }) %>
                     <%- include('../partials/forms/demerits/player', { id: `${demerit.id}|player`, name: `demerit[${demerit.id}][player]`, players, selected: String(demerit.player._id) }) %>
                     <%- include('../partials/forms/demerits/demerit', { id: `${demerit.id}|demerit`, name: `demerit[${demerit.id}][action][demerits]`, value: demerit.action.demerits }) %>
-                    <%- include('../partials/forms/demerits/rule', { id: `${demerit.id}|rule`, name: `demerit[${demerit.id}][rule]`, rules, selected: String(demerit.rule.id) }) %>
-                    <%- include('../partials/forms/demerits/rule-description', { description: rules.find(({ index }) => index === demerit.rule.index).description }) %>
+                    <%- include('../partials/forms/demerits/rule', { id: `${demerit.id}|rule`, name: `demerit[${demerit.id}][rule]`, rules: rules[0].rules, selected: String(demerit.rule.id) }) %>
+                    <%- include('../partials/forms/demerits/rule-description', { description: rules.map(({ rules }) => rules).flat().find(({ id }) => id === demerit.rule.id).description }) %>
                     <%- include('../partials/forms/demerits/title', { id: `${demerit.id}`, name: `demerit[${demerit.id}][action][titles]`, existingTitles: demerit.action.titles }) %>
                     <%- include('../partials/forms/demerits/comments', { id: `${demerit.id}|comments`, name: `demerit[${demerit.id}][comments]`, value: demerit.comments }) %>
                     <div class="col-12">
@@ -29,6 +29,8 @@
     <% }; %>
     <%- include('../partials/forms/demerits/buttons.ejs') %>
 </form>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/demerits/change-date.js"></script>
 <script src="/scripts/demerits/select-rule.js"></script>
 <script src="/scripts/demerits/toggle.js"></script>
 <script src="/scripts/validate-forms.js"></script>
@@ -37,7 +39,10 @@
     const actions = JSON.parse('<%- JSON.stringify(actions) %>');
     const titles = JSON.parse('<%- JSON.stringify(titles) %>');
     const rules = JSON.parse('<%- JSON.stringify(rules) %>').map(rule => {
-        rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
+        rule.rules.map(rule => {
+            rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
+            return rule;
+        });
         return rule;
     });
 </script>
