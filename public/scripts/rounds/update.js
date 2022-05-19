@@ -16,9 +16,13 @@ function getRound() {
     return JSON.parse(window.localStorage.getItem('round'));
 };
 
+function getPlayerKeys() {
+    return Object.keys(getRound()).filter(key => /^(?:marker$|player\-)/.test(key));
+};
+
 function getTee() {
     const courseId = document.getElementById('course-select').value;
-    const course = courses.find(({ _id }) => _id == courseId);
+    const course = courses.find(({ id }) => id == courseId);
     if (!course) return undefined;
     const teeSelect = document.getElementById('tee-select');
     const teeOption = teeSelect.selectedOptions[0];
@@ -101,7 +105,7 @@ function updateData() {
 function updateDemerits() {
     const round = getRound();
     if (!round) return;
-    for (const player of Object.keys(round).filter(key => !/(?:course|round)/.test(key))) {
+    for (const player of getPlayerKeys()) {
         const demerits = round[player].demerit;
         if (!demerits) continue;
         for (const hole of Object.keys(demerits)) {
@@ -136,21 +140,18 @@ function updateScores() {
     const round = getRound();
     if (!round) return;
     const tee = getTee();
-    const playerKeys = Object.keys(round).filter(key => !/(?:course|round)/.test(key));
-    for (const player of playerKeys) {
+    for (const player of getPlayerKeys()) {
         const currentPlayer = round[player];
         if (!currentPlayer || !currentPlayer.hole) continue;
         const totalElement = document.getElementById(`${player}|score`);
         let total = 0, par = 0;
-        // can we use Object.keys(currentPlayer) !== 'id'
-        for (let i = 1; i < 19; i++) {
-            const score = currentPlayer.hole[i];
-            const scoreElement = document.querySelector(`[name="[${player}][hole][${i}]"]`);
-            if (score) {
-                total += +score;
-                if (tee) par += +score - tee.holes[i - 1].par;
-                if (scoreElement) scoreElement.value = score;
-            };
+        for (const index of Object.keys(currentPlayer.hole)) {
+            const score = currentPlayer.hole[index];
+            if (!score) continue;
+            const scoreElement = document.querySelector(`[name="[${player}][hole][${index}]"]`);
+            total += +score;
+            if (tee) par += +score - tee.holes[index - 1].par;
+            if (scoreElement) scoreElement.value = score;
         };
         if (totalElement) totalElement.innerText = total;
         updateParElement(player, par);
@@ -171,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!window.localStorage.getItem('round')) updateData();
     const courseSelect = document.getElementById('course-select');
     const round = getRound();
-    const playerKeys = Object.keys(round).filter(key => /^(?:marker$|player\-)/.test(key));
+    const playerKeys = getPlayerKeys();
     const gameIndexes = Object.keys(round.game || {});
     const localCourses = JSON.parse(window.localStorage.getItem('courses')) || [];
     const localPlayers = JSON.parse(window.localStorage.getItem('players')) || [];
