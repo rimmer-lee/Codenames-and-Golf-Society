@@ -285,7 +285,7 @@ function selectPlayer() {
                                             { id: 'name', value: `[${id}][hole][${hole}]` },
                                             { id: 'tabindex', value: ++tabIndex }
                                         ],
-                                        addEventListener: [{ type: 'blur', listener: updateData }]
+                                        addEventListener: [{ type: 'input', listener: updateData }]
                                     }
                                 ]
                             }
