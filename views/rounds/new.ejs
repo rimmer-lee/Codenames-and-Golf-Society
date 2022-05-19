@@ -21,6 +21,9 @@
                                     Please select a date.
                                 </div>
                             </div>
+                            <div id="date-caution" class="d-none d-flex justify-content-end feedback">
+                                Note: changing the date to a different season will remove created demerits.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -523,17 +526,20 @@
     const teeColours = JSON.parse('<%- JSON.stringify(teeColours) %>');
     const titles = JSON.parse('<%- JSON.stringify(titles) %>');
     const rules = JSON.parse('<%- JSON.stringify(rules) %>').map(rule => {
-        rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
+        rule.rules.map(rule => {
+            rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
+            return rule;
+        });
         return rule;
     });
     let courses = JSON.parse('<%- JSON.stringify(courses) %>');
     let players = JSON.parse('<%- JSON.stringify(players) %>');
 </script>
 <script src="/scripts/create-element.js"></script>
+<script src="/scripts/demerits/select-rule.js"></script>
 <script src="/scripts/rounds/shared-functions.js"></script>
 <script src="/scripts/rounds/demerits/add.js"></script>
 <script src="/scripts/rounds/demerits/remove.js"></script>
-<script src="/scripts/rounds/demerits/select-rule.js"></script>
 <script src="/scripts/rounds/demerits/update-references.js"></script>
 <script src="/scripts/rounds/demerits/validate.js"></script>
 <script src="/scripts/rounds/accordion-buttons.js"></script>

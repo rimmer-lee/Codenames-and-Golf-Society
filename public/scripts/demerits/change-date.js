@@ -22,5 +22,5 @@ function changeDate() {
 };
 
 for (const dateInput of document.querySelectorAll('input[type=date][id$="date"]')) {
-    dateInput.addEventListener('change', changeDate);
+    dateInput.addEventListener('blur', changeDate);
 };

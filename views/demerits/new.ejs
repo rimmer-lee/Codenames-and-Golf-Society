@@ -40,4 +40,7 @@
         });
         return rule;
     });
+    for (const ruleSelector of document.querySelectorAll('[id$=rule')) {
+        ruleSelector.addEventListener('change', updateDescription);
+    };
 </script>

@@ -1,21 +1,3 @@
-function sectionElementWrapper(children) {
-    return {
-        type: 'section',
-        classList: ['col-12'],
-        children: [
-            {
-                classList: ['row', 'd-flex'],
-                children: [
-                    {
-                        classList: ['col-11', 'col-md-8', 'col-lg-6', 'border', 'border-3', 'rounded-3', 'mx-auto', 'px-3'],
-                        children: [{ classList: ['row', 'gy-3', 'py-3'], children }]
-                    }
-                ]
-            }
-        ]
-    };
-};
-
 function columnElementWrapper(children) {
     return {
         classList: ['col-12'],
@@ -25,16 +7,27 @@ function columnElementWrapper(children) {
     };
 };
 
-function invalidFeedbackElement(section) {
-    return {
-        classList: ['invalid-feedback'],
-        children: [
-            {
-                classList: ['d-flex', 'justify-content-end'],
-                innerText: `Please select a ${section.toLowerCase()}.`
-            }
-        ]
-    };
+function commentsElement(page, index) {
+    const id = `${index}|comments`;
+    const element = [
+        {
+            type: 'label',
+            classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
+            attributes: [{ id: 'for', value: id }],
+            innerText: 'Comments'
+        },
+        {
+            type: 'textarea',
+            classList: ['col', 'form-control', 'me-2'],
+            attributes: [
+                { id: 'id', value: id },
+                { id: 'name', value: `${page.toLowerCase()}[${index}][comments]` },
+                { id: 'rows', value: '1' },
+                { id: 'placeholder', value: 'Optional' }
+            ]
+        }
+    ]
+    return columnElementWrapper(element);
 };
 
 function dateElement(page, index) {
@@ -59,10 +52,157 @@ function dateElement(page, index) {
                 },
                 { id: 'required', value: '' }
             ],
-            addEventListener: [{ type: 'change', listener: validation }]
+            addEventListener: [
+                { type: 'change', listener: changeDate },
+                { type: 'change', listener: validation }
+            ]
         },
         invalidFeedbackElement('date')
     ];
+    return columnElementWrapper(element);
+};
+
+function demeritElement(index) {
+    const page = 'Demerit';
+    const element =  [
+        dateElement(page, index),
+        columnElementWrapper([
+            {
+                type: 'label',
+                classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
+                attributes: [{ id: 'for', value: `${index}|hole` }],
+                innerText: 'Hole'
+            },
+            {
+                type: 'input',
+                classList: ['col', 'form-control', 'me-2'],
+                attributes: [
+                    { id: 'id', value: `${index}|hole` },
+                    { id: 'type', value: 'number' },
+                    { id: 'name', value: `${page.toLowerCase()}[${index}][when][hole]` },
+                    { id: 'value', value: '0' },
+                    { id: 'min', value: '1' },
+                    { id: 'max', value: '18' }
+                ]
+            }
+        ]),
+        selectElement('Player', page, index),
+        columnElementWrapper([                    {
+                type: 'label',
+                classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
+                attributes: [{ id: 'for', value: `${index}|demerit` }],
+                innerText: 'Demerits'
+            },
+            {
+                type: 'input',
+                classList: ['col', 'form-control', 'me-2'],
+                attributes: [
+                    { id: 'id', value: `${index}|demerit` },
+                    { id: 'type', value: 'number' },
+                    { id: 'name', value: `${page.toLowerCase()}[${index}][action][demerits]` },
+                    { id: 'value', value: '0' }
+                ]
+            }
+        ]),
+        selectElement('Rule', page, index),
+        {
+            classList: ['col-12', 'd-none'],
+            attributes: [{ id: 'visibility', value: 'hidden' }],
+            children: [
+                {
+                    classList: ['row', 'mx-0', 'px-4'],
+                    children: [
+                        {
+                            type: 'p',
+                            classList: ['mb-0', 'text-overflow', 'text-muted', 'rule-description'],
+                            attributes: [
+                                { id: 'readonly', value: '' },
+                                { id: 'rows', value: '1' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        commentsElement(page, index),
+        removeButtonElement(page)
+    ];
+    for (const action of actions) element.splice(element.length - 2, 0, titlesElement(action, index));
+    return element;
+};
+
+function drinkElement(index) {
+    const page = 'Drink';
+    return [
+        dateElement(page, index),
+        selectElement('Player', page, index),
+        columnElementWrapper([
+            {
+                type: 'label',
+                classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
+                attributes: [{ id: 'for', value: `${index}|drink` }],
+                innerText: 'Drinks'
+            },
+            {
+                type: 'input',
+                classList: ['col', 'form-control', 'me-2'],
+                attributes: [
+                    { id: 'id', value: `${index}|drink` },
+                    { id: 'type', value: 'number' },
+                    { id: 'name', value: `${page.toLowerCase()}[${index}][value]` },
+                    { id: 'value', value: '0' },
+                    { id: 'min', value: '0' }
+                ]
+            }
+        ]),
+        commentsElement(page, index),
+        removeButtonElement(page)
+    ];
+};
+
+function sectionElementWrapper(children) {
+    return {
+        type: 'section',
+        classList: ['col-12'],
+        children: [
+            {
+                classList: ['row', 'd-flex'],
+                children: [
+                    {
+                        classList: ['col-11', 'col-md-8', 'col-lg-6', 'border', 'border-3', 'rounded-3', 'mx-auto', 'px-3'],
+                        children: [{ classList: ['row', 'gy-3', 'py-3'], children }]
+                    }
+                ]
+            }
+        ]
+    };
+};
+
+function invalidFeedbackElement(section) {
+    return {
+        classList: ['invalid-feedback'],
+        children: [
+            {
+                classList: ['d-flex', 'justify-content-end'],
+                innerText: `Please select a ${section.toLowerCase()}.`
+            }
+        ]
+    };
+};
+
+function removeButtonElement(page) {
+    const element = [
+        {
+            classList: ['btn', 'btn-danger'],
+            attributes: [
+                { id: 'data-type', value: 'button' },
+                { id: 'data-operation', value: 'remove' },
+                { id: 'data-section', value: 'section' }
+            ],
+            innerText: `Remove ${page}`,
+            addEventListener: [{ listener: remove }]
+        }
+    ]
     return columnElementWrapper(element);
 };
 
@@ -184,143 +324,6 @@ function titlesElement(action, index) {
         element[1].children[0].children[0].children.push(titleLabelElement(title, action, index));
     };
     return columnElementWrapper(element);
-};
-
-function commentsElement(page, index) {
-    const id = `${index}|comments`;
-    const element = [
-        {
-            type: 'label',
-            classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
-            attributes: [{ id: 'for', value: id }],
-            innerText: 'Comments'
-        },
-        {
-            type: 'textarea',
-            classList: ['col', 'form-control', 'me-2'],
-            attributes: [
-                { id: 'id', value: id },
-                { id: 'name', value: `${page.toLowerCase()}[${index}][comments]` },
-                { id: 'rows', value: '1' },
-                { id: 'placeholder', value: 'Optional' }
-            ]
-        }
-    ]
-    return columnElementWrapper(element);
-};
-
-function removeButtonElement(page) {
-    const element = [
-        {
-            classList: ['btn', 'btn-danger'],
-            attributes: [
-                { id: 'data-type', value: 'button' },
-                { id: 'data-operation', value: 'remove' },
-                { id: 'data-section', value: 'section' }
-            ],
-            innerText: `Remove ${page}`,
-            addEventListener: [{ listener: remove }]
-        }
-    ]
-    return columnElementWrapper(element);
-};
-
-function demeritElement(index) {
-    const page = 'Demerit';
-    const element =  [
-        dateElement(page, index),
-        columnElementWrapper([
-            {
-                type: 'label',
-                classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
-                attributes: [{ id: 'for', value: `${index}|hole` }],
-                innerText: 'Hole'
-            },
-            {
-                type: 'input',
-                classList: ['col', 'form-control', 'me-2'],
-                attributes: [
-                    { id: 'id', value: `${index}|hole` },
-                    { id: 'type', value: 'number' },
-                    { id: 'name', value: `${page.toLowerCase()}[${index}][when][hole]` },
-                    { id: 'value', value: '0' },
-                    { id: 'min', value: '1' },
-                    { id: 'max', value: '18' }
-                ]
-            }
-        ]),
-        selectElement('Player', page, index),
-        columnElementWrapper([                    {
-                type: 'label',
-                classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
-                attributes: [{ id: 'for', value: `${index}|demerit` }],
-                innerText: 'Demerits'
-            },
-            {
-                type: 'input',
-                classList: ['col', 'form-control', 'me-2'],
-                attributes: [
-                    { id: 'id', value: `${index}|demerit` },
-                    { id: 'type', value: 'number' },
-                    { id: 'name', value: `${page.toLowerCase()}[${index}][action][demerits]` },
-                    { id: 'value', value: '0' }
-                ]
-            }
-        ]),
-        selectElement('Rule', page, index),
-        {
-            classList: ['col-12', 'd-none'],
-            attributes: [{ id: 'visibility', value: 'hidden' }],
-            children: [
-                {
-                    classList: ['row', 'mx-0', 'px-4'],
-                    children: [
-                        {
-                            type: 'p',
-                            classList: ['mb-0', 'text-overflow', 'text-muted', 'rule-description'],
-                            attributes: [
-                                { id: 'readonly', value: '' },
-                                { id: 'rows', value: '1' }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        commentsElement(page, index),
-        removeButtonElement(page)
-    ];
-    for (const action of actions) element.splice(element.length - 2, 0, titlesElement(action, index));
-    return element;
-};
-
-function drinkElement(index) {
-    const page = 'Drink';
-    return [
-        dateElement(page, index),
-        selectElement('Player', page, index),
-        columnElementWrapper([
-            {
-                type: 'label',
-                classList: ['col-4', 'col-form-label', 'd-flex', 'align-items-center', 'fw-bold'],
-                attributes: [{ id: 'for', value: `${index}|drink` }],
-                innerText: 'Drinks'
-            },
-            {
-                type: 'input',
-                classList: ['col', 'form-control', 'me-2'],
-                attributes: [
-                    { id: 'id', value: `${index}|drink` },
-                    { id: 'type', value: 'number' },
-                    { id: 'name', value: `${page.toLowerCase()}[${index}][value]` },
-                    { id: 'value', value: '0' },
-                    { id: 'min', value: '0' }
-                ]
-            }
-        ]),
-        commentsElement(page, index),
-        removeButtonElement(page)
-    ];
 };
 
 // need to trigger validate form function

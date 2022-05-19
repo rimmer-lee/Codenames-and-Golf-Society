@@ -1,4 +1,4 @@
-const CACHE_NAME = 'CGS v.2022.05.02';
+const CACHE_NAME = 'CGS v.2022.05.17';
 const FILES_TO_CACHE = [
     '/rounds/new',
     '../../images/favicons/android-chrome-192x192.png',
@@ -10,9 +10,9 @@ const FILES_TO_CACHE = [
     '../../images/favicons/site.webmanifest',
     '../../images/logo.jfif',
     '../../scripts/create-element.js',
+    '../../scripts/demerits/select-rule.js',
     '../../scripts/rounds/demerits/add.js',
     '../../scripts/rounds/demerits/remove.js',
-    '../../scripts/rounds/demerits/select-rule.js',
     '../../scripts/rounds/demerits/update-references.js',
     '../../scripts/rounds/demerits/validate.js',
     '../../scripts/rounds/accordion-buttons.js',

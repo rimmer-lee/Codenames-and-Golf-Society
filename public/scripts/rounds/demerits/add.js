@@ -10,6 +10,11 @@ function addDemerit() {
 };
 
 function demeritObject(player, hole, index) {
+    const { value } = document.getElementById('date');
+    const currentRules = rules.find(({ date }) => {
+        const { end, start } = date;
+        return value <= end && value >= start;
+    }) || rules[rules.length - 1];
     const demeritObject = {
         classList: ['col-11', 'border', 'border-1', 'rounded-3', 'mx-auto', 'p-3'],
         children: [
@@ -39,7 +44,6 @@ function demeritObject(player, hole, index) {
                                         addEventListener: [
                                             { type: 'blur', listener: validation },
                                             { type: 'change', listener: updateData },
-                                            { type: 'change', listener: validation },
                                             { type: 'change', listener: updateDescription }
                                         ],
                                         children: [
@@ -156,7 +160,7 @@ function demeritObject(player, hole, index) {
             }
         ]
     };
-    for (const rule of rules.sort((a, b) => a.index - b.index)) {
+    for (const rule of currentRules.rules.sort((a, b) => a.index - b.index)) {
         demeritObject.children[0].children[0].children[0].children[1].children.push({
             type: 'option',
             attributes: [{ id: 'value', value: rule._id }],

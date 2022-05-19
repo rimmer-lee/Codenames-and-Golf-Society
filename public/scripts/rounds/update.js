@@ -259,6 +259,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateData();
 });
 
-for (const select of document.querySelectorAll('form select')) select.addEventListener('input', updateData);
-document.getElementById('date').addEventListener('input', updateData);
+// for (const select of document.querySelectorAll('form select')) select.addEventListener('input', updateData);
+// document.getElementById('date').addEventListener('input', updateData);
 document.getElementById('date').addEventListener('blur', updateData);

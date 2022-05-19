@@ -11,10 +11,15 @@ const { customDate } = require('../utilities/formatDate');
 const sort = require('../utilities/sort');
 const { GAMES, TEE_COLOURS, TITLES } = require('../constants');
 
+// used client-side also
+function getPlayerKeys(object) {
+    return Object.keys(object).filter(key => /^(?:marker$|player\-)/.test(key));
+};
+
 async function create (req, res) {const date = customDate('yyyy-mm-dd');
     const allCourses = await Course.find();
     const allPlayers = await User.findPlayers();
-    const rules = await Rule.getLatest();
+    const rules = await Rule.getAll();
     const courses = sort(allCourses, 'name').map(({ facility, id, name, randa, tees }) => ({ facility, id, name, randa, tees }));
     const players = allPlayers.map(({ handicap, id, name, role }) => {
         // is full needed?
@@ -30,12 +35,6 @@ async function remove (req, res) {
 };
 
 async function save (req, res) {
-
-    // used client-side also
-    function getPlayerKeys(object) {
-        return Object.keys(object).filter(key => /^(?:marker$|player\-)/.test(key));
-    };
-
     try {
         const { body } = req;
         const { date } = body.round;
@@ -128,7 +127,10 @@ async function save (req, res) {
                 player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
                 body[key].id = player.id;
             } else player = await User.findById(id);
-            round.scores.push({ handicap, player, shots: hole.map(Number), team });
+
+            // update index
+            round.scores.push({ handicap, player, playingGroup: { index: 0, player: key }, shots: hole.map(Number), team });
+
             if (!demerit) continue;
             for (const hole of Object.keys(demerit)) {
                 for (const index of Object.keys(demerit[hole])) {

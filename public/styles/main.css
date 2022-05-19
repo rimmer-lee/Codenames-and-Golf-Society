@@ -234,3 +234,10 @@ li.page-item.right-hole .page-link {
     color: #0B58CB;
     background-color: #B3D2FF;
 }
+
+.feedback {
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: .875em;
+    color: #dc3545;
+}
