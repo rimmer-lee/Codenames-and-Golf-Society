@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     sortPlayers();
     window.localStorage.setItem('players', JSON.stringify(localPlayers));
-    if (round.course && round.course.id && !/^new/.test()) {
+    if (round.course && round.course.id && !/^new/.test(round.course.id)) {
         updateSelect('course-select', round.course.id, selectCourse);
         if (round.course.tee) {
             const teeSelect = document.getElementById('tee-select');
