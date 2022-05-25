@@ -6,7 +6,7 @@ const Course = require('./course');
 const { GAMES, ROUND_TYPES } = require('../constants');
 
 const formatDate = require('../utilities/formatDate');
-const sort = require('../utilities/sort');
+// const sort = require('../utilities/sort');
 
 const options = { toJSON: { virtuals: true } };
 
