@@ -212,15 +212,8 @@ function addGame() {
             }
         ]
     };
-    for (const game of games) {
-        const value = game.name;
-        newItemElementObject.children[1].children[0].children[0].children[0].children[0].children[0].children.push({
-            type: 'option',
-            attributes: [{ id: 'value', value }],
-            innerText: value
-        });
-    };
     gameAccordionElement.insertBefore(createElement(newItemElementObject), null);
+    updateGameOptions();
     toggleVisibility(gameAccordionParentElement);
 };
 
@@ -362,7 +355,7 @@ function removeGame() {
     const gameAccordionParentElement = gameAccordionElement.parentElement;
     this.closest('.accordion-item').remove();
     toggleVisibility(gameAccordionParentElement, gameAccordionElement.children.length > 0);
-    document.querySelectorAll('select.form-select[id^="game-"][id$="|select"]').forEach((gameSelect, index) => {
+    document.querySelectorAll(gameSelectSelector).forEach((gameSelect, index) => {
         const [ , game ] = gameSelect.id.match(/game-(.+)\|select/);
         // updateAttributes(
         //     ['aria-controls', 'aria-labelledby', 'data-bs-target', 'for', 'id', 'name', 'title', 'value'],
@@ -417,7 +410,7 @@ function selectGame() {
         // update invalid message accordingly
         return this.classList.add('is-invalid');
     };
-    const playerSelects = Array.from(document.querySelectorAll('select.form-select[id$="|id"]:not([id^="game-"])')).filter(({ value }) => value && value !== 'Select Player');
+    const playerSelects = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player');
     const game = games.find(({ name }) => name === this.value);
     if (game.players.minimum > playerSelects.length) {
         // update invalid message accordingly
@@ -432,6 +425,26 @@ function selectGame() {
         const [ playerReference ] = id.split('|');
         const playerName = playerSelect[selectedIndex].innerText;
         addPlayerToGame(gameReference, playerReference, playerName);
+    };
+};
+
+function updateGameOptions() {
+    const gameSelects = document.querySelectorAll(gameSelectSelector);
+    const selectedPlayers = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player').length;
+    const applicableGames = games.filter(({ players }) => players.minimum <= selectedPlayers);
+    for (const gameSelect of gameSelects) {
+        const currentValue = gameSelect.value;
+        while (gameSelect.children.length > 1) gameSelect.children[1].remove();
+        for (const game of applicableGames) {
+            const value = game.name;
+            gameSelect.insertBefore(createElement({
+                type: 'option',
+                attributes: [{ id: 'value', value }],
+                innerText: value
+            }), null);
+        };
+        const selectedOption = Array.from(gameSelect.children).find(({ value }) => value === currentValue);
+        if (selectedOption) selectedOption.selected = true;
     };
 };
 

@@ -110,7 +110,7 @@ function removePlayer() {
             nameElement.name = nameElement.name.replaceAll(player, newPlayer);
         };
     });
-    for (const gameAccordionBody of document.querySelectorAll('#game .accordion-body')) updateMethodSelect.call(gameAccordionBody);
+    for (const gameAccordionBody of document.querySelectorAll('#game .accordion-body .accordion .accordion-body')) updateMethodSelect.call(gameAccordionBody);
     updateData();
 };
 
@@ -140,7 +140,7 @@ function selectPlayer() {
     // const scorecardAccordionItem = document.getElementById('scorecard-heading').closest('.accordion-item');
     let tabIndex = 0;
     // playersAccordion.classList.add('forced-accordion-bottom');
-    toggleElement(summary.closest('[class*="col"]'), selectValues.length > 0);
+    toggleElement(summary.closest('.col-12'), selectValues.length > 0);
     toggleElement(holeOne.closest('.row').closest('.col-12'), selectValues.length > 0);
     // toggleElement(scorecardAccordionItem, selectValues.length > 0);
     // if (selectValues.length > 0) playersAccordion.classList.remove('forced-accordion-bottom');
@@ -150,7 +150,7 @@ function selectPlayer() {
     while (summary.children.length > 0) summary.children[0].remove();
     for (const playerSelect of playerSelects) {
         const id = playerSelect.id.split('|')[0];
-        const currentSelectedPlayer = playerSelect[playerSelect.selectedIndex].value;
+        const currentSelectedPlayer = playerSelect.value;
         if (!document.querySelector(`input[value="${currentSelectedPlayer}"]`)) {
             while (playerSelect.children.length > 0) playerSelect.children[0].remove();
             const optionAttributes = [{ id: 'disabled', value: 'true' }];
@@ -167,7 +167,8 @@ function selectPlayer() {
         if (playerSelect.value === 'Select Player') continue;
         const selectParent = playerSelect.closest('.row.g-2');
         const localStoragePlayer = localStorage[id];
-        const handicap = localStoragePlayer && +localStoragePlayer.handicap || players.find(({ id }) => id === currentSelectedPlayer).handicap;
+        const currentPlayer = players.find(({ id }) => id === currentSelectedPlayer);
+        const handicap = localStoragePlayer && +localStoragePlayer.handicap || currentPlayer.handicap;
         const handicapElementObject = {
             classList: ['col-4', 'col-md-2'],
             children: [
@@ -192,9 +193,7 @@ function selectPlayer() {
                         },
                         {
                             type: 'label',
-                            attributes: [
-                                { id: 'for', value: `${id}|handicap` },
-                            ],
+                            attributes: [{ id: 'for', value: `${id}|handicap` }],
                             innerText: 'Handicap'
                         }
                     ]
@@ -206,18 +205,23 @@ function selectPlayer() {
             classList: ['col', 'mb-0', 'px-0'],
             children: [
                 {
-                    classList: ['row'],
+                    classList: ['row', 'row-cols-1'],
                     children: [
                         {
-                            classList: ['col-12', 'text-center'],
+                            classList: ['col', 'text-center'],
                             children: [
                                 {
-                                    innerText: players.find(({ id }) => id === playerSelect.value).name.knownAs
+                                    classList: ['d-none', 'd-md-block'],
+                                    innerText: currentPlayer.name.knownAs
+                                },
+                                {
+                                    classList: ['d-block', 'd-md-none'],
+                                    innerText: currentPlayer.name.initials.short
                                 }
                             ]
                         },
                         {
-                            classList: ['col-12', 'text-center'],
+                            classList: ['col', 'text-center'],
                             children: [
                                 {
                                     type: 'span',
@@ -252,9 +256,9 @@ function selectPlayer() {
         while (playersSection.children.length > 0) playersSection.children[0].remove();
         toggleElement(playersSection.closest('[class*="col"]'), selectValues.length > 0);
         for (const playerSelect of playerSelects) {
-            const playerName = playerSelect.selectedOptions[0].innerText;
-            const player = players.find(({ id }) => id === playerSelect.value);
-            if (playerName === 'Select Player') continue;
+            const currentSelectedPlayer = playerSelect.value;
+            if (currentSelectedPlayer === 'Select Player') continue;
+            const currentPlayer = players.find(({ id }) => id === currentSelectedPlayer);
             const id = playerSelect.id.split('|')[0];
             const playerScoreElementObject = {
                 classList: ['col-12'],
@@ -265,7 +269,7 @@ function selectPlayer() {
                             {
                                 classList: ['col', 'd-flex', 'align-items-center', 'justify-content-center'],
                                 attributes: [{ id: 'data-player', value: `${id}` }],
-                                innerText: player.name.knownAs
+                                innerText: currentPlayer.name.knownAs
                             },
                             {
                                 classList: ['col-3', 'px-0'],
@@ -297,7 +301,7 @@ function selectPlayer() {
                 const demeritColumn = {
                     classList: ['col-5'],
                 };
-                if (!player.guest) {
+                if (!currentPlayer.guest) {
                     demeritColumn.classList.push('d-md-flex', 'text-center');
                     demeritColumn.children = [
                         {
@@ -315,8 +319,8 @@ function selectPlayer() {
                 playerScoreElementObject.children[0].children.push(demeritColumn);
             // };
             playersSection.insertBefore(createElement(playerScoreElementObject), null);
-            // if (player.guest || nonGuests.length < 3) continue;
-            if (player.guest) continue;
+            // if (currentPlayer.guest || nonGuests.length < 3) continue;
+            if (currentPlayer.guest) continue;
             const demeritModalElementObject = {
                 classList: ['modal', 'fade'],
                 attributes: [
@@ -339,7 +343,7 @@ function selectPlayer() {
                                                 type: 'h5',
                                                 classList: ['modal-title'],
                                                 attributes: [{ id: 'id', value: `demerit-label|${id}|${hole}` }],
-                                                innerText: `Demerits for ${player.name.knownAs} on hole ${hole}`
+                                                innerText: `Demerits for ${currentPlayer.name.knownAs} on hole ${hole}`
                                             },
                                             {
                                                 type: 'button',
@@ -424,6 +428,7 @@ function selectPlayer() {
         if (playerParticipationLabel) return playerParticipationLabel.innerText = playerName;
         addPlayerToGame(gameReference, playerReference, playerName);
     };
+    updateGameOptions();
 };
 
 for (const playerSelect of document.querySelectorAll(playerSelectSelector)) {

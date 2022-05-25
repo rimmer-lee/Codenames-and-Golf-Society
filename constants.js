@@ -114,7 +114,6 @@ const GAMES = [
                 'individual',
                 'team'
             ],
-            maximum: 2,
             minimum: 2
         }
     },
@@ -140,7 +139,6 @@ const GAMES = [
                 'individual',
                 'team'
             ],
-            maximum: null,
             minimum: 2
         }
     },
@@ -153,7 +151,6 @@ const GAMES = [
         options: [],
         players: {
             for: [ 'individual' ],
-            maximum: null,
             minimum: 2
         }
     },
@@ -166,7 +163,6 @@ const GAMES = [
         options: [],
         players: {
             for: [ 'individual' ],
-            maximum: null,
             minimum: 1
         }
     }

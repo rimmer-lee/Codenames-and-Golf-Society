@@ -21,10 +21,10 @@ async function create (req, res) {const date = customDate('yyyy-mm-dd');
     const allPlayers = await User.findPlayers();
     const rules = await Rule.getAll();
     const courses = sort(allCourses, 'name').map(({ facility, id, name, randa, tees }) => ({ facility, id, name, randa, tees }));
-    const players = allPlayers.map(({ handicap, id, name, role }) => {
-        // is full needed?
-        const { first, full, knownAs, last } = name;
-        return { handicap: handicap.current, id, name: { first, full, knownAs, last }, guest: role === 'guest' };
+    const players = allPlayers.map(player => {
+        const { handicap, id, name, role } = player.toJSON();
+            const { initials, knownAs } = name;
+            return { handicap: handicap.current, id, name: { initials, knownAs }, guest: role === 'guest' };
     });
     res.render('rounds/new', { players, rules, courses, date });
 };

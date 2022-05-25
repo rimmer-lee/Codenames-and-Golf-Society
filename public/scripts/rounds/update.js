@@ -22,7 +22,7 @@ function getPlayerKeys() {
 
 function getTee() {
     const courseId = document.getElementById('course-select').value;
-    const course = courses.find(({ id }) => id == courseId);
+    const course = courses.find(({ id, randa }) => id == courseId || `randa-${randa}` === courseId);
     if (!course) return undefined;
     const teeSelect = document.getElementById('tee-select');
     const teeOption = teeSelect.selectedOptions[0];
@@ -149,8 +149,9 @@ function updateScores() {
             const score = currentPlayer.hole[index];
             if (!score) continue;
             const scoreElement = document.querySelector(`[name="[${player}][hole][${index}]"]`);
+            const parElement = document.getElementById(`${tee.name.toLowerCase()}-${index}|par`);
             total += +score;
-            if (tee) par += +score - tee.holes[index - 1].par;
+            if (parElement) par += +score - +parElement.value;
             if (scoreElement) scoreElement.value = score;
         };
         if (totalElement) totalElement.innerText = total;
