@@ -301,7 +301,12 @@ app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port 
 
 
 // in /rounds/:id highlight scores in scorecard
-//    - circles for birdies, squares for bogeys, etc.
+//    - No symbol - Par
+//    - Circle - Birdie;
+//    - Solid circle - Eagle or better
+//    - Square - Bogey
+//    - Solid square - Double-bogey or worse
+
 
 // consolidate rounds on the same day, same course, same tee
 //    - capture the playing ID (marker, player-a, etc.) and the playing group to the scores schema
