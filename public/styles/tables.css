@@ -89,3 +89,7 @@ table.summary td *,
 table.summary td {
     min-width: 60px;
 }
+
+table#courses > tbody > tr:hover {
+    cursor: pointer;
+}
