@@ -53,13 +53,14 @@ async function save (req, res) {
                 randa,
                 scorecardUrl,
                 name,
-                tees: teeKeys.map(name => {
-                    const tee = tees[name];
+                tees: teeKeys.map(teeKey => {
+                    const tee = tees[teeKey];
+                    const { gender } = tee;
                     return {
-                        name,
-                        gender: tee.gender,
+                        name: teeKey.split(`-${gender}`)[0],
+                        gender,
                         holes: Object.keys(tee).filter(key => key !== 'gender' && /\d{1,2}/.test(key)).map(index => {
-                            let { distance, par, strokeIndex } = tee[index];
+                            const { distance, par, strokeIndex } = tee[index];
                             return { distance, index, par, strokeIndex };
                         })
                     };
@@ -72,11 +73,11 @@ async function save (req, res) {
             if (!course) {
                 const { name, scorecardUrl, tees: teesObject } = body[id];
                 const teeNames = Object.keys(teesObject);
-                const tees = teeNames.map(name => {
-                    const { gender } = teesObject[name];
-                    const tee = body.course.tees[name.toLowerCase()];
+                const tees = teeNames.map(teeName => {
+                    const tee = body.course.tees[teeName.toLowerCase()];
+                    const { gender } = teesObject[teeName];
                     return {
-                        name: name.split(`-${gender}`)[0],
+                        name: teeName.split(`-${gender}`)[0],
                         gender,
                         holes: tee.map((hole, i) => {
                             const { distance, par, strokeIndex } = hole;
@@ -160,7 +161,7 @@ async function save (req, res) {
             const gameObject = body.game[key];
             const gamePlayerKeys = getPlayerKeys(gameObject);
             if (gamePlayerKeys.length === 0) continue;
-            const { handicap, method, name } = gameObject;
+            const { handicap, method, name, round: roundType } = gameObject;
             round.games.push({
                 handicap: handicap && handicap === 'on',
                 method,
@@ -171,7 +172,8 @@ async function save (req, res) {
                         player: await User.findById(body[gamePlayer].id),
                         team: teamValue === 'none' ? undefined : teamValue
                     };
-                }))
+                })),
+                roundType
             });
         };
         await new Round(round).save();
