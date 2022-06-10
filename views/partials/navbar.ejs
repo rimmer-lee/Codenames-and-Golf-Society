@@ -9,7 +9,7 @@
                 <a class="nav-link" href="/charter">Charter</a>
                 <a class="nav-link" href="/demerits">Demerits</a>
                 <a class="nav-link" href="/players">Players</a>
-                <!-- <% if (currentUser && ['super', 'founder', 'admin'].some(role => role === currentUser.role)) { %>
+                <!-- <% if (typeof currentUser !== "undefined" && currentUser.role && ['super', 'founder', 'admin'].some(role => role === currentUser.role)) { %>
                 <a class="nav-link" href="/users">Users</a>
                 <% }; %> -->
                 <a class="nav-link" href="/rounds">Rounds</a>
@@ -18,7 +18,7 @@
             </div>
             <hr class="d-block d-lg-none d-xl-none d-xxl-none">
             <div class="navbar-nav mx-3">
-                <% if (currentUser)  { %>
+                <% if (typeof currentUser !== "undefined" && currentUser)  { %>
                 <%- include('icon', { classes: 'bi-person-fill btn-outline-success', link: 'account', text: 'Account' }) %>
                 <form method="POST" action="/logout">
                     <label class="nav-link py-0 d-none d-lg-inline d-xl-inline d-xxl-inline">
