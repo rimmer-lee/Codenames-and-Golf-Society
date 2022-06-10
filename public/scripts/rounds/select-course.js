@@ -1,5 +1,5 @@
-function searchOnEnter(event) {
-    if (event.keyCode === 13) searchCourse.call(event.target);
+function removeInvalidClass(id) {
+    document.getElementById(id).classList.remove('is-invalid');
 };
 
 function provideFeedback(message) {
@@ -8,20 +8,6 @@ function provideFeedback(message) {
     feedback.innerText = message;
     feedbackParent.classList.remove('d-none');
     feedbackParent.removeAttribute('visibility');
-};
-
-function resetCourseSearchValidation() {
-    function removeInvalidClass(id) {
-        document.getElementById(id).classList.remove('is-invalid');
-    };
-    const feedback = document.getElementById('feedback');
-    const feedbackParent = feedback.parentElement;
-    removeInvalidClass('region-select');
-    removeInvalidClass('city');
-    removeInvalidClass('course-name');
-    feedback.innerText = 'No new courses found.';
-    feedbackParent.classList.add('d-none');
-    feedbackParent.setAttribute('visibility', 'hidden');
 };
 
 function resetCourseModalFields() {
@@ -44,6 +30,17 @@ function resetCourseModalFields() {
     name.value = '';
     while (coursesTable.children.length > 0) coursesTable.children[0].remove();
     toggleGrandparentVisibility(coursesTable, false);
+};
+
+function resetCourseSearchValidation() {
+    const feedback = document.getElementById('feedback');
+    const feedbackParent = feedback.parentElement;
+    removeInvalidClass('region-select');
+    removeInvalidClass('city');
+    removeInvalidClass('course-name');
+    feedback.innerText = 'No new courses found.';
+    feedbackParent.classList.add('d-none');
+    feedbackParent.setAttribute('visibility', 'hidden');
 };
 
 async function searchCourse() {
@@ -155,6 +152,10 @@ async function searchCourse() {
         feedbackParent.classList.remove('d-none');
         feedbackParent.removeAttribute('visibility');
     };
+};
+
+function searchOnEnter(event) {
+    if (event.keyCode === 13) searchCourse.call(event.target);
 };
 
 function selectCourse() {
@@ -386,15 +387,12 @@ function selectCourse() {
     };
     validation.call(this);
     selectTee.call(document.getElementById('tee-select'));
-    updateScores();
 };
 
 const countrySelect = document.getElementById('country-select');
 const regionSelect = document.getElementById('region-select');
 const cityInput = document.getElementById('city');
 const courseNameInput = document.getElementById('course-name');
-
-document.getElementById('course-select').addEventListener('change', selectCourse);
 
 countrySelect.addEventListener('click', resetCourseSearchValidation);
 
@@ -445,3 +443,6 @@ courseNameInput.addEventListener('click', resetCourseSearchValidation);
 courseNameInput.addEventListener('keydown', searchOnEnter);
 
 document.getElementById('search-course').addEventListener('click', searchCourse);
+
+document.getElementById('course-select').addEventListener('change', selectCourse);
+document.getElementById('course-select').addEventListener('change', updateData);

@@ -224,7 +224,12 @@
                         <div class="row gy-3">
                             <div class="col-12 d-none" visibility="hidden">
                                 <div class="border border-1 border-primary rounded p-3">
-                                    <div id="summary-score" class="row row-cols-3 row-cols-md-auto justify-content-center"></div>
+                                    <div id="summary-score" class="row row-cols-3 row-cols-md-auto gy-4 justify-content-center"></div>
+                                </div>
+                            </div>
+                            <div class="col-12 d-none" visibility="hidden">
+                                <div class="border border-1 border-primary rounded p-3">
+                                    <div id="games-summary" class="row row-cols-auto gy-2 justify-content-center"></div>
                                 </div>
                             </div>
                             <div class="col-12 d-none" visibility="hidden">
@@ -521,10 +526,11 @@
     </div>
 </div>
 <script>
-    const actions = JSON.parse('<%- JSON.stringify(actions) %>');
-    const games = JSON.parse('<%- JSON.stringify(games) %>');
+    const ACTIONS = JSON.parse('<%- JSON.stringify(actions) %>');
+    const GAMES = JSON.parse('<%- JSON.stringify(games) %>');
     const teeColours = JSON.parse('<%- JSON.stringify(teeColours) %>');
     const titles = JSON.parse('<%- JSON.stringify(titles) %>');
+    const ROUND_TYPES = JSON.parse('<%- JSON.stringify(roundTypes) %>');
     const rules = JSON.parse('<%- JSON.stringify(rules) %>').map(rule => {
         rule.rules.map(rule => {
             rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));
@@ -548,9 +554,9 @@
 <script src="/scripts/rounds/handle-modals.js"></script>
 <script src="/scripts/rounds/pagination.js"></script>
 <script src="/scripts/rounds/register-service-worker.js"></script>
-<script src="/scripts/rounds/select-course.js"></script>
 <script src="/scripts/rounds/select-game.js"></script>
 <script src="/scripts/rounds/update.js"></script>
-<script src="/scripts/rounds/select-tee.js"></script>
 <script src="/scripts/rounds/validate.js"></script>
+<script src="/scripts/rounds/select-course.js"></script>
 <script src="/scripts/rounds/select-player.js"></script>
+<script src="/scripts/rounds/select-tee.js"></script>

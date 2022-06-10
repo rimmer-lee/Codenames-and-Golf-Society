@@ -167,7 +167,7 @@ function demeritObject(player, hole, index) {
             innerText: `${rule.index}. ${rule.description[0]}`
         });
     };
-    for (const action of actions) {
+    for (const action of ACTIONS) {
         const actionElementObject = {
             classList: ['col-12'],
             children: [

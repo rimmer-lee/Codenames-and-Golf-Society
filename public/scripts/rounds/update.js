@@ -1,32 +1,192 @@
-function changeScores() {
-    const player = this.id.split('|')[0];
-    const holes = getRound()[player].hole;
-    const tee = getTee();
-    let total = 0, par = 0;
-    for (const key of Object.keys(holes)) {
-        const score = holes[key];
-        total += +score;
-        if (score > 0 && tee) par += +score - tee.holes[+key - 1].par;
+// shared with models/round.js
+function calculateGames(gameObject = {}, holes = []) {
+    for (const score of gameObject.scores) {
+        const handicap = Math.floor(score.handicap || 54);
+        const shotsPerHole = Math.floor(handicap / 18);
+        const holesWithAShot = handicap % 18;
+        for (const roundType of ROUND_TYPES) {
+            const { name, start, end } = roundType;
+            if (score.shots.slice(start, end).every(shot => shot !== 0)) {
+                score.roundType = name;
+                break;
+            };
+        };
+        score.scores = {
+            nett: [],
+            par: { front: 0, back: 0, full: 0 },
+            shots: {
+                front: score.shots.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
+                back: score.shots.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
+                full: score.shots.reduce((sum, value) => sum += value, 0)
+            }
+        };
+        for (const hole of holes) {
+            const { index, par, strokeIndex } = hole;
+            const shot = +score.shots[index - 1];
+            if (!shot) {
+                score.scores.nett.push(null);
+                continue;
+            };
+            const parScore = shot - par;
+            const nettScore = shot ? (shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot)) : 0;
+            if (index < 10) score.scores.par.front += parScore;
+            if (index > 9) score.scores.par.back += parScore;
+            score.scores.par.full += parScore;
+            score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
+        };
     };
-    document.getElementById(`${player}|score`).innerText = total;
-    updateParElement(player, par);
+    for (const game of gameObject.games) {
+        const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
+        if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
+        const { handicap, method, players: gamePlayers, roundType } = game;
+        game.team = gamePlayers.some(({ team }) => team && team !== 'none');
+        if ((game.team ? [ ...new Set(gamePlayers.map(({ team }) => team)) ].length : gamePlayers.length) < defaultPlayersObject.minimum) continue;
+        const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
+        const gameScores = (function() {
+            const gameScores = gamePlayers.map(p => {
+                const { player, scores, shots } = gameObject.scores.find(({ player }) => player._id.toString() === p.player._id.toString());
+                return {
+                    id: player._id.toString(),
+                    score: (handicap ? scores.nett : shots).slice(start, end),
+                    team: p.team
+                };
+            });
+            if (!game.team) return gameScores;
+            return [ ...new Set(gameScores.map(({ team: id }) => id)) ].map(id => {
+                const playerScores = gameScores.filter(score => score.team === id).map(({ score }) => score);
+                const score = [];
+                for (let i = start; i < end; i++) {
+                    score.push((function() {
+                        const holeScores = playerScores.map(playerScore => playerScore[i]).filter(score => score);
+                        if (holeScores.length === 0) return null;
+                        switch (method) {
+                            case 'Best':
+                                return Math.min( ...holeScores );
+                            case 'Combined':
+                                return holeScores.reduce((sum, value) => sum += value, 0);
+                            case 'Worse':
+                                return Math.max( ...holeScores );
+                            default:
+                                return null;
+                        };
+                    })());
+                };
+                return { id, score }
+            });
+        })();
+        game.scores = gameScores.map(({ id, score }) => {
+            const points = (function() {
+                if (name === 'Stroke Play') return score.map(s => s || null);
+                if (name === 'Stableford') {
+                    return score.map((s, i) => {
+                        if (s === null) return null;
+                        const { par } = holes[i + start];
+                        return ((function() {
+                            if (!s || (s > (2 + +par))) return 0;
+                            return 2 - s + +par;
+                        })());
+                    });
+                };
+                const matchPlay = name === 'Match Play';
+                let skins = 0;
+                return score.map((s, i) => {
+                    const holeScores = gameScores.map(({ score }) => score[i])
+                    const scores = holeScores.filter(score => score);
+                    if (holeScores.length !== scores.length) return null;
+                    const minScore = Math.min( ...scores );
+                    skins++;
+                    if (scores.filter(score => score === minScore).length === 1) {
+                        const skinsToAdd = skins;
+                        skins = 0;
+                        if (s === minScore) return matchPlay ? 1 : skinsToAdd;
+                        if (matchPlay) return -1;
+                    };
+                    return 0;
+                });
+            })();
+            return { id, points };
+        });
+        game.summary = (function() {
+            if (name === 'Match Play') {
+                const { id: idOne, points } = game.scores[0];
+                const idTwo = game.scores[1].id;
+                const nameOne = game.team ? `Team ${idOne.toUpperCase()}` : (players.find(player => player.id == idOne) || { name: {} }).name.knownAs || idOne;
+                const nameTwo = game.team ? `Team ${idTwo.toUpperCase()}` : (players.find(player => player.id == idTwo) || { name: {} }).name.knownAs || idTwo;
+                const lengthOfPoints = points.length;
+                const holesToPlay = points.filter(point => point === null).length;
+                let currentScore = 0;
+                for (let i = 0; i < lengthOfPoints; i++) {
+                    const point = points[i];
+                    const remainingHoles = lengthOfPoints + holesToPlay - i - 1;
+                    currentScore += point;
+                    if (remainingHoles === 0) {
+                        if (currentScore == 0) return 'Game halved';
+                        return `${currentScore > 0 ? nameOne : nameTwo} wins`;
+                    };
+                    if (currentScore > 0 && currentScore > remainingHoles) return `${nameOne} wins (${currentScore} & ${remainingHoles})`;
+                    if (Math.abs(currentScore) > 0 && Math.abs(currentScore) > remainingHoles) return `${nameTwo} wins (${Math.abs(currentScore)} & ${remainingHoles})`;
+                };
+                if (currentScore === 0) return 'All square';
+                return `${currentScore > 0 ? nameOne : nameTwo} ${currentScore > 0 ? currentScore : Math.abs(currentScore)} up`;
+            };
+            const sortedTotals = game.scores.map(({ id, points }) => {
+                const total = points.reduce((sum, value, index) => {
+                    if (game.scores.some(({ points }) => points[index] === null)) return sum;
+                    return sum += value;
+                }, 0);
+                const knownAs = game.team ? `Team ${id.toUpperCase()}` : (players.find(player => player.id == id) || { name: {} }).name.knownAs || id;
+                return { id: knownAs, total };
+            }).sort((a, b) => {
+                if (name === 'Skins' || name === 'Stableford') return b.total - a.total;
+                if (name === 'Stroke Play') return a.total - b.total;
+                return a.total - b.total;
+            });
+            const totals = [ ...new Set(sortedTotals.map(({ total }) => total)) ];
+            const leadTotal = totals[0];
+            const jointLeaders = sortedTotals.filter(({ total }) => total === leadTotal);
+            if (name === 'Stableford' && game.scores.length === 1) {
+                const { id, total } = sortedTotals[0];
+                return `${id} (${total})`;
+            };
+            if (jointLeaders.length === game.scores.length && name !== 'Skins') return 'All square';
+            return totals.map((t, index) => {
+                const equalTotals = sortedTotals.filter(sortedTotal => sortedTotal.total === t).sortAlphabetically('id');
+                const string = equalTotals.filter(equalTotal => equalTotal.total === t).map(({ id, total }, i) => {
+                    if (i !== equalTotals.length - 1) return id;
+                    if (name === 'Skins') return `${id} (${total})`;
+                    if (index === 0) return `${id} lead${equalTotals.length === 1 ? 's' : ''} (${total})`;
+                    return `${id} (${Math.abs(total - leadTotal)} behind)`;
+                }).join(', ');
+                const lastInstance = string.lastIndexOf(', ');
+                if (lastInstance === -1) return string;
+                return `${string.substr(0, lastInstance)} and ${string.substr(lastInstance + 2)}`;
+            }).join('; ');
+        }());
+    };
+    return gameObject;
 };
 
 function getRound() {
     return JSON.parse(window.localStorage.getItem('round'));
 };
 
-function getPlayerKeys() {
-    return Object.keys(getRound()).filter(key => /^(?:marker$|player\-)/.test(key));
+function getPlayerKeys(object = getRound()) {
+    return Object.keys(object).filter(key => /^(?:marker$|player\-)/.test(key));
 };
 
 function getTee() {
-    const courseId = document.getElementById('course-select').value;
-    const course = courses.find(({ id, randa }) => id == courseId || `randa-${randa}` === courseId);
-    if (!course) return undefined;
-    const teeSelect = document.getElementById('tee-select');
-    const teeOption = teeSelect.selectedOptions[0];
-    return teeOption ? course.tees.find(({ name }) => name === teeOption.value) : undefined;
+    const { course } = getRound();
+    const teeObject = { name: '', holes: [] };
+    if (!course) return teeObject;
+    const { tee, tees } = course;
+    const lowerTee = tee.toLowerCase();
+    const chosenTee = tees[lowerTee];
+    teeObject.name = lowerTee;
+    for (const index of Object.keys(chosenTee)) {
+        const { distance, par, strokeIndex } = chosenTee[index];
+        teeObject.holes.push({ distance, index, par, strokeIndex });
+    };
+    return teeObject;
 };
 
 function sortCourses() {
@@ -34,13 +194,7 @@ function sortCourses() {
     const { value: selectedValue } = courseSelect.querySelector('[selected]');
     const courseOptions = Array.from(courseSelect.children).filter(({ value }) => !/(?:new|select\scourse)/i.test(value));
     for (const courseOption of courseOptions) courseOption.remove();
-    courses = courses.sort((a, b) => {
-        const upperA = a.name.toUpperCase();
-        const upperB = b.name.toUpperCase();
-        if (upperA < upperB) return -1;
-        if (upperA > upperB) return 1;
-        return 0;
-    });
+    courses = courses.sortAlphabetically('name');
     for (const course of courses) {
         courseSelect.insertBefore(
             createOption(course.name, [{ id: 'value', value: course.id || `randa-${course.randa}` }]),
@@ -51,13 +205,7 @@ function sortCourses() {
 };
 
 function sortPlayers() {
-    players = players.sort((a, b) => {
-        const upperA = a.name.knownAs.toUpperCase();
-        const upperB = b.name.knownAs.toUpperCase();
-        if (upperA < upperB) return -1;
-        if (upperA > upperB) return 1;
-        return 0;
-    });
+    players = players.sortAlphabetically('name.knownAs');
 };
 
 function updateCourse() {
@@ -100,6 +248,7 @@ function updateData() {
     };
     window.localStorage.setItem('round', JSON.stringify(round));
     updateScores();
+    updateGames();
 };
 
 function updateDemerits() {
@@ -126,6 +275,47 @@ function updateDemerits() {
     };
 };
 
+function updateGames() {
+    const round = getRound();
+    if (!round) return;
+    const gamesSummary = document.getElementById('games-summary');
+    while (gamesSummary.children.length > 0) gamesSummary.children[0].remove();
+    toggleGrandparentVisibility(gamesSummary, false);
+    if (!round.game) return;
+    const gameKeys = Object.keys(round.game).filter(index => Object.keys(round.game[index]).some(key => /^(?:marker$|player\-)/.test(key)));
+    const { holes } = getTee();
+    const gamesObject = calculateGames({
+        games: gameKeys.map(index => {
+                const { handicap, method, name, round: roundType } = round.game[index];
+                return {
+                    handicap: handicap && handicap === 'on',
+                    method,
+                    name,
+                    players: getPlayerKeys(round.game[index]).map(player => {
+                        return {
+                            player: { _id: round[player].id },
+                            team: round.game[index][player].team
+                        };
+                    }),
+                    roundType
+                };
+            }),
+        scores: getPlayerKeys().map(key => {
+                const { handicap, hole, id: _id } = round[key];
+                const shots = Object.keys(hole).map(h => +hole[h]);
+                return { handicap, player: { _id }, shots };
+            })
+    }, holes);
+    gameKeys.forEach((gameKey, index) => {
+        const { handicap, method, name, roundType, summary } = gamesObject.games[index];
+        if (!summary) return;
+        // const innerText = `Game ${gameKey.replace(/'/g, '')}: ${handicap ? 'Nett ' : ''}${method ? (method === 'Combined ' ? `${method} Score ` : `${method} Best `) : ''}${name}${roundType ? (roundType === 'full' ? ' for 18' : ` for ${roundType.capitalize()} 9`) : ''} - ${summary}`;
+        const innerText = `Game ${gameKey.replace(/'/g, '')} - ${summary}`;
+        toggleGrandparentVisibility(gamesSummary)
+        gamesSummary.insertBefore(createElement({ type: 'h5', classList: ['col', 'mb-0'], innerText }), null);
+    });
+};
+
 function updateParElement(player, par) {
     const parElement = document.getElementById(`${player}|par`);
     if (!parElement) return;
@@ -139,20 +329,21 @@ function updateParElement(player, par) {
 function updateScores() {
     const round = getRound();
     if (!round) return;
-    const tee = getTee();
+    const teeName = getTee().name.toLowerCase();
     for (const player of getPlayerKeys()) {
-        const currentPlayer = round[player];
-        if (!currentPlayer || !currentPlayer.hole) continue;
+        const { hole } = round[player] || {};
+        if (!hole) continue;
         const totalElement = document.getElementById(`${player}|score`);
         let total = 0, par = 0;
-        for (const index of Object.keys(currentPlayer.hole)) {
-            const score = currentPlayer.hole[index];
+        for (const index of Object.keys(hole)) {
+            const score = hole[index];
             if (!score) continue;
             const scoreElement = document.querySelector(`[name="[${player}][hole][${index}]"]`);
-            const parElement = document.getElementById(`${tee.name.toLowerCase()}-${index}|par`);
-            total += +score;
-            if (parElement) par += +score - +parElement.value;
             if (scoreElement) scoreElement.value = score;
+            total += +score;
+            if (!teeName) continue;
+            const parValue = (document.getElementById(`${teeName}-${index}|par`) || {}).value;
+            if (parValue) par += +score - +parValue;
         };
         if (totalElement) totalElement.innerText = total;
         updateParElement(player, par);
@@ -173,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!window.localStorage.getItem('round')) updateData();
     const courseSelect = document.getElementById('course-select');
     const round = getRound();
-    const playerKeys = getPlayerKeys();
+    const playerKeys = getPlayerKeys(round);
     const gameIndexes = Object.keys(round.game || {});
     const localCourses = JSON.parse(window.localStorage.getItem('courses')) || [];
     const localPlayers = JSON.parse(window.localStorage.getItem('players')) || [];
@@ -236,12 +427,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const game = `game-${index.replace(/'/g, '')}`;
         const selectId = `${game}|select`;
         if (!document.getElementById(selectId)) addGame.call(document.getElementById('play-game'));
-        const handicapElement = document.getElementById(`${game}|handicap`);
         const gameObject = round.game[index];
-        const { handicap, method, name } = gameObject;
+        const { handicap, method, name, round: roundType } = gameObject;
         const gamePlayers = Object.keys(gameObject).filter(key => /^(?:marker$|player\-)/.test(key));
+        const handicapElement = document.getElementById(`${game}|handicap`);
+        const roundElement = document.getElementById(`${game}|round|${roundType}`);
         updateSelect(selectId, name, selectGame);
         if (handicapElement) handicapElement.checked = !!(handicap && handicap === 'on');
+        if (roundElement) roundElement.checked = true;
         for (const gamePlayer of gamePlayers) {
             const playerParticipationElement = document.getElementById(`${game}|${gamePlayer}|participation`);
             if (!playerParticipationElement) continue;
@@ -261,6 +454,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateData();
 });
 
-// for (const select of document.querySelectorAll('form select')) select.addEventListener('input', updateData);
-// document.getElementById('date').addEventListener('input', updateData);
 document.getElementById('date').addEventListener('blur', updateData);

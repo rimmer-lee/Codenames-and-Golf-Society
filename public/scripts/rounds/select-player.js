@@ -186,10 +186,7 @@ function selectPlayer() {
                                 { id: 'value', value: handicap },
                                 { id: 'max', value: 54 },
                             ],
-                            addEventListener: [
-                                { type: 'change', listener: () => console.log('function to calculate game standings') },
-                                { type: 'change', listener: updateData }
-                            ]
+                            addEventListener: [{ type: 'change', listener: updateData }]
                         },
                         {
                             type: 'label',
@@ -429,6 +426,7 @@ function selectPlayer() {
         addPlayerToGame(gameReference, playerReference, playerName);
     };
     updateGameOptions();
+    // updateGames();
 };
 
 for (const playerSelect of document.querySelectorAll(playerSelectSelector)) {

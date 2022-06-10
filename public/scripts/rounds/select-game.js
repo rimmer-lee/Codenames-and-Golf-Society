@@ -111,7 +111,17 @@ function addGame() {
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
                                         children: [
                                             {
-                                                classList: ['game-element', 'game-handicap', 'd-flex', 'align-items-center', 'justify-content-center'],
+                                                classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'justify-content-evenly', 'align-items-center'],
+                                                children: []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        classList: ['col-12', 'd-none'],
+                                        attributes: [{ id: 'visibility', value: 'hidden' }],
+                                        children: [
+                                            {
+                                                classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'align-items-center', 'justify-content-center'],
                                                 children: [
                                                     {
                                                         classList: ['form-check', 'form-switch'],
@@ -212,6 +222,34 @@ function addGame() {
             }
         ]
     };
+    for (const roundType of ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0)) {
+        const { name } = roundType;
+        const value = `${gameReference}|round|${name}`;
+        const radioButtonElementObject = {
+            classList: ['form-check', 'form-check-inline'],
+            children: [
+                {
+                    type: 'input',
+                    classList: ['form-check-input'],
+                    attributes: [
+                        { id: 'id', value },
+                        { id: 'name', value: `[game]['${gameIndex}'][round]` },
+                        { id: 'type', value: 'radio' },
+                        { id: 'value', value: name }
+                    ],
+                    addEventListener: [{ type: 'change', listener: updateData }]
+                },
+                {
+                    type: 'label',
+                    classList: ['form-check-label'],
+                    attributes: [{ id: 'for', value }],
+                    innerText: `${name[0].toUpperCase()}${name.substring(1)}`
+                }
+            ]
+        };
+        if (name === 'full') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
+        newItemElementObject.children[1].children[0].children[0].children[2].children[0].children.push(radioButtonElementObject);
+    };
     gameAccordionElement.insertBefore(createElement(newItemElementObject), null);
     updateGameOptions();
     toggleVisibility(gameAccordionParentElement);
@@ -269,79 +307,53 @@ function addPlayerToGame(game, player, innerText) {
 };
 
 function changeParticipation() {
-    function teamRadioButtonObject(game, player, team, checkedValue = '') {
-        const lowerTeam = team.toLowerCase();
-        const value = `${game}|${player}|team-${lowerTeam}`;
-        const teamRadioButtonObject = {
-            classList: ['form-check', 'form-check-inline'],
-            children: [
-                {
-                    type: 'input',
-                    classList: ['form-check-input'],
-                    attributes: [
-                        { id: 'id', value },
-                        { id: 'name', value: `[game]['${game.split('-')[1]}'][${player}][team]` },
-                        { id: 'type', value: 'radio' },
-                        { id: 'value', value: lowerTeam }
-                    ],
-                    addEventListener: [{ type: 'change', listener: changeTeam }]
-                },
-                {
-                    type: 'label',
-                    classList: ['form-check-label'],
-                    attributes: [{ id: 'for', value }],
-                    innerText: team
-                }
-            ]
-        };
-        if (checkedValue === lowerTeam) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true });
-        return teamRadioButtonObject;
-    };
     const parentAccordionBody = this.closest('.accordion-body');
     const gameSelect = parentAccordionBody.querySelector(gameSelectSelector);
     const gamePlayersElement = parentAccordionBody.querySelector(gamePlayersSelector);
     const participationCheckboxes = Array.from(gamePlayersElement.querySelectorAll('input[type=checkbox]'));
     const participationLabelElement = this.parentElement.querySelector('label');
     const { text } = gameSelect[gameSelect.selectedIndex];
-    const { players } = games.find(({ name }) => name === text)
+    const { players } = GAMES.find(({ name }) => name === text)
     const teamGame = players.for.some(value => value === 'team');
-    const maximumPlayers = players.maximum;
+    const { maximum: maximumPlayers, minimum: minimumPlayers } = players;
     const { checked } = this;
     const [ gameReference ] = this.id.split('|');
     participationLabelElement.classList.toggle('text-muted', !checked);
     participationLabelElement.classList.toggle('fw-bold', checked);
-    if (!teamGame) return;
-    const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked).length;
-    const participatingPlayers = maximumPlayers ? Math.min(maximumPlayers, checkedParticipationCheckboxes) : checkedParticipationCheckboxes;
-    for (const participationCheckbox of participationCheckboxes) {
-        const participationCheckboxRow = participationCheckbox.closest('.row');
-        const radioButton = participationCheckboxRow.querySelector('input.form-check-input[type=radio]');
-        const checkedValue = (participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked') || {}).value;
-        const [ , playerReference ] = participationCheckbox.id.split('|');
-        if (radioButton) radioButton.closest('.col').remove();
-        if (!participationCheckbox.checked || checkedParticipationCheckboxes < 2) continue;
-        const radioButtonElementObject = {
-            classList: ['col'],
-            children: [
-                {
-                    classList: ['d-flex', 'justify-content-evenly', 'align-items-center'],
-                    children: []
-                }
-            ]
+    if (teamGame) {
+        const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked).length;
+        const minimum = minimumPlayers === maximumPlayers ? 0 : -1;
+        const teams = maximumPlayers ? Math.min(maximumPlayers, checkedParticipationCheckboxes) : checkedParticipationCheckboxes;
+        for (const participationCheckbox of participationCheckboxes) {
+            const participationCheckboxRow = participationCheckbox.closest('.row');
+            const radioButton = participationCheckboxRow.querySelector('input.form-check-input[type=radio]');
+            const checkedValue = (participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked') || {}).value;
+            const [ , playerReference ] = participationCheckbox.id.split('|');
+            if (radioButton) radioButton.closest('.col').remove();
+            if (!participationCheckbox.checked || checkedParticipationCheckboxes < 3) continue;
+            const radioButtonElementObject = {
+                classList: ['col'],
+                children: [
+                    {
+                        classList: ['d-flex', 'justify-content-evenly', 'align-items-center'],
+                        children: []
+                    }
+                ]
+            };
+            for (let i = minimum; i < teams; i++) {
+                radioButtonElementObject.children[0].children.push(
+                    teamRadioButtonObject(
+                        gameReference,
+                        playerReference,
+                        i < 0 ? 'None' : letterFromNumber(i).toUpperCase(),
+                        checkedValue || (minimum < 0 ? 'none' : 'a')
+                    )
+                );
+            };
+            participationCheckbox.closest('.row').insertBefore(createElement(radioButtonElementObject), null);
         };
-        for (let i = -1; i < participatingPlayers; i++) {
-            radioButtonElementObject.children[0].children.push(
-                teamRadioButtonObject(
-                    gameReference,
-                    playerReference,
-                    i < 0 ? 'None' : letterFromNumber(i).toUpperCase(),
-                    checkedValue || 'none'
-                )
-            );
-        };
-        participationCheckbox.closest('.row').insertBefore(createElement(radioButtonElementObject), null);
+        updateMethodSelect.call(this);
     };
-    updateMethodSelect.call(this);
     updateData();
 };
 
@@ -397,6 +409,7 @@ function selectGame() {
     const parentAccordionBody = this.closest('.accordion-body');
     const gameHandicapSwitch = parentAccordionBody.querySelector('[id^="game-"][id$="|handicap"]');
     const gameMethodSelect = parentAccordionBody.querySelector('[id^="game-"][id$="|method"]');
+    const gameRoundRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|round|"][type="radio"]');
     const gamePlayersElement = parentAccordionBody.querySelector(gamePlayersSelector);
     const [ gameReference ] = this.id.split('|');
     this.classList.remove('is-invalid');
@@ -404,19 +417,18 @@ function selectGame() {
     gameHandicapSwitch.removeAttribute('disabled');
     toggleVisibility(gamePlayersElement.closest('.col-12'), false);
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
+    toggleVisibility(gameRoundRadioButton.closest('.col-12'), false);
     while (gamePlayersElement.children.length > 0) gamePlayersElement.children[0].remove();
     while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
-    if (!this.value || this.value === 'Select Game') {
-        // update invalid message accordingly
-        return this.classList.add('is-invalid');
-    };
+    if (!this.value || this.value === 'Select Game') return this.classList.add('is-invalid');
     const playerSelects = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player');
-    const game = games.find(({ name }) => name === this.value);
-    if (game.players.minimum > playerSelects.length) {
-        // update invalid message accordingly
+    const game = GAMES.find(({ name }) => name === this.value);
+    if (!game || game.players.minimum > playerSelects.length) {
+        this.children[0].selected = true;
         return this.classList.add('is-invalid');
     };
     toggleVisibility(gameHandicapSwitch.closest('.col-12'));
+    toggleVisibility(gameRoundRadioButton.closest('.col-12'));
     if (!game.handicap.adjustable) gameHandicapSwitch.setAttribute('disabled', true);
     gameHandicapSwitch.checked = game.handicap.default;
     toggleVisibility(gamePlayersElement.closest('.col-12'));
@@ -428,10 +440,39 @@ function selectGame() {
     };
 };
 
+function teamRadioButtonObject(game, player, team, checkedValue = '') {
+    const lowerTeam = team.toLowerCase();
+    const value = `${game}|${player}|team-${lowerTeam}`;
+    const teamRadioButtonObject = {
+        classList: ['form-check', 'form-check-inline'],
+        children: [
+            {
+                type: 'input',
+                classList: ['form-check-input'],
+                attributes: [
+                    { id: 'id', value },
+                    { id: 'name', value: `[game]['${game.split('-')[1]}'][${player}][team]` },
+                    { id: 'type', value: 'radio' },
+                    { id: 'value', value: lowerTeam }
+                ],
+                addEventListener: [{ type: 'change', listener: changeTeam }]
+            },
+            {
+                type: 'label',
+                classList: ['form-check-label'],
+                attributes: [{ id: 'for', value }],
+                innerText: team
+            }
+        ]
+    };
+    if (checkedValue === lowerTeam) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true });
+    return teamRadioButtonObject;
+};
+
 function updateGameOptions() {
     const gameSelects = document.querySelectorAll(gameSelectSelector);
     const selectedPlayers = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player').length;
-    const applicableGames = games.filter(({ players }) => players.minimum <= selectedPlayers);
+    const applicableGames = GAMES.filter(({ players }) => players.minimum <= selectedPlayers);
     for (const gameSelect of gameSelects) {
         const currentValue = gameSelect.value;
         while (gameSelect.children.length > 1) gameSelect.children[1].remove();
@@ -452,7 +493,7 @@ function updateMethodSelect() {
     const parentAccordionBody = this.closest('.accordion-body');
     const gameSelect = parentAccordionBody.querySelector(gameSelectSelector);
     const gameMethodSelect = parentAccordionBody.querySelector('[id^="game-"][id$="|method"]');
-    const game = games.find(({ name }) => name === gameSelect[gameSelect.selectedIndex].text)
+    const game = GAMES.find(({ name }) => name === gameSelect[gameSelect.selectedIndex].text)
     while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
     if (!game) return;

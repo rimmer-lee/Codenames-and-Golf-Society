@@ -226,7 +226,7 @@ li.page-item.right-hole .page-link {
     border-radius: 0.25rem;
 }
 
-.game-handicap {
+.fixed-game-element-height {
     min-height: 56px;
 }
 

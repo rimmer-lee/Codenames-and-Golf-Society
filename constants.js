@@ -114,6 +114,7 @@ const GAMES = [
                 'individual',
                 'team'
             ],
+            maximum: 2,
             minimum: 2
         }
     },

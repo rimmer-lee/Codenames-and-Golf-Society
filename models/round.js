@@ -99,16 +99,15 @@ const RoundSchema = new Schema({
                     team: String
                 }
             ],
+            roundType: {
+                type: String,
+                enum: ROUND_TYPES.map(({ name }) => name)
+            },
             scores: [
                 {
                     id: String,
                     points: [ Number ],
-                    team: String,
-                    totals: {
-                        front: Number,
-                        back: Number,
-                        full: Number
-                    }
+                    team: String
                 }
             ],
             summary: String,
@@ -151,25 +150,25 @@ RoundSchema.pre('save', async function(next) {
         //         break;
         //     };
         // };
-        score.scores.shots = {
-            front: score.shots.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
-            back: score.shots.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
-            full: score.shots.reduce((sum, value) => sum += value, 0)
+        score.scores = {
+            nett: [],
+            par: { front: 0, back: 0, full: 0 },
+            shots: {
+                front: score.shots.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
+                back: score.shots.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
+                full: score.shots.reduce((sum, value) => sum += value, 0)
+            }
         };
-        score.scores.par = { front: 0, back: 0, full: 0 };
-        score.scores.nett = [];
-        if (holes) {
-            for (const hole of holes) {
-                const { index, par, strokeIndex } = hole;
-                const shot = score.shots[index - 1];
-                if (!shot) continue;
-                const parScore = shot - par;
-                const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
-                if (index < 10) score.scores.par.front += parScore;
-                if (index > 9) score.scores.par.back += parScore;
-                score.scores.par.full += parScore;
-                score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
-            };
+        if (!holes) continue;
+        for (const hole of holes) {
+            const { index, par, strokeIndex } = hole;
+            const shot = +score.shots[index - 1];
+            const parScore = shot - par;
+            const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
+            if (index < 10) score.scores.par.front += parScore;
+            if (index > 9) score.scores.par.back += parScore;
+            score.scores.par.full += parScore;
+            score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
         };
     };
     for (const game of this.games) {
@@ -182,10 +181,11 @@ RoundSchema.pre('save', async function(next) {
                 team: p.team
             };
         });
-        const { handicap: defaultHandicap, name } = GAMES.find(({ name }) => name === game.name);
+        const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
         if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
         // move to a function in utilities?
-        const { handicap, method } = game;
+        const { handicap, method, players } = game;
+        if (players.length < defaultPlayersObject.minimum) continue;
         game.team = gameScores.some(({ team }) => team && team !== 'none');
         game.scores = [];
         if (game.team) {
