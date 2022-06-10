@@ -176,8 +176,9 @@ CourseSchema.pre('save', async function(next) {
         };
         if (course) {
             for (const tee of this.tees) {
+                const { gender, name } = tee;
                 const courseTee = course.TeeRows.find(({ TeeName, Gender }) => {
-                    return TeeName === tee.name && (tee.gender ? Gender === tee.gender : true)
+                    return TeeName === name && (gender ? Gender === gender : true)
                 });
                 const { Back, BogeyRating, CourseRating, Front, Gender, Par, SlopeRating } = courseTee;
                 const [ courseFront, slopeFront ] = Front.split(' / ');
