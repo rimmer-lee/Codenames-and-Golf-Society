@@ -2,11 +2,180 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const Course = require('./course');
+const User = require('./user');
 
 const { GAMES, ROUND_TYPES } = require('../constants');
 
 const formatDate = require('../utilities/formatDate');
 // const sort = require('../utilities/sort');
+
+// shared with public/scripts/rounds/update.js
+function calculateGames(gameObject = {}, holes = [], players = []) {
+    for (const score of gameObject.scores) {
+        const handicap = Math.floor(score.handicap || 54);
+        const shotsPerHole = Math.floor(handicap / 18);
+        const holesWithAShot = handicap % 18;
+        for (const roundType of ROUND_TYPES) {
+            const { name, start, end } = roundType;
+            if (score.shots.slice(start, end).every(shot => shot !== 0)) {
+                score.roundType = name;
+                break;
+            };
+        };
+        score.scores = {
+            nett: [],
+            par: { front: 0, back: 0, full: 0 },
+            shots: {
+                front: score.shots.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
+                back: score.shots.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
+                full: score.shots.reduce((sum, value) => sum += value, 0)
+            }
+        };
+        for (const hole of holes) {
+            const { index, par, strokeIndex } = hole;
+            const shot = +score.shots[index - 1];
+            if (!shot) {
+                score.scores.nett.push(null);
+                continue;
+            };
+            const parScore = shot - par;
+            const nettScore = shot ? (shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot)) : 0;
+            if (index < 10) score.scores.par.front += parScore;
+            if (index > 9) score.scores.par.back += parScore;
+            score.scores.par.full += parScore;
+            score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
+        };
+    };
+    for (const game of gameObject.games) {
+        const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
+        if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
+        const { handicap, method, players: gamePlayers, roundType } = game;
+        game.team = gamePlayers.some(({ team }) => team && team !== 'none');
+        if ((game.team ? [ ...new Set(gamePlayers.map(({ team }) => team)) ].length : gamePlayers.length) < defaultPlayersObject.minimum) continue;
+        const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
+        const gameScores = (function() {
+            const gameScores = gamePlayers.map(p => {
+                const { player, scores, shots } = gameObject.scores.find(({ player }) => player._id.toString() === p.player._id.toString());
+                return {
+                    id: player._id.toString(),
+                    score: (handicap ? scores.nett : shots).slice(start, end),
+                    team: p.team
+                };
+            });
+            if (!game.team) return gameScores;
+            return [ ...new Set(gameScores.map(({ team: id }) => id)) ].map(id => {
+                const playerScores = gameScores.filter(score => score.team === id).map(({ score }) => score);
+                const score = [];
+                for (let i = start; i < end; i++) {
+                    score.push((function() {
+                        const holeScores = playerScores.map(playerScore => playerScore[i]).filter(score => score);
+                        if (holeScores.length === 0) return null;
+                        switch (method) {
+                            case 'Best':
+                                return Math.min( ...holeScores );
+                            case 'Combined':
+                                return holeScores.reduce((sum, value) => sum += value, 0);
+                            case 'Worse':
+                                return Math.max( ...holeScores );
+                            default:
+                                return null;
+                        };
+                    })());
+                };
+                return { id, score }
+            });
+        })();
+        game.scores = gameScores.map(({ id, score }) => {
+            const points = (function() {
+                if (name === 'Stroke Play') return score.map(s => s || null);
+                if (name === 'Stableford') {
+                    return score.map((s, i) => {
+                        if (s === null) return null;
+                        const { par } = holes[i + start];
+                        const doubleBogey = 2 + +par;
+                        if (s > doubleBogey) return 0;
+                        return doubleBogey - s;
+                    });
+                };
+                const matchPlay = name === 'Match Play';
+                let skins = 0;
+                return score.map((s, i) => {
+                    const holeScores = gameScores.map(({ score }) => score[i])
+                    const scores = holeScores.filter(score => score);
+                    if (holeScores.length !== scores.length) return null;
+                    const minScore = Math.min( ...scores );
+                    skins++;
+                    if (scores.filter(score => score === minScore).length === 1) {
+                        const skinsToAdd = skins;
+                        skins = 0;
+                        if (s === minScore) return matchPlay ? 1 : skinsToAdd;
+                        if (matchPlay) return -1;
+                    };
+                    return 0;
+                });
+            })();
+            return { id, points };
+        });
+        game.summary = (function() {
+            if (name === 'Match Play') {
+                const { id: idOne, points } = game.scores[0];
+                const idTwo = game.scores[1].id;
+                const nameOne = game.team ? `Team ${idOne.toUpperCase()}` : (players.find(player => player.id == idOne) || { name: {} }).name.knownAs || idOne;
+                const nameTwo = game.team ? `Team ${idTwo.toUpperCase()}` : (players.find(player => player.id == idTwo) || { name: {} }).name.knownAs || idTwo;
+                const lengthOfPoints = points.length;
+                const holesToPlay = points.filter(point => point === null).length;
+                let currentScore = 0;
+                for (let i = 0; i < lengthOfPoints; i++) {
+                    const point = points[i];
+                    const remainingHoles = lengthOfPoints + holesToPlay - i - 1;
+                    currentScore += point;
+                    if (remainingHoles === 0) {
+                        if (currentScore == 0) return 'Game halved';
+                        return `${currentScore > 0 ? nameOne : nameTwo} wins`;
+                    };
+                    if (currentScore > 0 && currentScore > remainingHoles) return `${nameOne} wins (${currentScore} & ${remainingHoles})`;
+                    if (Math.abs(currentScore) > 0 && Math.abs(currentScore) > remainingHoles) return `${nameTwo} wins (${Math.abs(currentScore)} & ${remainingHoles})`;
+                };
+                if (currentScore === 0) return 'All square';
+                return `${currentScore > 0 ? nameOne : nameTwo} ${currentScore > 0 ? currentScore : Math.abs(currentScore)} up`;
+            };
+            const sortedTotals = game.scores.map(({ id, points }) => {
+                const total = points.reduce((sum, value, index) => {
+                    if (game.scores.some(({ points }) => points[index] === null)) return sum;
+                    return sum += value;
+                }, 0);
+                const knownAs = game.team ? `Team ${id.toUpperCase()}` : (players.find(player => player.id == id) || { name: {} }).name.knownAs || id;
+                return { id: knownAs, total };
+            }).sort((a, b) => {
+                if (name === 'Skins' || name === 'Stableford') return b.total - a.total;
+                if (name === 'Stroke Play') return a.total - b.total;
+                return a.total - b.total;
+            });
+            const totals = [ ...new Set(sortedTotals.map(({ total }) => total)) ];
+            const leadTotal = totals[0];
+            const jointLeaders = sortedTotals.filter(({ total }) => total === leadTotal);
+            if (name === 'Stableford' && game.scores.length === 1) {
+                const { id, total } = sortedTotals[0];
+                return `${id} (${total})`;
+            };
+            if (jointLeaders.length === game.scores.length && name !== 'Skins') return 'All square';
+            return totals.map((t, index) => {
+                const equalTotals = sortedTotals.filter(sortedTotal => sortedTotal.total === t).sortAlphabetically('id');
+                const string = equalTotals.filter(equalTotal => equalTotal.total === t).map(({ id, total }, i) => {
+                    if (i !== equalTotals.length - 1) return id;
+                    if (name === 'Skins') return `${id} (${total})`;
+                    if (index === 0) return `${id} lead${equalTotals.length === 1 ? 's' : ''} (${total})`;
+                    return `${id} (${Math.abs(total - leadTotal)} behind)`;
+                }).join(', ');
+                const lastInstance = string.lastIndexOf(', ');
+                if (lastInstance === -1) return string;
+                return `${string.substr(0, lastInstance)} and ${string.substr(lastInstance + 2)}`;
+            }).join('; ');
+        }());
+    };
+    return gameObject;
+};
+
 
 const options = { toJSON: { virtuals: true } };
 
@@ -137,166 +306,13 @@ ScoreSchema.virtual('parClass').get(function () {
 });
 
 RoundSchema.pre('save', async function(next) {
-    const course = await Course.findById(this.course);
-    const { holes } = course.tees.find(({ _id}) => _id == this.tee);
-    for (const score of this.scores) {
-        const handicap = Math.floor(score.handicap || 54);
-        const shotsPerHole = Math.floor(handicap / 18);
-        const holesWithAShot = handicap % 18;
-        // for (const roundType of ROUND_TYPES) {
-        //     const { name, start, end } = roundType;
-        //     if (score.shots.slice(start, end).every(shot => shot !== 0)) {
-        //         score.roundType = name;
-        //         break;
-        //     };
-        // };
-        score.scores = {
-            nett: [],
-            par: { front: 0, back: 0, full: 0 },
-            shots: {
-                front: score.shots.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
-                back: score.shots.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
-                full: score.shots.reduce((sum, value) => sum += value, 0)
-            }
-        };
-        if (!holes) continue;
-        for (const hole of holes) {
-            const { index, par, strokeIndex } = hole;
-            const shot = +score.shots[index - 1];
-            const parScore = shot - par;
-            const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
-            if (index < 10) score.scores.par.front += parScore;
-            if (index > 9) score.scores.par.back += parScore;
-            score.scores.par.full += parScore;
-            score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
-        };
-    };
-    for (const game of this.games) {
-        const gameScores = game.players.map(p => {
-            const { player, scores, shots } = this.scores.find(score => score.player._id.toString() === p.player._id.toString());
-            return {
-                player: player._id.toString(),
-                scores,
-                shots,
-                team: p.team
-            };
-        });
-        const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
-        if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
-        // move to a function in utilities?
-        const { handicap, method, players } = game;
-        if (players.length < defaultPlayersObject.minimum) continue;
-        game.team = gameScores.some(({ team }) => team && team !== 'none');
-        game.scores = [];
-        if (game.team) {
-            const teams = [ ...new Set(gameScores.map(({ team }) => team)) ].map(team => {
-                const playerScores = gameScores.filter(score => score.team === team)
-                    .map(({ scores, shots }) =>  handicap ? scores.nett : shots);
-                const teamScore = [];
-                for (let i = 0; i < 18; i++) {
-                    const holeScores = [];
-                    let holeScore = 0;
-                    for (const playerScore of playerScores) holeScores.push(playerScore[i]);
-                    switch (method) {
-                        case 'Best':
-                            holeScore = Math.min( ...holeScores );
-                            break;
-                        case 'Combined':
-                            holeScore = holeScores.reduce((sum, value) => sum += value, 0);
-                            break;
-                        case 'Worse':
-                            holeScore = Math.max( ...holeScores  );
-                            break;
-                    };
-                    teamScore.push(holeScore);
-                };
-                return { team, teamScore }
-            });
-            for (const team of teams) {
-                const { teamScore, team: id } = team;
-                let points = [];
-                switch (name) {
-                    case 'Match Play':
-                        for (let i = 0; i < 18; i++) {
-                            const scores = teams.map(({ teamScore }) => teamScore[i]);
-                            const minScore = Math.min( ...scores );
-                            let point = 0;
-                            if (scores.filter(score => score === minScore).length === 1) {
-                                if ((teamScore[i]) === minScore) point = 1;
-                                else point = -1;
-                            };
-                            points.push(point);
-                        };
-                        break;
-                    case 'Stroke Play':
-                        points = teamScore;
-                        break;
-                };
-                game.scores.push({
-                    id: id.toUpperCase(),
-                    points,
-                    totals: {
-                        front: points.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
-                        back: points.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
-                        full: points.reduce((sum, value) => sum += value, 0)
-                    }
-                });
-            };
-        } else {
-            for (const score of gameScores) {
-                const { player: id } = score;
-                let points = [];
-                switch (name) {
-                    case 'Match Play':
-                        for (let i = 0; i < 18; i++) {
-                            const scores = gameScores.map(({ scores, shots }) => handicap ? scores.nett[i] : shots[i]);
-                            const minScore = Math.min( ...scores );
-                            let point = 0;
-                            if (scores.filter(score => score === minScore).length === 1) {
-                                if ((handicap ? score.scores.nett[i] : score.shots[i]) === minScore) point = 1;
-                                else point = -1;
-                            };
-                            points.push(point);
-                        };
-                        break;
-                    case 'Skins':
-                        let skins = 0;
-                        for (let i = 0; i < 18; i++) {
-                            const scores = gameScores.map(({ scores, shots }) => handicap ? scores.nett[i] : shots[i]);
-                            const minScore = Math.min( ...scores );
-                            let point = 0;
-                            skins++;
-                            if (scores.filter(score => score === minScore).length === 1) {
-                                if ((handicap ? score.scores.nett[i] : score.shots[i]) === minScore) point = skins;
-                                skins = 0;
-                            };
-                            points.push(point);
-                        };
-                        break;
-                    case 'Stableford':
-                        for (const hole of holes) {
-                            const { index, par } = hole;
-                            let stablefordScore = 0;
-                            if (score.scores.nett[index - 1]) stablefordScore = 2 - score.scores.nett[index - 1] + par;
-                            points.push(stablefordScore < 0 ? 0 : stablefordScore);
-                        };
-                        break;
-                    case 'Stroke Play':
-                        points = handicap ? score.scores.nett : score.shots;
-                        break;
-                };
-                game.scores.push({
-                    id,
-                    points,
-                    totals: {
-                        front: points.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
-                        back: points.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
-                        full: points.reduce((sum, value) => sum += value, 0)
-                    }
-                });
-            };
-        };
-    };
+    const players = await User.find();
+    const { course: courseId, games, scores, tee } = this;
+    const course = await Course.findById(courseId);
+    const { holes } = course.tees.find(({ _id}) => _id == tee);
+    const gamesObject = calculateGames({ games, scores }, holes, players);
+    this.games = gamesObject.games;
+    this.scores = gamesObject.scores;
     this.lastModified.date = Date.now();
     next();
 });

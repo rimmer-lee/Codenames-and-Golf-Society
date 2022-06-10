@@ -1,5 +1,5 @@
 // shared with models/round.js
-function calculateGames(gameObject = {}, holes = []) {
+function calculateGames(gameObject = {}, holes = [], players = []) {
     for (const score of gameObject.scores) {
         const handicap = Math.floor(score.handicap || 54);
         const shotsPerHole = Math.floor(handicap / 18);
@@ -81,10 +81,9 @@ function calculateGames(gameObject = {}, holes = []) {
                     return score.map((s, i) => {
                         if (s === null) return null;
                         const { par } = holes[i + start];
-                        return ((function() {
-                            if (!s || (s > (2 + +par))) return 0;
-                            return 2 - s + +par;
-                        })());
+                        const doubleBogey = 2 + +par;
+                        if (s > doubleBogey) return 0;
+                        return doubleBogey - s;
                     });
                 };
                 const matchPlay = name === 'Match Play';
@@ -177,7 +176,7 @@ function getPlayerKeys(object = getRound()) {
 function getTee() {
     const { course } = getRound();
     const teeObject = { name: '', holes: [] };
-    if (!course) return teeObject;
+    if (!course || course.id === 'new') return teeObject;
     const { tee, tees } = course;
     const lowerTee = tee.toLowerCase();
     const chosenTee = tees[lowerTee];
@@ -305,7 +304,7 @@ function updateGames() {
                 const shots = Object.keys(hole).map(h => +hole[h]);
                 return { handicap, player: { _id }, shots };
             })
-    }, holes);
+    }, holes, players);
     gameKeys.forEach((gameKey, index) => {
         const { handicap, method, name, roundType, summary } = gamesObject.games[index];
         if (!summary) return;
