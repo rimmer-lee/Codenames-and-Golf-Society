@@ -646,27 +646,7 @@ const rounds = [
                 shots: [ 6, 4, 4, 4, 5, 6, 4, 6, 6, 3, 7, 6, 5, 5, 6, 6, 4, 4 ]
             }
         ],
-        games: [
-            {
-                handicap: false,
-                method: 'Combined',
-                name: 'Match Play',
-                players: [
-                    { player: 'Thomas Rimmer', team: 'a' },
-                    { player: 'Joseph Burrows', team: 'a' },
-                    { player: 'Martin Nash', team: 'b' },
-                    { player: 'Oliver Nash', team: 'b' }
-                ]
-            },
-            {
-                handicap: false,
-                name: 'Skins',
-                players: [
-                    { player: 'Thomas Rimmer' },
-                    { player: 'Joseph Burrows' }
-                ]
-            }
-        ]
+        games: []
     }
 ];
 
