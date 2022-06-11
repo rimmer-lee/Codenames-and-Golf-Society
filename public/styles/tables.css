@@ -93,3 +93,14 @@ table.summary td {
 table#courses > tbody > tr:hover {
     cursor: pointer;
 }
+
+/* table#round > tbody > tr > td::before {
+    content: '';
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    -moz-border-radius: 7.5px;
+    -webkit-border-radius: 7.5px;
+    border-radius: 7.5px;
+    background-color: #69b6d5;
+} */
