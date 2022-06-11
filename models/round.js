@@ -10,6 +10,21 @@ const formatDate = require('../utilities/formatDate');
 // const sort = require('../utilities/sort');
 
 // shared with public/scripts/rounds/update.js
+Array.prototype.sortAlphabetically = function(property = '') {
+    function getProperty(property) {
+        let object = this;
+        for (const p of property.split('.')) object = object[p];
+        return object;
+    };
+    return this.sort((a, b) => {
+        const upperA = getProperty.call(a, property).toUpperCase();
+        const upperB = getProperty.call(b, property).toUpperCase();
+        if (upperA < upperB) return -1;
+        if (upperA > upperB) return 1;
+        return 0;
+    })
+};
+
 function calculateGames(gameObject = {}, holes = [], players = []) {
     for (const score of gameObject.scores) {
         const handicap = Math.floor(score.handicap || 54);
