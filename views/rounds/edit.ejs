@@ -253,6 +253,9 @@
                                 <% for (const game of round.games) { %>
                                 <div class="col-12">
                                     <%= `${game.handicap ? 'Nett ' : ''}${game.method ? `${game.method} ` : ''}${game.name}` %>
+
+                                    <!-- const innerText = `Game ${gameKey.replace(/'/g, '')}: ${handicap ? 'Nett ' : ''}${method ? (method === 'Combined ' ? `${method} Score ` : `${method} Best `) : ''}${name}${roundType ? (roundType === 'full' ? ' for 18' : ` for ${roundType.capitalize()} 9`) : ''} - ${summary}`; -->
+
                                 </div>
                                 <% }; %>
                             </div>
@@ -498,88 +501,8 @@
                                         <div class="col-12">
                                             <h4 class="text-decoration-underline"><%= game.handicap ? `Nett ` : '' %><%= game.method ? `${game.method} ` : '' %><%= game.name %></h4>
                                         </div>
-                                        <!-- <div class="col-12">
-                                            <%= game.summary %>
-                                        </div> -->
                                         <div class="col-12">
-                                            <div class="table-responsive">
-                                                <table id="team-summary" class="table table-bordered table-striped mb-0 summary">
-                                                    <thead class="table-dark">
-                                                        <tr class="d-none d-lg-table-row">
-                                                            <th scope="col" rowspan="2">
-                                                                <div class="text-center">
-                                                                    <%= game.team ? 'Team' : 'Player' %>
-                                                                </div>
-                                                            </th>
-                                                            <th scope="col" colspan="3">
-                                                                <div class="text-center">
-                                                                    Score
-                                                                </div>
-                                                            </th>
-                                                        </tr>
-                                                        <tr>
-                                                            <th class="d-table-cell d-lg-none" scope="col">
-                                                                <div class="text-center">
-                                                                    <%= game.team ? 'Team' : 'Player' %>
-                                                                </div>
-                                                            </th>
-                                                            <th class="d-none d-lg-table-cell" scope="col">
-                                                                <div class="text-center">
-                                                                    Front
-                                                                </div>
-                                                            </th>
-                                                            <th class="d-none d-lg-table-cell" scope="col">
-                                                                <div class="text-center">
-                                                                    Back
-                                                                </div>
-                                                            </th>
-                                                            <th scope="col">
-                                                                <div class="d-none d-lg-block text-center">
-                                                                    Full
-                                                                </div>
-                                                                <div class="d-block d-lg-none text-center">
-                                                                    Score
-                                                                </div>
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <% for (const score of game.scores) { %>
-                                                        <tr>
-                                                            <td class="align-middle">
-                                                                <% if (game.team) { %>
-                                                                <div class="text-center">
-                                                                    <%= score.id %>
-                                                                </div>
-                                                                <% } else { %>
-                                                                <div class="d-none d-md-block text-center">
-                                                                    <%= score.name.knownAs %>
-                                                                </div>
-                                                                <div class="d-block d-md-none text-center">
-                                                                    <%= score.name.initials.short %>
-                                                                </div>
-                                                                <% }; %>
-                                                            </td>
-                                                            <td class="align-middle d-none d-lg-table-cell">
-                                                                <div class="text-center">
-                                                                    <%= score.totals.front %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle d-none d-lg-table-cell">
-                                                                <div class="text-center">
-                                                                    <%= score.totals.back %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle">
-                                                                <div class="text-center">
-                                                                    <%= score.totals.full %>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <% }; %>
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <%= game.summary %>
                                         </div>
                                     </div>
                                 </div>
