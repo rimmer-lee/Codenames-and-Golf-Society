@@ -1,4 +1,5 @@
 const dateElement = document.getElementById('date');
+const ruleSelector = 'select[id^="demerit"][id*="rule"]';
 
 // dateElement.addEventListener('change', function () {
 //     for (const dateElement of document.querySelectorAll('[data-bs-date]')) {
@@ -7,13 +8,13 @@ const dateElement = document.getElementById('date');
 // });
 
 dateElement.addEventListener('focus', function() {
-    if (document.querySelector('select[id^="demerit"][id*="rule"]').length === 0) return;
+    if (!document.querySelector(ruleSelector)) return;
     this.parentElement.querySelector('.feedback').classList.remove('d-none');
 });
 
 dateElement.addEventListener('blur', function() {
     const { parentElement, value } = this;
-    const ruleSelects = Array.from(document.querySelectorAll('select[id^="demerit-"][id*="rule"]'));
+    const ruleSelects = Array.from(document.querySelectorAll(ruleSelector));
     const { rules: currentRules } = rules.find(({ date }) => {
         const { end, start } = date;
         return value <= end && value >= start;
