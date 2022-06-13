@@ -115,12 +115,11 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 const matchPlay = name === 'Match Play';
                 let skins = 0;
                 return score.map((s, i) => {
-                    const holeScores = gameScores.map(({ score }) => score[i])
-                    const scores = holeScores.filter(score => score);
-                    if (holeScores.length !== scores.length) return null;
-                    const minScore = Math.min( ...scores );
+                    const holeScores = gameScores.map(({ score }) => score[i]);
+                    if (holeScores.some(score => score === null)) return null;
+                    const minScore = Math.min( ...holeScores );
                     skins++;
-                    if (scores.filter(score => score === minScore).length === 1) {
+                    if (holeScores.filter(score => score === minScore).length === 1) {
                         const skinsToAdd = skins;
                         skins = 0;
                         if (s === minScore) return matchPlay ? 1 : skinsToAdd;
@@ -138,11 +137,10 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 const nameOne = game.team ? `Team ${idOne.toUpperCase()}` : (players.find(player => player.id == idOne) || { name: {} }).name.knownAs || idOne;
                 const nameTwo = game.team ? `Team ${idTwo.toUpperCase()}` : (players.find(player => player.id == idTwo) || { name: {} }).name.knownAs || idTwo;
                 const lengthOfPoints = points.length;
-                const holesToPlay = points.filter(point => point === null).length;
                 let currentScore = 0;
                 for (let i = 0; i < lengthOfPoints; i++) {
                     const point = points[i];
-                    const remainingHoles = lengthOfPoints + holesToPlay - i - 1;
+                    const remainingHoles = lengthOfPoints - i - 1;
                     currentScore += point;
                     if (remainingHoles === 0) {
                         if (currentScore == 0) return 'Game halved';
