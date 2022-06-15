@@ -83,24 +83,45 @@ table img {
 
 table#course td *,
 table#course td,
-table#round td *,
+/* table#round td *, */
 table#round td,
 table.summary td *,
 table.summary td {
     min-width: 60px;
 }
 
+table#round td > div > div {
+    min-width: 24px;
+}
+
 table#courses > tbody > tr:hover {
     cursor: pointer;
 }
 
-/* table#round > tbody > tr > td::before {
+.birdie,
+.eagle,
+.eagle::after {
+    border-radius: 50%;
+}
+
+.birdie,
+.eagle,
+.eagle::after,
+.bogey,
+.double-bogey,
+.double-bogey::after {
+    border: 1px solid black;
+}
+
+.eagle::after,
+.double-bogey::after {
+    --size: 90%;
+    --indent: calc((100% - var(--size)) / 2);
     content: '';
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    -moz-border-radius: 7.5px;
-    -webkit-border-radius: 7.5px;
-    border-radius: 7.5px;
-    background-color: #69b6d5;
-} */
+    width: var(--size);
+    height: var(--size);
+    position:absolute;
+    z-index: -1;
+    top: var(--indent);
+    left: var(--indent);
+}

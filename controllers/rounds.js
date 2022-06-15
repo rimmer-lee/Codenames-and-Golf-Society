@@ -260,6 +260,20 @@ async function view (req, res) {
         };
     };
 
+    for (const score of scores) {
+        score.class = score.shots.map((shot, i) => {
+            if (!shot) return '';
+            const { par } = tee.holes.find(({ index }) => index === (i + 1)) || { par: undefined };
+            if (!par) return '';
+            const parScore = shot - par;
+            if (parScore < -1) return 'eagle';
+            if (parScore === -1) return 'birdie';
+            if (parScore === 1) return 'bogey';
+            if (parScore > 1) return 'double-bogey';
+            return '';
+        });
+    };
+
     res.render('rounds/edit', { courses, date, round, tee, tees, tableClass, players, scores });
 };
 
