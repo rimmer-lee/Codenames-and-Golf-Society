@@ -115,7 +115,7 @@ table#courses > tbody > tr:hover {
 
 .eagle::after,
 .double-bogey::after {
-    --size: 150%;
+    --size: 140%;
     --indent: calc((100% - var(--size)) / 2);
     content: '';
     width: var(--size);
