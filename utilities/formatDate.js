@@ -18,18 +18,19 @@ function fullDate(date = new Date()) {
     const day = d.toLocaleDateString('en-GB', { day: 'numeric' });
     const month = d.toLocaleDateString('en-GB', { month: 'long' });
     const year = d.toLocaleDateString('en-GB', { year: '2-digit' });
-    let ordinal = 'th';
-    switch (day % 10) {
-        case 1:
-            ordinal = 'st';
-            break;
-        case 2:
-            ordinal = 'nd';
-            break;
-        case 3:
-            ordinal = 'rd';
-            break;
-    };
+    const ordinal = (function(day){
+        if (day === '11' || day === '12' || day === '13') return 'th';
+        switch (day % 10) {
+            case 1:
+                return 'st';
+            case 2:
+                return 'nd';
+            case 3:
+                return 'rd';
+            default:
+                return 'th'
+        };
+    })(day);
     return `${weekday}, ${day}${ordinal} ${month} '${year}`;
 };
 
