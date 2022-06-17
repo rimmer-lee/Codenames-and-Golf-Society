@@ -76,8 +76,6 @@ table img {
     opacity: 80%;
 }
 
-table#course td *,
-table#course td,
 table.summary td *,
 table.summary td {
     min-width: 60px;
@@ -138,10 +136,12 @@ table#courses > tbody > tr:hover {
     outline: none;
 }
 
+table#course tr > *:not(:first-child),
 table#round tr > *:nth-child(-n + 4):nth-child(n + 2) {
     width: 90px;
 }
 
+table#course tr > *:first-child,
 table#round tr > *:first-child {
     width: 60px;
 }

@@ -175,7 +175,7 @@ async function view (req, res) {
                 return {
                     colour: {
                         name: colour,
-                        colour: ((TEE_COLOURS.find(tee => colour === tee.colour) || {}).class || {}).table || '',
+                        class: ((TEE_COLOURS.find(tee => colour === tee.colour) || {}).class || {}).table || '',
                     },
                     distance,
                     holes,
