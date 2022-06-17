@@ -24,7 +24,7 @@
                         </label>
                         <select id="<%= `${tee.id}|colour` %>" class="col form-select text-capitalize" name="<%= `[${tee.id}][colour]` %>">
                             <% for (const teeColour of teeColours) { %>
-                            <option value="<%= teeColour.colour %>"<%= tee.colour.name === teeColour.colour ? " selected": "" %>><%= teeColour.colour %></option>
+                            <option value="<%= teeColour.class.table %>"<%= tee.colour.name === teeColour.colour ? " selected": "" %>><%= teeColour.colour %></option>
                             <% }; %>
                         </select>
                     </div>
