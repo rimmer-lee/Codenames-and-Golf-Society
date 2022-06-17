@@ -527,10 +527,10 @@
 </div>
 <script>
     const ACTIONS = JSON.parse('<%- JSON.stringify(actions) %>');
-    const GAMES = JSON.parse('<%- JSON.stringify(games) %>');
+    const GAMES = JSON.parse('<%- JSON.stringify(GAMES) %>');
     const teeColours = JSON.parse('<%- JSON.stringify(teeColours) %>');
     const titles = JSON.parse('<%- JSON.stringify(titles) %>');
-    const ROUND_TYPES = JSON.parse('<%- JSON.stringify(roundTypes) %>');
+    const ROUND_TYPES = JSON.parse('<%- JSON.stringify(ROUND_TYPES) %>');
     const rules = JSON.parse('<%- JSON.stringify(rules) %>').map(rule => {
         rule.rules.map(rule => {
             rule.description = rule.description.map(description => decodeURI(description).replace(/`/g, "'"));

@@ -1,8 +1,8 @@
 <% layout('layouts/boilerplate') %>
-<form class="mb-3" method="POST" action="/rounds/<%= round.id %>?_method=PUT" novalidate>
+<form class="mb-3" method="POST" action="/rounds/<%= id %>?_method=PUT" novalidate>
     <div class="d-flex my-3 pb-2 border-bottom border-1">
         <div class="flex-grow-1">
-            <h1 class="d-inline me-2"><%= round.course.name %> on <span class="d-none d-lg-inline"><%= round.formattedDate.full %></span><span class="d-lg-none"><%= round.formattedDate.friendly %></span></h1>
+            <h1 class="d-inline me-2"><%= course.name %> on <span class="d-none d-lg-inline"><%= date.full %></span><span class="d-lg-none"><%= date.friendly %></span></h1>
         </div>
         <!-- <div>
             <div class="d-flex justify-content-end">
@@ -27,7 +27,7 @@
                     <div id="round-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="round-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <div class="form-floating">
-                                <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= round.formattedDate.datePicker %>" max="<%= date %>" required disabled>
+                                <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= date.datePicker %>" max="<%= currentDate %>" required disabled>
                                 <label for="date">Date</label>
                                 <div class="invalid-feedback">
                                     <div class="d-flex justify-content-end">
@@ -51,8 +51,8 @@
                                     <div class="form-floating">
                                         <select id="course-select" class="form-select text-capitalize text-wrap" aria-label="course" name="[course][id]" required disabled>
                                             <option disabled>Select Course</option>
-                                            <% for (const course of courses) { %>
-                                            <option value="<%= course.id %>"<%= course.id === round.course.id ? ' selected' : '' %>><%= course.name %></option>
+                                            <% for (const c of courses) { %>
+                                            <option value="<%= c.id %>"<%= course.id === course.id ? ' selected' : '' %>><%= c.name %></option>
                                             <% }; %>
                                         </select>
                                         <label for="course-select">Course</label>
@@ -214,10 +214,10 @@
                                                     <select id="player-<%= score.player.id %>|id" class="form-select text-capitalize" name="[player-<%= score.player.id %>][id]" disabled>
                                                         <% for (const player of players) { %>
                                                         <% if (scores.some(score => score.player.id === player.id) && player.id !== score.player.id) continue; %>
-                                                        <option <%= (player.id === score.player.id) ? 'selected ' : '' %>value="<%= player.id %>"><%= player.name.knownAs %></option>
+                                                        <option value="<%= player.id %>"<%= (player.id === score.player.id) ? " selected" : "" %>><%= player.name.knownAs %></option>
                                                         <% }; %>
                                                     </select>
-                                                    <label for="player-<%= score.player.id %>|id">Select Player</label>
+                                                    <label for="player-<%= score.player.id %>|id"><%= score.playingGroup.player %></label>
                                                 </div>
                                             </div>
                                             <div class="col-4 col-md-2">
@@ -228,6 +228,7 @@
                                             </div>
                                         </div>
 
+                                        <!-- need to make disabled first or implement functionality  -->
                                         <!-- <div class="d-flex remove-player ps-2">
                                             <div class="btn btn-danger d-flex align-items-center" data-bs-placement="left" title="Remove Player">
                                                 <div class="btn-close btn-close-white" aria-label="remove"></div>
@@ -250,14 +251,112 @@
                     <div id="game-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="game-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <div class="row gy-3">
-                                <% for (const game of round.games) { %>
+                                <% games.forEach((game, index) => { %>
                                 <div class="col-12">
-                                    <%= `${game.handicap ? 'Nett ' : ''}${game.method ? `${game.method} ` : ''}${game.name}` %>
+                                    <div class="accordion">
+                                        <div class="accordion-item">
+                                            <h2 id="game-<%= index + 1 %>|heading" class="accordion-header">
+                                                <button class="accordion-button" aria-controls="game-<%= index + 1 %>" aria-expanded="true" data-bs-target="#game-<%= index + 1 %>" data-bs-toggle="collapse" title="Game <%= index + 1 %>" type="button">
+                                                    Game <%= index + 1 %>
+                                                </button>
+                                            </h2>
+                                            <div id="game-<%= index + 1 %>" class="accordion-collapse collapse show" aria-labelledby="game-<%= index + 1 %>|heading">
+                                                <div class="accordion-body">
+                                                    <div class="row gx-2 gy-3">
+                                                        <div class="col-12">
+                                                            <div class="form-floating">
+                                                                <select class="form-select text-capitalize text-wrap" id="game-<%= index + 1 %>|select" name="[game]['<%= index + 1 %>'][name]" aria-label="game select" disabled>
+                                                                    <option disabled="true">Select Game</option>
+                                                                    <% for (const GAME of GAMES) { %>
+                                                                    <option value="<%= GAME.name %>"<%= GAME.name === game.name ? " selected" : "" %>><%= GAME.name %></option>
+                                                                    <% }; %>
+                                                                </select>
+                                                                <label for="game-1|select">Game</label>
+                                                                <div class="invalid-feedback">
+                                                                    <div class="d-flex justify-content-end">Please select a game.</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 px-4 d-none" visibility="hidden">
+                                                            <p class="mb-0 text-overflow text-muted" id="game-<%= index + 1 %>|description" readonly="true" rows="1"></p>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="game-element fixed-game-element-height d-flex justify-content-evenly align-items-center">
+                                                                <% for (const ROUND_TYPE of ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0).map(({ name }) => name)) { %>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" id="game-<%= index + 1 %>|round|<%= ROUND_TYPE %>" name="[game]['<%= index + 1 %>'][round]" type="radio" value="<%= ROUND_TYPE %>"<%= ROUND_TYPE === game.roundType ? " checked" : "" %> disabled>
+                                                                    <label class="form-check-label" for="game-<%= index + 1 %>|round|<%= ROUND_TYPE %>"><%= ROUND_TYPE.split(' ').map(s => s[0].toUpperCase() + s.substring(1)).join(' ') %></label>
+                                                                </div>
+                                                                <% }; %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="game-element fixed-game-element-height d-flex align-items-center justify-content-center">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" id="game-<%= index + 1 %>|handicap" name="[game]['<%= index + 1 %>'][handicap]" type="checkbox"<%= game.handicap ? " checked" : "" %> disabled>
+                                                                    <label class="form-check-label" for="game-<%= index + 1 %>|handicap">Handicap Adjusted</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="game-element">
+                                                                <div class="row g-3 p-3" id="game-<%= index + 1 %>|players">
+                                                                    <% for (const player of game.players) { %>
+                                                                    <div class="col-12">
+                                                                        <div class="border border-1 rounded p-2">
+                                                                            <div class="row g-2">
+                                                                                <div class="col">
+                                                                                    <div class="d-flex justify-content-center align-items-center">
+                                                                                        <div class="form-check form-switch">
+                                                                                            <input class="form-check-input" id="game-<%= index + 1 %>|<%= player.playingGroup.player %>|participation" name="[game]['<%= index + 1 %>'][<%= player.playingGroup.player %>][participation]" type="checkbox" value="game-<%= index + 1 %>|<%= player.playingGroup.player %>|participation" checked disabled>
+                                                                                            <label class="form-check-label fw-bold" for="game-<%= index + 1 %>|<%= player.playingGroup.player %>|participation"><%= player.player.name.knownAs %></label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <% if (GAMES.find(({ name }) => name === game.name).players.for.some(f => f === 'team')) { %>
+                                                                                <!-- <div class="col">
+                                                                                    <div class="d-flex justify-content-evenly align-items-center">
+                                                                                        <div class="form-check form-check-inline">
+                                                                                            <input class="form-check-input" id="game-<%= index + 1 %>|marker|team-a" name="[game]['<%= index + 1 %>'][marker][team]" type="radio" value="a" checked="true">
+                                                                                            <label class="form-check-label" for="game-<%= index + 1 %>|marker|team-a">A</label>
+                                                                                        </div>
+                                                                                        <div class="form-check form-check-inline">
+                                                                                            <input class="form-check-input" id="game-<%= index + 1 %>|marker|team-b" name="[game]['<%= index + 1 %>'][marker][team]" type="radio" value="b">
+                                                                                            <label class="form-check-label" for="game-<%= index + 1 %>|marker|team-b">B</label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div> -->
+                                                                                <% }; %>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% }; %>
 
-                                    <!-- const innerText = `Game ${gameKey.replace(/'/g, '')}: ${handicap ? 'Nett ' : ''}${method ? (method === 'Combined ' ? `${method} Score ` : `${method} Best `) : ''}${name}${roundType ? (roundType === 'full' ? ' for 18' : ` for ${roundType.capitalize()} 9`) : ''} - ${summary}`; -->
-
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <% if (game.method) { %>
+                                                        <div class="col-12">
+                                                            <div class="form-floating">
+                                                                <select class="form-select text-capitalize text-wrap" id="game-<%= index + 1 %>|method" name="[game]['<%= index + 1 %>'][method]" aria-label="game method" disabled>
+                                                                    <% for (const method of (games.find(({ name }) => name === game.name) || { options: [] }).options.find(({ type }) => type === 'method') | []) { %>
+                                                                    <option value="<%= method %>"<%= method === game.method ? " selected" : "" %>><%= method %></option>
+                                                                    <% }; %>
+                                                                </select>
+                                                                <label for="game-<%= index + 1 %>|method">Method</label>
+                                                            </div>
+                                                        </div>
+                                                        <% }; %>
+                                                        <!-- <div class="col-12">
+                                                            <input class="btn btn-danger w-100" type="button" value="Remove Game" disabled>
+                                                        </div> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <% }; %>
+                                <% }); %>
                             </div>
                         </div>
                     </div>
@@ -270,7 +369,7 @@
                     </h2>
                     <div id="scorecard-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="scorecard-accordion-item-heading">
                         <div class="accordion-body p-3">
-                            <div class="table-responsive">
+                            <!-- <div class="table-responsive"> -->
                                 <table id="round" class="table table-bordered table-striped">
                                     <thead class="table-dark">
                                         <tr>
@@ -379,7 +478,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
+                            <!-- </div> -->
                         </div>
                     </div>
                 </div>
@@ -391,111 +490,1045 @@
                     </h2>
                     <div id="summary-accordion-item-body-parent" class="accordion-collapse collapse show" aria-labelledby="summary-accordion-item-heading">
                         <div class="accordion-body p-3">
-                            <div class="row gy-4">
+
+                            <div class="row gy-3">
+                                <div class="col-12">
+                                    <div class="border border-1 border-primary rounded p-3">
+                                        <div id="summary-score" class="row row-cols-3 row-cols-md-auto gy-4 justify-content-center">
+                                            <% for (const score of scores) { %>
+                                            <h4 class="col mb-0 px-0">
+                                                <div class="row row-cols-1">
+                                                    <div class="col text-center">
+                                                        <div class="d-none d-md-block"><%= score.player.name.knownAs %></div>
+                                                        <div class="d-block d-md-none"><%= score.player.name.initials.short %></div>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <span id="<%= score.playingGroup.player %>|score"><%= score.scores.shots.full %></span>
+                                                        <span> (</span>
+                                                        <span class="f-level" id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span>
+                                                        <span>)</span>
+                                                    </div>
+                                                </div>
+                                            </h4>
+                                            <% }; %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% if (games.length > 0) { %>
+                                <div class="col-12">
+                                <% } else { %>
+                                <div class="col-12 d-none" visibility="hidden">
+                                <% }; %>
+                                    <div class="border border-1 border-primary rounded p-3">
+                                        <div id="games-summary" class="row row-cols-auto gy-2 justify-content-center">
+                                            <% games.forEach((game, index) => { %>
+                                            <h5 class="col mb-0"><%= `Game ${index + 1} - ${game.summary}` %></h5>
+                                            <% }); %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- <div class="col-12">
+                                    <div class="border border-1 border-primary rounded p-3">
+                                        <div class="row gy-2">
+
+                                            <div id="hole-1" class="col-12">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 1</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-1|long-name">White</div><div class="d-block d-md-none text-center" id="white-1|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-1|distance"></label><input class="form-control text-center" id="white-1|distance" type="number" name="[course][tees][white][1][distance]" min="1" value="499"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-1|par"></label><input class="form-control text-center" id="white-1|par" type="number" name="[course][tees][white][1][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-1|strokeIndex"></label><input class="form-control text-center" id="white-1|strokeIndex" type="number" name="[course][tees][white][1][strokeIndex]" min="1" max="18" value="11"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-1|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-1|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-1|distance"></label><input class="form-control text-center" id="yellow-1|distance" type="number" name="[course][tees][yellow][1][distance]" min="1" value="497"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-1|par"></label><input class="form-control text-center" id="yellow-1|par" type="number" name="[course][tees][yellow][1][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-1|strokeIndex"></label><input class="form-control text-center" id="yellow-1|strokeIndex" type="number" name="[course][tees][yellow][1][strokeIndex]" min="1" max="18" value="11"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-1|long-name">Red</div><div class="d-block d-md-none text-center" id="red-1|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-1|distance"></label><input class="form-control text-center" id="red-1|distance" type="number" name="[course][tees][red][1][distance]" min="1" value="483"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-1|par"></label><input class="form-control text-center" id="red-1|par" type="number" name="[course][tees][red][1][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-1|strokeIndex"></label><input class="form-control text-center" id="red-1|strokeIndex" type="number" name="[course][tees][red][1][strokeIndex]" min="1" max="18" value="10"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-1" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-1"></label><input class="form-control text-center" id="marker|hole-1" type="number" min="1" name="[marker][hole][1]" tabindex="1"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|1">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-2" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 2</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-2|long-name">White</div><div class="d-block d-md-none text-center" id="white-2|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-2|distance"></label><input class="form-control text-center" id="white-2|distance" type="number" name="[course][tees][white][2][distance]" min="1" value="167"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-2|par"></label><input class="form-control text-center" id="white-2|par" type="number" name="[course][tees][white][2][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-2|strokeIndex"></label><input class="form-control text-center" id="white-2|strokeIndex" type="number" name="[course][tees][white][2][strokeIndex]" min="1" max="18" value="13"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-2|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-2|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-2|distance"></label><input class="form-control text-center" id="yellow-2|distance" type="number" name="[course][tees][yellow][2][distance]" min="1" value="164"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-2|par"></label><input class="form-control text-center" id="yellow-2|par" type="number" name="[course][tees][yellow][2][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-2|strokeIndex"></label><input class="form-control text-center" id="yellow-2|strokeIndex" type="number" name="[course][tees][yellow][2][strokeIndex]" min="1" max="18" value="13"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-2|long-name">Red</div><div class="d-block d-md-none text-center" id="red-2|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-2|distance"></label><input class="form-control text-center" id="red-2|distance" type="number" name="[course][tees][red][2][distance]" min="1" value="151"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-2|par"></label><input class="form-control text-center" id="red-2|par" type="number" name="[course][tees][red][2][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-2|strokeIndex"></label><input class="form-control text-center" id="red-2|strokeIndex" type="number" name="[course][tees][red][2][strokeIndex]" min="1" max="18" value="15"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-2" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-2"></label><input class="form-control text-center" id="marker|hole-2" type="number" min="1" name="[marker][hole][2]" tabindex="2"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|2">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-3" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 3</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-3|long-name">White</div><div class="d-block d-md-none text-center" id="white-3|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|distance"></label><input class="form-control text-center" id="white-3|distance" type="number" name="[course][tees][white][3][distance]" min="1" value="427"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|par"></label><input class="form-control text-center" id="white-3|par" type="number" name="[course][tees][white][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|strokeIndex"></label><input class="form-control text-center" id="white-3|strokeIndex" type="number" name="[course][tees][white][3][strokeIndex]" min="1" max="18" value="4"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-3|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-3|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|distance"></label><input class="form-control text-center" id="yellow-3|distance" type="number" name="[course][tees][yellow][3][distance]" min="1" value="417"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|par"></label><input class="form-control text-center" id="yellow-3|par" type="number" name="[course][tees][yellow][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|strokeIndex"></label><input class="form-control text-center" id="yellow-3|strokeIndex" type="number" name="[course][tees][yellow][3][strokeIndex]" min="1" max="18" value="4"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-3|long-name">Red</div><div class="d-block d-md-none text-center" id="red-3|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|distance"></label><input class="form-control text-center" id="red-3|distance" type="number" name="[course][tees][red][3][distance]" min="1" value="340"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|par"></label><input class="form-control text-center" id="red-3|par" type="number" name="[course][tees][red][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|strokeIndex"></label><input class="form-control text-center" id="red-3|strokeIndex" type="number" name="[course][tees][red][3][strokeIndex]" min="1" max="18" value="6"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-3" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-3"></label><input class="form-control text-center" id="marker|hole-3" type="number" min="1" name="[marker][hole][3]" tabindex="3"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|3">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-4" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 4</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-4|long-name">White</div><div class="d-block d-md-none text-center" id="white-4|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-4|distance"></label><input class="form-control text-center" id="white-4|distance" type="number" name="[course][tees][white][4][distance]" min="1" value="320"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-4|par"></label><input class="form-control text-center" id="white-4|par" type="number" name="[course][tees][white][4][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-4|strokeIndex"></label><input class="form-control text-center" id="white-4|strokeIndex" type="number" name="[course][tees][white][4][strokeIndex]" min="1" max="18" value="15"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-4|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-4|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-4|distance"></label><input class="form-control text-center" id="yellow-4|distance" type="number" name="[course][tees][yellow][4][distance]" min="1" value="309"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-4|par"></label><input class="form-control text-center" id="yellow-4|par" type="number" name="[course][tees][yellow][4][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-4|strokeIndex"></label><input class="form-control text-center" id="yellow-4|strokeIndex" type="number" name="[course][tees][yellow][4][strokeIndex]" min="1" max="18" value="15"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-4|long-name">Red</div><div class="d-block d-md-none text-center" id="red-4|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-4|distance"></label><input class="form-control text-center" id="red-4|distance" type="number" name="[course][tees][red][4][distance]" min="1" value="265"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-4|par"></label><input class="form-control text-center" id="red-4|par" type="number" name="[course][tees][red][4][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-4|strokeIndex"></label><input class="form-control text-center" id="red-4|strokeIndex" type="number" name="[course][tees][red][4][strokeIndex]" min="1" max="18" value="12"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-4" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-4"></label><input class="form-control text-center" id="marker|hole-4" type="number" min="1" name="[marker][hole][4]" tabindex="4"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|4">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-5" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 5</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-5|long-name">White</div><div class="d-block d-md-none text-center" id="white-5|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-5|distance"></label><input class="form-control text-center" id="white-5|distance" type="number" name="[course][tees][white][5][distance]" min="1" value="377"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-5|par"></label><input class="form-control text-center" id="white-5|par" type="number" name="[course][tees][white][5][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-5|strokeIndex"></label><input class="form-control text-center" id="white-5|strokeIndex" type="number" name="[course][tees][white][5][strokeIndex]" min="1" max="18" value="6"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-5|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-5|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-5|distance"></label><input class="form-control text-center" id="yellow-5|distance" type="number" name="[course][tees][yellow][5][distance]" min="1" value="373"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-5|par"></label><input class="form-control text-center" id="yellow-5|par" type="number" name="[course][tees][yellow][5][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-5|strokeIndex"></label><input class="form-control text-center" id="yellow-5|strokeIndex" type="number" name="[course][tees][yellow][5][strokeIndex]" min="1" max="18" value="6"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-5|long-name">Red</div><div class="d-block d-md-none text-center" id="red-5|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-5|distance"></label><input class="form-control text-center" id="red-5|distance" type="number" name="[course][tees][red][5][distance]" min="1" value="361"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-5|par"></label><input class="form-control text-center" id="red-5|par" type="number" name="[course][tees][red][5][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-5|strokeIndex"></label><input class="form-control text-center" id="red-5|strokeIndex" type="number" name="[course][tees][red][5][strokeIndex]" min="1" max="18" value="2"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-5" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-5"></label><input class="form-control text-center" id="marker|hole-5" type="number" min="1" name="[marker][hole][5]" tabindex="5"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|5">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-6" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 6</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-6|long-name">White</div><div class="d-block d-md-none text-center" id="white-6|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-6|distance"></label><input class="form-control text-center" id="white-6|distance" type="number" name="[course][tees][white][6][distance]" min="1" value="402"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-6|par"></label><input class="form-control text-center" id="white-6|par" type="number" name="[course][tees][white][6][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-6|strokeIndex"></label><input class="form-control text-center" id="white-6|strokeIndex" type="number" name="[course][tees][white][6][strokeIndex]" min="1" max="18" value="2"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-6|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-6|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-6|distance"></label><input class="form-control text-center" id="yellow-6|distance" type="number" name="[course][tees][yellow][6][distance]" min="1" value="399"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-6|par"></label><input class="form-control text-center" id="yellow-6|par" type="number" name="[course][tees][yellow][6][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-6|strokeIndex"></label><input class="form-control text-center" id="yellow-6|strokeIndex" type="number" name="[course][tees][yellow][6][strokeIndex]" min="1" max="18" value="2"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-6|long-name">Red</div><div class="d-block d-md-none text-center" id="red-6|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-6|distance"></label><input class="form-control text-center" id="red-6|distance" type="number" name="[course][tees][red][6][distance]" min="1" value="340"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-6|par"></label><input class="form-control text-center" id="red-6|par" type="number" name="[course][tees][red][6][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-6|strokeIndex"></label><input class="form-control text-center" id="red-6|strokeIndex" type="number" name="[course][tees][red][6][strokeIndex]" min="1" max="18" value="4"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-6" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-6"></label><input class="form-control text-center" id="marker|hole-6" type="number" min="1" name="[marker][hole][6]" tabindex="6"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|6">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-7" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 7</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-7|long-name">White</div><div class="d-block d-md-none text-center" id="white-7|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-7|distance"></label><input class="form-control text-center" id="white-7|distance" type="number" name="[course][tees][white][7][distance]" min="1" value="340"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-7|par"></label><input class="form-control text-center" id="white-7|par" type="number" name="[course][tees][white][7][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-7|strokeIndex"></label><input class="form-control text-center" id="white-7|strokeIndex" type="number" name="[course][tees][white][7][strokeIndex]" min="1" max="18" value="16"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-7|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-7|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-7|distance"></label><input class="form-control text-center" id="yellow-7|distance" type="number" name="[course][tees][yellow][7][distance]" min="1" value="339"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-7|par"></label><input class="form-control text-center" id="yellow-7|par" type="number" name="[course][tees][yellow][7][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-7|strokeIndex"></label><input class="form-control text-center" id="yellow-7|strokeIndex" type="number" name="[course][tees][yellow][7][strokeIndex]" min="1" max="18" value="16"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-7|long-name">Red</div><div class="d-block d-md-none text-center" id="red-7|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-7|distance"></label><input class="form-control text-center" id="red-7|distance" type="number" name="[course][tees][red][7][distance]" min="1" value="275"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-7|par"></label><input class="form-control text-center" id="red-7|par" type="number" name="[course][tees][red][7][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-7|strokeIndex"></label><input class="form-control text-center" id="red-7|strokeIndex" type="number" name="[course][tees][red][7][strokeIndex]" min="1" max="18" value="14"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-7" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-7"></label><input class="form-control text-center" id="marker|hole-7" type="number" min="1" name="[marker][hole][7]" tabindex="7"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|7">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-8" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 8</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-8|long-name">White</div><div class="d-block d-md-none text-center" id="white-8|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-8|distance"></label><input class="form-control text-center" id="white-8|distance" type="number" name="[course][tees][white][8][distance]" min="1" value="217"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-8|par"></label><input class="form-control text-center" id="white-8|par" type="number" name="[course][tees][white][8][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-8|strokeIndex"></label><input class="form-control text-center" id="white-8|strokeIndex" type="number" name="[course][tees][white][8][strokeIndex]" min="1" max="18" value="9"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-8|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-8|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-8|distance"></label><input class="form-control text-center" id="yellow-8|distance" type="number" name="[course][tees][yellow][8][distance]" min="1" value="177"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-8|par"></label><input class="form-control text-center" id="yellow-8|par" type="number" name="[course][tees][yellow][8][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-8|strokeIndex"></label><input class="form-control text-center" id="yellow-8|strokeIndex" type="number" name="[course][tees][yellow][8][strokeIndex]" min="1" max="18" value="9"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-8|long-name">Red</div><div class="d-block d-md-none text-center" id="red-8|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-8|distance"></label><input class="form-control text-center" id="red-8|distance" type="number" name="[course][tees][red][8][distance]" min="1" value="139"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-8|par"></label><input class="form-control text-center" id="red-8|par" type="number" name="[course][tees][red][8][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-8|strokeIndex"></label><input class="form-control text-center" id="red-8|strokeIndex" type="number" name="[course][tees][red][8][strokeIndex]" min="1" max="18" value="17"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-8" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-8"></label><input class="form-control text-center" id="marker|hole-8" type="number" min="1" name="[marker][hole][8]" tabindex="8"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|8">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-9" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 9</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-9|long-name">White</div><div class="d-block d-md-none text-center" id="white-9|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-9|distance"></label><input class="form-control text-center" id="white-9|distance" type="number" name="[course][tees][white][9][distance]" min="1" value="495"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-9|par"></label><input class="form-control text-center" id="white-9|par" type="number" name="[course][tees][white][9][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-9|strokeIndex"></label><input class="form-control text-center" id="white-9|strokeIndex" type="number" name="[course][tees][white][9][strokeIndex]" min="1" max="18" value="17"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-9|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-9|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-9|distance"></label><input class="form-control text-center" id="yellow-9|distance" type="number" name="[course][tees][yellow][9][distance]" min="1" value="490"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-9|par"></label><input class="form-control text-center" id="yellow-9|par" type="number" name="[course][tees][yellow][9][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-9|strokeIndex"></label><input class="form-control text-center" id="yellow-9|strokeIndex" type="number" name="[course][tees][yellow][9][strokeIndex]" min="1" max="18" value="17"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-9|long-name">Red</div><div class="d-block d-md-none text-center" id="red-9|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-9|distance"></label><input class="form-control text-center" id="red-9|distance" type="number" name="[course][tees][red][9][distance]" min="1" value="468"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-9|par"></label><input class="form-control text-center" id="red-9|par" type="number" name="[course][tees][red][9][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-9|strokeIndex"></label><input class="form-control text-center" id="red-9|strokeIndex" type="number" name="[course][tees][red][9][strokeIndex]" min="1" max="18" value="9"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-9" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-9"></label><input class="form-control text-center" id="marker|hole-9" type="number" min="1" name="[marker][hole][9]" tabindex="9"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|9">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-10" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 10</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-10|long-name">White</div><div class="d-block d-md-none text-center" id="white-10|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-10|distance"></label><input class="form-control text-center" id="white-10|distance" type="number" name="[course][tees][white][10][distance]" min="1" value="453"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-10|par"></label><input class="form-control text-center" id="white-10|par" type="number" name="[course][tees][white][10][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-10|strokeIndex"></label><input class="form-control text-center" id="white-10|strokeIndex" type="number" name="[course][tees][white][10][strokeIndex]" min="1" max="18" value="5"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-10|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-10|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-10|distance"></label><input class="form-control text-center" id="yellow-10|distance" type="number" name="[course][tees][yellow][10][distance]" min="1" value="448"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-10|par"></label><input class="form-control text-center" id="yellow-10|par" type="number" name="[course][tees][yellow][10][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-10|strokeIndex"></label><input class="form-control text-center" id="yellow-10|strokeIndex" type="number" name="[course][tees][yellow][10][strokeIndex]" min="1" max="18" value="5"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-10|long-name">Red</div><div class="d-block d-md-none text-center" id="red-10|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-10|distance"></label><input class="form-control text-center" id="red-10|distance" type="number" name="[course][tees][red][10][distance]" min="1" value="421"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-10|par"></label><input class="form-control text-center" id="red-10|par" type="number" name="[course][tees][red][10][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-10|strokeIndex"></label><input class="form-control text-center" id="red-10|strokeIndex" type="number" name="[course][tees][red][10][strokeIndex]" min="1" max="18" value="13"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-10" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-10"></label><input class="form-control text-center" id="marker|hole-10" type="number" min="1" name="[marker][hole][10]" tabindex="10"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|10">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-11" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 11</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-11|long-name">White</div><div class="d-block d-md-none text-center" id="white-11|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-11|distance"></label><input class="form-control text-center" id="white-11|distance" type="number" name="[course][tees][white][11][distance]" min="1" value="362"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-11|par"></label><input class="form-control text-center" id="white-11|par" type="number" name="[course][tees][white][11][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-11|strokeIndex"></label><input class="form-control text-center" id="white-11|strokeIndex" type="number" name="[course][tees][white][11][strokeIndex]" min="1" max="18" value="8"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-11|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-11|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-11|distance"></label><input class="form-control text-center" id="yellow-11|distance" type="number" name="[course][tees][yellow][11][distance]" min="1" value="360"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-11|par"></label><input class="form-control text-center" id="yellow-11|par" type="number" name="[course][tees][yellow][11][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-11|strokeIndex"></label><input class="form-control text-center" id="yellow-11|strokeIndex" type="number" name="[course][tees][yellow][11][strokeIndex]" min="1" max="18" value="8"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-11|long-name">Red</div><div class="d-block d-md-none text-center" id="red-11|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-11|distance"></label><input class="form-control text-center" id="red-11|distance" type="number" name="[course][tees][red][11][distance]" min="1" value="277"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-11|par"></label><input class="form-control text-center" id="red-11|par" type="number" name="[course][tees][red][11][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-11|strokeIndex"></label><input class="form-control text-center" id="red-11|strokeIndex" type="number" name="[course][tees][red][11][strokeIndex]" min="1" max="18" value="11"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-11" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-11"></label><input class="form-control text-center" id="marker|hole-11" type="number" min="1" name="[marker][hole][11]" tabindex="11"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|11">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-12" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 12</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-12|long-name">White</div><div class="d-block d-md-none text-center" id="white-12|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-12|distance"></label><input class="form-control text-center" id="white-12|distance" type="number" name="[course][tees][white][12][distance]" min="1" value="503"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-12|par"></label><input class="form-control text-center" id="white-12|par" type="number" name="[course][tees][white][12][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-12|strokeIndex"></label><input class="form-control text-center" id="white-12|strokeIndex" type="number" name="[course][tees][white][12][strokeIndex]" min="1" max="18" value="12"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-12|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-12|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-12|distance"></label><input class="form-control text-center" id="yellow-12|distance" type="number" name="[course][tees][yellow][12][distance]" min="1" value="498"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-12|par"></label><input class="form-control text-center" id="yellow-12|par" type="number" name="[course][tees][yellow][12][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-12|strokeIndex"></label><input class="form-control text-center" id="yellow-12|strokeIndex" type="number" name="[course][tees][yellow][12][strokeIndex]" min="1" max="18" value="12"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-12|long-name">Red</div><div class="d-block d-md-none text-center" id="red-12|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-12|distance"></label><input class="form-control text-center" id="red-12|distance" type="number" name="[course][tees][red][12][distance]" min="1" value="364"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-12|par"></label><input class="form-control text-center" id="red-12|par" type="number" name="[course][tees][red][12][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-12|strokeIndex"></label><input class="form-control text-center" id="red-12|strokeIndex" type="number" name="[course][tees][red][12][strokeIndex]" min="1" max="18" value="1"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-12" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-12"></label><input class="form-control text-center" id="marker|hole-12" type="number" min="1" name="[marker][hole][12]" tabindex="12"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|12">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-13" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 13</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-13|long-name">White</div><div class="d-block d-md-none text-center" id="white-13|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-13|distance"></label><input class="form-control text-center" id="white-13|distance" type="number" name="[course][tees][white][13][distance]" min="1" value="414"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-13|par"></label><input class="form-control text-center" id="white-13|par" type="number" name="[course][tees][white][13][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-13|strokeIndex"></label><input class="form-control text-center" id="white-13|strokeIndex" type="number" name="[course][tees][white][13][strokeIndex]" min="1" max="18" value="1"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-13|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-13|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-13|distance"></label><input class="form-control text-center" id="yellow-13|distance" type="number" name="[course][tees][yellow][13][distance]" min="1" value="408"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-13|par"></label><input class="form-control text-center" id="yellow-13|par" type="number" name="[course][tees][yellow][13][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-13|strokeIndex"></label><input class="form-control text-center" id="yellow-13|strokeIndex" type="number" name="[course][tees][yellow][13][strokeIndex]" min="1" max="18" value="1"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-13|long-name">Red</div><div class="d-block d-md-none text-center" id="red-13|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-13|distance"></label><input class="form-control text-center" id="red-13|distance" type="number" name="[course][tees][red][13][distance]" min="1" value="389"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-13|par"></label><input class="form-control text-center" id="red-13|par" type="number" name="[course][tees][red][13][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-13|strokeIndex"></label><input class="form-control text-center" id="red-13|strokeIndex" type="number" name="[course][tees][red][13][strokeIndex]" min="1" max="18" value="5"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-13" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-13"></label><input class="form-control text-center" id="marker|hole-13" type="number" min="1" name="[marker][hole][13]" tabindex="13"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|13">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-14" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 14</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-14|long-name">White</div><div class="d-block d-md-none text-center" id="white-14|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-14|distance"></label><input class="form-control text-center" id="white-14|distance" type="number" name="[course][tees][white][14][distance]" min="1" value="447"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-14|par"></label><input class="form-control text-center" id="white-14|par" type="number" name="[course][tees][white][14][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-14|strokeIndex"></label><input class="form-control text-center" id="white-14|strokeIndex" type="number" name="[course][tees][white][14][strokeIndex]" min="1" max="18" value="3"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-14|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-14|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-14|distance"></label><input class="form-control text-center" id="yellow-14|distance" type="number" name="[course][tees][yellow][14][distance]" min="1" value="447"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-14|par"></label><input class="form-control text-center" id="yellow-14|par" type="number" name="[course][tees][yellow][14][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-14|strokeIndex"></label><input class="form-control text-center" id="yellow-14|strokeIndex" type="number" name="[course][tees][yellow][14][strokeIndex]" min="1" max="18" value="3"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-14|long-name">Red</div><div class="d-block d-md-none text-center" id="red-14|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-14|distance"></label><input class="form-control text-center" id="red-14|distance" type="number" name="[course][tees][red][14][distance]" min="1" value="359"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-14|par"></label><input class="form-control text-center" id="red-14|par" type="number" name="[course][tees][red][14][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-14|strokeIndex"></label><input class="form-control text-center" id="red-14|strokeIndex" type="number" name="[course][tees][red][14][strokeIndex]" min="1" max="18" value="3"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-14" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-14"></label><input class="form-control text-center" id="marker|hole-14" type="number" min="1" name="[marker][hole][14]" tabindex="14"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|14">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-15" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 15</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-15|long-name">White</div><div class="d-block d-md-none text-center" id="white-15|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-15|distance"></label><input class="form-control text-center" id="white-15|distance" type="number" name="[course][tees][white][15][distance]" min="1" value="170"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-15|par"></label><input class="form-control text-center" id="white-15|par" type="number" name="[course][tees][white][15][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-15|strokeIndex"></label><input class="form-control text-center" id="white-15|strokeIndex" type="number" name="[course][tees][white][15][strokeIndex]" min="1" max="18" value="10"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-15|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-15|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-15|distance"></label><input class="form-control text-center" id="yellow-15|distance" type="number" name="[course][tees][yellow][15][distance]" min="1" value="166"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-15|par"></label><input class="form-control text-center" id="yellow-15|par" type="number" name="[course][tees][yellow][15][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-15|strokeIndex"></label><input class="form-control text-center" id="yellow-15|strokeIndex" type="number" name="[course][tees][yellow][15][strokeIndex]" min="1" max="18" value="10"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-15|long-name">Red</div><div class="d-block d-md-none text-center" id="red-15|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-15|distance"></label><input class="form-control text-center" id="red-15|distance" type="number" name="[course][tees][red][15][distance]" min="1" value="135"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-15|par"></label><input class="form-control text-center" id="red-15|par" type="number" name="[course][tees][red][15][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-15|strokeIndex"></label><input class="form-control text-center" id="red-15|strokeIndex" type="number" name="[course][tees][red][15][strokeIndex]" min="1" max="18" value="16"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-15" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-15"></label><input class="form-control text-center" id="marker|hole-15" type="number" min="1" name="[marker][hole][15]" tabindex="15"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|15">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-16" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 16</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-16|long-name">White</div><div class="d-block d-md-none text-center" id="white-16|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-16|distance"></label><input class="form-control text-center" id="white-16|distance" type="number" name="[course][tees][white][16][distance]" min="1" value="302"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-16|par"></label><input class="form-control text-center" id="white-16|par" type="number" name="[course][tees][white][16][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-16|strokeIndex"></label><input class="form-control text-center" id="white-16|strokeIndex" type="number" name="[course][tees][white][16][strokeIndex]" min="1" max="18" value="13"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-16|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-16|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-16|distance"></label><input class="form-control text-center" id="yellow-16|distance" type="number" name="[course][tees][yellow][16][distance]" min="1" value="302"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-16|par"></label><input class="form-control text-center" id="yellow-16|par" type="number" name="[course][tees][yellow][16][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-16|strokeIndex"></label><input class="form-control text-center" id="yellow-16|strokeIndex" type="number" name="[course][tees][yellow][16][strokeIndex]" min="1" max="18" value="13"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-16|long-name">Red</div><div class="d-block d-md-none text-center" id="red-16|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-16|distance"></label><input class="form-control text-center" id="red-16|distance" type="number" name="[course][tees][red][16][distance]" min="1" value="273"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-16|par"></label><input class="form-control text-center" id="red-16|par" type="number" name="[course][tees][red][16][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-16|strokeIndex"></label><input class="form-control text-center" id="red-16|strokeIndex" type="number" name="[course][tees][red][16][strokeIndex]" min="1" max="18" value="8"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-16" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-16"></label><input class="form-control text-center" id="marker|hole-16" type="number" min="1" name="[marker][hole][16]" tabindex="16"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|16">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-17" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 17</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-17|long-name">White</div><div class="d-block d-md-none text-center" id="white-17|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-17|distance"></label><input class="form-control text-center" id="white-17|distance" type="number" name="[course][tees][white][17][distance]" min="1" value="164"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-17|par"></label><input class="form-control text-center" id="white-17|par" type="number" name="[course][tees][white][17][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-17|strokeIndex"></label><input class="form-control text-center" id="white-17|strokeIndex" type="number" name="[course][tees][white][17][strokeIndex]" min="1" max="18" value="18"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-17|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-17|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-17|distance"></label><input class="form-control text-center" id="yellow-17|distance" type="number" name="[course][tees][yellow][17][distance]" min="1" value="156"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-17|par"></label><input class="form-control text-center" id="yellow-17|par" type="number" name="[course][tees][yellow][17][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-17|strokeIndex"></label><input class="form-control text-center" id="yellow-17|strokeIndex" type="number" name="[course][tees][yellow][17][strokeIndex]" min="1" max="18" value="18"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-17|long-name">Red</div><div class="d-block d-md-none text-center" id="red-17|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-17|distance"></label><input class="form-control text-center" id="red-17|distance" type="number" name="[course][tees][red][17][distance]" min="1" value="137"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-17|par"></label><input class="form-control text-center" id="red-17|par" type="number" name="[course][tees][red][17][par]" min="3" max="5" value="3"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-17|strokeIndex"></label><input class="form-control text-center" id="red-17|strokeIndex" type="number" name="[course][tees][red][17][strokeIndex]" min="1" max="18" value="18"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-17" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-17"></label><input class="form-control text-center" id="marker|hole-17" type="number" min="1" name="[marker][hole][17]" tabindex="17"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|17">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="hole-18" class="d-none col-12" visibility="hidden">
+                                                <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Hole 18</h5>
+                                                        </div>
+                                                        <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Tee
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="d-none d-md-block text-center distance-long">
+                                                                            Yards
+                                                                        </div>
+                                                                        <div class="d-block d-md-none text-center distance-short">
+                                                                            Yds
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            Par
+                                                                        </div>
+                                                                    </td>
+                                                                    <td scope="col">
+                                                                        <div class="text-center">
+                                                                            SI
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-18|long-name">White</div><div class="d-block d-md-none text-center" id="white-18|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-18|distance"></label><input class="form-control text-center" id="white-18|distance" type="number" name="[course][tees][white][18][distance]" min="1" value="534"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-18|par"></label><input class="form-control text-center" id="white-18|par" type="number" name="[course][tees][white][18][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-18|strokeIndex"></label><input class="form-control text-center" id="white-18|strokeIndex" type="number" name="[course][tees][white][18][strokeIndex]" min="1" max="18" value="7"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-18|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-18|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-18|distance"></label><input class="form-control text-center" id="yellow-18|distance" type="number" name="[course][tees][yellow][18][distance]" min="1" value="524"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-18|par"></label><input class="form-control text-center" id="yellow-18|par" type="number" name="[course][tees][yellow][18][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-18|strokeIndex"></label><input class="form-control text-center" id="yellow-18|strokeIndex" type="number" name="[course][tees][yellow][18][strokeIndex]" min="1" max="18" value="7"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-18|long-name">Red</div><div class="d-block d-md-none text-center" id="red-18|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-18|distance"></label><input class="form-control text-center" id="red-18|distance" type="number" name="[course][tees][red][18][distance]" min="1" value="462"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-18|par"></label><input class="form-control text-center" id="red-18|par" type="number" name="[course][tees][red][18][par]" min="3" max="5" value="5"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-18|strokeIndex"></label><input class="form-control text-center" id="red-18|strokeIndex" type="number" name="[course][tees][red][18][strokeIndex]" min="1" max="18" value="7"></div></td></tr></tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="mb-2 border-bottom border-1">
+                                                            <h5>Players</h5>
+                                                        </div>
+                                                        <div id="players-18" class="row gy-2"><div class="col-12"><div class="row mx-0"><div class="col d-flex align-items-center justify-content-center" data-player="marker">Joe</div><div class="col-3 px-0"><label class="form-label d-none" for="marker|hole-18"></label><input class="form-control text-center" id="marker|hole-18" type="number" min="1" name="[marker][hole][18]" tabindex="18"></div><div class="col-5 d-md-flex text-center"><button class="btn btn-success mx-auto" data-bs-toggle="modal" data-bs-target="#demerit\|marker\|18">Demerit</button></div></div></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <ul class="d-flex justify-content-center pagination mb-0">
+                                        <li class="d-none page-item" data-hole="1" data-hole-end="9">
+                                            <div class="nine-holes page-link text-center px-1">
+                                                Front
+                                            </div>
+                                        </li>
+
+                                        <li class="page-item active left-hole" data-hole="1">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                1
+                                            </div>
+                                        </li>
+
+                                        <li class="page-item" data-hole="2">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                2
+                                            </div>
+                                        </li>
+
+                                        <li class="page-item" data-hole="3">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                3
+                                            </div>
+                                        </li>
+
+                                        <li class="page-item" data-hole="4">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                4
+                                            </div>
+                                        </li>
+
+                                        <li class="page-item" data-hole="5">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                5
+                                            </div>
+                                        </li>
+
+                                        <li class="page-item" data-hole="6">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                6
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none page-item" data-hole="1" data-hole-end="6">
+                                            <div class="six-holes page-link text-center px-1">
+                                                1 - 6
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-sm-block page-item" data-hole="7">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                7
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-sm-block page-item" data-hole="8">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                8
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-sm-block page-item" data-hole="9">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                9
+                                            </div>
+                                        </li>
+
+
+                                        <li class="d-none d-md-block page-item" data-hole="10">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                10
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="11">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                11
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="12">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                12
+                                            </div>
+                                        </li>
+
+                                        <li class="d-sm-none page-item" data-hole="7" data-hole-end="12">
+                                            <div class="six-holes page-link text-center px-1">
+                                                7 - 12
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="13">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                13
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="14">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                14
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="15">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                15
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="16">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                16
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item" data-hole="17">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                17
+                                            </div>
+                                        </li>
+
+                                        <li class="d-none d-md-block page-item right-hole" data-hole="18">
+                                            <div class="individual-hole page-link text-center px-0">
+                                                18
+                                            </div>
+                                        </li>
+
+                                        <li class="d-sm-none page-item" data-hole="13" data-hole-end="18">
+                                            <div class="six-holes page-link text-center px-1">
+                                                13 - 18
+                                            </div>
+                                        </li>
+                                        <li class="d-none d-sm-block d-md-none page-item" data-hole="10" data-hole-end="18">
+                                            <div class="nine-holes page-link text-center px-1">
+                                                Back
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div> -->
+                            </div>
+
+                            <!-- <div class="row gy-4">
                                 <div class="col-12">
                                     <div class="row gy-2">
                                         <div class="col-12">
                                             <h4 class="text-decoration-underline">Individual</h4>
                                         </div>
                                         <div class="col-12">
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-striped mb-0 summary">
-                                                    <thead class="table-dark">
-                                                        <tr class="d-none d-lg-table-row">
-                                                            <th scope="col" rowspan="2">
-                                                                <div class="text-center">
-                                                                    Player
-                                                                </div>
-                                                            </th>
-                                                            <th scope="col" colspan="3">
-                                                                <div class="text-center">
-                                                                    Shots
-                                                                </div>
-                                                            </th>
-                                                            <th scope="col" colspan="3">
-                                                                <div class="text-center">
-                                                                    Par
-                                                                </div>
-                                                            </th>
-                                                        </tr>
-                                                        <tr>
-                                                            <th class="d-table-cell d-lg-none" scope="col">
-                                                                <div class="text-center">
-                                                                    Player
-                                                                </div>
-                                                            </th>
-                                                            <% for (const property of ['Shots', 'Par']) { %>
-                                                            <th class="d-none d-lg-table-cell" scope="col">
-                                                                <div class="text-center">
-                                                                    Front
-                                                                </div>
-                                                            </th>
-                                                            <th class="d-none d-lg-table-cell" scope="col">
-                                                                <div class="text-center">
-                                                                    Back
-                                                                </div>
-                                                            </th>
-                                                            <th scope="col">
-                                                                <div class="d-none d-lg-block text-center">
-                                                                    Full
-                                                                </div>
-                                                                <div class="d-block d-lg-none text-center">
-                                                                    <%= property %>
-                                                                </div>
-                                                            </th>
-                                                            <% }; %>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <% for (const score of scores) { %>
-                                                        <tr>
-                                                            <td class="align-middle">
-                                                                <div class="d-none d-md-block text-center">
-                                                                    <%= score.player.name.knownAs %>
-                                                                </div>
-                                                                <div class="d-block d-md-none text-center">
-                                                                    <%= score.player.name.initials.short %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle d-none d-lg-table-cell">
-                                                                <div class="text-center">
-                                                                    <%= score.scores.shots.front %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle d-none d-lg-table-cell">
-                                                                <div class="text-center">
-                                                                    <%= score.scores.shots.back %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle">
-                                                                <div class="text-center">
-                                                                    <%= score.scores.shots.full %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle d-none d-lg-table-cell">
-                                                                <div class="text-center">
-                                                                    <%= score.scores.par.front %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle d-none d-lg-table-cell">
-                                                                <div class="text-center">
-                                                                    <%= score.scores.par.back %>
-                                                                </div>
-                                                            </td>
-                                                            <td class="align-middle">
-                                                                <div class="text-center">
-                                                                    <%= score.scores.par.full %>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <% }; %>
-                                                    </tbody>
-                                                </table>
+                                            <div class="row">
+                                                <% for (const score of scores) { %>
+                                                <div class="col-12">
+                                                    <span class="d-none d-md-inline-block">
+                                                        <%= score.player.name.knownAs %>
+                                                    </span>
+                                                    <span class="d-inline-block d-md-none">
+                                                        <%= score.player.name.initials.short %>
+                                                    </span>
+                                                    <%= `${score.scores.shots.full} (${score.scores.par.full})` %>
+                                                </div>
+                                                <% }; %>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <% for (const game of round.games) { %>
+                                <% for (const game of games) { %>
                                 <div class="col-12">
                                     <div class="row gy-2">
                                         <div class="col-12">
@@ -507,7 +1540,7 @@
                                     </div>
                                 </div>
                                 <% }; %>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -516,4 +1549,4 @@
         </div>
     </div>
 </form>
-<%- include('../partials/modals/delete', { item: 'round', path: `/rounds/${round.id}` }) %>
+<%- include('../partials/modals/delete', { item: 'round', path: `/rounds/${id}` }) %>

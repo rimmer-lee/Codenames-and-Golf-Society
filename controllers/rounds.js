@@ -9,7 +9,7 @@ const User = require('../models/user');
 
 const { customDate } = require('../utilities/formatDate');
 const sort = require('../utilities/sort');
-const { GAMES, TEE_COLOURS, TITLES } = require('../constants');
+const { TEE_COLOURS, TITLES } = require('../constants');
 
 // used client-side also
 function getPlayerKeys(object) {
@@ -206,28 +206,43 @@ async function update (req, res) {
 };
 
 async function view (req, res) {
-
-    // concatenate tee name and tee gender when there are multiple tees with the same name
-    // needs a whole lot of tidying
-
     const courses = await Course.find();
-    const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
-    const date = customDate('yyyy-mm-dd');
-    const { course, games, scores } = round;
     const players = await User.findPlayers();
+    const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
+    const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round;
+    const currentDate = customDate('yyyy-mm-dd');
+    const games = G.map(({ handicap, method, name, players, roundType, summary }, index) => {
+        return {
+            handicap,
+            method,
+            name,
+            players: players.map(({ player }) => S.find(score => score.player._id.toString() === player.toString())),
+            roundType,
+            summary
+        };
+    });
+    const scores = S.map(({ handicap = 54, player, playingGroup: pg, scores, shots }, scoreIndex) => {
+        const playingGroup = (function(playingGroup, playerIndex) {
+            const { index, player: p } = playingGroup || { index: 0 };
+            const player = (function(player, playerIndex) {
+                if (player === 'marker' || playerIndex === 0) return 'Marker';
+                return `Player ${(player && player.split('-')[1] || String.fromCharCode(96 + playerIndex)).toUpperCase()}`;
+            })(p, playerIndex);
+            return { player, index }
+        })(pg, scoreIndex);
+        return { handicap, player, playingGroup, scores, shots }
+    });
 
+    // move to Course model as virtual?
     const tees = course.tees.map(({ _id, colour, distance, gender, holes, measure, name, par, ratings }) => {
-        let long = name;
-        let short = name;
+        let long = short = name;
         if (/\s/.test(name)) short = short.split(' ');
         else short = short.split('/');
         short = short.map(name => {
-            if (/\D/.test(name)) {
-                for (const letter of name) {
-                    if (/\w/.test(letter)) return letter.toUpperCase();
-                };
+            if (!/\D/.test(name)) return name;
+            for (const letter of name) {
+                if (/\w/.test(letter)) return letter.toUpperCase();
             };
-            return name;
         }).join('');
         if (gender && course.tees.filter(tee => tee.name === name).length > 1) {
             long += ` (${gender[0].toUpperCase()}${gender.substr(1).toLowerCase()})`;
@@ -246,20 +261,7 @@ async function view (req, res) {
         };
     });
 
-    // move into round object
-    const tee = tees.find(({ _id }) => _id == round.tee);
-
-    // why does this not work?
-    // round.tee = tees.find(({ _id }) => _id == round.tee);
-
-    const tableClass = ((TEE_COLOURS.find(({ colour }) => colour === tee.name.name.toLowerCase()) || {}).class || {}).table || '';
-
-    for (const game of games) {
-        for (const score of game.scores) {
-            if (!game.team) score.name = players.find(({ id }) => id.toString() === score.id).toJSON().name;
-        };
-    };
-
+    const tee = tees.find(({ _id }) => _id == T);
     for (const score of scores) {
         score.class = score.shots.map((shot, i) => {
             if (!shot) return '';
@@ -273,8 +275,8 @@ async function view (req, res) {
             return '';
         });
     };
-
-    res.render('rounds/edit', { courses, date, round, tee, tees, tableClass, players, scores });
+    tee.class = (TEE_COLOURS.find(({ colour }) => colour === tee.colour) || { class: { table: '' } }).class.table;
+    res.render('rounds/edit', { course, courses, currentDate, date, games, id, players, scores, tee, tees });
 };
 
 module.exports = { create, remove, save, serviceWorker, show, update, view };

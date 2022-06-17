@@ -22,7 +22,20 @@ const ExpressError = require(path.join(__dirname, 'utilities', 'ExpressError'));
 
 const User = require(path.join(__dirname, 'models', 'user'));
 
-const constants = require(path.join(__dirname, 'constants'));
+const {
+    ACTIONS,
+    COUNTRY_CODES,
+    GAMES,
+    GENDERS,
+    NAME_TITLES,
+    PAR_CLASSES,
+    ROLES,
+    ROUND_TYPES,
+    SAFE_URLS,
+    TEE_COLOURS,
+    TITLES
+} = require(path.join(__dirname, 'constants'));
+
 const { devFeatures } = require(path.join(__dirname, 'middleware'));
 
 const app = express();
@@ -92,13 +105,13 @@ app.use(flash());
 app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", ...constants.SAFE_URLS.connect],
-        scriptSrc: ["'unsafe-inline'", "'self'", ...constants.SAFE_URLS.script],
-        styleSrc: ["'self'", "'unsafe-inline'", ...constants.SAFE_URLS.style],
-        workerSrc: ["'self'", "blob:", ...constants.SAFE_URLS.worker],
-        objectSrc: [...constants.SAFE_URLS.object],
-        imgSrc: ["'self'", "blob:", "data:", ...constants.SAFE_URLS.image],
-        fontSrc: ["'self'", ...constants.SAFE_URLS.font]
+        connectSrc: ["'self'", ...SAFE_URLS.connect],
+        scriptSrc: ["'unsafe-inline'", "'self'", ...SAFE_URLS.script],
+        styleSrc: ["'self'", "'unsafe-inline'", ...SAFE_URLS.style],
+        workerSrc: ["'self'", "blob:", ...SAFE_URLS.worker],
+        objectSrc: [...SAFE_URLS.object],
+        imgSrc: ["'self'", "blob:", "data:", ...SAFE_URLS.image],
+        fontSrc: ["'self'", ...SAFE_URLS.font]
     }
 }));
 app.use(passport.initialize());
@@ -117,16 +130,16 @@ passport.deserializeUser(User.deserializeUser());
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
 app.use(async (req, res, next) => {
-    res.locals.actions = constants.ACTIONS;
-    res.locals.countryCodes = constants.COUNTRY_CODES;
-    res.locals.games = constants.GAMES;
-    res.locals.genders = constants.GENDERS;
-    res.locals.nameTitles = constants.NAME_TITLES;
-    res.locals.parClasses = constants.PAR_CLASSES;
-    res.locals.roles = constants.ROLES;
-    res.locals.roundTypes = constants.ROUND_TYPES;
-    res.locals.teeColours = constants.TEE_COLOURS;
-    res.locals.titles = constants.TITLES;
+    res.locals.actions = ACTIONS;
+    res.locals.countryCodes = COUNTRY_CODES;
+    res.locals.GAMES = GAMES;
+    res.locals.genders = GENDERS;
+    res.locals.nameTitles = NAME_TITLES;
+    res.locals.parClasses = PAR_CLASSES;
+    res.locals.roles = ROLES;
+    res.locals.ROUND_TYPES = ROUND_TYPES;
+    res.locals.teeColours = TEE_COLOURS;
+    res.locals.titles = TITLES;
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.info = req.flash('info');
@@ -256,7 +269,7 @@ app.use((error, req, res, next) => {
     res.status(status).render('error', { error });
 });
 
-app.listen(port, () => console.log(`Serving Codesnames and Golf Society on port ${port}`));
+app.listen(port, () => console.log(`Serving Codenames and Golf Society on port ${port}`));
 
 // https://ncrdb.usga.org/
 

@@ -1,10 +1,5 @@
 /* Bootstrap Extra Small (xs) */
 @media (max-width: 576px) {
-    /* table,
-    table *.btn,
-    table .form-control {
-        font-size: 0.8rem;
-    } */
     .course-tees td {
         width: calc(100% / 4);
     };
@@ -83,45 +78,74 @@ table img {
 
 table#course td *,
 table#course td,
-/* table#round td *, */
-table#round td,
 table.summary td *,
 table.summary td {
     min-width: 60px;
-}
-
-table#round td > div > div {
-    min-width: 24px;
 }
 
 table#courses > tbody > tr:hover {
     cursor: pointer;
 }
 
-.birdie,
-.eagle,
+.birdie::before,
+.eagle::before,
+.bogey::before,
+.double-bogey::before {
+    --size: 2.5%;
+    padding-bottom: var(--size);
+    position: absolute;
+    width: var(--size);
+}
+
+.birdie::before,
+.eagle::before,
 .eagle::after {
     border-radius: 50%;
 }
 
-.birdie,
-.eagle,
+.birdie::before,
+.eagle::before,
 .eagle::after,
-.bogey,
-.double-bogey,
+.bogey::before,
+.double-bogey::before,
 .double-bogey::after {
+    content: '';
     border: 1px solid black;
+    z-index: -1;
 }
 
 .eagle::after,
 .double-bogey::after {
-    --size: 140%;
-    --indent: calc((100% - var(--size)) / 2);
-    content: '';
+    --size: 3%;
+    padding-bottom: var(--size);
+    position: absolute;
     width: var(--size);
-    height: var(--size);
-    position:absolute;
-    z-index: -1;
-    top: var(--indent);
-    left: var(--indent);
+}
+
+.table-input {
+    margin: auto;
+    width: 60px;
+    padding: 0.375rem 0;
+}
+
+.table-input input {
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
+}
+
+.table-input input:focus {
+    outline: none;
+}
+
+table#round tr > *:nth-child(-n + 4):nth-child(n + 2) {
+    width: 90px;
+}
+
+table#round tr > *:first-child {
+    width: 60px;
+}
+
+table#round tr > *:not(:nth-child(-n + 4)) {
+    width: auto;
 }
