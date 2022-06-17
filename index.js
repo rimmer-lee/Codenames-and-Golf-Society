@@ -313,14 +313,7 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // readImage();
 
 
-
-// in /rounds/:id highlight scores in scorecard
-//    - No symbol - Par
-//    - Circle - Birdie;
-//    - Solid circle - Eagle or better
-//    - Square - Bogey
-//    - Solid square - Double-bogey or worse
-
+// update Course.name to be Course.name = { long, name, short }, or something similar
 
 // consolidate rounds on the same day, same course, same tee
 //    - capture the playing ID (marker, player-a, etc.) and the playing group to the scores schema
