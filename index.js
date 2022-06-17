@@ -313,6 +313,8 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // readImage();
 
 
+// tidy .css files
+
 // update Course.name to be Course.name = { long, name, short }, or something similar
 
 // consolidate rounds on the same day, same course, same tee
