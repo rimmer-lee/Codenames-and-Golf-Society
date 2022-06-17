@@ -12,17 +12,6 @@
     </td>
     <% }; %>
     <% for (const score of scores) { %>
-    <!-- <td>
-        <div class="d-flex justify-content-center">
-            <div>
-                <div class="ratio ratio-1x1">
-                    <div class="d-flex justify-content-center align-items-center<%= ` ${score.class[i - 1]}` || '' %>">
-                        <%= score.shots[i - 1] || '' %>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </td> -->
     <td>
         <div class="d-flex align-items-center justify-content-center table-input<%= ` ${score.class[i - 1]}` || '' %>">
             <label for="<%= i - 1 %>|hole-<%= i %>" class="d-none"></label>
