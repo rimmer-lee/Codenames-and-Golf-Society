@@ -311,12 +311,12 @@ RoundSchema.virtual('formattedDate').get(function () {
     };
 });
 
-ScoreSchema.virtual('parClass').get(function () {
-    const { par = 0 } = this;
-    if (par > 0) return 'f-over';
-    if (par < 0) return 'f-under';
-    return 'f-level';
-});
+// ScoreSchema.virtual('parClass').get(function () {
+//     const { par = 0 } = this;
+//     if (par > 0) return 'f-over';
+//     if (par < 0) return 'f-under';
+//     return 'f-level';
+// });
 
 RoundSchema.pre('save', async function(next) {
     const players = await User.find();

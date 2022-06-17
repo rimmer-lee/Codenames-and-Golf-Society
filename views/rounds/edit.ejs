@@ -505,7 +505,7 @@
                                                     <div class="col text-center">
                                                         <span id="<%= score.playingGroup.player %>|score"><%= score.scores.shots.full %></span>
                                                         <span> (</span>
-                                                        <span class="f-level" id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span>
+                                                        <span class="<%= score.scores.par.class %>" id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span>
                                                         <span>)</span>
                                                     </div>
                                                 </div>

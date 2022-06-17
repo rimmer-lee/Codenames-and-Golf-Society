@@ -274,6 +274,11 @@ async function view (req, res) {
             if (parScore > 1) return 'double-bogey';
             return '';
         });
+        score.scores.par.class = (function(par) {
+            if (par > 0) return 'f-over';
+            if (par < 0) return 'f-under';
+            return 'f-level';
+        })(score.scores.par.full);
     };
     tee.class = (TEE_COLOURS.find(({ colour }) => colour === tee.colour) || { class: { table: '' } }).class.table;
     res.render('rounds/edit', { course, courses, currentDate, date, games, id, players, scores, tee, tees });
