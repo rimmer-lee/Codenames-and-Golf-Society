@@ -32,20 +32,21 @@ function different() {
 };
 
 function updateButtons() {
-    function updateButtonClassList(remove) {
-        const undo = document.getElementById('undo');
-        const save = document.getElementById('save');
-        for (const button of [undo, save]) {
-            if (remove) {
-                button.classList.remove('d-none');
-                continue;
-            };
-            button.classList.add('d-none');
-        };
-        return remove;
-    };
     const differentValue = different();
     return updateButtonClassList(different());
+};
+
+function updateButtonClassList(remove) {
+    const undo = document.getElementById('undo');
+    const save = document.getElementById('save');
+    for (const button of [undo, save]) {
+        if (remove) {
+            button.classList.remove('d-none');
+            continue;
+        };
+        button.classList.add('d-none');
+    };
+    return remove;
 };
 
 function updateStrokeIndexSelects(id) {
@@ -64,6 +65,16 @@ function updateStrokeIndexSelects(id) {
             select.insertBefore(createElement(optionElement), null);
         };
         Array.from(select.children).find(({ value }) => +value === existingValue).setAttribute('selected', true);
+    };
+};
+
+function updateTableClasses(teeId, classToAdd) {
+    const classesToRemove = teeColours.map(teeColour => teeColour.class.table);
+    for (const element of document.querySelectorAll(`table td [id^="${teeId}|"]`)) {
+        const tdElement = element.closest('td[class^="table"]');
+        if (!tdElement) continue;
+        tdElement.classList.remove(...classesToRemove);
+        tdElement.classList.add(classToAdd);
     };
 };
 
@@ -88,13 +99,7 @@ for (const select of document.querySelectorAll('table select')) {
 for (const select of document.querySelectorAll('select[id$="|colour"]')) {
     select.addEventListener('change', function() {
         const [ , id ] = this.id.match(/(.+)\|colour/);
-        const classesToRemove = teeColours.map(teeColour => teeColour.class.table);
-        for (const element of document.querySelectorAll(`table td [id^="${id}|"]`)) {
-            const tdElement = element.closest('td[class^="table"]');
-            if (!tdElement) continue;
-            tdElement.classList.remove(...classesToRemove);
-            tdElement.classList.add(this.value);
-        };
+        updateTableClasses(id, this.value);
         updateButtons();
     });
 };
@@ -104,7 +109,8 @@ document.getElementById('undo').addEventListener('click', function() {
         const { colour, holes, id } = tee;
         const teeSelectOptions = Array.from(document.getElementById(`${id}|colour`).children);
         teeSelectOptions.find(({ selected }) => selected).selected = false;
-        teeSelectOptions.find(({ value }) => value === colour.name).selected = true;
+        teeSelectOptions.find(({ innerText }) => innerText === colour.name).selected = true;
+        updateTableClasses(id, colour.class);
         for (const hole of holes) {
             const { index } = hole;
             for (const property of ['distance', 'par', 'strokeIndex']) {
