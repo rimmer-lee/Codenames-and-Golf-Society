@@ -215,5 +215,4 @@ const TITLES = [
     { id: 'karen', value: 'Karen', icon: 'bi-cone-striped' }
 ];
 
-
 module.exports = { ACTIONS, COUNTRY_CODES, GAMES, GENDERS, NAME_TITLES, PAR_CLASSES, ROLES, ROUND_TYPES, SAFE_URLS, TEE_COLOURS, TITLES };
