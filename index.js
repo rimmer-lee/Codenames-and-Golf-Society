@@ -51,10 +51,10 @@ const playerRoutes = require(path.join(__dirname, 'routes', 'players'));
 const roundRoutes = require(path.join(__dirname, 'routes', 'rounds'));
 const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 
-const port = process.env.PORT || 3000;
-const secret = process.env.SECRET || 'thisshouldbeabettersecret';
-const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/codenames-and-golf-society';
-// const dbUrl = process.env.DB_URL || 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
+const port = process.env.PORT;
+const secret = process.env.SECRET;
+const dbUrl = process.env.DB_URL
+// const dbUrl = 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
 const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({
