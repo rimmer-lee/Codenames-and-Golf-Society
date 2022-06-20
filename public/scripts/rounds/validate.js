@@ -1,3 +1,19 @@
+function addInput(name, value) {
+    form.appendChild(createElement({
+        type: 'input',
+        classList: ['d-none', 'update-data-ignore'],
+        attributes: [
+            { id: 'visibility', value: 'hidden' },
+            { id: 'name', value: name },
+            { id: 'value', value }
+        ]
+    }));
+};
+function invalid (element) {
+    element.classList.add('is-invalid');
+    return false;
+};
+
 function resetValidation() {
     this.classList.remove('is-valid', 'is-invalid');
 };
@@ -19,21 +35,6 @@ for (const required of document.querySelectorAll('*:required')) {
 
 for (const form of document.querySelectorAll('form.needs-validation')) {
     form.addEventListener('submit', e => {
-        function addInput(name, value) {
-            form.appendChild(createElement({
-                type: 'input',
-                classList: ['d-none', 'update-data-ignore'],
-                attributes: [
-                    { id: 'visibility', value: 'hidden' },
-                    { id: 'name', value: name },
-                    { id: 'value', value }
-                ]
-            }));
-        };
-        function invalid (element) {
-            element.classList.add('is-invalid');
-            return false;
-        };
         const invalidElements = [];
         let valid = true;
         for (const required of form.querySelectorAll('*:required')) {
@@ -67,5 +68,5 @@ for (const form of document.querySelectorAll('form.needs-validation')) {
                 };
             };
         };
-    }, false);
+    }, { once: true });
 };
