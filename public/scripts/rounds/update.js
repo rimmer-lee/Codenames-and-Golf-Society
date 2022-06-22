@@ -169,7 +169,7 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
 };
 
 function getRound() {
-    return JSON.parse(window.localStorage.getItem('round'));
+    return JSON.parse(window.localStorage.getItem('round')) || {};
 };
 
 function getPlayerKeys(object = getRound()) {
