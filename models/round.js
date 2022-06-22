@@ -102,10 +102,10 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
         })();
         game.scores = gameScores.map(({ id, score }) => {
             const points = (function() {
-                if (name === 'Stroke Play') return score.map(s => s || null);
+                if (name === 'Stroke Play') return score.map(s => +s || null);
                 if (name === 'Stableford') {
                     return score.map((s, i) => {
-                        if (s === null) return null;
+                        if (!+s) return null;
                         const { par } = holes[i + start];
                         const doubleBogey = 2 + +par;
                         if (s > doubleBogey) return 0;
@@ -116,7 +116,7 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 let skins = 0;
                 return score.map((s, i) => {
                     const holeScores = gameScores.map(({ score }) => score[i]);
-                    if (holeScores.some(score => score === null)) return null;
+                    if (holeScores.some(s => !+s)) return null;
                     const minScore = Math.min( ...holeScores );
                     skins++;
                     if (holeScores.filter(score => score === minScore).length === 1) {
@@ -134,15 +134,20 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
             if (name === 'Match Play') {
                 const { id: idOne, points } = game.scores[0];
                 const idTwo = game.scores[1].id;
+
+                // move logic to function
                 const nameOne = game.team ? `Team ${idOne.toUpperCase()}` : (players.find(player => player.id == idOne) || { name: {} }).name.knownAs || idOne;
                 const nameTwo = game.team ? `Team ${idTwo.toUpperCase()}` : (players.find(player => player.id == idTwo) || { name: {} }).name.knownAs || idTwo;
+
+                const gameComplete = !points.some(point => point === null);
                 const lengthOfPoints = points.length;
                 let currentScore = 0;
                 for (let i = 0; i < lengthOfPoints; i++) {
                     const point = points[i];
                     const remainingHoles = lengthOfPoints - i - 1;
+                    if (point === null) continue;
                     currentScore += point;
-                    if (remainingHoles === 0) {
+                    if (gameComplete && remainingHoles === 0) {
                         if (currentScore == 0) return 'Game halved';
                         return `${currentScore > 0 ? nameOne : nameTwo} wins`;
                     };
@@ -288,8 +293,7 @@ const RoundSchema = new Schema({
             scores: [
                 {
                     id: String,
-                    points: [ Number ],
-                    team: String
+                    points: [ Number ]
                 }
             ],
             summary: String,
