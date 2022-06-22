@@ -6,11 +6,14 @@ document.getElementById('reset-submit').addEventListener('click', () => {
         callback.call(element);
         if (element.hasAttribute('required')) resetValidation.call(element);
     };
+    const gameAccordion = document.querySelector('#game .accordion');
     const playerSelects = document.querySelectorAll('select.form-select[id$="|id"]:not([id="marker|id"])');
     window.localStorage.removeItem('round');
     resetElement('course-select', selectCourse);
     for (const playerSelect of playerSelects) playerSelect.closest('.col-12').remove();
     resetElement('marker|id', selectPlayer);
+    toggleVisibility(gameAccordion.parentElement, false);
+    while (gameAccordion.children.length > 0) gameAccordion.children[0].remove();
     for (const accordionItem of document.querySelectorAll('.accordion-item')) {
         const accordionButton = accordionItem.querySelector('button.accordion-button');
         accordionItem.querySelector('.accordion-collapse.collapse').classList.add('show');
