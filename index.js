@@ -1,12 +1,11 @@
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
+const cookieParser = require('cookie-parser');
 const ejsMate = require('ejs-mate');
 const express = require('express');
 const flash = require('connect-flash');
-const cookieParser = require('cookie-parser');
 
-// alternative
-// https://www.youtube.com/watch?v=PNtFSVU-YTI
+// alternative https://www.youtube.com/watch?v=PNtFSVU-YTI
 const helmet = require('helmet');
 
 const LocalStrategy = require('passport-local');
@@ -312,6 +311,8 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 
 // readImage();
 
+
+// there's a bug on /rounds/new where the course select isn't always selected
 
 // tidy .css files
 
