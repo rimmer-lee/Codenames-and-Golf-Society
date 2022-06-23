@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const Charter = require('./charter');
 
 const { TITLES, ACTIONS } = require('../constants');
-const seasonDates = require('../utilities/seasonDates');
+const { seasonDates } = require('../utilities/seasons');
 
 const BreakdownSchema = new Schema({
     description: [ String ],

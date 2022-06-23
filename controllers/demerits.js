@@ -4,7 +4,7 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const seasonDates = require('../utilities/seasonDates');
+const { seasonDates } = require('../utilities/seasons');
 const { customDate } = require('../utilities/formatDate');
 
 const { TITLES } = require('../constants');
