@@ -1,0 +1,50 @@
+<% for (const score of playingGroup) { %>
+<% if (loggedIn) { %>
+<div class="col-12 d-flex">
+    <div class="flex-grow-1">
+        <div class="row g-2">
+            <div class="col">
+                <div class="form-floating">
+                    <select id="<%= `${score.playingGroup.index}|${score.playingGroup.player}|id` %>" class="form-select text-capitalize" name="<%= `[${score.playingGroup.index}][${score.playingGroup.player}][id]` %>">
+                    <% for (const player of players) { %>
+                        <% if (playingGroups.map(playingGroup => playingGroup.map(({ player }) => player._id)).flat().some(id => id === player.id) && player.id !== score.player.id) continue; %>
+                        <option value="<%= player.id %>"<%= player.id === score.player.id ? " selected" : "" %>><%= player.name.knownAs %></option>
+                    <% }; %>
+                    </select>
+                    <label for="<%= `${score.playingGroup.index}|${score.playingGroup.player}|id` %>" class="text-capitalize"><%= score.playingGroup.player %></label>
+                </div>
+            </div>
+            <div class="col-4 col-md-2">
+                <div class="form-floating">
+                    <input id="<%= `${score.playingGroup.index}|${score.playingGroup.player}|handicap` %>" class="form-control text-center" type="number" placeholder="Handicap" name="<%= `[${score.playingGroup.index}][${score.playingGroup.player}][handicap]` %>" value="<%= score.handicap %>" max="54">
+                    <label for="<%= `${score.playingGroup.index}|${score.playingGroup.player}|handicap` %>">Handicap</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% continue; %>
+<% }; %>
+<div class="col">
+    <div class="row g-3 px-2">
+        <div class="border border-1 col rounded">
+            <div class="row row-cols-1 p-2">
+                <div class="col text-center text-muted text-capitalize">
+                    <%= score.playingGroup.player %>
+                </div>
+                <h4 class="col text-center">
+                    <%= `${score.player.name.knownAs} (${score.handicap})` %>
+                </h4>
+                <h5 class="col text-center">
+                    <span><%= score.scores.shots.full %></span><span> (</span><span class="<%= score.scores.par.class %>"><%= score.scores.par.full %></span><span>)</span>
+                </h5>
+            </div>
+        </div>
+    </div>
+</div>
+<% }; %>
+<% if (loggedIn) { %>
+<div class="col-12 mt-3">
+    <button id="add-player" class="btn btn-success w-100" type="button">Add Player</button>
+</div>
+<% }; %>

@@ -38,8 +38,8 @@ async function save (req, res) {
     try {
         const { body } = req;
         const { date } = body.round;
-        const { id, tee: teeValue } = body.course;
-        const courseKeys = Object.keys(body).filter(key => key !== id && /^randa\-/.test(key));
+        const { id: courseId, tee: teeValue } = body.course;
+        const courseKeys = Object.keys(body).filter(key => key !== courseId && /^randa\-/.test(key));
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
         let course;
@@ -67,11 +67,38 @@ async function save (req, res) {
                 })
             }).save();
         };
-        if (/^randa-/.test(id)) {
-            const [ , randa ] = id.split('randa-');
+
+        // const course = (async function(courseId) {
+        //     if (/^randa-/.test(courseId)) {
+        //         const [ , randa ] = courseId.split('randa-');
+        //         const C = await Course.findOne({ randa });
+        //         if (!C) {
+        //             const { name, scorecardUrl, tees: teesObject } = body[courseId];
+        //             const teeNames = Object.keys(teesObject);
+        //             const tees = teeNames.map(teeName => {
+        //                 const tee = body.course.tees[teeName.toLowerCase()];
+        //                 const { gender } = teesObject[teeName];
+        //                 return {
+        //                     name: teeName.split(`-${gender}`)[0],
+        //                     gender,
+        //                     holes: tee.map((hole, i) => {
+        //                         const { distance, par, strokeIndex } = hole;
+        //                         return { distance, index: ++i, par, strokeIndex };
+        //                     })
+        //                 };
+        //             });
+        //             return await new Course({ created, name, randa, scorecardUrl, tees, updated: [ created ] }).save();
+        //         };
+        //         return C;
+        //     };
+        //     return await Course.findById(courseId);
+        // })(courseId);
+
+        if (/^randa-/.test(courseId)) {
+            const [ , randa ] = courseId.split('randa-');
             course = await Course.findOne({ randa });
             if (!course) {
-                const { name, scorecardUrl, tees: teesObject } = body[id];
+                const { name, scorecardUrl, tees: teesObject } = body[courseId];
                 const teeNames = Object.keys(teesObject);
                 const tees = teeNames.map(teeName => {
                     const tee = body.course.tees[teeName.toLowerCase()];
@@ -87,7 +114,7 @@ async function save (req, res) {
                 });
                 course = await new Course({ created, name, randa, scorecardUrl, tees, updated: [ created ] }).save();
             };
-        } else course = await Course.findById(id);
+        } else course = await Course.findById(courseId);
 
         const tee = course.tees.find(({ gender, name }) => {
             const lowerTee = teeValue.toLowerCase();
@@ -101,7 +128,7 @@ async function save (req, res) {
         // capture marker, player-a, etc.
         // capturing playing group - some sort of index
 
-        // const existingRound = await Round.findOne({ course, date, tee }) || {
+        // const round = await Round.findOne({ course, date, tee }) || {
         //     created,
         //     course,
         //     games: [],
@@ -119,9 +146,21 @@ async function save (req, res) {
             scores: [],
             tee
         };
+        const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
             const { demerit, handicap, hole, id, team } = body[key];
+
+            // const player = (async function(id) {
+            //     if (/^new\-\d+/.test(id)) {
+            //         const { name: full } = body[id];
+            //         const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
+            //         body[key].id = player.id;
+            //         return player;
+            //     };
+            //     return await User.findById(id);
+            // })(id);
+
             let player;
             if (/^new\-\d+/.test(id)) {
                 const { name: full } = body[id];
@@ -209,28 +248,38 @@ async function view (req, res) {
     const courses = await Course.find();
     const players = await User.findPlayers();
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
+    const loggedIn = !!req.user;
     const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round;
     const currentDate = customDate('yyyy-mm-dd');
     const games = G.map(({ handicap, method, name, players, roundType, summary }, index) => {
+        const teams = [ ...new Set(players.map(({ team }) => team).filter(team => team)) ];
         return {
             handicap,
+            index: index + 1,
             method,
             name,
             players: players.map(({ player }) => S.find(score => score.player._id.toString() === player.toString())),
-            roundType,
-            summary
+            roundType: roundType.capitalize(),
+            summary,
+            teams
         };
     });
+
+    // can we reduce duplication between scores and playingGroups?
     const scores = S.map(({ handicap = 54, player, playingGroup: pg, scores, shots }, scoreIndex) => {
         const playingGroup = (function(playingGroup, playerIndex) {
             const { index, player: p } = playingGroup || { index: 0 };
             const player = (function(player, playerIndex) {
-                if (player === 'marker' || playerIndex === 0) return 'Marker';
-                return `Player ${(player && player.split('-')[1] || String.fromCharCode(96 + playerIndex)).toUpperCase()}`;
+                if (player === 'marker' || playerIndex === 0) return player;
+                return `player ${player && player.split('-')[1] || String.fromCharCode(96 + playerIndex)}`;
             })(p, playerIndex);
-            return { player, index }
+            return { index, player };
         })(pg, scoreIndex);
         return { handicap, player, playingGroup, scores, shots }
+    });
+    const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
+        return scores.filter(({ playingGroup}) => playingGroup.index === playingGroupIndex)
+            .map(({ handicap, player, playingGroup, scores, shots }) => ({ handicap, player, playingGroup, scores, shots }));
     });
 
     // move to Course model as virtual?
@@ -250,7 +299,7 @@ async function view (req, res) {
         };
         return {
             _id,
-            colour,
+            colour: (TEE_COLOURS.find(teeColour => teeColour.colour === colour) || { class: { table: '' } }).class.table,
             distance,
             gender,
             holes,
@@ -262,6 +311,9 @@ async function view (req, res) {
     });
 
     const tee = tees.find(({ _id }) => _id == T);
+
+    // move Round model
+    // can then be used to calculate number of birdies, bogeys, etc. for each player
     for (const score of scores) {
         score.class = score.shots.map((shot, i) => {
             if (!shot) return '';
@@ -280,8 +332,9 @@ async function view (req, res) {
             return 'f-level';
         })(score.scores.par.full);
     };
+
     tee.class = (TEE_COLOURS.find(({ colour }) => colour === tee.colour) || { class: { table: '' } }).class.table;
-    res.render('rounds/edit', { course, courses, currentDate, date, games, id, players, scores, tee, tees });
+    res.render('rounds/edit', { course, courses, currentDate, date, loggedIn, games, id, players, playingGroups, scores, tee, tees });
 };
 
 module.exports = { create, remove, save, serviceWorker, show, update, view };
