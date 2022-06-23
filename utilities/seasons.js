@@ -5,4 +5,11 @@ function seasonDates(year) {
     };
 };
 
-module.exports = { seasonDates };
+function years() {
+    const currentYear = new Date().getFullYear();
+    const startYear = 2021;
+    return Array.from({ length: currentYear - startYear + 1 }, (v, i) => startYear + i)
+        .map(year => ({ year, current: year === currentYear }));
+};
+
+module.exports = { seasonDates, years };
