@@ -2,7 +2,7 @@
 @media (max-width: 576px) {
     .course-tees td {
         width: calc(100% / 4);
-    };
+    }
 }
 
 /* Bootstrap Extra Small (xs) and Small (sm) */
@@ -10,6 +10,12 @@
     #tees td {
         width: calc(100% / 4);
     }
+
+    /* temporary solution */
+    .hole-score {
+        --size: 40%;
+    }
+
 }
 
 /* Bootstrap Medium (md) */
@@ -17,7 +23,21 @@
     #tees td {
         width: calc(100% / 9);
     }
+
+    /* temporary solution */
+    .hole-score {
+        --size: 35%;
+    }
+
 }
+
+@media (min-width: 992px) {
+    /* temporary solution */
+    .hole-score {
+        --size: 50px;
+    }
+}
+
 
 /* Bootstrap Large (lg) */
 @media (min-width: 992px) {
@@ -152,7 +172,6 @@ table#round tr > * {
 }
 
 .hole-score {
-    --size: 40%;
     padding-bottom: var(--size);
     position: absolute;
     width: var(--size);
