@@ -4,7 +4,7 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const { seasonDates } = require('../utilities/seasons');
+const { seasonDates, years } = require('../utilities/seasons');
 const { customDate } = require('../utilities/formatDate');
 
 const { TITLES } = require('../constants');
@@ -34,9 +34,7 @@ async function edit (req, res) {
         req.flash('error', 'Something went wrong');
         return res.redirect('/demerits');
     };
-
-    // I'm not sure that this is correct
-    const { endDate, startDate } = (function() {
+    const { endDate, startDate } = (function(date, year) {
         if (date) {
             const dateParts = date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
             if (dateParts && dateParts.length === 4) {
@@ -54,8 +52,7 @@ async function edit (req, res) {
             };
         };
         return {};
-    })();
-
+    })(date, year);
     if (!endDate && !startDate) {
         req.flash('error', 'Something went wrong');
         return res.redirect('/demerits');
@@ -97,19 +94,9 @@ async function save (req, res) {
 };
 
 async function show (req, res) {
-    const currentYear = new Date().getFullYear();
-    const years = (function() {
-        const years = [];
-        let year = currentYear;
-        while (year >= 2021) {
-            years.push({ year, current: year === currentYear });
-            year--;
-        };
-        return years;
-    })();
     const allPlayers = await User.findMembers();
     const allTitles = TITLES.map(({ value }) => value);
-    const data = await Promise.all(years.map(async ({ year }) => {
+    const data = await Promise.all(years().map(async ({ year }) => {
         const { endDate, startDate } = seasonDates(year);
         const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
