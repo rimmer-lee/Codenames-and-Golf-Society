@@ -312,6 +312,10 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // readImage();
 
 
+// enable sorting and filtering on /rounds
+
+// implement functionality for /rounds/edit
+
 // there's a bug on /rounds/new where the course select isn't always selected
 
 // tidy .css files
