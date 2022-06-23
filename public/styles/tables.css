@@ -82,7 +82,7 @@ input:not(:focus) + .birdie::before,
 input:not(:focus) + .eagle::before,
 input:not(:focus) + .bogey::before,
 input:not(:focus) + .double-bogey::before {
-    --size: 75%;
+    --size: 90%;
     --offset: calc((100% - var(--size)) / 2);
 }
 
@@ -109,7 +109,7 @@ input:not(:focus) + .double-bogey::after {
 
 input:not(:focus) + .eagle::after,
 input:not(:focus) + .double-bogey::after {
-    --size: 90%;
+    --size: 75%;
     --offset: calc((100% - var(--size)) / 2);
 }
 
