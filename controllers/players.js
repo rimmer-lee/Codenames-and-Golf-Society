@@ -48,7 +48,7 @@ async function show (req, res) {
                     id,
                     infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
                     name,
-                    rounds: seasonRounds.filter(({ scores }) => scores.map(({ player }) => player == playerId)).length,
+                    rounds: seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId)).length,
                     titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
                         const { class: tClass, icon, method, value } = t;
                         return { class: tClass, icon, method, value };
