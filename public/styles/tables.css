@@ -167,8 +167,9 @@ input:not(:focus) + .double-bogey::after {
 }
 
 table#round tr > * {
-    max-width: 90px;
-    min-width: 90px;
+    --width: 90px;
+    max-width: var(--width);
+    min-width: var(--width);
 }
 
 .hole-score {
@@ -176,4 +177,8 @@ table#round tr > * {
     position: absolute;
     width: var(--size);
     z-index: -1;
+}
+
+#players td {
+    width: 20%;
 }

@@ -13,55 +13,76 @@
     </div>
 </div>
 <% if (players.length > 0) { %>
-<table class="table table-sm table-bordered table-dark mb-0 lh-lg">
+<table id="players" class="table table-sm table-bordered table-dark mb-0 lh-lg">
     <thead>
         <tr>
-            <% for (const header of ['Name', 'Rounds Played', 'Infractions', 'Title Held', 'Drinks Bought']) { %>
-            <td scope="col">
-                <div class="d-flex justify-content-center align-items-center">
-                    <%= header %>
+            <td class="text-center align-middle" scope="col">
+                Player
+            </td>
+            <td class="text-center align-middle" scope="col">
+                <div class="d-none d-md-block">
+                    Rounds Played
+                </div>
+                <div class="d-md-none">
+                    Rounds
                 </div>
             </td>
-            <% }; %>
+            <td class="text-center align-middle" scope="col">
+                <div class="d-none d-md-block">
+                    Rule Breaks
+                </div>
+                <div class="d-md-none">
+                   Breaks
+                </div>
+            </td>
+            <td class="text-center align-middle" scope="col">
+                <div class="d-none d-md-block">
+                    Titles Held
+                </div>
+                <div class="d-md-none">
+                    Titles
+                </div>
+            </td>
+            <td class="text-center align-middle" scope="col">
+                <div class="d-none d-md-block">
+                    Drinks Bought
+                </div>
+                <div class="d-md-none">
+                    Drinks
+                </div>
+            </td>
         </tr>
     </thead>
-    <tbody class="table-light">
+    <tbody class="text-center align-middle table-light">
         <% for (const player of players) { %>
         <tr>
             <td>
-                <div class="d-flex justify-content-center align-items-center">
-                    <a href="/players/<%= player.id %>">
+                <a href="/players/<%= player.id %>">
+                    <div class="d-none d-md-block">
                         <%= player.name.friendly %>
-                    </a>
-                </div>
+                    </div>
+                    <div class="d-md-none">
+                        <%= player.name.initials.short %>
+                    </div>
+                </a>
             </td>
             <td>
-                <div class="d-flex justify-content-center align-items-center">
-                    <%= player.rounds %>
-                </div>
+                <%= player.rounds %>
             </td>
             <td>
-                <div class="d-flex justify-content-center align-items-center">
-                    <%= player.infractions %>
-                </div>
+                <%= player.infractions %>
             </td>
             <td>
                 <div class="d-flex justify-content-evenly align-items-center">
                     <% for (const title of player.titles) { %>
-                    <div>
-                        <div class="btn btn-<%= title.class %>" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= title.title %> <%= title.value %>">
-                            <div class="d-flex p-0">
-                                <i class="mx-auto bi <%= title.icon %>"></i>
-                            </div>
-                        </div>
+                    <div class="btn btn-<%= title.class %> py-0 px-1" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= title.title %> <%= title.value %>">
+                        <i class="bi <%= title.icon %>"></i>
                     </div>
                     <% }; %>
                 </div>
             </td>
             <td>
-                <div class="d-flex justify-content-center align-items-center">
-                    <%= player.drinks %>
-                </div>
+                <%= player.drinks %>
             </td>
         </tr>
         <% }; %>

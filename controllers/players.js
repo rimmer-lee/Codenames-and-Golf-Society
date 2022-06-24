@@ -64,8 +64,8 @@ async function show (req, res) {
 
 async function view (req, res) {
 
-    req.flash('info', 'Apologies, age under construction')
-    return res.redirect('/rounds');
+    req.flash('info', 'Apologies, page under construction')
+    return res.redirect('/players');
 
     const { id: playerId } = req.params;
     const players = await User.findPlayers();
