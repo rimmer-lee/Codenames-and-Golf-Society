@@ -5,36 +5,61 @@ const Title = require('../models/title');
 const User = require('../models/user');
 
 const { ACTIONS, ROUND_TYPES, TITLES } = require('../constants');
+const { dates, years } = require('../utilities/seasons');
+const sort = require('../utilities/sort');
 
 async function show (req, res) {
-    const demerits = await Demerit.find().populate('action.titles');
-    const drinks = await Drink.find();
-    const players = await User.findPlayers();
-    const rounds = await Round.find().populate('scores.player');
-    const allTitles = await Title.find().sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
-    const titles = TITLES.map(({ icon, value }) => ({ icon, value }));
+    const DEMERITS = await Demerit.find().sort({ 'when.date': 1 }).populate('action.titles');
+    const DRINKS = await Drink.find().sort({ 'when.date': 1 });
+    const PLAYERS = await User.findPlayers();
+    const ROUNDS = await Round.find().sort({ date: 1 });
+    const ALL_TITLES = await Title.find().sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
     const award = ACTIONS.find(({ method }) => method === 'award');
-    for (const player of players) {
-        const playerDemerits = demerits.filter(demerit => String(demerit.player) === player.id);
-        player.demerits = playerDemerits.reduce((sum, demerit) => sum += demerit.action.demerits, 0);
-        player.drinks = drinks.filter(drink => String(drink.player) === player.id).reduce((sum, drink) => sum += drink.value, 0);
-        player.rounds = rounds.filter(({ scores }) => scores.some(score => score.player.id === player.id)).length;
-        player.titles = [];
-    };
-    for (const title of titles) {
-        const filterTitles = allTitles.filter(({ name }) => name === title.value);
-        if (!filterTitles) continue;
-        for (const filterTitle of filterTitles) {
-            if (filterTitle.method === 'award') {
-                if (!filterTitles.filter(({ player }) => player == filterTitle.player).find(({ method }) => method === 'revoke')) {
-                    const holder = players.find(({ id }) => filterTitle.player == id);
-                    if (holder) holder.titles.push({ class: award.class, icon: title.icon, title: award.title, value: title.value });
+    const seasonYears = years();
+    const titles = TITLES.map(({ icon, value }) => ({ icon, value }));
+    const data = seasonYears.map(({ year }) => {
+        const { endDate, startDate } = dates(year);
+        const seasonDemerits = DEMERITS.filter(({ when }) => when.date >= startDate && when.date <= endDate);
+        const seasonDrinks = DRINKS.filter(({ when }) => when.date >= startDate && when.date <= endDate);
+        const seasonRounds = ROUNDS.filter(({ date }) => date >= startDate && date <= endDate);
+        const seasonTitles = ALL_TITLES.filter(({ when }) => when.date >= startDate && when.date <= endDate);
+        const titleHolders = titles.map(({ icon, value }) => {
+            const filteredTitles = seasonTitles.filter(({ name }) => name === value);
+            if (filteredTitles.length === 0) return { holder: undefined };
+            for (const filteredTitle of filteredTitles) {
+                if (filteredTitle.method === 'award') {
+                    if (filteredTitles.some(({ method, player, when }) => method === 'revoke' && player == filteredTitle.player && when.date > filteredTitle.when.date)) continue;
+                    return {
+                        holder: filteredTitle.player,
+                        title: { class: award.class, icon, method: award.title, value }
+                    };
                 };
-                break;
             };
+        });
+        return {
+            players: sort([ ...new Set([
+                ...seasonDemerits.map(({ player }) => player.toString()),
+                ...seasonDrinks.map(({ player }) => player.toString()),
+                ...seasonRounds.map(({ scores }) => scores.map(({ player }) => player.toString())).flat()
+            ]) ].map(playerId => {
+                const { id, name } = PLAYERS.find(({ _id }) => _id == playerId);
+                return {
+                    drinks: seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0),
+                    id,
+                    infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
+                    name,
+                    rounds: seasonRounds.filter(({ scores }) => scores.map(({ player }) => player == playerId)).length,
+                    titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
+                        const { class: tClass, icon, method, value } = t;
+                        return { class: tClass, icon, method, value };
+                    })
+                };
+            }), 'name.friendly'),
+            year
         };
-    };
-    res.render('players/index', { players });
+    });
+    const players = data[0].players;
+    res.render('players/index', { data, players, years: seasonYears });
 };
 
 async function view (req, res) {

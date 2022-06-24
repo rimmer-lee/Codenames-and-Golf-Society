@@ -1,13 +1,22 @@
 <% layout('layouts/boilerplate') %>
 <div class="row my-3 pb-2 border-bottom border-1">
-    <h1>Players</h1>
+    <h1 class="col">Players</h1>
+    <div class="col">
+        <div class="row mx-0">
+            <label class="col fw-bold d-flex align-items-center justify-content-end" for="year">Year</label>
+            <select id="year" class="col form-select" aria-label="player">
+                <% for (const year of years) { %>
+                <option value="<%= year.year %>" <%= year.current ? "selected" : "" %>><%= year.year %></option>
+                <% }; %>
+            </select>
+        </div>
+    </div>
 </div>
-<!-- add a new player button -->
 <% if (players.length > 0) { %>
 <table class="table table-sm table-bordered table-dark mb-0 lh-lg">
     <thead>
         <tr>
-            <% for (const header of ['Name', 'Rounds', 'Demerits', 'Titles', 'Drinks']) { %>
+            <% for (const header of ['Name', 'Rounds Played', 'Infractions', 'Title Held', 'Drinks Bought']) { %>
             <td scope="col">
                 <div class="d-flex justify-content-center align-items-center">
                     <%= header %>
@@ -33,7 +42,7 @@
             </td>
             <td>
                 <div class="d-flex justify-content-center align-items-center">
-                    <%= player.demerits %>
+                    <%= player.infractions %>
                 </div>
             </td>
             <td>
@@ -63,3 +72,9 @@
     There are currently no players
 </div>
 <% }; %>
+<script>
+    const data = JSON.parse('<%- JSON.stringify(data) %>');
+    const TITLES = JSON.parse('<%- JSON.stringify(titles) %>');
+</script>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/players/change-year.js"></script>
