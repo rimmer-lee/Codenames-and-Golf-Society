@@ -4,7 +4,7 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const { seasonDates, years } = require('../utilities/seasons');
+const { dates, years } = require('../utilities/seasons');
 const { customDate } = require('../utilities/formatDate');
 
 const { TITLES } = require('../constants');
@@ -96,9 +96,9 @@ async function save (req, res) {
 async function show (req, res) {
     const allPlayers = await User.findMembers();
     const allTitles = TITLES.map(({ value }) => value);
-    const years = years();
-    const data = await Promise.all(years.map(async ({ year }) => {
-        const { endDate, startDate } = seasonDates(year);
+    const seasonYears = years();
+    const data = await Promise.all(seasonYears.map(async ({ year }) => {
+        const { endDate, startDate } = dates(year);
         const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const titles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
@@ -163,7 +163,7 @@ async function show (req, res) {
         };
         return data;
     }));
-    res.render('demerits/index', { years, data } );
+    res.render('demerits/index', { data, years: seasonYears } );
 };
 
 async function update (req, res) {
