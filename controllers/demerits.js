@@ -96,10 +96,11 @@ async function save (req, res) {
 async function show (req, res) {
     const allPlayers = await User.findMembers();
     const allTitles = TITLES.map(({ value }) => value);
-    const data = await Promise.all(years().map(async ({ year }) => {
+    const years = years();
+    const data = await Promise.all(years.map(async ({ year }) => {
         const { endDate, startDate } = seasonDates(year);
         const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
-        const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ date: 1 }).populate('player');
+        const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
         const titles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
         const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
         const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
