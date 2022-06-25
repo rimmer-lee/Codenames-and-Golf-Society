@@ -343,7 +343,7 @@
                                                         <div class="col-12">
                                                             <div class="form-floating">
                                                                 <select class="form-select text-capitalize text-wrap" id="game-<%= game.index %>|method" name="[game]['<%= game.index %>'][method]" aria-label="game method">
-                                                                    <% for (const method of (games.find(({ name }) => name === game.name) || { options: [] }).options.find(({ type }) => type === 'method') | []) { %>
+                                                                    <% for (const method of ((GAMES.find(({ name }) => name === game.name) || { options: [] }).options.find(({ type }) => type === 'method') || { values: [] }).values) { %>
                                                                     <option value="<%= method %>"<%= method === game.method ? " selected" : "" %>><%= method %></option>
                                                                     <% }; %>
                                                                 </select>
