@@ -375,7 +375,8 @@
                                                     <%= `Game ${game.index}` %>
                                                 </div>
                                                 <h4 class="col text-center">
-                                                    <%= `${game.handicap ? 'Nett ' : ''}${game.method ? (game.method === 'Combined ' ? `${game.method} Score ` : `${game.method} Ball `) : ''}${game.name}${game.roundType ? (game.roundType === 'Full' ? ' for 18' : ` on ${game.roundType} 9`) : ''}` %>
+                                                    <%= console.log(game.method) %>
+                                                    <%= `${game.handicap ? 'Nett ' : ''}${game.method ? (game.method === 'Combined' ? `${game.method} Score ` : `${game.method} Ball `) : ''}${game.name}${game.roundType ? (game.roundType === 'Full' ? ' for 18' : ` on ${game.roundType} 9`) : ''}` %>
                                                 </h4>
                                                 <h5 class="col text-center">
                                                     <%= game.summary %>
