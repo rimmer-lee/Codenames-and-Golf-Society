@@ -17,22 +17,35 @@
     <thead>
         <tr>
             <td class="text-center align-middle" scope="col">
-                Player
+                <div class="d-none d-md-block">
+                    Player
+                </div>
+                <div class="d-md-none">
+                    Plyr.
+                </div>
             </td>
             <td class="text-center align-middle" scope="col">
                 <div class="d-none d-md-block">
                     Rounds Played
                 </div>
                 <div class="d-md-none">
-                    Rounds
+                    Rnds.
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
                 <div class="d-none d-md-block">
-                    Rule Breaks
+                    Quorums Played
                 </div>
                 <div class="d-md-none">
-                   Breaks
+                    Qrms.
+                </div>
+            </td>
+            <td class="text-center align-middle" scope="col">
+                <div class="d-none d-md-block">
+                    Infractions
+                </div>
+                <div class="d-md-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Infractions">
+                   Infrcts.
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -40,7 +53,7 @@
                     Titles Held
                 </div>
                 <div class="d-md-none">
-                    Titles
+                    Ttls.
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -48,7 +61,7 @@
                     Drinks Bought
                 </div>
                 <div class="d-md-none">
-                    Drinks
+                    Drnks.
                 </div>
             </td>
         </tr>
@@ -68,6 +81,9 @@
             </td>
             <td>
                 <%= player.rounds %>
+            </td>
+            <td>
+                <%= player.quorums %>
             </td>
             <td>
                 <%= player.infractions %>

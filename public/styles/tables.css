@@ -180,5 +180,5 @@ table#round tr > * {
 }
 
 #players td {
-    width: 20%;
+    width: calc(100% / 6);
 }

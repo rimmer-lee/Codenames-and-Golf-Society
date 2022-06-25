@@ -42,18 +42,42 @@ async function show (req, res) {
                 ...seasonDrinks.map(({ player }) => player.toString()),
                 ...seasonRounds.map(({ scores }) => scores.map(({ player }) => player.toString())).flat()
             ]) ].map(playerId => {
-                const { id, name } = PLAYERS.find(({ _id }) => _id == playerId);
+                const { id, name, role } = PLAYERS.find(({ _id }) => _id == playerId);
                 return {
                     drinks: seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0),
                     id,
                     infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
                     name,
+                    quorums: (role === 'founder' || role === 'member') ? seasonRounds.filter(({ scores }) => {
+                        return scores.map(({ player }) => PLAYERS.find(({ _id }) => _id.toString() === player.toString()).role)
+                            .filter(role => role === 'founder' || role === 'member').length > 2 &&
+                        scores.some(({ player }) => player == playerId)
+                    }).length : 0,
                     rounds: seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId)).length,
                     titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
                         const { class: tClass, icon, method, value } = t;
                         return { class: tClass, icon, method, value };
                     })
                 };
+
+                // const rounds = seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId));
+                // const data = {
+                //     drinks: seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0),
+                //     id,
+                //     infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
+                //     name,
+                //     titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
+                //         const { class: tClass, icon, method, value } = t;
+                //         return { class: tClass, icon, method, value };
+                //     })
+                // };
+                // data.rounds = rounds.length;
+                // data.quorums = (role === 'founder' || role === 'member') ? ROUNDS.filter(({ scores }) => {
+                //     return scores.map(({ player }) => PLAYERS.find(({ _id }) => _id.toString() === player.toString()).role)
+                //         .filter(role => role === 'founder' || role === 'member').length > 2
+                // }).length : 0;
+                // return data;
+
             }), 'name.friendly'),
             year
         };

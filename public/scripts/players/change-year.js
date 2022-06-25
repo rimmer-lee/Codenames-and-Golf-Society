@@ -5,7 +5,7 @@ document.getElementById('year').addEventListener('change', function() {
     if (!players) return;
     while (tableBody.children.length > 0) tableBody.children[0].remove();
     for (const player of players) {
-        const { drinks, id, infractions, name, rounds, titles } = player;
+        const { drinks, id, infractions, name, quorums, rounds, titles } = player;
         const children = titles.map(({ class: tClass, icon, method, value }) => {
             return {
                 classList: ['btn', `btn-${tClass}`, 'py-0', 'px-1'],
@@ -54,6 +54,10 @@ document.getElementById('year').addEventListener('change', function() {
                 {
                     type: 'td',
                     innerText: rounds.toString()
+                },
+                {
+                    type: 'td',
+                    innerText: quorums.toString()
                 },
                 {
                     type: 'td',
