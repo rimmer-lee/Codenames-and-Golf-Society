@@ -1,8 +1,20 @@
-const tableBody = document.querySelector('table > tbody');
+const playersTable = document.getElementById('players');
+const tableBody = playersTable.querySelector('table > tbody');
+
+// shared with public/scripts/rounds/shared-functions.js
+function toggleVisibility(element, show = true) {
+    element.classList.toggle('d-none', !show);
+    if (show) return element.removeAttribute('visibility');
+    return element.setAttribute('visibility', 'hidden');
+};
 
 document.getElementById('year').addEventListener('change', function() {
     const { players } = data.find(({ year }) => year == this.value);
-    if (!players) return;
+    const availableData = players && players.length > 0;
+    toggleVisibility(playersTable, availableData);
+    toggleVisibility(document.getElementById('key'), availableData);
+    toggleVisibility(document.getElementById('no-data'), !availableData);
+    if (!availableData) return;
     while (tableBody.children.length > 0) tableBody.children[0].remove();
     for (const player of players) {
         const { drinks, id, infractions, name, quorums, rounds, titles } = player;
