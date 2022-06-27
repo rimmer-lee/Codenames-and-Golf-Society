@@ -17,14 +17,16 @@
     </td>
     <% }; %>
     <% }; %>
+    <% for (const scores of playingGroups) { %>
     <% for (const score of scores) { %>
     <td>
         <div class="d-flex align-items-center justify-content-center table-input">
             <label for="<%= i - 1 %>|hole-<%= i %>" class="d-none"></label>
-            <input id="<%= i - 1 %>|hole-<%= i %>" class="text-center" type="number" min="1" name="[<%= i - 1 %>][hole]" value="<%= score.shots[i - 1] || '' %>"<%= !loggedIn && ' disabled' %>>
-            <div class="hole-score<%= ` ${score.class[i - 1]}` || '' %>"></div>
+            <input id="<%= i - 1 %>|hole-<%= i %>" class="text-center" type="number" min="1" name="[<%= i - 1 %>][hole]" value="<%= score.shots[i - 1] || "" %>"<%= !loggedIn && " disabled" %>>
+            <div class="hole-score<%= ` ${score.class[i - 1]}` || "" %>"></div>
         </div>
     </td>
+    <% }; %>
     <% }; %>
 </tr>
 <% }; %>

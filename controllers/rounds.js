@@ -264,24 +264,6 @@ async function view (req, res) {
             teams
         };
     });
-
-    // can we reduce duplication between scores and playingGroups?
-    const scores = S.map(({ handicap = 54, player, playingGroup: pg, scores, shots }, scoreIndex) => {
-        const playingGroup = (function(playingGroup, playerIndex) {
-            const { index, player: p } = playingGroup || { index: 0 };
-            const player = (function(player, playerIndex) {
-                if (player === 'marker' || playerIndex === 0) return player;
-                return `player ${player && player.split('-')[1] || String.fromCharCode(96 + playerIndex)}`;
-            })(p, playerIndex);
-            return { index, player };
-        })(pg, scoreIndex);
-        return { handicap, player, playingGroup, scores, shots }
-    });
-    const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
-        return scores.filter(({ playingGroup}) => playingGroup.index === playingGroupIndex)
-            .map(({ handicap, player, playingGroup, scores, shots }) => ({ handicap, player, playingGroup, scores, shots }));
-    });
-
     const tees = course.tees.map(({ _id, colourClasses, distance, gender, holes, measure, name, names, par, ratings }) => {
         const { long, short } = names;
         return {
@@ -297,29 +279,45 @@ async function view (req, res) {
         };
     });
     const tee = tees.find(({ _id }) => _id == T);
+    const scores = S.map(({ handicap = 54, player, playingGroup: pg, scores, shots }, scoreIndex) => {
+        const playingGroup = (function(playingGroup, playerIndex) {
+            const { index, player: p } = playingGroup || { index: 0 };
+            const player = (function(player, playerIndex) {
+                if (player === 'marker' || playerIndex === 0) return player;
+                return `player ${player && player.split('-')[1] || String.fromCharCode(96 + playerIndex)}`;
+            })(p, playerIndex);
+            return { index, player };
+        })(pg, scoreIndex);
+        return { handicap, player, playingGroup, scores, shots };
+    });
+    const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
+        return scores.filter(({ playingGroup}) => playingGroup.index === playingGroupIndex)
+            .map(({ handicap, player, playingGroup, scores, shots }) => {
 
-    // move Round model
-    // can then be used to calculate number of birdies, bogeys, etc. for each player
-    for (const score of scores) {
-        score.class = score.shots.map((shot, i) => {
-            if (!shot) return '';
-            const { par } = tee.holes.find(({ index }) => index === (i + 1)) || { par: undefined };
-            if (!par) return '';
-            const parScore = shot - par;
-            if (parScore < -1) return 'eagle';
-            if (parScore === -1) return 'birdie';
-            if (parScore === 1) return 'bogey';
-            if (parScore > 1) return 'double-bogey';
-            return '';
-        });
-        score.scores.par.class = (function(par) {
-            if (par > 0) return 'f-over';
-            if (par < 0) return 'f-under';
-            return 'f-level';
-        })(score.scores.par.full);
-    };
+                // move Round model
+                // can then be used to calculate number of birdies, bogeys, etc. for each player
+                const scoreClass = shots.map((shot, i) => {
+                    if (!shot) return '';
+                    const { par } = tee.holes.find(({ index }) => index === (i + 1)) || { par: undefined };
+                    if (!par) return '';
+                    const parScore = shot - par;
+                    if (parScore < -1) return 'eagle';
+                    if (parScore === -1) return 'birdie';
+                    if (parScore === 1) return 'bogey';
+                    if (parScore > 1) return 'double-bogey';
+                    return '';
+                });
+                scores.par.class = (function(par) {
+                    if (par > 0) return 'f-over';
+                    if (par < 0) return 'f-under';
+                    return 'f-level';
+                })(scores.par.full);
 
-    res.render('rounds/edit', { course, courses, currentDate, date, loggedIn, games, id, players, playingGroups, scores, tee, tees });
+                return { class: scoreClass, handicap, player, playingGroup, scores, shots };
+
+            });
+    });
+    res.render('rounds/edit', { course, courses, currentDate, date, loggedIn, games, id, players, playingGroups, tee, tees });
 };
 
 module.exports = { create, remove, save, serviceWorker, show, update, view };
