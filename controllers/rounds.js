@@ -282,24 +282,11 @@ async function view (req, res) {
             .map(({ handicap, player, playingGroup, scores, shots }) => ({ handicap, player, playingGroup, scores, shots }));
     });
 
-    // move to Course model as virtual?
-    const tees = course.tees.map(({ _id, colour, distance, gender, holes, measure, name, par, ratings }) => {
-        let long = short = name;
-        if (/\s/.test(name)) short = short.split(' ');
-        else short = short.split('/');
-        short = short.map(name => {
-            if (!/\D/.test(name)) return name;
-            for (const letter of name) {
-                if (/\w/.test(letter)) return letter.toUpperCase();
-            };
-        }).join('');
-        if (gender && course.tees.filter(tee => tee.name === name).length > 1) {
-            long += ` (${gender[0].toUpperCase()}${gender.substr(1).toLowerCase()})`;
-            short += ` (${gender[0].toUpperCase()})`;
-        };
+    const tees = course.tees.map(({ _id, colourClasses, distance, gender, holes, measure, name, names, par, ratings }) => {
+        const { long, short } = names;
         return {
             _id,
-            colour: (TEE_COLOURS.find(teeColour => teeColour.colour === colour) || { class: { table: '' } }).class.table,
+            colour: (colourClasses || { table: '' }).table,
             distance,
             gender,
             holes,
@@ -309,7 +296,6 @@ async function view (req, res) {
             ratings
         };
     });
-
     const tee = tees.find(({ _id }) => _id == T);
 
     // move Round model
@@ -333,7 +319,6 @@ async function view (req, res) {
         })(score.scores.par.full);
     };
 
-    tee.class = (TEE_COLOURS.find(({ colour }) => colour === tee.colour) || { class: { table: '' } }).class.table;
     res.render('rounds/edit', { course, courses, currentDate, date, loggedIn, games, id, players, playingGroups, scores, tee, tees });
 };
 

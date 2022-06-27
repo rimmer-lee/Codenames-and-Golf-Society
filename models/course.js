@@ -7,8 +7,9 @@ const { COUNTRY_CODES, TEE_COLOURS } = require('../constants');
 
 const { searchCourse, searchCourses } = require('../utilities/externalApis');
 
-// is this necessary?
-require('../utilities/capitalize');
+function singleDecimal(number) {
+    return Number.parseFloat(number).toFixed(1)
+};
 
 const options = { toJSON: { virtuals: true } };
 
@@ -57,6 +58,9 @@ const TeeSchema = new Schema({
         type: String,
         enum: ['Male', 'Female']
     },
+    // colour: {
+    //     enum: TEE_COLOURS
+    // },
     colour: {
         type: String,
         enum: TEE_COLOURS.map(({ colour }) => colour)
@@ -65,7 +69,7 @@ const TeeSchema = new Schema({
         course: {
             full: Number,
             front: Number,
-            back: Number,
+            back: Number
         },
         bogey: Number,
         slope: {
@@ -187,11 +191,11 @@ CourseSchema.pre('save', async function(next) {
                 // tee.par = { full: +Par };
                 tee.ratings = {
                     course: {
-                        full: Number.parseFloat(CourseRating).toFixed(1),
-                        front: Number.parseFloat(courseFront).toFixed(1),
-                        back: Number.parseFloat(courseBack).toFixed(1)
+                        full: singleDecimal(CourseRating),
+                        front: singleDecimal(courseFront),
+                        back: singleDecimal(courseBack)
                     },
-                    bogey: Number.parseFloat(BogeyRating).toFixed(1),
+                    bogey: singleDecimal(BogeyRating),
                     slope: {
                         full: +SlopeRating,
                         front: +slopeFront,
@@ -234,11 +238,35 @@ CourseSchema.virtual('scorecardUrl.full').get(function() {
     return `https://${domain}${path}`;
 });
 
+// won't be necessary if we save the individual TEE_COLOURS object to TeeSchema.colour
+TeeSchema.virtual('colourClasses').get(function() {
+    const { colour } = this;
+    return (TEE_COLOURS.find(teeColour => teeColour.colour === colour) || { class: {} }).class;
+});
+
 TeeSchema.virtual('measure.short').get(function() {
     const { full } = this.measure;
     if (full === 'yards') return 'yd';
     if (full === 'metres') return 'm';
     return undefined;
+});
+
+TeeSchema.virtual('names').get(function() {
+    const { gender, name } = this;
+    const { tees } = this.parent();
+    const multiple = gender && tees.filter(tee => tee.name === name).length > 1;
+    const long = `${name}${multiple ? ` (${gender.capitalize()})` : ''}`;
+    const short = `${name.split((function(value) {
+        if (/\s/.test(value)) return ' ';
+        if (/\//.test(value)) return '/';
+        return;
+    })(name)).map(value => {
+        if (!/\D/.test(value)) return value;
+        for (const v of value) {
+            if (/\w/.test(v)) return v.toUpperCase();
+        };
+    }).join('')}${multiple ? ` (${gender[0].toUpperCase()})` : ''}`;
+    return { long, short };
 });
 
 module.exports = mongoose.model('Course', CourseSchema);

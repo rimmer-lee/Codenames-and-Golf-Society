@@ -5,14 +5,14 @@
     </td>
     <% for (const property of ['distance', 'par', 'strokeIndex']) { %>
     <% if (loggedIn) { %>
-    <td class="<%= tee.class %>">
+    <td class="<%= tee.colour %>">
         <div class="d-flex justify-content-center">
             <label for="<%= `hole-${i}|${property}` %>" class="form-label d-none"></label>
             <input id="<%= `hole-${i}|${property}` %>" class="form-control text-center" type="number" min="1" max="18" name="[hole][<%= property %>]" value="<%= tee.holes[i - 1][property] %>">
         </div>
     </td>
     <% } else { %>
-    <td class="text-center align-middle <%= tee.class %>">
+    <td class="text-center align-middle <%= tee.colour %>">
         <%= tee.holes[i - 1][property] %>
     </td>
     <% }; %>
