@@ -170,6 +170,7 @@ const GAMES = [
 ];
 const GENDERS = ['ambiguous', 'female', 'male', 'trans'];
 const NAME_TITLES = ['Master', 'Mr', 'Ms', 'Miss', 'Mrs', 'Mx', 'Lord', 'Lady', 'Sir', 'Dame', 'Dr', 'Prof'];
+const NON_MEMBERS = ['guest', 'super'];
 const PAR_CLASSES = ['f-level', 'f-over', 'f-under'];
 const ROLES = ['admin', 'founder', 'guest', 'member', 'super'];
 const ROUND_TYPES = [

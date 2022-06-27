@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
 const Schema = mongoose.Schema;
 
-const { GENDERS, NAME_TITLES, ROLES } = require('../constants');
+const { GENDERS, NAME_TITLES, NON_MEMBERS, ROLES } = require('../constants');
 
 const { customDate } = require('../utilities/formatDate');
 const sort = require('../utilities/sort');
@@ -84,13 +84,13 @@ UserSchema.pre('save', async function(next) {
         switch (i) {
             case 1:
                 this.name.first = names.shift();
-                break;
+                return next();
             case 2:
                 this.name.last = names.pop();
-                break;
+                return next();
             case 3:
                 this.name.middle = names;
-                break;
+                return next();
         };
     };
     next();
@@ -133,7 +133,7 @@ UserSchema.virtual('name.initials').get(function() {
 });
 
 UserSchema.statics.findMembers = async function() {
-    const members = await this.find({ 'role': { $nin: ['guest', 'super'] } });
+    const members = await this.find({ 'role': { $nin: NON_MEMBERS } });
     return sort(members, 'name.friendly');
 };
 

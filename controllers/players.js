@@ -4,9 +4,13 @@ const Round = require('../models/round');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const { ACTIONS, ROUND_TYPES, TITLES } = require('../constants');
+const { ACTIONS, NON_MEMBERS, ROUND_TYPES, TITLES } = require('../constants');
 const { dates, years } = require('../utilities/seasons');
 const sort = require('../utilities/sort');
+
+function isMember(role) {
+    return !NON_MEMBERS.some(r => r === role);
+};
 
 async function show (req, res) {
     const DEMERITS = await Demerit.find().sort({ 'when.date': 1 }).populate('action.titles');
@@ -43,41 +47,23 @@ async function show (req, res) {
                 ...seasonRounds.map(({ scores }) => scores.map(({ player }) => player.toString())).flat()
             ]) ].map(playerId => {
                 const { id, name, role } = PLAYERS.find(({ _id }) => _id == playerId);
-                return {
+                const playerRounds = seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId));
+                const data = {
                     drinks: seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0),
                     id,
                     infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
                     name,
-                    quorums: (role === 'founder' || role === 'member') ? seasonRounds.filter(({ scores }) => {
-                        return scores.map(({ player }) => PLAYERS.find(({ _id }) => _id.toString() === player.toString()).role)
-                            .filter(role => role === 'founder' || role === 'member').length > 2 &&
-                        scores.some(({ player }) => player == playerId)
-                    }).length : 0,
-                    rounds: seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId)).length,
                     titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
                         const { class: tClass, icon, method, value } = t;
                         return { class: tClass, icon, method, value };
                     })
                 };
-
-                // const rounds = seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId));
-                // const data = {
-                //     drinks: seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0),
-                //     id,
-                //     infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
-                //     name,
-                //     titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
-                //         const { class: tClass, icon, method, value } = t;
-                //         return { class: tClass, icon, method, value };
-                //     })
-                // };
-                // data.rounds = rounds.length;
-                // data.quorums = (role === 'founder' || role === 'member') ? ROUNDS.filter(({ scores }) => {
-                //     return scores.map(({ player }) => PLAYERS.find(({ _id }) => _id.toString() === player.toString()).role)
-                //         .filter(role => role === 'founder' || role === 'member').length > 2
-                // }).length : 0;
-                // return data;
-
+                data.rounds = playerRounds.length;
+                data.quorums = isMember(role) ? playerRounds.filter(({ scores }) => {
+                    return scores.map(({ player }) => PLAYERS.find(({ _id }) => _id.toString() === player.toString()).role)
+                        .filter(role => isMember(role)).length > 2
+                }).length : 0;
+                return data;
             }), 'name.friendly'),
             year
         };
