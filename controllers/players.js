@@ -52,23 +52,16 @@ async function show (req, res) {
                 ...seasonRounds.map(({ scores }) => scores.map(({ player }) => player.toString())).flat()
             ]) ].map(playerId => {
                 const { id, name, role } = PLAYERS.find(({ _id }) => _id == playerId);
+                const drinks = seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0);
+                const infractions = seasonDemerits.filter(({ player }) => player == playerId).length;
                 const playerRounds = seasonRounds.filter(({ scores }) => scores.some(({ player }) => player == playerId));
-                const data = {
-                    drinks: seasonDrinks.filter(({ player }) => player == playerId).reduce((sum, { value }) => sum += value, 0),
-                    id,
-                    infractions: seasonDemerits.filter(({ player }) => player == playerId).length,
-                    name,
-                    titles: titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => {
-                        const { class: tClass, icon, method, value } = t;
-                        return { class: tClass, icon, method, value };
-                    })
-                };
-                data.rounds = playerRounds.length;
-                data.quorums = isMember(role) ? playerRounds.filter(({ scores }) => {
+                const quorums = isMember(role) ? playerRounds.filter(({ scores }) => {
                     return scores.map(({ player }) => PLAYERS.find(({ _id }) => _id.toString() === player.toString()).role)
                         .filter(role => isMember(role)).length > 2
                 }).length : 0;
-                return data;
+                const rounds = playerRounds.length;
+                const titles = titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => t);
+                return { drinks, infractions, id, name, quorums, rounds, titles };
             }), 'name.friendly'),
             year
         };
