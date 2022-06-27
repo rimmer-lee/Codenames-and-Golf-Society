@@ -8,6 +8,11 @@ const { ACTIONS, NON_MEMBERS, ROUND_TYPES, TITLES } = require('../constants');
 const { dates, years } = require('../utilities/seasons');
 const sort = require('../utilities/sort');
 
+function isBetweenDates(year, value) {
+    const { endDate, startDate } = dates(year);
+    return value >= startDate && value <= endDate;
+};
+
 function isMember(role) {
     return !NON_MEMBERS.some(r => r === role);
 };
@@ -22,17 +27,17 @@ async function show (req, res) {
     const seasonYears = years();
     const titles = TITLES.map(({ icon, value }) => ({ icon, value }));
     const data = seasonYears.map(({ year }) => {
-        const { endDate, startDate } = dates(year);
-        const seasonDemerits = DEMERITS.filter(({ when }) => when.date >= startDate && when.date <= endDate);
-        const seasonDrinks = DRINKS.filter(({ when }) => when.date >= startDate && when.date <= endDate);
-        const seasonRounds = ROUNDS.filter(({ date }) => date >= startDate && date <= endDate);
-        const seasonTitles = ALL_TITLES.filter(({ when }) => when.date >= startDate && when.date <= endDate);
+        const seasonDemerits = DEMERITS.filter(({ when }) => isBetweenDates(year, when.date));
+        const seasonDrinks = DRINKS.filter(({ when }) => isBetweenDates(year, when.date));
+        const seasonRounds = ROUNDS.filter(({ date }) => isBetweenDates(year, date));
+        const seasonTitles = ALL_TITLES.filter(({ when }) => isBetweenDates(year, when.date));
         const titleHolders = titles.map(({ icon, value }) => {
             const filteredTitles = seasonTitles.filter(({ name }) => name === value);
             if (filteredTitles.length === 0) return { holder: undefined };
             for (const filteredTitle of filteredTitles) {
                 if (filteredTitle.method === 'award') {
-                    if (filteredTitles.some(({ method, player, when }) => method === 'revoke' && player == filteredTitle.player && when.date > filteredTitle.when.date)) continue;
+                    if (filteredTitles.some(({ method, player, when }) => method === 'revoke' &&
+                        player == filteredTitle.player && when.date > filteredTitle.when.date)) continue;
                     return {
                         holder: filteredTitle.player,
                         title: { class: award.class, icon, method: award.title, value }
