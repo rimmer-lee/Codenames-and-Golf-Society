@@ -312,6 +312,10 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // readImage();
 
 
+// for rounds/new
+//      - add feature to name teams
+//      - for handicap enabled, offer standard or competition (deduct lower handicap from others - applicable for Stableford and match play)
+
 // should utilities files be combined in a utilities.js???
 
 // enable sorting and filtering on /rounds
