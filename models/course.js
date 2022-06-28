@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const Region = require('../models/region');
 
-const { COUNTRY_CODES, TEE_COLOURS } = require('../constants');
+const { BREAKDOWN_OBJECT, COUNTRY_CODES, GENDERS, TEE_COLOURS } = require('../constants');
 
 const { searchCourse, searchCourses } = require('../utilities/externalApis');
 
@@ -56,7 +56,8 @@ const TeeSchema = new Schema({
     name: String,
     gender: {
         type: String,
-        enum: ['Male', 'Female']
+        // enum: GENDERS
+        enum: ['Male', 'Female', 'male', 'female']
     },
     // colour: {
     //     enum: TEE_COLOURS
@@ -66,11 +67,7 @@ const TeeSchema = new Schema({
         enum: TEE_COLOURS.map(({ colour }) => colour)
     },
     ratings: {
-        course: {
-            full: Number,
-            front: Number,
-            back: Number
-        },
+        course: BREAKDOWN_OBJECT,
         bogey: Number,
         slope: {
             full: {
@@ -90,16 +87,8 @@ const TeeSchema = new Schema({
             }
         }
     },
-    distance: {
-        full: Number,
-        front: Number,
-        back: Number
-    },
-    par: {
-        full: Number,
-        front: Number,
-        back: Number
-    },
+    distance: BREAKDOWN_OBJECT,
+    par: BREAKDOWN_OBJECT,
     measure: {
         full: {
             type: String,
@@ -148,7 +137,7 @@ const CourseSchema = new Schema({
 CourseSchema.pre('validate', function(next) {
     for (const tee of this.tees) {
         const { gender } = tee;
-        if (gender) tee.gender = gender.capitalize();
+        if (gender) tee.gender = gender.toLowerCase();
         for (hole of tee.holes) {
             const { distance, par, strokeIndex } = hole;
             if (distance < 0) hole.distance = undefined;

@@ -3,6 +3,11 @@ module.exports = {
         { method: 'award', title: 'Award', class: 'success', tooltip: 'top' },
         { method: 'revoke', title: 'Revoke', class: 'danger', tooltip: 'bottom' }
     ],
+    BREAKDOWN_OBJECT: {
+        back: Number,
+        front: Number,
+        full: Number
+    },
     COUNTRY_CODES: [
         { name: 'Argentina', 'alpha-3': 'ARG' },
         { name: 'Australia', 'alpha-3': 'AUS' },
