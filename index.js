@@ -52,8 +52,8 @@ const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 
 const port = process.env.PORT;
 const secret = process.env.SECRET;
-// const dbUrl = process.env.DB_URL;
-const dbUrl = 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
+const dbUrl = process.env.DB_URL;
+// const dbUrl = 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
 const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({
