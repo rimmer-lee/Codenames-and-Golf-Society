@@ -317,34 +317,19 @@ const RoundSchema = new Schema({
     tee: String
 }, options);
 
-RoundSchema.virtual('formattedDate').get(function () {
-    const { date } = this;
-    return {
-        datePicker: formatDate.customDate('yyyy-mm-dd', date),
-        friendly: formatDate.customDate('dd/mm/yyyy', date),
-        full: formatDate.fullDate(date)
-    };
-});
-
-ScoreSchema.virtual('classes.par').get(function () {
-    const { par } = this.scores;
-    const classesObject = {};
-    for (const key of Object.keys(par)) {
-        const value = par[key] || 0;
-        classesObject[key] = parClass(value);
-    };
-    return classesObject;
+RoundSchema.pre('validate', async function(next) {
+    this.lastModified.date = Date.now();
+    next();
 });
 
 RoundSchema.pre('save', async function(next) {
-    const players = await User.find();
     const { course: courseId, games, scores, tee } = this;
+    const players = await User.find();
     const course = await Course.findById(courseId);
     const { holes } = course.tees.find(({ _id}) => _id == tee);
     const gamesObject = calculateGames({ games, scores }, holes, players);
     this.games = gamesObject.games;
     this.scores = gamesObject.scores;
-    this.lastModified.date = Date.now();
     next();
 });
 
@@ -401,5 +386,24 @@ RoundSchema.pre('save', async function(next) {
 //     };
 //     next();
 // });
+
+RoundSchema.virtual('formattedDate').get(function () {
+    const { date } = this;
+    return {
+        datePicker: formatDate.customDate('yyyy-mm-dd', date),
+        friendly: formatDate.customDate('dd/mm/yyyy', date),
+        full: formatDate.fullDate(date)
+    };
+});
+
+ScoreSchema.virtual('classes.par').get(function () {
+    const { par } = this.scores;
+    const classesObject = {};
+    for (const key of Object.keys(par)) {
+        const value = par[key] || 0;
+        classesObject[key] = parClass(value);
+    };
+    return classesObject;
+});
 
 module.exports = mongoose.model('Round', RoundSchema);
