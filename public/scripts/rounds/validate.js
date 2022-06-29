@@ -55,20 +55,5 @@ for (const form of document.querySelectorAll('form.needs-validation')) {
                 addInput(form, `[${player.id}][${property}]`, player[property].full || player[property]);
             };
         };
-        // for (const course of JSON.parse(window.localStorage.getItem('courses')) || []) {
-        //     const { randa, scorecardUrl, tees } = course;
-        //     for (const property of ['name', 'randa']) addInput(form, `[randa-${randa}][${property}]`, course[property]);
-        //     for (const property of ['domain', 'path']) addInput(form, `[randa-${randa}][scorecardUrl][${property}]`, scorecardUrl[property]);
-        //     for (const tee of tees) {
-        //         const { gender, holes, name } = tee;
-        //         const teeName = `${name}${tees.filter(({ name }) => name === name).length > 1 ? `-${gender}` : ''}`;
-        //         addInput(form, `[randa-${randa}][tees][${teeName}][gender]`, gender);
-        //         for (const hole of holes) {
-        //             for (const property of ['distance', 'par', 'strokeIndex']) {
-        //                 addInput(form, `[randa-${randa}][tees][${teeName}][${+hole.index}][${property}]`, hole[property]);
-        //             };
-        //         };
-        //     };
-        // };
     }, { once: true });
 };
