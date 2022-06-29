@@ -315,6 +315,7 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // for rounds/new
 //      - add feature to name teams
 //      - for handicap enabled, offer standard or competition (deduct lower handicap from others - applicable for Stableford and match play)
+//      - move tee from round schema to score schema and allow individual players to choose which tee they're playing off
 
 // should utilities files be combined in a utilities.js???
 
