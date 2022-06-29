@@ -1,5 +1,5 @@
 <% for (const score of playingGroup) { %>
-<% if (loggedIn) { %>
+<% if (editAccess) { %>
 <div class="col-12 d-flex">
     <div class="flex-grow-1">
         <div class="row g-2">
@@ -43,7 +43,7 @@
     </div>
 </div>
 <% }; %>
-<% if (loggedIn) { %>
+<% if (editAccess) { %>
 <div class="col-12 mt-3">
     <button id="add-player" class="btn btn-success w-100" type="button">Add Player</button>
 </div>
