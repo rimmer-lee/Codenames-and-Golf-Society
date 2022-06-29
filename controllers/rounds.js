@@ -9,7 +9,8 @@ const User = require('../models/user');
 
 const { customDate } = require('../utilities/formatDate');
 const sort = require('../utilities/sort');
-const { TEE_COLOURS, TITLES } = require('../constants');
+
+const { TITLES } = require('../constants');
 
 // used client-side also
 function getPlayerKeys(object) {
@@ -30,8 +31,10 @@ async function create (req, res) {const date = customDate('yyyy-mm-dd');
 };
 
 async function remove (req, res) {
+
     req.flash('info', 'That feature is not available yet');
     res.redirect('/rounds');
+
 };
 
 async function save (req, res) {
@@ -39,107 +42,38 @@ async function save (req, res) {
         const { body } = req;
         const { date } = body.round;
         const { id: courseId, tee: teeValue } = body.course;
-        // const courseKeys = Object.keys(body).filter(key => /^randa\-/.test(key));
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
-        // let course;
-        // for (const key of courseKeys) {
-        //     const { name, randa, scorecardUrl, tees = {} } = body[key];
-        //     await new Course({
-        //         created,
-        //         name,
-        //         randa,
-        //         scorecardUrl,
-        //         tees: Object.keys(tees).map(teeKey => {
-        //             const tee = tees[teeKey];
-        //             const { gender } = tee;
-        //             return {
-        //                 gender,
-        //                 holes: Object.keys(tee).filter(key => key !== 'gender' && /\d{1,2}/.test(key)).map(index => {
-        //                     const { distance, par, strokeIndex } = tee[index];
-        //                     return { distance, index, par, strokeIndex };
-        //                 }),
-        //                 name: teeKey.split(`-${gender}`)[0]
-        //             };
-        //         }),
-        //         updated: [ created ],
-        //     }).save();
-        // };
-
         const course = await Course.findById(courseId);
-
-        // if (/^randa-/.test(courseId)) {
-        //     const [ , randa ] = courseId.split('randa-');
-        //     course = await Course.findOne({ randa });
-        //     // if (!course) {
-        //     //     const { name, scorecardUrl, tees: teesObject } = body.course;
-        //     //     const tees = Object.keys(teesObject).map(teeName => {
-        //     //         const tee = body.course.tees[teeName.toLowerCase()];
-        //     //         const { gender } = teesObject[teeName];
-        //     //         return {
-        //     //             name: teeName.split(`-${gender}`)[0],
-        //     //             gender,
-        //     //             holes: tee.map((hole, i) => {
-        //     //                 const { distance, par, strokeIndex } = hole;
-        //     //                 return { distance, index: ++i, par, strokeIndex };
-        //     //             })
-        //     //         };
-        //     //     });
-        //     //     course = await new Course({ created, name, randa, scorecardUrl, tees, updated: [ created ] }).save();
-        //     // };
-        // } else course = await Course.findById(courseId);
-
         const tee = course.tees.find(({ gender, name }) => {
             const lowerTee = teeValue.toLowerCase();
             const [ teeName, teeGender ] = lowerTee.split('-');
             if (!teeGender) return name.toLowerCase() === teeName;
             return `${name}-${gender}`.toLowerCase() === lowerTee;
         })._id
-
-        // if a round has already been completed on the same day and at the same course, update that round
-
-        // capture marker, player-a, etc.
-        // capturing playing group - some sort of index
-
-        const round = await Round.findOne({ course, date, tee }) || {
-            created,
-            course,
-            games: [],
-            date,
-            scores: [],
-            tee
-        };
-
-
-        // const round = {
-        //     created,
-        //     course,
-        //     games: [],
-        //     date,
-        //     scores: [],
-        //     tee
-        // };
+        const round = await Round.findOne({ course, date, tee }) ||
+            { created, course, games: [], date, scores: [], tee };
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
             const { demerit, handicap, hole, id, team } = body[key];
 
-            const player = (async function(id) {
-                if (/^new\-\d+/.test(id)) {
-                    const { name: full } = body[id];
-                    const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
-                    body[key].id = player.id;
-                    return player;
-                };
-                return await User.findById(id);
-            })(id);
+            // const player = (async function(id) {
+            //     if (/^new\-\d+/.test(id)) {
+            //         const { name: full } = body[id];
+            //         const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
+            //         body[key].id = player.id;
+            //         return player;
+            //     };
+            //     return await User.findById(id);
+            // })(id);
 
-            // let player;
-            // if (/^new\-\d+/.test(id)) {
-            //     const { name: full } = body[id];
-            //     player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
-            //     body[key].id = player.id;
-            // } else player = await User.findById(id);
+            let player;
+            if (/^new\-\d+/.test(id)) {
+                const { name: full } = body[id];
+                player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
+                body[key].id = player.id;
+            } else player = await User.findById(id);
 
             round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots: hole.map(Number), team });
 
@@ -187,9 +121,9 @@ async function save (req, res) {
                 roundType
             });
         };
-        if (round.created.date !== date) await new Round(round).save();
-        else await round.save();
-        req.session.deleteLocalStorage = ['round', 'courses', 'players'];
+        if (round._id) await round.save();
+        else await new Round(round).save();
+        req.session.deleteLocalStorage = ['round', 'players'];
         return res.redirect('/rounds');
     } catch (error) {
         console.error(error);
@@ -211,10 +145,9 @@ async function show (req, res) {
 
 async function update (req, res) {
 
-    // will need to save course as well
-
     console.log(JSON.parse(Object.keys(req.body)[0]).a)
     res.json({ success: true, message: req.params.id });
+
 };
 
 async function view (req, res) {
