@@ -12,7 +12,7 @@ const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 // const mongoSanitize = require('express-mongo-sanitize');
-const MongoStore = require('connect-mongo').default;
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const path = require('path');
 const session = require('express-session');
@@ -52,8 +52,8 @@ const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 
 const port = process.env.PORT;
 const secret = process.env.SECRET;
-const dbUrl = process.env.DB_URL;
-// const dbUrl = 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
+// const dbUrl = process.env.DB_URL;
+const dbUrl = 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
 const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({

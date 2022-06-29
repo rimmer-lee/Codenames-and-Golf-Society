@@ -1,4 +1,4 @@
-function addInput(name, value) {
+function addInput(form, name, value) {
     form.appendChild(createElement({
         type: 'input',
         classList: ['d-none', 'update-data-ignore'],
@@ -52,21 +52,23 @@ for (const form of document.querySelectorAll('form.needs-validation')) {
         };
         for (const player of JSON.parse(window.localStorage.getItem('players')) || []) {
             for (const property of ['name', 'handicap']) {
-                addInput(`[${player.id}][${property}]`, player[property].full || player[property]);
+                addInput(form, `[${player.id}][${property}]`, player[property].full || player[property]);
             };
         };
-        for (const course of JSON.parse(window.localStorage.getItem('courses')) || []) {
-            for (const property of ['name', 'randa']) addInput(`[randa-${course.randa}][${property}]`, course[property]);
-            for (const property of ['domain', 'path']) addInput(`[randa-${course.randa}][scorecardUrl][${property}]`, course.scorecardUrl[property]);
-            for (const tee of course.tees) {
-                const teeName = `${tee.name}${course.tees.filter(({ name }) => name === tee.name).length > 1 ? `-${tee.gender}` : ''}`;
-                addInput(`[randa-${course.randa}][tees][${teeName}][gender]`, tee.gender);
-                for (const hole of tee.holes) {
-                    for (const property of ['distance', 'par', 'strokeIndex']) {
-                        addInput(`[randa-${course.randa}][tees][${teeName}][${+hole.index}][${property}]`, hole[property]);
-                    };
-                };
-            };
-        };
+        // for (const course of JSON.parse(window.localStorage.getItem('courses')) || []) {
+        //     const { randa, scorecardUrl, tees } = course;
+        //     for (const property of ['name', 'randa']) addInput(form, `[randa-${randa}][${property}]`, course[property]);
+        //     for (const property of ['domain', 'path']) addInput(form, `[randa-${randa}][scorecardUrl][${property}]`, scorecardUrl[property]);
+        //     for (const tee of tees) {
+        //         const { gender, holes, name } = tee;
+        //         const teeName = `${name}${tees.filter(({ name }) => name === name).length > 1 ? `-${gender}` : ''}`;
+        //         addInput(form, `[randa-${randa}][tees][${teeName}][gender]`, gender);
+        //         for (const hole of holes) {
+        //             for (const property of ['distance', 'par', 'strokeIndex']) {
+        //                 addInput(form, `[randa-${randa}][tees][${teeName}][${+hole.index}][${property}]`, hole[property]);
+        //             };
+        //         };
+        //     };
+        // };
     }, { once: true });
 };

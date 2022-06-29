@@ -4,10 +4,9 @@ const Schema = mongoose.Schema;
 const Course = require('./course');
 const User = require('./user');
 
-const { GAMES, ROUND_TYPES } = require('../constants');
+const { BREAKDOWN_OBJECT, GAMES, ROUND_TYPES } = require('../constants');
 
 const formatDate = require('../utilities/formatDate');
-// const sort = require('../utilities/sort');
 
 // shared with public/scripts/rounds/update.js
 Array.prototype.sortAlphabetically = function(property = '') {
@@ -37,6 +36,7 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 break;
             };
         };
+        score.classes.shots = []
         score.scores = {
             nett: [],
             par: { front: 0, back: 0, full: 0 },
@@ -49,8 +49,9 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
         for (const hole of holes) {
             const { index, par, strokeIndex } = hole;
             const shot = +score.shots[index - 1];
-            if (!shot) {
+            if (!shot || !par) {
                 score.scores.nett.push(null);
+                score.classes.shots.push('');
                 continue;
             };
             const parScore = shot - par;
@@ -59,12 +60,13 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
             if (index > 9) score.scores.par.back += parScore;
             score.scores.par.full += parScore;
             score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
+            score.classes.shots.push(parScoreClass(parScore));
         };
     };
     for (const game of gameObject.games) {
         const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
         if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
-        const { handicap, method, players: gamePlayers, roundType } = game;
+        const { handicap, method, players: gamePlayers, roundType = 'full' } = game;
         game.team = gamePlayers.some(({ team }) => team && team !== 'none');
         if ((game.team ? [ ...new Set(gamePlayers.map(({ team }) => team)) ].length : gamePlayers.length) < defaultPlayersObject.minimum) continue;
         const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
@@ -194,101 +196,109 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
     return gameObject;
 };
 
+function parClass(par) {
+    if (par > 0) return 'f-over';
+    if (par < 0) return 'f-under';
+    return 'f-level';
+};
+
+function parScoreClass(parScore) {
+    if (parScore < -1) return 'eagle';
+    if (parScore === -1) return 'birdie';
+    if (parScore === 1) return 'bogey';
+    if (parScore > 1) return 'double-bogey';
+    return '';
+};
 
 const options = { toJSON: { virtuals: true } };
 
-const scoresObject = {
-    front: Number,
-    back: Number,
-    full: Number
-};
-
 const ScoreSchema = new Schema({
+    classes: { shots: [ String ] },
 
     // can use handicap object from user model
     handicap: Number,
 
     player: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        type: Schema.Types.ObjectId
     },
     playingGroup: {
         index: Number,
         player: String
     },
     roundType: {
-        type: String,
-        enum: ROUND_TYPES.map(({ name }) => name)
+        enum: ROUND_TYPES.map(({ name }) => name),
+        type: String
     },
     scores: {
         nett: [ Number ],
-        shots: scoresObject,
-        par: scoresObject
+        par: BREAKDOWN_OBJECT,
+        shots: BREAKDOWN_OBJECT
     },
     shots: [ Number ]
 }, options);
 
 const RoundSchema = new Schema({
+    course: {
+        ref: 'Course',
+        type: Schema.Types.ObjectId
+    },
     created: {
         date: {
-            type: Date,
             default: Date.now(),
+            immutable: true,
             required: true,
-            immutable: true
+            type: Date
         },
         by: {
-            type: Schema.Types.ObjectId,
             ref: 'User',
-            required: true
+            required: true,
+            type: Schema.Types.ObjectId
         },
         comments: String
+    },
+    date: {
+        default: Date.now(),
+        required: true,
+        type: Date
     },
     lastModified: {
-        date: {
-            type: Date,
-            default: Date.now(),
-            required: true
-        },
         by: {
-            type: Schema.Types.ObjectId,
             ref: 'User',
-            required: true
+            required: true,
+            type: Schema.Types.ObjectId
         },
-        comments: String
-    },
-    course: {
-        type: Schema.Types.ObjectId,
-        ref: 'Course'
-    },
-    tee: String,
-    date: {
-        type: Date,
-        default: Date.now(),
-        required: true
+        comments: String,
+        date: {
+            default: Date.now(),
+            required: true,
+            type: Date
+        }
     },
     games: [
         {
-            handicap: Boolean,
+            // handicap: Boolean,
+            handicap: Schema.Types.Mixed,
             method: {
-                type: String,
-                enum: [ ...new Set(GAMES.map(({ options }) => options.map(({ values }) => values)).flat(2)) ]
+                enum: [ ...new Set(GAMES.map(({ options }) => options.map(({ values }) => values)).flat(2)) ],
+                type: String
             },
             name: {
-                type: String,
-                enum: GAMES.map(({ name }) => name)
+                enum: GAMES.map(({ name }) => name),
+                type: String
             },
             players: [
                 {
                     player: {
-                        type: Schema.Types.ObjectId,
-                        ref: 'User'
+                        ref: 'User',
+                        type: Schema.Types.ObjectId
                     },
                     team: String
                 }
             ],
             roundType: {
-                type: String,
-                enum: ROUND_TYPES.map(({ name }) => name)
+                enum: ROUND_TYPES.map(({ name }) => name),
+                type: String
             },
             scores: [
                 {
@@ -298,12 +308,13 @@ const RoundSchema = new Schema({
             ],
             summary: String,
             team: {
-                type: Boolean,
-                default: false
+                default: false,
+                type: Boolean
             }
         }
     ],
-    scores: [ ScoreSchema ]
+    scores: [ ScoreSchema ],
+    tee: String
 }, options);
 
 RoundSchema.virtual('formattedDate').get(function () {
@@ -315,12 +326,15 @@ RoundSchema.virtual('formattedDate').get(function () {
     };
 });
 
-// ScoreSchema.virtual('parClass').get(function () {
-//     const { par = 0 } = this;
-//     if (par > 0) return 'f-over';
-//     if (par < 0) return 'f-under';
-//     return 'f-level';
-// });
+ScoreSchema.virtual('classes.par').get(function () {
+    const { par } = this.scores;
+    const classesObject = {};
+    for (const key of Object.keys(par)) {
+        const value = par[key] || 0;
+        classesObject[key] = parClass(value);
+    };
+    return classesObject;
+});
 
 RoundSchema.pre('save', async function(next) {
     const players = await User.find();

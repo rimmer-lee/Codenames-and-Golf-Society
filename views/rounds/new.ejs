@@ -167,9 +167,7 @@
                                                     <% for (const player of players) { %>
                                                     <option value="<%= player.id %>"><%= player.name.knownAs %></option>
                                                     <% }; %>
-                                                    <% if (!currentUser) { %>
                                                     <option value="new">New Player</option>
-                                                    <% }; %>
                                                     <% }; %>
                                                 </select>
                                                 <label for="marker|id" class="text-capitalize">Marker</label>

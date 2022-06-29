@@ -24,7 +24,7 @@
                         </label>
                         <select id="<%= `${tee.id}|colour` %>" class="col form-select text-capitalize" name="<%= `[${tee.id}][colour]` %>">
                             <% for (const teeColour of teeColours) { %>
-                            <option value="<%= teeColour.class.table %>"<%= tee.colour.name === teeColour.colour ? " selected": "" %>><%= teeColour.colour %></option>
+                            <option value="<%= teeColour.colour %>"<%= tee.colour.colour === teeColour.colour ? " selected": "" %>><%= teeColour.colour %></option>
                             <% }; %>
                         </select>
                     </div>
@@ -66,11 +66,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <%- include('../partials/tables/courses/holes', { start: 1, end: 9, tees: course.tees }) %>
-                        <%- include('../partials/tables/courses/totals', { title: 'Out', property: 'front', tees: course.tees }) %>
-                        <%- include('../partials/tables/courses/holes', { start: 10, end: 18, tees: course.tees }) %>
-                        <%- include('../partials/tables/courses/totals', { title: 'In', property: 'back', tees: course.tees }) %>
-                        <%- include('../partials/tables/courses/totals', { title: 'Total', property: 'full', tees: course.tees }) %>
+                        <%- include('../partials/tables/courses/holes', { start: 1, end: 9 }) %>
+                        <%- include('../partials/tables/courses/totals', { title: 'Out', property: 'front' }) %>
+                        <%- include('../partials/tables/courses/holes', { start: 10, end: 18 }) %>
+                        <%- include('../partials/tables/courses/totals', { title: 'In', property: 'back' }) %>
+                        <%- include('../partials/tables/courses/totals', { title: 'Total', property: 'full' }) %>
                     </tbody>
                 </table>
             </div>

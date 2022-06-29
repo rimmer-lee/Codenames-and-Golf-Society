@@ -1,8 +1,9 @@
 const Course = require('../models/course');
 const Region = require('../models/region');
 const Round = require('../models/round');
+const User = require('../models/user');
 
-const { COUNTRY_CODES, TEE_COLOURS } = require('../constants');
+const { COUNTRY_CODES } = require('../constants');
 
 const { createCourse, findRegions, searchCourses } = require('../utilities/externalApis');
 const sort = require('../utilities/sort');
@@ -12,7 +13,7 @@ async function create (req, res) {
 };
 
 async function find (req, res) {
-    const { id, country, region, city, name } = req.query;
+    const { city, country, id, marker, name, region } = req.query;
     let message = '';
     let success = false;
     let data = {};
@@ -24,12 +25,18 @@ async function find (req, res) {
                 message = 'Course already exists.';
                 data = existingCourse;
             } else {
-                data = await createCourse(id);
-                if (!data) message = 'Unable to retrieve course.';
-                else {
+                const courseData = await createCourse(id);
+                const by = marker ? await User.findById(marker) : await User.findOne({ 'username': 'machine' });
+                const createdObject = { by };
+                courseData.created = createdObject;
+                courseData.updated = [ createdObject ];
+                const newCourse = await new Course(courseData).save();
+                if (newCourse) {
+                    const { facility, id: courseId, name, randa, tees } = newCourse;
+                    data = { facility, id: courseId, name, randa, tees };
                     message = 'Successfully retrieved course.';
                     success = true;
-                };
+                } else message = 'Unable to retrieve course.';
             };
         } catch (error) {
             data = undefined;
@@ -100,42 +107,7 @@ async function save (req, res) {
 
 async function show (req, res) {
     const allCourses = await Course.find({}, '_id name tees');
-    const courses = sort(allCourses.map(({ id, name, tees }) => {
-        return {
-            id,
-            name,
-            tees: tees.map(({ colour, distance, gender, measure, name, par, ratings }) => {
-                const { bogey, course, slope } = ratings;
-                let long = name;
-                let short = name;
-                if (/\s/.test(name)) short = short.split(' ');
-                else short = short.split('/');
-                short = short.map(name => {
-                    if (/\D/.test(name)) {
-                        for (const letter of name) {
-                            if (/\w/.test(letter)) return letter.toUpperCase();
-                        };
-                    };
-                    return name;
-                }).join('');
-                if (gender && tees.filter(tee => name === tee.name).length > 1) {
-                    long += ` (${gender.capitalize()})`;
-                    short += ` (${gender[0].toUpperCase()})`;
-                };
-                return {
-                    bogey,
-                    colour: ((TEE_COLOURS.find(tee => colour === tee.colour) || {}).class || {}).table || '',
-                    course,
-                    distance,
-                    gender,
-                    measure,
-                    name: { short, long },
-                    par,
-                    slope
-                };
-            })
-        };
-    }), 'name');
+    const courses = sort(allCourses, 'name');
     res.render('courses/index', { courses });
 };
 
@@ -167,25 +139,7 @@ async function update (req, res) {
 
 async function view (req, res) {
     try {
-        const { id, name, tees } = await Course.findById(req.params.id, 'id name tees');
-        const course = {
-            id,
-            name,
-            tees: tees.map(({ colour, distance, holes, id, measure, name, par }) => {
-                return {
-                    colour: {
-                        name: colour,
-                        class: ((TEE_COLOURS.find(tee => colour === tee.colour) || {}).class || {}).table || '',
-                    },
-                    distance,
-                    holes,
-                    id,
-                    measure,
-                    par,
-                    name
-                };
-            })
-        };
+        const course = await Course.findById(req.params.id, 'id name tees');
         return res.render('courses/edit', { course });
     } catch (error) {
         console.log(error);

@@ -99,7 +99,8 @@ for (const select of document.querySelectorAll('table select')) {
 for (const select of document.querySelectorAll('select[id$="|colour"]')) {
     select.addEventListener('change', function() {
         const [ , id ] = this.id.match(/(.+)\|colour/);
-        updateTableClasses(id, this.value);
+        const { table } = (teeColours.find(({ colour }) => colour === this.value) || { class: { table: ''} }).class;
+        updateTableClasses(id, table);
         updateButtons();
     });
 };
@@ -109,8 +110,8 @@ document.getElementById('undo').addEventListener('click', function() {
         const { colour, holes, id } = tee;
         const teeSelectOptions = Array.from(document.getElementById(`${id}|colour`).children);
         teeSelectOptions.find(({ selected }) => selected).selected = false;
-        teeSelectOptions.find(({ innerText }) => innerText === colour.name).selected = true;
-        updateTableClasses(id, colour.class);
+        teeSelectOptions.find(({ value }) => value === colour.colour).selected = true;
+        updateTableClasses(id, colour.class.table);
         for (const hole of holes) {
             const { index } = hole;
             for (const property of ['distance', 'par', 'strokeIndex']) {

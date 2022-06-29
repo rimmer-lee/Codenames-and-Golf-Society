@@ -71,7 +71,7 @@
                                 <div class="col-12 col-md-4">
                                     <div class="form-floating">
                                         <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]">
-                                            <% for (const t of tees) { %>
+                                            <% for (const t of course.tees) { %>
                                             <option value="<%= t.id %>"<%= t._id == tee._id ? ' selected' : '' %>><%= t.name.long %></option>
                                             <% }; %>
                                         </select>
@@ -80,7 +80,7 @@
                                 </div>
                                 <% } else { %>
                                 <h4 class="col-12 px-3">
-                                    <%= `${course.name} off the ${tee.name.long} Tees` %>
+                                    <%= `${course.name} off the ${tee.names.long} Tees` %>
                                 </h4>
                                 <% }; %>
                                 <div class="col-12">
@@ -163,14 +163,14 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <% for (const t of tees) { %>
-                                            <tr class="<%= t.colour %><%= t._id === tee._id ? ' fw-bold' : '' %>">
+                                            <% for (const t of course.tees) { %>
+                                            <tr class="<%= t.colour.class.table %><%= t._id === tee._id ? ' fw-bold' : '' %>">
                                                 <td class="align-middle">
                                                     <div class="d-none d-md-block text-center">
-                                                        <%= t.name.long %>
+                                                        <%= t.names.long %>
                                                     </div>
                                                     <div class="d-block d-md-none text-center">
-                                                        <%= t.name.short %>
+                                                        <%= t.names.short %>
                                                     </div>
                                                 </td>
                                                 <td class="align-middle text-center">
@@ -375,7 +375,6 @@
                                                     <%= `Game ${game.index}` %>
                                                 </div>
                                                 <h4 class="col text-center">
-                                                    <%= console.log(game.method) %>
                                                     <%= `${game.handicap ? 'Nett ' : ''}${game.method ? (game.method === 'Combined' ? `${game.method} Score ` : `${game.method} Ball `) : ''}${game.name}${game.roundType ? (game.roundType === 'Full' ? ' for 18' : ` on ${game.roundType} 9`) : ''}` %>
                                                 </h4>
                                                 <h5 class="col text-center">
@@ -543,7 +542,7 @@
                                                     <div class="col text-center">
                                                         <span id="<%= score.playingGroup.player %>|score"><%= score.scores.shots.full %></span>
                                                         <span> (</span>
-                                                        <span class="<%= score.scores.par.class %>" id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span>
+                                                        <span class="<%= score.classes.par.full %>" id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span>
                                                         <span>)</span>
                                                     </div>
                                                 </div>
@@ -696,7 +695,9 @@
                                                                     </td>
                                                                 </tr>
                                                             </thead>
-                                                            <tbody><tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-3|long-name">White</div><div class="d-block d-md-none text-center" id="white-3|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|distance"></label><input class="form-control text-center" id="white-3|distance" type="number" name="[course][tees][white][3][distance]" min="1" value="427"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|par"></label><input class="form-control text-center" id="white-3|par" type="number" name="[course][tees][white][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|strokeIndex"></label><input class="form-control text-center" id="white-3|strokeIndex" type="number" name="[course][tees][white][3][strokeIndex]" min="1" max="18" value="4"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-3|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-3|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|distance"></label><input class="form-control text-center" id="yellow-3|distance" type="number" name="[course][tees][yellow][3][distance]" min="1" value="417"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|par"></label><input class="form-control text-center" id="yellow-3|par" type="number" name="[course][tees][yellow][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|strokeIndex"></label><input class="form-control text-center" id="yellow-3|strokeIndex" type="number" name="[course][tees][yellow][3][strokeIndex]" min="1" max="18" value="4"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-3|long-name">Red</div><div class="d-block d-md-none text-center" id="red-3|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|distance"></label><input class="form-control text-center" id="red-3|distance" type="number" name="[course][tees][red][3][distance]" min="1" value="340"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|par"></label><input class="form-control text-center" id="red-3|par" type="number" name="[course][tees][red][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|strokeIndex"></label><input class="form-control text-center" id="red-3|strokeIndex" type="number" name="[course][tees][red][3][strokeIndex]" min="1" max="18" value="6"></div></td></tr></tbody>
+                                                            <tbody>
+                                                                <tr class="table-light"><td class="align-middle"><div class="d-none d-md-block text-center" id="white-3|long-name">White</div><div class="d-block d-md-none text-center" id="white-3|short-name">W</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|distance"></label><input class="form-control text-center" id="white-3|distance" type="number" name="[course][tees][white][3][distance]" min="1" value="427"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|par"></label><input class="form-control text-center" id="white-3|par" type="number" name="[course][tees][white][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="white-3|strokeIndex"></label><input class="form-control text-center" id="white-3|strokeIndex" type="number" name="[course][tees][white][3][strokeIndex]" min="1" max="18" value="4"></div></td></tr><tr class="table-warning"><td class="align-middle"><div class="d-none d-md-block text-center" id="yellow-3|long-name">Yellow</div><div class="d-block d-md-none text-center" id="yellow-3|short-name">Y</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|distance"></label><input class="form-control text-center" id="yellow-3|distance" type="number" name="[course][tees][yellow][3][distance]" min="1" value="417"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|par"></label><input class="form-control text-center" id="yellow-3|par" type="number" name="[course][tees][yellow][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="yellow-3|strokeIndex"></label><input class="form-control text-center" id="yellow-3|strokeIndex" type="number" name="[course][tees][yellow][3][strokeIndex]" min="1" max="18" value="4"></div></td></tr><tr class="table-danger"><td class="align-middle"><div class="d-none d-md-block text-center" id="red-3|long-name">Red</div><div class="d-block d-md-none text-center" id="red-3|short-name">R</div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|distance"></label><input class="form-control text-center" id="red-3|distance" type="number" name="[course][tees][red][3][distance]" min="1" value="340"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|par"></label><input class="form-control text-center" id="red-3|par" type="number" name="[course][tees][red][3][par]" min="3" max="5" value="4"></div></td><td class="align-middle"><div class="d-flex justify-content-center"><label class="d-none form-label" for="red-3|strokeIndex"></label><input class="form-control text-center" id="red-3|strokeIndex" type="number" name="[course][tees][red][3][strokeIndex]" min="1" max="18" value="6"></div></td></tr>
+                                                            </tbody>
                                                         </table>
                                                     </div>
                                                     <div class="col">

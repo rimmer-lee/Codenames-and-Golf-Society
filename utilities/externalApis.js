@@ -2,7 +2,8 @@ const HTMLParser = require('node-html-parser');
 
 const Region = require('../models/region');
 
-const { COUNTRY_CODES, TEE_COLOURS } = require('../constants');
+const { COUNTRY_CODES } = require('../constants');
+const { courseNames, findTeeColour } = require('./courseFunctions');
 
 const fetch = require('./fetch');
 
@@ -16,7 +17,7 @@ async function createCourse(id) {
         const [ courseFront, slopeFront ] = tee.Front.split(' / ');
         const [ courseBack, slopeBack ] = tee.Back.split(' / ');
         const { CourseRating, TeeName: name, Gender: gender, Par, SlopeRating } = tee;
-        const colour = (TEE_COLOURS.find(({ colour }) => colour === name.split(' - ')[0].toLowerCase()) || {}).colour || '';
+        const colour = findTeeColour({ colour: '', name });
         const scorecardTee = scorecardTees.find(tee => {
             return testMatch(tee.name, name) ||
                 ((testMatch(tee.name, colour) ||
@@ -27,6 +28,7 @@ async function createCourse(id) {
         const holes = (scorecardTee || {}).holes || [];
         return {
             name,
+            names: courseNames(gender, name, TeeRows.map(({ TeeName: name }) => name)),
             gender,
             holes,
             colour,
@@ -179,7 +181,7 @@ function removeWhiteSpace(newValue, string) {
 
 function testMatch(a, b, type = 'exact') {
     const aToLower = a && typeof a === 'string' ? a.toLowerCase() : a;
-    const bToLower = b && typeof b === 'string' ? b.toLowerCase() : a;
+    const bToLower = b && typeof b === 'string' ? b.toLowerCase() : b;
     switch (type) {
         case 'loose':
             return aToLower && aToLower.indexOf(bToLower) !== -1 ||

@@ -87,7 +87,8 @@ async function searchCourse() {
                 addEventListener: [{ listener: async function() {
                     document.body.classList.add('spin');
                     const courseSelect = document.getElementById('course-select');
-                    const response = await fetch(`/rounds/courses/find?id=${this.closest('tr').id}&country=${country}`)
+                    const marker = (document.getElementById('marker|id') || { value: undefined }).value;
+                    const response = await fetch(`/rounds/courses/find?id=${this.closest('tr').id}&country=${country}${marker && marker !== 'Select Player' ? `&marker=${marker}` : ''}`)
                         .then(response => response.json());
                     const { data, message, success } = response;
                     if (!success) {
@@ -100,19 +101,16 @@ async function searchCourse() {
                         provideFeedback(message);
                         return this.remove();
                     };
-                    const id = `randa-${data.randa}`;
-                    const localStorage = JSON.parse(window.localStorage.getItem('courses')) || [];
+                    const { id: value, name: innerText } = data;
                     resetCourseModalFields();
-                    localStorage.push(data);
-                    window.localStorage.setItem('courses', JSON.stringify(localStorage));
                     courses.push(data);
                     courseSelect.insertBefore(createElement({
                         type: 'option',
-                        attributes: [{ id: 'value', value: id }],
-                        innerText: data.name
+                        attributes: [{ id: 'value', value }],
+                        innerText
                     }), courseSelect.querySelector('[value="new"]'));
                     courseSelect.querySelector('[selected]').removeAttribute('selected');
-                    courseSelect.querySelector(`[value="${id}"]`).setAttribute('selected', true);
+                    courseSelect.querySelector(`[value="${value}"]`).setAttribute('selected', true);
                     sortCourses();
                     selectCourse.call(courseSelect);
                     document.body.classList.remove('spin');
@@ -182,39 +180,23 @@ function selectCourse() {
         if (!course) continue;
         toggleElement(tableBody.closest('[class*="col"]'));
         for (const tee of course.tees) {
+            const { colour, names } = tee;
+            const { long, short, value } = names;
             const newElementObject = { type: 'tr', classList: [], children: [] };
-            let longName = tee.name;
-            let shortName = tee.name;
-            let teeValue = tee.name.toLowerCase();
-            if (/\s/.test(tee.name)) shortName = shortName.split(' ');
-            else shortName = shortName.split('/');
-            shortName = shortName.map(name => {
-                if (/\D/.test(name)) {
-                    for (const letter of name) {
-                        if (/\w/.test(letter)) return letter.toUpperCase();
-                    };
-                };
-                return name;
-            }).join('');
-            if (tee.gender && course.tees.filter(({ name }) => name === tee.name).length > 1) {
-                teeValue += `-${tee.gender.toLowerCase()}`;
-                longName += ` (${tee.gender[0].toUpperCase()}${tee.gender.substr(1).toLowerCase()})`;
-                shortName += ` (${tee.gender[0].toUpperCase()})`;
-            };
-            if (tee.colour) newElementObject.classList.push(((teeColours.find(({ colour }) => colour === tee.colour) || {}).class || {}).table);
+            if (colour) newElementObject.classList.push(colour.class.table);
             newElementObject.children.push({
                 type: 'td',
                 classList: ['align-middle'],
                 children: [
                     {
                         classList: ['d-none', 'd-md-block', 'text-center'],
-                        attributes: [{ id: 'id', value: `${teeValue}-${i}|long-name` }],
-                        innerText: longName
+                        attributes: [{ id: 'id', value: `${value}-${i}|long-name` }],
+                        innerText: long
                     },
                     {
                         classList: ['d-block', 'd-md-none', 'text-center'],
-                        attributes: [{ id: 'id', value: `${teeValue}-${i}|short-name` }],
-                        innerText: shortName
+                        attributes: [{ id: 'id', value: `${value}-${i}|short-name` }],
+                        innerText: short
                     }
                 ]
             });
@@ -230,15 +212,15 @@ function selectCourse() {
                         {
                             type: 'label',
                             classList: ['d-none', 'form-label'],
-                            attributes: [{ id: 'for', value: `${teeValue}-${i}|${property}` }]
+                            attributes: [{ id: 'for', value: `${value}-${i}|${property}` }]
                         },
                         {
                             type: 'input',
                             classList: ['form-control', 'text-center'],
                             attributes: [
-                                { id: 'id', value: `${teeValue}-${i}|${property}` },
+                                { id: 'id', value: `${value}-${i}|${property}` },
                                 { id: 'type', value: 'number' },
-                                { id: 'name', value: `[course][tees][${teeValue}][${i}][${property}]` },
+                                { id: 'name', value: `[course][tees][${value}][${i}][${property}]` },
                             ],
                             addEventListener: [{ type: 'blur', listener: updateData }]
                         }
@@ -269,33 +251,16 @@ function selectCourse() {
         toggleElement(paginationParentElement);
         // playersAccordion.classList.remove('forced-accordion-bottom');
         for (const tee of course.tees) {
+            const { colour, holes, name, names, par, ratings } = tee;
+            const { long, short, value } = names;
+            const { bogey, course, slope, } = ratings;
             const optionElementObject = {
                 type: 'option',
                 attributes: [{ id: 'value', value: tee.name }],
-                innerText: tee.name
+                innerText: name
             };
             const tableRowElementObject = { type: 'tr', classList: [], children: [] };
-            let teeValue = tee.name.toLowerCase();
-            let longName = tee.name;
-            let shortName = tee.name;
-            if (/\s/.test(tee.name)) shortName = shortName.split(' ');
-            else shortName = shortName.split('/');
-            shortName = shortName.map(name => {
-                if (/\D/.test(name)) {
-                    for (const letter of name) {
-                        if (/\w/.test(letter)) return letter.toUpperCase();
-                    };
-                };
-                return name;
-            }).join('');
-            if (tee.gender && course.tees.filter(({ name }) => name === tee.name).length > 1) {
-                teeValue += `-${tee.gender.toLowerCase()}`;
-                optionElementObject.attributes.find(({ id }) => id === 'value').value = teeValue;
-                optionElementObject.innerText = `${tee.name} (${tee.gender})`;
-                longName += ` (${tee.gender[0].toUpperCase()}${tee.gender.substr(1).toLowerCase()})`;
-                shortName += ` (${tee.gender[0].toUpperCase()})`;
-            };
-            if (tee.colour) tableRowElementObject.classList.push(teeColours.find(({ colour }) => colour === tee.colour).class.table);
+            if (colour) tableRowElementObject.classList.push(colour.class.table);
             teeSelect.insertBefore(createElement(optionElementObject), null);
             tableRowElementObject.children.push({
                 type: 'td',
@@ -303,13 +268,13 @@ function selectCourse() {
                 children: [
                     {
                         classList: ['d-none', 'd-md-block', 'text-center'],
-                        attributes: [{ id: 'id', value: `${teeValue}|long-name` }],
-                        innerText: longName
+                        attributes: [{ id: 'id', value: `${value}|long-name` }],
+                        innerText: long
                     },
                     {
                         classList: ['d-block', 'd-md-none', 'text-center'],
-                        attributes: [{ id: 'id', value: `${teeValue}|short-name` }],
-                        innerText: shortName
+                        attributes: [{ id: 'id', value: `${value}|short-name` }],
+                        innerText: short
                     }
                 ]
             });
@@ -320,7 +285,7 @@ function selectCourse() {
                     children: [
                         {
                             classList: ['text-center'],
-                            attributes: [{ id: 'id', value: `${teeValue}|${property}` }]
+                            attributes: [{ id: 'id', value: `${value}|${property}` }]
                         }
                     ]
                 };
@@ -328,52 +293,51 @@ function selectCourse() {
                 let valueToAssign = '';
                 switch (property) {
                     case 'par':
-                        if ((tee.par || {}).full) valueToAssign = tee.par.full;
-                        else if (tee.holes) valueToAssign = tee.holes.reduce((sum, hole) => sum + hole.par, 0);
+                        if ((par || {}).full) valueToAssign = par.full;
+                        else if (holes) valueToAssign = holes.reduce((sum, hole) => sum + hole.par, 0);
                         break;
                     case 'courseRating-full':
-                        valueToAssign = tee.ratings.course.full;
+                        valueToAssign = course.full;
                         break;
                     case 'courseRating-front':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = tee.ratings.course.front;
+                        valueToAssign = course.front;
                         break;
                     case 'courseRating-back':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = tee.ratings.course.back;
+                        valueToAssign = course.back;
                         break;
                     case 'bogeyRating':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = tee.ratings.bogey;
+                        valueToAssign = bogey;
                         break;
                     case 'slopeRating-full':
-                        valueToAssign = tee.ratings.slope.full;
+                        valueToAssign = slope.full;
                         break;
                     case 'slopeRating-front':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = tee.ratings.slope.front;
+                        valueToAssign = slope.front;
                         break;
                     case 'slopeRating-back':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = tee.ratings.slope.back;
+                        valueToAssign = slope.back;
                         break;
                 };
-                if (['courseRating-full', 'courseRating-front', 'courseRating-back', 'bogeyRating'].includes(property)) valueToAssign = valueToAssign.toFixed(1);
                 tableDataElementObject.classList.push( ...classesToAssign );
                 tableDataElementObject.children[0].innerText = valueToAssign;
                 tableRowElementObject.children.push(tableDataElementObject);
             };
             teeElement.insertBefore(createElement(tableRowElementObject), null);
-            if (!tee.holes) continue;
-            for (const hole of tee.holes) {
+            if (!holes) continue;
+            for (const hole of holes) {
                 const { distance, index, par, strokeIndex } = hole;
-                const id = `${teeValue}-${index}|`;
+                const id = `${value}-${index}|`;
                 const distanceElement = document.getElementById(`${id}distance`);
                 const parElement = document.getElementById(`${id}par`);
                 const strokeIndexElement = document.getElementById(`${id}strokeIndex`);
-                if (distanceElement) distanceElement.setAttribute('value', distance);
-                if (parElement) parElement.setAttribute('value', par);
-                if (strokeIndexElement) strokeIndexElement.setAttribute('value', strokeIndex);
+                if (distanceElement) distanceElement.value = distance;
+                if (parElement) parElement.value = par;
+                if (strokeIndexElement) strokeIndexElement.value = strokeIndex;
             };
         };
         teeSelect.children[0].setAttribute('selected', true);
@@ -412,7 +376,7 @@ countrySelect.addEventListener('change', async function() {
     const { data, message, success } = response;
     if (!success) return provideFeedback(message);
     const regions = data;
-    if (!regions || regions.lenth === 0) return provideFeedback(message);
+    if (!regions || regions.length === 0) return provideFeedback(message);
     for (const region of regions) {
         regionSelect.insertBefore(createElement({
             type: 'option',

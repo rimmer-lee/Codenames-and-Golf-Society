@@ -122,34 +122,62 @@
                         <tr class="<%= tee.colour %>">
                             <td class="align-middle">
                                 <div class="d-none d-md-block text-center">
-                                    <%= tee.name.long %>
+                                    <%= tee.names.long %>
                                 </div>
                                 <div class="d-block d-md-none text-center">
-                                    <%= tee.name.short %>
+                                    <%= tee.names.short %>
                                 </div>
                             </td>
-                            <% for (const column of ['par', 'course', 'bogey', 'slope']) { %>
-                            <% if (column === 'bogey') { %>
-                            <td class="align-middle d-none d-lg-table-cell">
-                                <div class="text-center">
-                                    <%= tee[column] %>
-                                </div>
-                            </td>
-                            <% continue; %>
-                            <% }; %>
                             <td class="align-middle">
                                 <div class="text-center">
-                                    <%= tee[column].full %>
+                                    <%= tee.par.full %>
                                 </div>
                             </td>
-                            <% for (const breakdown of ['front', 'back']) { %>
                             <td class="align-middle d-none d-lg-table-cell">
                                 <div class="text-center">
-                                    <%= tee[column][breakdown] %>
+                                    <%= tee.par.front %>
                                 </div>
                             </td>
-                            <% }; %>
-                            <% }; %>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee.par.back %>
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <div class="text-center">
+                                    <%= tee.ratings.course.full %>
+                                </div>
+                            </td>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee.ratings.course.front %>
+                                </div>
+                            </td>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee.ratings.course.back %>
+                                </div>
+                            </td>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee.ratings.bogey %>
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <div class="text-center">
+                                    <%= tee.ratings.slope.full %>
+                                </div>
+                            </td>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee.ratings.slope.front %>
+                                </div>
+                            </td>
+                            <td class="align-middle d-none d-lg-table-cell">
+                                <div class="text-center">
+                                    <%= tee.ratings.slope.back %>
+                                </div>
+                            </td>
                         </tr>
                         <% }; %>
                     </tbody>

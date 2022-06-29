@@ -5,134 +5,127 @@ const Region = require('../models/region');
 
 const { BREAKDOWN_OBJECT, COUNTRY_CODES, GENDERS, TEE_COLOURS } = require('../constants');
 
+const { courseNames, findTeeColour } = require('../utilities/courseFunctions');
 const { searchCourse, searchCourses } = require('../utilities/externalApis');
 
 function singleDecimal(number) {
-    return Number.parseFloat(number).toFixed(1)
+    return Number.parseFloat(number).toFixed(1);
 };
 
 const options = { toJSON: { virtuals: true } };
 
 const changeObject = {
-    date: {
-        type: Date,
-        default: Date.now(),
-        required: true,
-        immutable: true
-    },
     by: {
-        type: Schema.Types.ObjectId,
+        immutable: true,
         ref: 'User',
         required: true,
-        immutable: true
+        type: Schema.Types.ObjectId
     },
     comments: {
-        type: String,
-        immutable: true
+        immutable: true,
+        type: String
+    },
+    date: {
+        default: Date.now(),
+        immutable: true,
+        required: true,
+        type: Date
     }
 };
 
+const slopeObject = {
+    max: 155,
+    min: 55,
+    type: Number
+};
+
 const HoleSchema = new Schema({
-    name: String,
-    index: {
-        type: Number,
-        min: 1,
-        max: 18
-    },
     distance: Number,
-    strokeIndex: {
-        type: Number,
+    index: {
+        max: 18,
         min: 1,
-        max: 18
+        type: Number
     },
+    name: String,
     par: {
-        type: Number,
+        max: 5,
         min: 3,
-        max: 5
+        type: Number
+    },
+    strokeIndex: {
+        max: 18,
+        min: 1,
+        type: Number
     }
 });
 
 const TeeSchema = new Schema({
-    name: String,
-    gender: {
-        type: String,
-        // enum: GENDERS
-        enum: ['Male', 'Female', 'male', 'female']
-    },
-    // colour: {
-    //     enum: TEE_COLOURS
-    // },
-    colour: {
-        type: String,
-        enum: TEE_COLOURS.map(({ colour }) => colour)
-    },
-    ratings: {
-        course: BREAKDOWN_OBJECT,
-        bogey: Number,
-        slope: {
-            full: {
-                type: Number,
-                min: 55,
-                max: 155
-            },
-            front: {
-                type: Number,
-                min: 55,
-                max: 155
-            },
-            back: {
-                type: Number,
-                min: 55,
-                max: 155
-            }
-        }
-    },
+    // colour: { enum: TEE_COLOURS },
+    colour: Schema.Types.Mixed,
     distance: BREAKDOWN_OBJECT,
-    par: BREAKDOWN_OBJECT,
+    gender: {
+        enum: GENDERS,
+        type: String
+    },
+    holes: [ HoleSchema ],
     measure: {
         full: {
-            type: String,
+            default: 'yards',
             enum: [ 'yards', 'metres' ],
-            default: 'yards'
+            type: String
         }
     },
-    holes: [ HoleSchema ]
+    name: String,
+    names: {
+        long: String,
+        short: String,
+        value: String
+    },
+    par: BREAKDOWN_OBJECT,
+    ratings: {
+        bogey: Number,
+        course: BREAKDOWN_OBJECT,
+        slope: {
+            back: slopeObject,
+            front: slopeObject,
+            full: slopeObject
+        }
+    }
 }, options);
 
 const CourseSchema = new Schema({
-    created: changeObject,
-    updated: [ changeObject ],
-    randa: Number,
-    name: String,
-    facility: String,
-    geometry: {
-        type: {
-            type: String,
-            enum: [ 'Point' ]
+    address: {
+        city: String,
+        country: {
+            enum: COUNTRY_CODES.map(({ name }) => name),
+            type: String
         },
-        coordinates: {
-            type: [ Number ]
+        firstLine: String,
+        postcode: String,
+        region: {
+            ref: 'Region',
+            type: Schema.Types.ObjectId
         }
     },
-    address: {
-        firstLine: String,
-        city: String,
-        region: {
-            type: Schema.Types.ObjectId,
-            ref: 'Region'
-        },
-        country: {
-            type: String,
-            enum: COUNTRY_CODES.map(({ name }) => name)
-        },
-        postcode: String
+    created: changeObject,
+    facility: String,
+    geometry: {
+        coordinates: [ Number ],
+        type: {
+            default: 'Point',
+            enum: [ 'Point' ],
+            type: String
+        }
     },
-    tees: [ TeeSchema ],
+    name: String,
+    randa: Number,
     scorecardUrl: {
         domain: String,
         path: String
-    }
-});
+    },
+    tees: [ TeeSchema ],
+    updated: [ changeObject ]
+}, options);
 
 CourseSchema.pre('validate', function(next) {
     for (const tee of this.tees) {
@@ -158,25 +151,22 @@ CourseSchema.pre('save', async function(next) {
         if (courses) {
             const { Address1: firstLine, City: city, Country, FacilityName, State: code, Zip: postcode } = courses;
             const region = await Region.findOne({ code });
-            this.address = {
-                firstLine,
-                city,
-                region,
-                country: (COUNTRY_CODES.find(country => country['alpha-3'] === Country) || {}).name,
-                postcode
-            };
+            const country = (COUNTRY_CODES.find(country => country['alpha-3'] === Country) || { name: '' }).name;
+            this.address = { city, country, firstLine, postcode, region };
             this.facility = FacilityName.split(' (')[0];
         };
         if (course) {
             for (const tee of this.tees) {
                 const { gender, name } = tee;
                 const courseTee = course.TeeRows.find(({ TeeName, Gender }) => {
-                    return TeeName === name && (gender ? Gender === gender : true)
+                    return TeeName.toLowerCase() === name.toLowerCase() &&
+                    (gender ? Gender.toLowerCase() === gender.toLowerCase() : true)
                 });
                 const { Back, BogeyRating, CourseRating, Front, Gender, Par, SlopeRating } = courseTee;
                 const [ courseFront, slopeFront ] = Front.split(' / ');
                 const [ courseBack, slopeBack ] = Back.split(' / ');
-                tee.gender = Gender;
+                tee.gender = Gender.toLowerCase();
+                tee.names = courseNames(gender, name, this.tees);
                 // tee.par = { full: +Par };
                 tee.ratings = {
                     course: {
@@ -195,25 +185,25 @@ CourseSchema.pre('save', async function(next) {
         };
     };
     for (const tee of this.tees) {
-        const teeColour = TEE_COLOURS.find(({ colour }) => colour === tee.name.split(' ')[0].toLowerCase());
+        const teeColour = findTeeColour(tee);
         tee.measure.full = 'yards';
         tee.distance.front = 0;
         tee.distance.back = 0;
         tee.par.front = 0;
         tee.par.back = 0;
-        if (teeColour && !tee.colour) tee.colour = teeColour.colour;
+        if (teeColour) tee.colour = teeColour;
         for (const hole of tee.holes) {
-            const { distance, index, par } = hole;
+            const { distance = 0, index, par = 0 } = hole;
             if (index < 10) {
-                if (distance) tee.distance.front += distance;
-                if (par) tee.par.front += par;
+                tee.distance.front += distance;
+                tee.par.front += par;
                 continue;
             };
-            if (distance) tee.distance.back += distance;
-            if (par) tee.par.back += par;
+            tee.distance.back += distance;
+            tee.par.back += par;
         };
         tee.distance.full = tee.distance.front + tee.distance.back;
-        if (!tee.par.full) tee.par.full = tee.par.front + tee.par.back;
+        tee.par.full = tee.par.front + tee.par.back;
     };
     next();
 });
@@ -227,35 +217,11 @@ CourseSchema.virtual('scorecardUrl.full').get(function() {
     return `https://${domain}${path}`;
 });
 
-// won't be necessary if we save the individual TEE_COLOURS object to TeeSchema.colour
-TeeSchema.virtual('colourClasses').get(function() {
-    const { colour } = this;
-    return (TEE_COLOURS.find(teeColour => teeColour.colour === colour) || { class: {} }).class;
-});
-
 TeeSchema.virtual('measure.short').get(function() {
     const { full } = this.measure;
     if (full === 'yards') return 'yd';
     if (full === 'metres') return 'm';
     return undefined;
-});
-
-TeeSchema.virtual('names').get(function() {
-    const { gender, name } = this;
-    const { tees } = this.parent();
-    const multiple = gender && tees.filter(tee => tee.name === name).length > 1;
-    const long = `${name}${multiple ? ` (${gender.capitalize()})` : ''}`;
-    const short = `${name.split((function(value) {
-        if (/\s/.test(value)) return ' ';
-        if (/\//.test(value)) return '/';
-        return;
-    })(name)).map(value => {
-        if (!/\D/.test(value)) return value;
-        for (const v of value) {
-            if (/\w/.test(v)) return v.toUpperCase();
-        };
-    }).join('')}${multiple ? ` (${gender[0].toUpperCase()})` : ''}`;
-    return { long, short };
 });
 
 module.exports = mongoose.model('Course', CourseSchema);

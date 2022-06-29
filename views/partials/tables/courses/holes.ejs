@@ -3,9 +3,9 @@
     <td class="text-center align-middle">
         <%= i %>
     </td>
-    <% for (const tee of tees) { %>
+    <% for (const tee of course.tees) { %>
     <% for (const variable of ['distance', 'par']) { %>
-    <td class="<%= tee.colour.class %>">
+    <td class="<%= tee.colour.class.table %>">
         <div class="d-flex justify-content-center">
             <label for="<%= `${tee.id}|${i}|${variable}` %>" class="form-label d-none"><%= `${variable[0].toUpperCase()}${variable.slice(1, )} ${i}` %></label>
             <input id="<%= `${tee.id}|${i}|${variable}` %>" class="form-control text-center" type="number"<%= variable === "par" ? " min=3 max=5" : "" %> name="<%= `[${tee.id}][hole][${variable}]` %>" value="<%= tee.holes[i - 1][variable] %>">

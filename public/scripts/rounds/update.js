@@ -11,6 +11,7 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 break;
             };
         };
+        score.classes.shots = []
         score.scores = {
             nett: [],
             par: { front: 0, back: 0, full: 0 },
@@ -23,8 +24,9 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
         for (const hole of holes) {
             const { index, par, strokeIndex } = hole;
             const shot = +score.shots[index - 1];
-            if (!shot) {
+            if (!shot || !par) {
                 score.scores.nett.push(null);
+                score.classes.shots.push('');
                 continue;
             };
             const parScore = shot - par;
@@ -33,6 +35,7 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
             if (index > 9) score.scores.par.back += parScore;
             score.scores.par.full += parScore;
             score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
+            score.classes.shots.push(parScoreClass(parScore));
         };
     };
     for (const game of gameObject.games) {
@@ -169,7 +172,8 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
 };
 
 function getRound() {
-    return JSON.parse(window.localStorage.getItem('round')) || {};
+    if (!window.localStorage.getItem('round')) updateData();
+    return JSON.parse(window.localStorage.getItem('round'));
 };
 
 function getPlayerKeys(object = getRound()) {
@@ -363,31 +367,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (callback) callback.call(element);
         if (element.hasAttribute('required')) validation.call(element);
     };
-
-    // is this needed?
-    // if (!window.localStorage.getItem('round')) updateData();
-
-    const courseSelect = document.getElementById('course-select');
     const round = getRound();
     const playerKeys = getPlayerKeys(round);
     const gameIndexes = Object.keys(round.game || {});
-    const localCourses = JSON.parse(window.localStorage.getItem('courses')) || [];
     const localPlayers = JSON.parse(window.localStorage.getItem('players')) || [];
-    let courseIndex = 0;
     let playerIndex = 0;
-    while (localCourses.length > 0 && courseIndex < localCourses.length) {
-        if (courses.some(({ randa }) => randa == localCourses[courseIndex].randa)) localCourses.splice(courseIndex, 1);
-        else {
-            const course = localCourses[courseIndex];
-            courseSelect.insertBefore(
-                createOption(course.name, [{ id: 'value', value: `randa-${course.randa}` }]),
-                courseSelect.querySelector('[value="new"]'));
-            courses.push(course);
-            courseIndex++;
-        };
-    };
-    sortCourses();
-    window.localStorage.setItem('courses', JSON.stringify(localCourses));
     while (localPlayers.length > 0 && playerIndex < localPlayers.length) {
         if (players.some(({ id }) => id === localPlayers[playerIndex].id)) localPlayers.splice(playerIndex, 1);
         else {

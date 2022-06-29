@@ -2,7 +2,7 @@
     <td class="text-center align-middle text-uppercase">
         <%= title %>
     </td>
-    <% for (const tee of tees) { %>
+    <% for (const tee of course.tees) { %>
     <% for (const variable of ['distance', 'par']) { %>
     <td id= "<%= `${tee.id}|${variable}|${property}` %>" class="text-center align-middle">
         <%= tee[variable][property] !== 0 ? tee[variable][property] : "" %>
