@@ -154,7 +154,6 @@ async function view (req, res) {
     const courses = await Course.find();
     const players = await User.findPlayers();
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
-    const editAccess = req.user && ['admin', 'founder', 'super'].includes(req.user);
     const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round.toJSON();
     const currentDate = customDate('yyyy-mm-dd');
     const games = G.map(({ handicap, method, name, players, roundType, summary }, index) => {
@@ -185,7 +184,7 @@ async function view (req, res) {
     const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
         return scores.filter(({ playingGroup}) => playingGroup.index === playingGroupIndex);
     });
-    res.render('rounds/edit', { course, courses, currentDate, date, editAccess, games, id, players, playingGroups, tee });
+    res.render('rounds/edit', { course, courses, currentDate, date, games, id, players, playingGroups, tee });
 };
 
 module.exports = { create, remove, save, serviceWorker, show, update, view };

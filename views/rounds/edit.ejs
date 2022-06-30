@@ -4,18 +4,18 @@
         <div class="flex-grow-1">
             <h1 class="d-inline me-2"><%= course.name %> on <span class="d-none d-lg-inline"><%= date.full %></span><span class="d-lg-none"><%= date.friendly %></span></h1>
         </div>
-        <% if (editAccess) { %>
+        <% if (EDIT_ACCESS) { %>
         <div>
             <div class="d-flex justify-content-end">
-                <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" readonly>
-                <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" readonly>
+                <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" visibility="hidden" readonly>
+                <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" visibility="hidden" readonly>
                 <!-- <input id="delete" class="btn btn-danger me-2" type="button"  data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly> -->
             </div>
         </div>
         <% }; %>
     </div>
 
-    <!-- show demerits -->
+    <!-- show demerits??? -->
 
     <div class="row">
         <div class="col-12">
@@ -28,7 +28,7 @@
                     </h2>
                     <div id="round-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="round-accordion-item-heading">
                         <div class="accordion-body p-3">
-                            <% if (editAccess) { %>
+                            <% if (EDIT_ACCESS) { %>
                             <div class="form-floating">
                                 <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= date.datePicker %>" max="<%= currentDate %>" required>
                                 <label for="date">Date</label>
@@ -53,7 +53,7 @@
                     <div id="course-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="course-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <div class="row g-2">
-                                <% if (editAccess) { %>
+                                <% if (EDIT_ACCESS) { %>
                                 <div class="col">
                                     <div class="form-floating">
                                         <select id="course-select" class="form-select text-capitalize text-wrap" aria-label="course" name="[course][id]" required>
@@ -245,7 +245,7 @@
                     </h2>
                     <div id="game-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="game-accordion-item-heading">
                         <div class="accordion-body p-3">
-                            <% if (!editAccess && games.length === 0) { %>
+                            <% if (!EDIT_ACCESS && games.length === 0) { %>
                             <div class="row gy-3">
                                 <h4 class="mb-0 px-3 text-muted">
                                     No games were played
@@ -253,7 +253,7 @@
                             </div>
                             <% } else { %>
                             <% for (const game of games) { %>
-                            <% if (editAccess) { %>
+                            <% if (EDIT_ACCESS) { %>
                             <div class="row gy-3">
                                 <div class="col-12">
                                     <div class="accordion">
@@ -394,11 +394,11 @@
                 </div>
                 <div class="accordion-item">
                     <h2 id="scorecard-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button<%= editAccess ? ' collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard-accordion-item-body-parent" aria-expanded="<%= !editAccess %>" aria-controls="scorecard-accordion-item-body-parent">
+                        <button class="accordion-button<%= EDIT_ACCESS ? ' collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard-accordion-item-body-parent" aria-expanded="<%= !EDIT_ACCESS %>" aria-controls="scorecard-accordion-item-body-parent">
                             Scorecard
                         </button>
                     </h2>
-                    <div id="scorecard-accordion-item-body-parent" class="accordion-collapse collapse<%= !editAccess ? ' show' : '' %>" aria-labelledby="scorecard-accordion-item-heading">
+                    <div id="scorecard-accordion-item-body-parent" class="accordion-collapse collapse<%= !EDIT_ACCESS ? ' show' : '' %>" aria-labelledby="scorecard-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <div class="table-responsive">
                                 <table id="round" class="table table-bordered table-striped">
@@ -519,7 +519,7 @@
                         </div>
                     </div>
                 </div>
-                <% if (editAccess) { %>
+                <% if (EDIT_ACCESS) { %>
                 <div class="accordion-item">
                     <h2 id="summary-accordion-item-heading" class="accordion-header">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#summary-accordion-item-body-parent" aria-expanded="true" aria-controls="summary-accordion-item-body-parent">
