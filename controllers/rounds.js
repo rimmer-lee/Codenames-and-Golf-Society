@@ -56,40 +56,37 @@ async function save (req, res) {
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
-            const { demerit, handicap, hole, id, team } = body[key];
-
-            // const player = (async function(id) {
-            //     if (/^new\-\d+/.test(id)) {
-            //         const { name: full } = body[id];
-            //         const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
-            //         body[key].id = player.id;
-            //         return player;
-            //     };
-            //     return await User.findById(id);
-            // })(id);
-
-            let player;
-            if (/^new\-\d+/.test(id)) {
-                const { name: full } = body[id];
-                player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
-                body[key].id = player.id;
-            } else player = await User.findById(id);
-
-            round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots: hole.map(Number), team });
-
+            const { demerit, handicap, hole, id } = body[key];
+            const shots = hole.map(Number);
+            const existingScoreIndex = round.scores.findIndex(({ player }) => player == id);
+            if (existingScoreIndex !== -1) {
+                const { player, playingGroup } = round.scores[existingScoreIndex];
+                round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots });
+            } else {
+                const player = await (async function(id) {
+                    if (/^new\-\d+/.test(id)) {
+                        const { name: full } = body[id];
+                        const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
+                        body[key].id = player.id;
+                        return player;
+                    };
+                    return await User.findById(id);
+                })(id);
+                round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots });
+            };
             if (!demerit) continue;
             for (const hole of Object.keys(demerit)) {
                 for (const index of Object.keys(demerit[hole])) {
                     const { rule, demerits, comments, ...titles } = demerit[hole][index];
                     const when = { date, hole: +hole.replace(/'/g, '') };
                     const d = {
-                        when,
+                        action: { demerits: +demerits || 0 },
+                        comments,
+                        history: [{ status: 'Created', updated: created }],
                         player,
                         rule: await Rule.findById(rule),
                         status: 'Approved',
-                        history: [{ status: 'Created', updated: created }],
-                        action: { demerits: +demerits || 0 },
-                        comments
+                        when
                     };
                     if (titles && Object.keys(titles).length > 0) {
                         d.action.titles = await Promise.all(Object.keys(titles).map(async title => {
