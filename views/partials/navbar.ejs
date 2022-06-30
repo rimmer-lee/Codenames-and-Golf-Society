@@ -9,9 +9,9 @@
                 <a class="nav-link" href="/charter">Charter</a>
                 <a class="nav-link" href="/demerits">Demerits</a>
                 <a class="nav-link" href="/players">Players</a>
-                <!-- <% if (typeof currentUser !== "undefined" && currentUser.role && ['super', 'founder', 'admin'].some(role => role === currentUser.role)) { %>
+                <% if (ADMIN_ACCESS) { %>
                 <a class="nav-link" href="/users">Users</a>
-                <% }; %> -->
+                <% }; %>
                 <a class="nav-link" href="/rounds">Rounds</a>
                 <a class="nav-link" href="/rounds/courses">Courses</a>
                 <!-- <a class="nav-link" href="/games">Games</a> -->
