@@ -35,8 +35,6 @@ async function register (req, res) {
 };
 
 async function reset (req, res) {
-    // can we trigger a flash message
-    if (!req.user || req.user.role !== 'super') return res.json({ success: false, message: 'You don\'t have the necessary permissions to reset passwords' });
     try {
         const user = await User.findById(req.body.id);
         if (user) {
