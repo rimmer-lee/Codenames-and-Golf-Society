@@ -35,7 +35,7 @@
                             </div>
                         </div>
                     </th>
-                    <% if (currentUser.role === 'super') { %>
+                    <% if (ADMIN_ACCESS) { %>
                     <th scope="col">
                         <div class="d-flex">
                             <div class="mx-auto">
@@ -68,7 +68,7 @@
                     </td>
                     <td>
                         <label for="<%= user.id %>|role" class="col-form-label d-none"></label>
-                        <% if (user.role === 'founder' || user.role === 'founder') { %>
+                        <% if (role === 'super' || role === 'founder') { %>
                         <input id="<%= user.id %>|role" class="form-control text-capitalize text-center" name="users[<%= user.id %>][role]" value="<%= user.role %>" disabled>
                         <% } else { %>
                         <select id="<%= user.id %>|role" class="form-select text-capitalize" aria-label="roles" name="users[<%= user.id %>][role]">
