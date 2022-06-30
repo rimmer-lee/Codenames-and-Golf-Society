@@ -58,6 +58,10 @@ async function updatePassword (req, res) {
 };
 
 async function remove (req, res) {
+    if (req.user.access.access) {
+        req.flash('error', 'Your account cannot be deleted');
+        return res.redirect('/account');
+    };
     try {
         const { id } = req.user;
         req.logout();

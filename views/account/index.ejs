@@ -8,7 +8,9 @@
             <div class="d-flex justify-content-end">
                 <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" readonly>
                 <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" readonly>
+                <% if (!ADMIN_ACCESS) { %>
                 <input id="delete" class="btn btn-danger me-2" type="button"  data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly>
+                <% }; %>
             </div>
         </div>
     </div>
