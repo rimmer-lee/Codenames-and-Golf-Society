@@ -21,56 +21,56 @@ const ImageSchema = new Schema({
 });
 
 const UserSchema = new Schema({
-    name: {
-        title: {
-            type: String,
-            enum: NAME_TITLES
-        },
-        preferred: String,
-        full: String,
-        first: String,
-        middle: [ String ],
-        last: String
-    },
-    images: [ ImageSchema ],
-    username: {
-        type: String,
-        unique: true,
-        sparse: true
-        // required: true
-    },
-    email: {
-        type: String,
-        unique: true,
-        sparse: true
-    },
-    status: {
-        type: String,
-        default: 'active',
-        enum: ['active', 'inactive'],
-        required: true
-    },
-    role: {
-        type: String,
-        default: 'guest',
-        enum: ROLES,
-        required: true
-    },
     birthday: Date,
-    gender: {
+    email: {
+        sparse: true,
         type: String,
-        enum: GENDERS
+        unique: true
     },
-    password: String,
+    gender: {
+        enum: GENDERS,
+        type: String
+    },
     handicap: {
+        current: handicapObject,
         progression: [
             {
                 date: Date,
                 handicap: handicapObject
             }
         ],
-        starting: handicapObject,
-        current: handicapObject
+        starting: handicapObject
+    },
+    images: [ ImageSchema ],
+    name: {
+        first: String,
+        full: String,
+        last: String,
+        middle: [ String ],
+        preferred: String,
+        title: {
+            enum: NAME_TITLES,
+            type: String
+        }
+    },
+    password: String,
+    role: {
+        default: 'guest',
+        enum: ROLES,
+        required: true,
+        type: String
+    },
+    status: {
+        default: 'active',
+        enum: ['active', 'inactive'],
+        required: true,
+        type: String
+    },
+    username: {
+        // required: true,
+        sparse: true,
+        type: String,
+        unique: true
     }
 }, options);
 
@@ -94,6 +94,14 @@ UserSchema.pre('save', async function(next) {
         };
     };
     next();
+});
+
+UserSchema.virtual('access').get(function() {
+    const { role } = this;
+    return {
+        admin: ['admin', 'super'].includes(role),
+        edit: ['admin', 'founder', 'super'].includes(role)
+    };
 });
 
 UserSchema.virtual('formattedBirthday').get(function() {
