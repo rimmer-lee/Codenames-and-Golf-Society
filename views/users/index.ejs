@@ -68,7 +68,7 @@
                     </td>
                     <td>
                         <label for="<%= user.id %>|role" class="col-form-label d-none"></label>
-                        <% if (role === 'super' || role === 'founder') { %>
+                        <% if (user.role === 'super' || user.role === 'founder') { %>
                         <input id="<%= user.id %>|role" class="form-control text-capitalize text-center" name="users[<%= user.id %>][role]" value="<%= user.role %>" disabled>
                         <% } else { %>
                         <select id="<%= user.id %>|role" class="form-select text-capitalize" aria-label="roles" name="users[<%= user.id %>][role]">
