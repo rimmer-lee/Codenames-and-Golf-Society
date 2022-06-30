@@ -462,16 +462,20 @@ document.getElementById('add-new-player').addEventListener('click', function () 
     if (existingPlayer) id = existingPlayer.id;
     else {
         const localStorage = JSON.parse(window.localStorage.getItem('players')) || [];
-        id = `new-${localStorage.length + 1}`;
         const handicap = +document.getElementById('player-handicap').value || 54.0;
-        const data = { id, guest: true, handicap, name: { full: value, knownAs, last } };
+        const initials = {
+            full: names.map(name => name[0].toUpperCase()).join(''),
+            short: `${knownAs[0]}${last[0]}`.toUpperCase()
+        };
+        id = `new-${localStorage.length + 1}`;
+        const data = { id, guest: true, handicap, name: { full: value, initials, knownAs, last } };
         localStorage.push(data);
         players.push(data);
         window.localStorage.setItem('players', JSON.stringify(localStorage));
         playerSelect.insertBefore(createElement({
             type: 'option',
             attributes: [{ id: 'value', value: id }],
-            innerText: data.name.knownAs
+            innerText: knownAs
         }), playerSelect.querySelector('[value="new"]'));
     };
     playerSelect.querySelector('[selected]').removeAttribute('selected');
