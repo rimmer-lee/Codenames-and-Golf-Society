@@ -129,6 +129,8 @@ passport.deserializeUser(User.deserializeUser());
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
 app.use(async (req, res, next) => {
+
+    // Constants
     res.locals.actions = ACTIONS;
     res.locals.countryCodes = COUNTRY_CODES;
     res.locals.GAMES = GAMES;
@@ -139,10 +141,17 @@ app.use(async (req, res, next) => {
     res.locals.ROUND_TYPES = ROUND_TYPES;
     res.locals.teeColours = TEE_COLOURS;
     res.locals.titles = TITLES;
-    res.locals.currentUser = req.user;
+
+    // Flash messages
     res.locals.success = req.flash('success');
     res.locals.info = req.flash('info');
     res.locals.error = req.flash('error');
+
+    // User variables
+    res.locals.currentUser = req.user;
+    res.locals.ADMIN_ACCESS = !!(req.user && req.user.access.admin);
+    res.locals.EDIT_ACCESS = !!(req.user && req.user.access.edit);
+
     next();
 });
 
