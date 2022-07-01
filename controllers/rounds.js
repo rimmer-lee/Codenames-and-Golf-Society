@@ -45,23 +45,37 @@ async function save (req, res) {
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
         const course = await Course.findById(courseId);
+
+        // as course is saved at time of returning search
+        // this should no longer be needed
+        // i.e. the tee ID should be available
         const tee = course.tees.find(({ gender, name }) => {
             const lowerTee = teeValue.toLowerCase();
             const [ teeName, teeGender ] = lowerTee.split('-');
             if (!teeGender) return name.toLowerCase() === teeName;
             return `${name}-${gender}`.toLowerCase() === lowerTee;
         })._id
+
+        // const round = await Round.findOne({ course, date }) ||
+        //     { created, course, games: [], date, scores: [] };
         const round = await Round.findOne({ course, date, tee }) ||
             { created, course, games: [], date, scores: [], tee };
+
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
+
+            // const { demerit, handicap, hole, id, tee } = body[key];
             const { demerit, handicap, hole, id } = body[key];
+
             const shots = hole.map(Number);
             const existingScoreIndex = round.scores.findIndex(({ player }) => player == id);
             if (existingScoreIndex !== -1) {
                 const { player, playingGroup } = round.scores[existingScoreIndex];
-                round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots });
+
+                round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots, tee });
+                // round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots });
+
             } else {
                 const player = await (async function(id) {
                     if (/^new\-\d+/.test(id)) {
@@ -72,7 +86,10 @@ async function save (req, res) {
                     };
                     return await User.findById(id);
                 })(id);
-                round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots });
+
+                round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots, tee });
+                // round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots });
+
             };
             if (!demerit) continue;
             for (const hole of Object.keys(demerit)) {
