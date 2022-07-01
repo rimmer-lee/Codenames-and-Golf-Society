@@ -3,29 +3,26 @@
     <div class="col">
         <h1 class="d-inline">Courses</h1>
     </div>
-    <!-- <div class="col">
+    <% if (EDIT_ACCESS) { %>
+    <div class="col">
         <div class="d-flex justify-content-end">
             <a class="btn btn-primary" href="/rounds/courses/add">Add</a>
         </div>
-    </div> -->
+    </div>
+    <% }; %>
 </div>
 <div class="row gy-4">
     <% for (const course of courses) { %>
     <div class="col-12">
-        <div class="row">
-            <div class="col-12">
-                <div class="row mb-2">
-                    <div class="col">
-                        <h3 class="text-decoration-underline"><%= course.name %></h1>
-                    </div>
-                    <div class="col">
-                        <div class="d-flex justify-content-end">
-                            <a class="btn btn-warning" href="/rounds/courses/<%= course.id %>">Edit</a>
-                        </div>
-                    </div>
-                </div>
+        <div class="row row-cols-1 g-2">
+            <div class="col">
+                <h3 class="text-decoration-underline">
+                    <a href="/rounds/courses/<%= course.id %>">
+                        <%= course.name %>
+                    </a>
+                </h3>
             </div>
-            <div class="col-12">
+            <div class="col">
                 <table class="course-tees table table-bordered table-striped">
                     <thead class="table-dark">
                         <tr class="d-none d-lg-table-row">
@@ -119,7 +116,7 @@
                     </thead>
                     <tbody>
                         <% for (const tee of course.tees) { %>
-                        <tr class="<%= tee.colour %>">
+                        <tr class="<%= tee.colour.class.table %>">
                             <td class="align-middle">
                                 <div class="d-none d-md-block text-center">
                                     <%= tee.names.long %>
