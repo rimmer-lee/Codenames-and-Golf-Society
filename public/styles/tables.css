@@ -67,7 +67,7 @@ table#round input,
     width: auto;
 }
 
-/* need optimising to fit in the table cell */
+/* needs optimizing to fit in the table cell */
 table img {
     object-fit: cover;
     width: 100%;
@@ -85,6 +85,7 @@ table img {
 }
 
 .hole tr input,
+table#course input,
 table#round div:not(.table-input) input {
     opacity: 80%;
 }
@@ -166,6 +167,7 @@ input:not(:focus) + .double-bogey::after {
     outline: 0;
 }
 
+table#course tr > *,
 table#round tr > * {
     --width: 90px;
     max-width: var(--width);
