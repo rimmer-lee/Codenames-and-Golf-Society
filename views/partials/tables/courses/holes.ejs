@@ -12,7 +12,7 @@
         </div>
     </td>
     <%} ; %>
-    <td class="<%= tee.colour.class %>">
+    <td class="<%= tee.colour.class.table %>">
         <select id="<%= `${tee.id}|${i}|strokeIndex` %>" class="form-select" name="[<%= tee.id %>][hole][strokeIndex]">
             <option value=""<%= tee.holes[i - 1].strokeIndex === "" ? " selected" : "" %>></option>
             <% for (let index = 1; index < 19; index++) { %>
