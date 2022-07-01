@@ -1,3 +1,4 @@
+// shared with models/round.js
 Array.prototype.sortAlphabetically = function(property = '') {
     function getProperty(property) {
         let object = this;
