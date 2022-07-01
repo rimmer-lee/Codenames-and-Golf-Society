@@ -132,7 +132,7 @@ function selectPlayer() {
     const playerSelects = document.querySelectorAll(playerSelectSelector);
     const handicapInputs = document.querySelectorAll('input.form-control[id$="|handicap"]:not([id^="game-"])');
     const selectValues = Array.from(playerSelects).filter(({ value }) => value && value !== 'Select Player'); // .map(({ value }) => value); -- doesn't work
-    const localStorage = JSON.parse(window.localStorage.getItem('round')) || {};
+    const localStorage = JSON.parse(window.localStorage.round) || {};
     // const nonGuests = players.filter(({ guest, id }) => !guest && selectValues.some(selectValue => selectValue.value === id));
     const summary = document.getElementById('summary-score');
     const holeOne = document.getElementById('hole-1');
@@ -168,7 +168,7 @@ function selectPlayer() {
         const selectParent = playerSelect.closest('.row.g-2');
         const localStoragePlayer = localStorage[id];
         const currentPlayer = players.find(({ id }) => id === currentSelectedPlayer);
-        const handicap = localStoragePlayer && +localStoragePlayer.handicap || currentPlayer.handicap;
+        const handicap = +(localStoragePlayer && localStoragePlayer.handicap || currentPlayer.handicap);
         const handicapElementObject = {
             classList: ['col-4', 'col-md-2'],
             children: [
