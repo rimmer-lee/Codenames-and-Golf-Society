@@ -1,9 +1,10 @@
 // shared with models/round.js
-function calculateGames(gameObject = {}, holes = [], players = []) {
+function calculateGames(gameObject = {}, course = { tees: [] }, players = [], defaultTee = { holes: [] }) {
     for (const score of gameObject.scores) {
         const handicap = Math.floor(score.handicap || 54);
         const shotsPerHole = Math.floor(handicap / 18);
         const holesWithAShot = handicap % 18;
+        const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == score.tee) || defaultTee;
         for (const roundType of ROUND_TYPES) {
             const { name, start, end } = roundType;
             if (score.shots.slice(start, end).every(shot => shot !== 0)) {
@@ -11,15 +12,16 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 break;
             };
         };
-        score.classes.shots = []
+        score.classes = { shots: [] };
         score.scores = {
             nett: [],
             par: { front: 0, back: 0, full: 0 },
             shots: {
-                front: score.shots.reduce((sum, value, index) => index < 9 ? sum + +value : sum, 0),
-                back: score.shots.reduce((sum, value, index) => index > 8 ? sum + +value : sum, 0),
+                front: score.shots.slice(0, 9).reduce((sum, value) => sum += value, 0),
+                back: score.shots.slice(9).reduce((sum, value) => sum += value, 0),
                 full: score.shots.reduce((sum, value) => sum += value, 0)
-            }
+            },
+            stableford: []
         };
         for (const hole of holes) {
             const { index, par, strokeIndex } = hole;
@@ -27,32 +29,37 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
             if (!shot || !par) {
                 score.scores.nett.push(null);
                 score.classes.shots.push('');
+                score.scores.stableford.push(null);
                 continue;
             };
+            const doubleBogey = +par + 2;
             const parScore = shot - par;
-            const nettScore = shot ? (shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot)) : 0;
+            const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
+            const nettParScore = doubleBogey - nettScore;
+            score.classes.shots.push(parScoreClass(parScore));
+            score.scores.nett.push(nettScore > doubleBogey ? doubleBogey : nettScore);
+            score.scores.stableford.push(nettParScore < 0 ? 0 : nettParScore);
             if (index < 10) score.scores.par.front += parScore;
             if (index > 9) score.scores.par.back += parScore;
             score.scores.par.full += parScore;
-            score.scores.nett.push(nettScore > (par + 2) ? par + 2 : nettScore);
-            score.classes.shots.push(parScoreClass(parScore));
         };
     };
     for (const game of gameObject.games) {
         const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
         if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
-        const { handicap, method, players: gamePlayers, roundType } = game;
+        const { handicap, method, players: gamePlayers, roundType = 'full' } = game;
         game.team = gamePlayers.some(({ team }) => team && team !== 'none');
         if ((game.team ? [ ...new Set(gamePlayers.map(({ team }) => team)) ].length : gamePlayers.length) < defaultPlayersObject.minimum) continue;
         const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
         const gameScores = (function() {
             const gameScores = gamePlayers.map(p => {
                 const { player, scores, shots } = gameObject.scores.find(({ player }) => player._id.toString() === p.player._id.toString());
-                return {
-                    id: player._id.toString(),
-                    score: (handicap ? scores.nett : shots).slice(start, end),
-                    team: p.team
-                };
+                const score = (function(game, handicap, scores) {
+                    if (game === 'Stableford') return scores.stableford;
+                    if (handicap) return scores.nett;
+                    return shots;
+                })(name, handicap, scores, shots).slice(start, end);
+                return { id: player._id.toString(), score, team: p.team };
             });
             if (!game.team) return gameScores;
             return [ ...new Set(gameScores.map(({ team: id }) => id)) ].map(id => {
@@ -61,13 +68,13 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
                 for (let i = start; i < end; i++) {
                     score.push((function() {
                         const holeScores = playerScores.map(playerScore => playerScore[i]).filter(score => score);
-                        if (holeScores.length === 0) return null;
+                        if (holeScores.length !== playerScores.length) return null;
                         switch (method) {
                             case 'Best':
                                 return Math.min( ...holeScores );
                             case 'Combined':
                                 return holeScores.reduce((sum, value) => sum += value, 0);
-                            case 'Worse':
+                            case 'Worst':
                                 return Math.max( ...holeScores );
                             default:
                                 return null;
@@ -79,16 +86,7 @@ function calculateGames(gameObject = {}, holes = [], players = []) {
         })();
         game.scores = gameScores.map(({ id, score }) => {
             const points = (function() {
-                if (name === 'Stroke Play') return score.map(s => +s || null);
-                if (name === 'Stableford') {
-                    return score.map((s, i) => {
-                        if (!+s) return null;
-                        const { par } = holes[i + start];
-                        const doubleBogey = 2 + +par;
-                        if (s > doubleBogey) return 0;
-                        return doubleBogey - s;
-                    });
-                };
+                if (name === 'Stroke Play' || name === 'Stableford') return score.map(s => +s || null);
                 const matchPlay = name === 'Match Play';
                 let skins = 0;
                 return score.map((s, i) => {
@@ -195,6 +193,15 @@ function getTee() {
     return teeObject;
 };
 
+// shared with models/round.js
+function parScoreClass(parScore) {
+    if (parScore < -1) return 'eagle';
+    if (parScore === -1) return 'birdie';
+    if (parScore === 1) return 'bogey';
+    if (parScore > 1) return 'double-bogey';
+    return '';
+};
+
 function sortCourses() {
     const courseSelect = document.getElementById('course-select');
     const { value: selectedValue } = courseSelect.querySelector('[selected]');
@@ -289,7 +296,8 @@ function updateGames() {
     toggleGrandparentVisibility(gamesSummary, false);
     if (!round.game) return;
     const gameKeys = Object.keys(round.game).filter(index => Object.keys(round.game[index]).some(key => /^(?:marker$|player\-)/.test(key)));
-    const { holes } = getTee();
+    const course = courses.find(({ id }) => id === (round.course && round.course.id));
+    const tee = getTee();
     const gamesObject = calculateGames({
         games: gameKeys.map(index => {
                 const { handicap, method, name, round: roundType } = round.game[index];
@@ -311,7 +319,7 @@ function updateGames() {
                 const shots = Object.keys(hole).map(h => +hole[h]);
                 return { handicap, player: { _id }, shots };
             })
-    }, holes, players);
+    }, course, players, tee);
     gameKeys.forEach((gameKey, index) => {
         const { handicap, method, name, roundType, summary } = gamesObject.games[index];
         if (!summary) return;
