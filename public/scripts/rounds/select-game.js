@@ -116,6 +116,28 @@ function addGame() {
                                             }
                                         ]
                                     },
+
+                                    // {
+                                    //     classList: ['col-12', 'd-none'],
+                                    //     attributes: [{ id: 'visibility', value: 'hidden' }],
+                                    //     children: [
+                                    //         {
+                                    //             classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'justify-content-evenly', 'align-items-center'],
+                                    //             children: []
+                                    //         }
+                                    //     ]
+                                    // },
+                                    // {
+                                    //     classList: ['col-12', 'd-none'],
+                                    //     attributes: [{ id: 'visibility', value: 'hidden' }],
+                                    //     children: [
+                                    //         {
+                                    //             classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'align-items-center', 'justify-content-center'],
+                                    //             children: []
+                                    //         }
+                                    //     ]
+                                    // },
+
                                     {
                                         classList: ['col-12', 'd-none'],
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
@@ -148,6 +170,7 @@ function addGame() {
                                             }
                                         ]
                                     },
+
                                     {
                                         classList: ['col-12', 'd-none'],
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
@@ -250,6 +273,60 @@ function addGame() {
         if (name === 'full') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
         newItemElementObject.children[1].children[0].children[0].children[2].children[0].children.push(radioButtonElementObject);
     };
+    // for (const scoring of ['Shots', 'Nett', 'Stableford']) {
+    //     const value = `${gameReference}|scoring|${scoring}`;
+    //     const radioButtonElementObject = {
+    //         classList: ['form-check', 'form-check-inline'],
+    //         children: [
+    //             {
+    //                 type: 'input',
+    //                 classList: ['form-check-input'],
+    //                 attributes: [
+    //                     { id: 'id', value },
+    //                     { id: 'name', value: `[game]['${gameIndex}'][scoring]` },
+    //                     { id: 'type', value: 'radio' },
+    //                     { id: 'value', value: scoring.toLowerCase() }
+    //                 ],
+    //                 addEventListener: [{ type: 'change', listener: updateData }]
+    //             },
+    //             {
+    //                 type: 'label',
+    //                 classList: ['form-check-label'],
+    //                 attributes: [{ id: 'for', value }],
+    //                 innerText: scoring
+    //             }
+    //         ]
+    //     };
+    //     if (scoring === 'Shots') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
+    //     newItemElementObject.children[1].children[0].children[0].children[3].children[0].children.push(radioButtonElementObject);
+    // };
+    // for (const handicaps of ['Standard', 'Competition']) {
+    //     const value = `${gameReference}|handicap|${handicaps}`;
+    //     const radioButtonElementObject = {
+    //         classList: ['form-check', 'form-check-inline'],
+    //         children: [
+    //             {
+    //                 type: 'input',
+    //                 classList: ['form-check-input'],
+    //                 attributes: [
+    //                     { id: 'id', value },
+    //                     { id: 'name', value: `[game]['${gameIndex}'][handicap]` },
+    //                     { id: 'type', value: 'radio' },
+    //                     { id: 'value', value: handicaps.toLowerCase() }
+    //                 ],
+    //                 addEventListener: [{ type: 'change', listener: updateData }]
+    //             },
+    //             {
+    //                 type: 'label',
+    //                 classList: ['form-check-label'],
+    //                 attributes: [{ id: 'for', value }],
+    //                 innerText: handicaps
+    //             }
+    //         ]
+    //     };
+    //     if (handicaps === 'Standard') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
+    //     newItemElementObject.children[1].children[0].children[0].children[4].children[0].children.push(radioButtonElementObject);
+    // };
     gameAccordionElement.insertBefore(createElement(newItemElementObject), null);
     updateGameOptions();
     toggleVisibility(gameAccordionParentElement);
@@ -407,14 +484,23 @@ function removeGame() {
 
 function selectGame() {
     const parentAccordionBody = this.closest('.accordion-body');
-    const gameHandicapSwitch = parentAccordionBody.querySelector('[id^="game-"][id$="|handicap"]');
-    const gameMethodSelect = parentAccordionBody.querySelector('[id^="game-"][id$="|method"]');
+
+    // const gameScoringRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|scoring|"][type="radio"]');
+    const gameHandicapRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|handicap|"][type="radio"]');
+
+    const gameHandicapCheckbox = parentAccordionBody.querySelector('input[id^="game-"][id$="|handicap"][type="checkbox"]');
+
+    const gameMethodSelect = parentAccordionBody.querySelector('select[id^="game-"][id$="|method"]');
     const gameRoundRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|round|"][type="radio"]');
     const gamePlayersElement = parentAccordionBody.querySelector(gamePlayersSelector);
     const [ gameReference ] = this.id.split('|');
     this.classList.remove('is-invalid');
-    toggleVisibility(gameHandicapSwitch.closest('.col-12'), false);
-    gameHandicapSwitch.removeAttribute('disabled');
+
+    // toggleVisibility(gameScoringRadioButton.closest('.col-12'), false);
+    // toggleVisibility(gameHandicapRadioButton.closest('.col-12'), false);
+
+    toggleVisibility(gameHandicapCheckbox.closest('.col-12'), false);
+    gameHandicapCheckbox.removeAttribute('disabled');
     toggleVisibility(gamePlayersElement.closest('.col-12'), false);
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
     toggleVisibility(gameRoundRadioButton.closest('.col-12'), false);
@@ -427,10 +513,16 @@ function selectGame() {
         this.children[0].selected = true;
         return this.classList.add('is-invalid');
     };
-    toggleVisibility(gameHandicapSwitch.closest('.col-12'));
+
+    // toggleVisibility(gameScoringRadioButton.closest('.col-12'));
+    // toggleVisibility(gameHandicapRadioButton.closest('.col-12'));
+
+    toggleVisibility(gameHandicapCheckbox.closest('.col-12'));
     toggleVisibility(gameRoundRadioButton.closest('.col-12'));
-    if (!game.handicap.adjustable) gameHandicapSwitch.setAttribute('disabled', true);
-    gameHandicapSwitch.checked = game.handicap.default;
+
+    if (!game.handicap.adjustable) gameHandicapCheckbox.setAttribute('disabled', true);
+    gameHandicapCheckbox.checked = game.handicap.default;
+
     toggleVisibility(gamePlayersElement.closest('.col-12'));
     for (const playerSelect of playerSelects) {
         const { id, selectedIndex } = playerSelect;
