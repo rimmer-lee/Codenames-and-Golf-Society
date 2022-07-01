@@ -186,7 +186,7 @@ function selectPlayer() {
                                 { id: 'value', value: handicap },
                                 { id: 'max', value: 54 },
                             ],
-                            addEventListener: [{ type: 'change', listener: updateData }]
+                            addEventListener: [{ type: 'input', listener: updateData }]
                         },
                         {
                             type: 'label',
