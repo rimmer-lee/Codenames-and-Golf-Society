@@ -259,6 +259,10 @@ app.use(devFeatures)
 
 if (process.env.NODE_ENV !== 'production') {
     app.get('/reseed', async (req, res) => {
+        if (mongoose.connection._connectionString !== process.env.DB_URL) {
+            req.flash('error', 'You\'re not connected to the dev database');
+            return res.redirect('home');
+        };
         const { seed } = require('./seeds/seed');
         await seed();
         res.redirect('/');
