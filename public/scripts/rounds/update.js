@@ -170,8 +170,8 @@ function calculateGames(gameObject = {}, course = { tees: [] }, players = [], de
 };
 
 function getRound() {
-    if (!window.localStorage.getItem('round')) updateData();
-    return JSON.parse(window.localStorage.getItem('round'));
+    if (!window.localStorage.round) updateData();
+    return JSON.parse(window.localStorage.round);
 };
 
 function getPlayerKeys(object = getRound()) {
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const round = getRound();
     const playerKeys = getPlayerKeys(round);
     const gameIndexes = Object.keys(round.game || {});
-    const localPlayers = JSON.parse(window.localStorage.getItem('players')) || [];
+    const localPlayers = JSON.parse(window.localStorage.players) || [];
     let playerIndex = 0;
     while (localPlayers.length > 0 && playerIndex < localPlayers.length) {
         if (players.some(({ id }) => id === localPlayers[playerIndex].id)) localPlayers.splice(playerIndex, 1);
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     };
     sortPlayers();
-    window.localStorage.setItem('players', JSON.stringify(localPlayers));
+    window.localStorage.players = JSON.stringify(localPlayers);
     if (round.course && round.course.id && !/^new/.test(round.course.id)) {
         updateSelect('course-select', round.course.id, selectCourse);
         if (round.course.tee) {
