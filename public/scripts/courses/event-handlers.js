@@ -17,7 +17,8 @@ function calculateTotals(id, property) {
 function different() {
     for (const tee of course.tees) {
         const { colour, holes, id } = tee;
-        if (document.getElementById(`${id}|colour`).value !== colour.name) return true;
+        const teeSelect = document.getElementById(`${id}|colour`);
+        if (teeSelect && teeSelect.value.toLowerCase() !== colour.colour.toLowerCase()) return true;
         for (const hole of holes) {
             const { distance, index, par, strokeIndex } = hole;
             const distanceValue = document.getElementById(`${id}|${index}|distance`).value;
@@ -32,7 +33,6 @@ function different() {
 };
 
 function updateButtons() {
-    const differentValue = different();
     return updateButtonClassList(different());
 };
 
