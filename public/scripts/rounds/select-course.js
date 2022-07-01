@@ -180,7 +180,7 @@ function selectCourse() {
         if (!course) continue;
         toggleElement(tableBody.closest('[class*="col"]'));
         for (const tee of course.tees) {
-            const { colour, names } = tee;
+            const { colour, id, names } = tee;
             const { long, short, value } = names;
             const newElementObject = { type: 'tr', classList: [], children: [] };
             if (colour) newElementObject.classList.push(colour.class.table);
@@ -220,25 +220,25 @@ function selectCourse() {
                             attributes: [
                                 { id: 'id', value: `${value}-${i}|${property}` },
                                 { id: 'type', value: 'number' },
-                                { id: 'name', value: `[course][tees][${value}][${i}][${property}]` },
+                                { id: 'name', value: `[course][tees][${id}][${i}][${property}]` },
                             ],
                             addEventListener: [{ type: 'blur', listener: updateData }]
                         }
                     ]
                 });
+                let attributes = [];
                 switch (property) {
                     case 'distance':
-                        dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' });
+                        attributes = [{ id: 'min', value: '1' }];
                         break;
                     case 'par':
-                        dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '3' });
-                        dataElementObject.children[0].children[1].attributes.push({ id: 'max', value: '5' });
+                        attributes = [{ id: 'min', value: '3' }, { id: 'max', value: '5' }];
                         break;
                     case 'strokeIndex':
-                        dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' });
-                        dataElementObject.children[0].children[1].attributes.push({ id: 'max', value: '18' });
+                        attributes = [{ id: 'min', value: '1' }, { id: 'max', value: '18' }];
                         break;
                 };
+                for (const attribute of attributes) dataElementObject.children[0].children[1].attributes.push(attribute);
                 newElementObject.children.push(dataElementObject);
             };
             tableBody.insertBefore(createElement(newElementObject), null);
@@ -251,12 +251,18 @@ function selectCourse() {
         toggleElement(paginationParentElement);
         // playersAccordion.classList.remove('forced-accordion-bottom');
         for (const tee of course.tees) {
-            const { colour, holes, name, names, par, ratings } = tee;
+
+            // const { colour, holes, name, names, par, ratings } = tee;
+            const { colour, holes, id, name, names, par, ratings } = tee;
+
             const { long, short, value } = names;
             const { bogey, course, slope, } = ratings;
             const optionElementObject = {
                 type: 'option',
-                attributes: [{ id: 'value', value: tee.name }],
+
+                // attributes: [{ id: 'value', value: name }],
+                attributes: [{ id: 'value', value: id }],
+
                 innerText: name
             };
             const tableRowElementObject = { type: 'tr', classList: [], children: [] };

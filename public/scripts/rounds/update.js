@@ -181,11 +181,10 @@ function getPlayerKeys(object = getRound()) {
 function getTee() {
     const { course } = getRound();
     const teeObject = { name: '', holes: [] };
-    if (!course || course.id === 'new') return teeObject;
-    const { tee, tees } = course;
-    const lowerTee = tee.toLowerCase();
-    const chosenTee = tees[lowerTee];
-    teeObject.name = lowerTee;
+    if (!course) return teeObject;
+    const { id, tee, tees } = course;
+    const chosenTee = tees[tee];
+    teeObject.name = ((courses.find(course => course.id === id) || { tees: [] }).tees.find(({ id }) => id === tee) || {}).name;
     for (const index of Object.keys(chosenTee)) {
         const { distance, par, strokeIndex } = chosenTee[index];
         teeObject.holes.push({ distance, index, par, strokeIndex });
@@ -378,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const round = getRound();
     const playerKeys = getPlayerKeys(round);
     const gameIndexes = Object.keys(round.game || {});
-    const localPlayers = JSON.parse(window.localStorage.players) || [];
+    const localPlayers = JSON.parse(window.localStorage.players || '[]');
     let playerIndex = 0;
     while (localPlayers.length > 0 && playerIndex < localPlayers.length) {
         if (players.some(({ id }) => id === localPlayers[playerIndex].id)) localPlayers.splice(playerIndex, 1);

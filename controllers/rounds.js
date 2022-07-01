@@ -41,20 +41,18 @@ async function save (req, res) {
     try {
         const { body } = req;
         const { date } = body.round;
-        const { id: courseId, tee: teeValue } = body.course;
+        const { id: courseId, tee, tees } = body.course;
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
         const course = await Course.findById(courseId);
-
-        // as course is saved at time of returning search
-        // this should no longer be needed
-        // i.e. the tee ID should be available
-        const tee = course.tees.find(({ gender, name }) => {
-            const lowerTee = teeValue.toLowerCase();
-            const [ teeName, teeGender ] = lowerTee.split('-');
-            if (!teeGender) return name.toLowerCase() === teeName;
-            return `${name}-${gender}`.toLowerCase() === lowerTee;
-        })._id
+        for (const teeId of Object.keys(tees)) {
+            const holes = tees[teeId];
+            course.tees.find(({ id }) => id === teeId).holes = Object.keys(holes).map(hole => {
+                const {distance, par, strokeIndex } = holes[hole];
+                return { distance: +distance, index: ++hole, par: +par, strokeIndex: +strokeIndex };
+            });
+        };
+        await course.save();
 
         // const round = await Round.findOne({ course, date }) ||
         //     { created, course, games: [], date, scores: [] };
