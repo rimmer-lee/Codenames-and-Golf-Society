@@ -71,7 +71,7 @@ function updateStrokeIndexSelects(id) {
 function updateTableClasses(teeId, classToAdd) {
     const classesToRemove = teeColours.map(teeColour => teeColour.class.table);
     for (const element of document.querySelectorAll(`table td [id^="${teeId}|"]`)) {
-        const tdElement = element.closest('td[class^="table"]');
+        const tdElement = element.closest('td');
         if (!tdElement) continue;
         tdElement.classList.remove(...classesToRemove);
         tdElement.classList.add(classToAdd);
@@ -79,7 +79,7 @@ function updateTableClasses(teeId, classToAdd) {
 };
 
 for (const input of document.querySelectorAll('input')) {
-    input.addEventListener('change', function () {
+    input.addEventListener('input', function () {
         const [ , id, property ] = this.id.match(/(.+)\|(?:1[0-8]|[1-9])\|(.+)/);
         if (!id || !property) return;
         calculateTotals(id, property);
