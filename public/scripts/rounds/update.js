@@ -183,6 +183,7 @@ function getTee() {
     const teeObject = { name: '', holes: [] };
     if (!course) return teeObject;
     const { id, tee, tees } = course;
+    if (!tee || !tees) return teeObject;
     const chosenTee = tees[tee];
     teeObject.name = ((courses.find(course => course.id === id) || { tees: [] }).tees.find(({ id }) => id === tee) || {}).name;
     for (const index of Object.keys(chosenTee)) {
