@@ -184,3 +184,7 @@ table#round tr > * {
 #players td {
     width: calc(100% / 6);
 }
+
+table#rounds-table td {
+    min-width: 90px;
+}
