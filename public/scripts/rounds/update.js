@@ -107,13 +107,9 @@ function calculateGames(gameObject = {}, course = { tees: [] }, players = [], de
         });
         game.summary = (function() {
             if (name === 'Match Play') {
-                const { id: idOne, points } = game.scores[0];
-                const idTwo = game.scores[1].id;
-
-                // move logic to function
-                const nameOne = game.team ? `Team ${idOne.toUpperCase()}` : (players.find(player => player.id == idOne) || { name: {} }).name.knownAs || idOne;
-                const nameTwo = game.team ? `Team ${idTwo.toUpperCase()}` : (players.find(player => player.id == idTwo) || { name: {} }).name.knownAs || idTwo;
-
+                const { id, points } = game.scores[0];
+                const nameOne = getName(id, players, game.team);
+                const nameTwo = getName(game.scores[1].id, players, game.team);
                 const gameComplete = !points.some(point => point === null);
                 const lengthOfPoints = points.length;
                 let currentScore = 0;
@@ -137,7 +133,7 @@ function calculateGames(gameObject = {}, course = { tees: [] }, players = [], de
                     if (game.scores.some(({ points }) => points[index] === null)) return sum;
                     return sum += value;
                 }, 0);
-                const knownAs = game.team ? `Team ${id.toUpperCase()}` : (players.find(player => player.id == id) || { name: {} }).name.knownAs || id;
+                const knownAs = getName(id, players, game.team);
                 return { id: knownAs, total };
             }).sort((a, b) => {
                 if (name === 'Skins' || name === 'Stableford') return b.total - a.total;
@@ -167,6 +163,12 @@ function calculateGames(gameObject = {}, course = { tees: [] }, players = [], de
         }());
     };
     return gameObject;
+};
+
+// shared with models/round.js
+function getName(id, players, teamGame) {
+    if (teamGame) return `Team ${id.length === 1 ? id.toUpperCase() : id}`;
+    return (players.find(player => player.id == id) || { name: {} }).name.knownAs || id;
 };
 
 function getRound() {
@@ -259,7 +261,7 @@ function updateData() {
         if ((input.type === 'radio' || input.type === 'checkbox') && !input.checked) continue;
         createNestedObject(round, input);
     };
-    window.localStorage.setItem('round', JSON.stringify(round));
+    window.localStorage.round = JSON.stringify(round);
     updateScores();
     updateGames();
 };
