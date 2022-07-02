@@ -172,7 +172,7 @@ async function view (req, res) {
         const teams = [ ...new Set(players.map(({ team }) => team).filter(team => team)) ];
         return {
             handicap,
-            index,
+            index: ++index,
             method,
             name,
             players: players.map(({ player }) => S.find(score => score.player._id.toString() === player.toString())),
