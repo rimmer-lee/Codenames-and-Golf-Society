@@ -225,9 +225,8 @@ function sortPlayers() {
 
 function updateCourse() {
     const round = getRound();
-    if (!/^randa-/.test(((round || {}).course || {}).id)) return;
-    if (!round.course.hole) return;
     const holes = round.course.hole;
+    if (!holes) return;
     for (const index of Object.keys(holes)) {
         const hole = holes[index];
         for (const teeName of Object.keys(hole)) {
@@ -269,7 +268,7 @@ function updateData() {
 function updateDemerits() {
     const round = getRound();
     if (!round) return;
-    for (const player of getPlayerKeys()) {
+    for (const player of getPlayerKeys(round)) {
         const demerits = round[player].demerit;
         if (!demerits) continue;
         for (const hole of Object.keys(demerits)) {
@@ -403,21 +402,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectTee.call(teeSelect);
             };
         };
-        for (const teeName of Object.keys(round.course.tees)) {
-            const tee = round.course.tees[teeName];
+        for (const teeId of Object.keys(round.course.tees)) {
+            const tee = round.course.tees[teeId];
             for (const hole of Object.keys(tee)) {
                 for (const property of ['distance', 'par', 'strokeIndex']) {
-                    const element = document.getElementById(`${teeName}-${hole}|${property}`);
-                    if (element) element.value = tee[hole][property];
+                    const element = document.getElementById(`${teeId}-${hole}|${property}`);
+                    const value = +tee[hole][property];
+                    if (element && value) element.value = value;
                 };
             };
          };
     };
     if (round.round && round.round.date) document.getElementById('date').value = round.round.date;
     for (const player of playerKeys) {
-        if (round[player].id === 'new') continue;
-        const elementId = `${player}|id`;
         const { handicap, id } = round[player];
+        if (id === 'new') continue;
+        const elementId = `${player}|id`;
         if (!document.getElementById(elementId)) addPlayer.call(document.getElementById('add-player'));
         updateSelect(elementId, id, selectPlayer);
         if (handicap) document.getElementById(`${player}|handicap`).value = +handicap;
