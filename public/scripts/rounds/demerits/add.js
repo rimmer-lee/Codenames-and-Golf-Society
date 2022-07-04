@@ -5,7 +5,6 @@ function addDemerit() {
     const index = modalBody.childElementCount;
     modalBody.insertBefore(createElement(demeritObject(player, hole, index)), modalBody.querySelector('.btn.btn-success').closest('.col-11.border.border-1.rounded-3.mx-auto.p-3'));
     updateDemeritButtons(player, hole);
-    updateReferences();
     updateCloseButtons(modal);
 };
 
