@@ -8,6 +8,7 @@ const { BREAKDOWN_OBJECT, COUNTRY_CODES, GENDERS, TEE_COLOURS } = require('../co
 const { courseNames, findTeeColour } = require('../utilities/courseFunctions');
 const { searchCourse, searchCourses } = require('../utilities/externalApis');
 
+// shared with public/scripts/rounds/select-course.js
 function singleDecimal(number) {
     return Number.parseFloat(number).toFixed(1);
 };
@@ -167,7 +168,7 @@ CourseSchema.pre('save', async function(next) {
                 const [ courseBack, slopeBack ] = Back.split(' / ');
                 tee.gender = Gender.toLowerCase();
                 tee.names = courseNames(gender, name, this.tees);
-                // tee.par = { full: +Par };
+                if (!tee.par) tee.par = { full: +Par };
                 tee.ratings = {
                     course: {
                         full: singleDecimal(CourseRating),
@@ -203,7 +204,7 @@ CourseSchema.pre('save', async function(next) {
             tee.par.back += par;
         };
         tee.distance.full = tee.distance.front + tee.distance.back;
-        tee.par.full = tee.par.front + tee.par.back;
+        if (tee.par.front && tee.par.back) tee.par.full = tee.par.front + tee.par.back;
     };
     next();
 });
