@@ -10,6 +10,11 @@ const User = require('../models/user');
 
 const { courses, demerits, drinks, rounds, sections, users } = require('./base');
 
+function regexName(name) {
+    const [ first, last ] = name.split(' ');
+    return new RegExp(`^${first}.*${last}$`, 'i');
+};
+
 async function seed() {
     const ch = await Charter.find();
     if (ch.length > 0) await Charter.collection.drop();
@@ -39,14 +44,14 @@ async function seed() {
     };
     await new Charter({ created: { date: new Date(2021, 0, 1), by: defaultUser }, sections, status: 'Approved' }).save();
     for (const demerit of demerits) {
-        demerit.player = await User.findOne({ 'name.full': { $regex: demerit.player.split(' ')[0] }, 'name.full': { $regex: demerit.player.split(' ')[1] }});
+        demerit.player = await User.findOne({ 'name.full': { $regex: regexName(demerit.player) }});
         demerit.rule = await Rule.findOne({ 'index': demerit.rule });
         if (demerit.action && demerit.action.titles && demerit.action.titles.length > 0) demerit.action.titles = await Promise.all(demerit.action.titles.map(async ({ method, name }) => await new Title({ when: demerit.when, method, player: demerit.player, name }).save()));
         if (demerit.history && demerit.history.length > 0) for (const h of demerit.history) h.updated.by = defaultUser;
         await new Demerit(demerit).save();
     };
     for (const drink of drinks) {
-        drink.player = await User.findOne({ 'name.full': { $regex: drink.player.split(' ')[0] }, 'name.full': { $regex: drink.player.split(' ')[1] }});
+        drink.player = await User.findOne({ 'name.full': { $regex: regexName(drink.player) }});
         await new Drink(drink).save();
     };
     for (const course of courses) {
@@ -67,13 +72,13 @@ async function seed() {
                 players: await Promise.all(players.map(async p => {
                     const { player, team } = p;
                     return {
-                        player: await User.findOne({ 'name.full': { $regex: player.split(' ')[0] }, 'name.full': { $regex: player.split(' ')[1] }}),
+                        player: await User.findOne({ 'name.full': { $regex: regexName(player) }}),
                         team
                     }
                 }))
             };
         }));
-        for (const score of round.scores) score.player = await User.findOne({ 'name.full': { $regex: score.player.split(' ')[0] }, 'name.full': { $regex: score.player.split(' ')[1] }});
+        for (const score of round.scores) score.player = await User.findOne({ 'name.full': { $regex: regexName(score.player) }});
         await new Round(round).save();
     };
 };
