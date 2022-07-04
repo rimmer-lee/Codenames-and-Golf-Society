@@ -251,18 +251,12 @@ function selectCourse() {
         toggleElement(paginationParentElement);
         // playersAccordion.classList.remove('forced-accordion-bottom');
         for (const tee of course.tees) {
-
-            // const { colour, holes, name, names, par, ratings } = tee;
             const { colour, holes, id, name, names, par, ratings } = tee;
-
             const { long, short, value } = names;
             const { bogey, course, slope, } = ratings;
             const optionElementObject = {
                 type: 'option',
-
-                // attributes: [{ id: 'value', value: name }],
                 attributes: [{ id: 'value', value: id }],
-
                 innerText: name
             };
             const tableRowElementObject = { type: 'tr', classList: [], children: [] };
@@ -303,19 +297,19 @@ function selectCourse() {
                         else if (holes) valueToAssign = holes.reduce((sum, hole) => sum + hole.par, 0);
                         break;
                     case 'courseRating-full':
-                        valueToAssign = course.full;
+                        valueToAssign = singleDecimal(course.full);
                         break;
                     case 'courseRating-front':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = course.front;
+                        valueToAssign = singleDecimal(course.front);
                         break;
                     case 'courseRating-back':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = course.back;
+                        valueToAssign = singleDecimal(course.back);
                         break;
                     case 'bogeyRating':
                         classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = bogey;
+                        valueToAssign = singleDecimal(bogey);
                         break;
                     case 'slopeRating-full':
                         valueToAssign = slope.full;
@@ -392,6 +386,11 @@ countrySelect.addEventListener('change', async function() {
     };
     toggleGrandparentVisibility(regionSelect);
 });
+
+// shared with models/course.js
+function singleDecimal(number) {
+    return Number.parseFloat(number).toFixed(1);
+};
 
 regionSelect.addEventListener('click', resetCourseSearchValidation);
 
