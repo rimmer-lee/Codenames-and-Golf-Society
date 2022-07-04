@@ -68,27 +68,20 @@ async function save (req, res) {
 
             const shots = hole.map(Number);
             const existingScoreIndex = round.scores.findIndex(({ player }) => player == id);
+            const player = await (async function(id) {
+                if (existingScoreIndex !== -1) return round.scores[existingScoreIndex].player;
+                if (/^new\-\d+/.test(id)) {
+                    const { name: full } = body[id];
+                    const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
+                    body[key].id = player.id;
+                    return player;
+                };
+                return await User.findById(id);
+            })(id);
             if (existingScoreIndex !== -1) {
-                const { player, playingGroup } = round.scores[existingScoreIndex];
-
+                const { playingGroup } = round.scores[existingScoreIndex];
                 round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots, tee });
-                // round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots });
-
-            } else {
-                const player = await (async function(id) {
-                    if (/^new\-\d+/.test(id)) {
-                        const { name: full } = body[id];
-                        const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
-                        body[key].id = player.id;
-                        return player;
-                    };
-                    return await User.findById(id);
-                })(id);
-
-                round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots, tee });
-                // round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots });
-
-            };
+            } else round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots, tee });
             if (!demerit) continue;
             for (const hole of Object.keys(demerit)) {
                 for (const index of Object.keys(demerit[hole])) {
