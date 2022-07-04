@@ -181,7 +181,7 @@ function selectCourse() {
         toggleElement(tableBody.closest('[class*="col"]'));
         for (const tee of course.tees) {
             const { colour, id, names } = tee;
-            const { long, short, value } = names;
+            const { long, short } = names;
             const newElementObject = { type: 'tr', classList: [], children: [] };
             if (colour) newElementObject.classList.push(colour.class.table);
             newElementObject.children.push({
@@ -190,12 +190,12 @@ function selectCourse() {
                 children: [
                     {
                         classList: ['d-none', 'd-md-block', 'text-center'],
-                        attributes: [{ id: 'id', value: `${value}-${i}|long-name` }],
+                        attributes: [{ id: 'id', value: `${id}-${i}|long-name` }],
                         innerText: long
                     },
                     {
                         classList: ['d-block', 'd-md-none', 'text-center'],
-                        attributes: [{ id: 'id', value: `${value}-${i}|short-name` }],
+                        attributes: [{ id: 'id', value: `${id}-${i}|short-name` }],
                         innerText: short
                     }
                 ]
@@ -212,13 +212,13 @@ function selectCourse() {
                         {
                             type: 'label',
                             classList: ['d-none', 'form-label'],
-                            attributes: [{ id: 'for', value: `${value}-${i}|${property}` }]
+                            attributes: [{ id: 'for', value: `${id}-${i}|${property}` }]
                         },
                         {
                             type: 'input',
                             classList: ['form-control', 'text-center'],
                             attributes: [
-                                { id: 'id', value: `${value}-${i}|${property}` },
+                                { id: 'id', value: `${id}-${i}|${property}` },
                                 { id: 'type', value: 'number' },
                                 { id: 'name', value: `[course][tees][${id}][${i}][${property}]` },
                             ],
