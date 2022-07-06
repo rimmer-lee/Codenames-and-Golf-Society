@@ -30,19 +30,15 @@
         <% for (const round of rounds) { %>
         <tr>
             <td>
-                <div class="d-flex justify-content-center align-items-center">
-                    <a href="/rounds/<%= round.id %>">
-                        <div class="d-none d-md-block"><%= round.formattedDate.full %></div>
-                        <div class="d-md-none"><%= round.formattedDate.friendly %></div>
-                    </a>
-                </div>
+                <a class="text-center" href="/rounds/<%= round.id %>">
+                    <div class="d-none d-md-block"><%= round.formattedDate.full %></div>
+                    <div class="d-md-none"><%= round.formattedDate.friendly %></div>
+                </a>
             </td>
             <td>
-                <div class="d-flex justify-content-center align-items-center">
-                    <a href="/rounds/courses/<%= round.course.id %>">
-                        <%= round.course.name %>
-                    </a>
-                </div>
+                <a class="text-center" href="/rounds/courses/<%= round.course.id %>">
+                    <%= round.course.name %>
+                </a>
             </td>
             <td>
                 <div class="d-flex flex-column">
