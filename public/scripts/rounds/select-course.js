@@ -331,10 +331,10 @@ function selectCourse() {
             if (!holes) continue;
             for (const hole of holes) {
                 const { distance, index, par, strokeIndex } = hole;
-                const id = `${value}-${index}|`;
-                const distanceElement = document.getElementById(`${id}distance`);
-                const parElement = document.getElementById(`${id}par`);
-                const strokeIndexElement = document.getElementById(`${id}strokeIndex`);
+                const holeId = `${id}-${index}|`;
+                const distanceElement = document.getElementById(`${holeId}distance`);
+                const parElement = document.getElementById(`${holeId}par`);
+                const strokeIndexElement = document.getElementById(`${holeId}strokeIndex`);
                 if (distanceElement) distanceElement.value = distance;
                 if (parElement) parElement.value = par;
                 if (strokeIndexElement) strokeIndexElement.value = strokeIndex;
