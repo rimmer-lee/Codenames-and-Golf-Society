@@ -252,9 +252,9 @@
                                 </h4>
                             </div>
                             <% } else { %>
-                            <% for (const game of games) { %>
-                            <% if (EDIT_ACCESS) { %>
-                            <div class="row gy-3">
+                            <div class="g-3 justify-content-center row row-cols-1 row-cols-md-2">
+                                <% for (const game of games) { %>
+                                <% if (EDIT_ACCESS) { %>
                                 <div class="col-12">
                                     <div class="accordion">
                                         <div class="accordion-item">
@@ -364,11 +364,10 @@
                                     <div class="col-12 mt-3">
                                         <button id="add-game" class="btn btn-success w-100" type="button">Add Game</button>
                                     </div>
+
                                 </div>
-                            </div>
-                            <% continue; %>
-                            <% }; %>
-                            <div class="g-3 justify-content-center row row-cols-1 row-cols-md-2">
+                                <% continue; %>
+                                <% }; %>
                                 <div class="col">
                                     <div class="row g-3 px-2">
                                         <div class="border border-1 col rounded">
@@ -382,12 +381,15 @@
                                                 <h5 class="col text-center">
                                                     <%= game.summary %>
                                                 </h5>
+                                                <div class="col text-center text-muted">
+                                                    <%= game.playerString %>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <% }; %>
                             </div>
-                            <% }; %>
                             <% }; %>
                         </div>
                     </div>

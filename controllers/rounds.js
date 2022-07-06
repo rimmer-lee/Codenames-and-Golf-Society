@@ -161,14 +161,25 @@ async function view (req, res) {
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
     const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round.toJSON();
     const currentDate = customDate('yyyy-mm-dd');
-    const games = G.map(({ handicap, method, name, players, roundType, summary }, index) => {
-        const teams = [ ...new Set(players.map(({ team }) => team).filter(team => team)) ];
+    const games = G.map(({ handicap, method, name, players: p, roundType, summary }, index) => {
+        const teams = [ ...new Set(p.map(({ team }) => team).filter(team => team)) ];
+        const players = p.map(({ player }) => S.find(score => score.player._id.toString() === player.toString()));
+
+        // logic shared with calculating game.summary
+        const playerString = (function() {
+            const string = `Played Between ${players.map(({ player }) => player.name.knownAs).join(', ')}`;
+            const lastInstance = string.lastIndexOf(', ');
+            if (lastInstance === -1) return string;
+            return `${string.substr(0, lastInstance)} and ${string.substr(lastInstance + 2)}`;
+        })();
+
         return {
             handicap,
             index: ++index,
             method,
             name,
-            players: players.map(({ player }) => S.find(score => score.player._id.toString() === player.toString())),
+            players,
+            playerString,
             roundType: roundType.capitalize(),
             summary,
             teams
