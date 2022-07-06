@@ -6,7 +6,6 @@ const User = require('../models/user');
 
 const { ACTIONS, NON_MEMBERS, ROUND_TYPES, TITLES } = require('../constants');
 const { dates, years } = require('../utilities/seasons');
-const sort = require('../utilities/sort');
 
 function isBetweenDates(year, value) {
     const { endDate, startDate } = dates(year);
@@ -46,7 +45,7 @@ async function show (req, res) {
             };
         });
         return {
-            players: sort([ ...new Set([
+            players: [ ...new Set([
                 ...seasonDemerits.map(({ player }) => player.toString()),
                 ...seasonDrinks.map(({ player }) => player.toString()),
                 ...seasonRounds.map(({ scores }) => scores.map(({ player }) => player.toString())).flat()
@@ -62,7 +61,7 @@ async function show (req, res) {
                 const rounds = playerRounds.length;
                 const titles = titleHolders.filter(({ holder }) => holder == playerId).map(({ title: t }) => t);
                 return { drinks, infractions, id, name, quorums, rounds, titles };
-            }), 'name.friendly'),
+            }).sortAlphabetically('name.friendly'),
             year
         };
     });

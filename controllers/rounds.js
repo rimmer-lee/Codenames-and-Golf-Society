@@ -8,7 +8,6 @@ const Title = require('../models/title');
 const User = require('../models/user');
 
 const { customDate } = require('../utilities/formatDate');
-const sort = require('../utilities/sort');
 
 const { TITLES } = require('../constants');
 
@@ -21,7 +20,8 @@ async function create (req, res) {const date = customDate('yyyy-mm-dd');
     const allCourses = await Course.find();
     const allPlayers = await User.findPlayers();
     const rules = await Rule.getAll();
-    const courses = sort(allCourses, 'name').map(({ facility, id, name, randa, tees }) => ({ facility, id, name, randa, tees }));
+    const courses = allCourses.sortAlphabetically('name')
+        .map(({ facility, id, name, randa, tees }) => ({ facility, id, name, randa, tees }));
     const players = allPlayers.map(player => {
         const { handicap, id, name, role } = player.toJSON();
             const { initials, knownAs } = name;
@@ -143,9 +143,11 @@ function serviceWorker (req, res) {
 
 async function show (req, res) {
     const rounds = await Round.find().sort({ 'date': -1 }).populate('scores.player').populate('course');
+
     const localStorage = req.session.deleteLocalStorage || [];
     delete req.session.localStorage;
     res.render('rounds/index', { rounds, localStorage });
+
 };
 
 async function update (req, res) {
@@ -166,14 +168,29 @@ async function view (req, res) {
         const players = p.map(({ player }) => S.find(score => score.player._id.toString() === player.toString()));
 
         // logic shared with calculating game.summary
-        const playerString = (function() {
-            const string = `Played Between ${players.map(({ player }) => player.name.knownAs).join(', ')}`;
-            const lastInstance = string.lastIndexOf(', ');
-            if (lastInstance === -1) return string;
-            return `${string.substr(0, lastInstance)} and ${string.substr(lastInstance + 2)}`;
-        })();
+        // const playerString = (function() {
+        //     const string = `Played between ${players.map(({ player }) => player.name.knownAs).join(', ')}`;
+        //     const lastInstance = string.lastIndexOf(', ');
+        //     if (lastInstance === -1) return string;
+        //     return `${string.substring(0, lastInstance)} and ${string.substring(lastInstance + 2)}`;
+        // })();
+        const playerString = `Played between ${players.map(({ player }) => player.name.knownAs).join(', ').replaceLastInstance()}`;
 
+        let description = '';
+        if (handicap) description += 'Nett ';
+        if (method) {
+            if (method === 'Combined') description += 'Combined Score';
+            else description += `${method} Ball`;
+            description += ' ';
+        };
+        description += name;
+        if (roundType) {
+            description += ' ';
+            if (roundType === 'Full') description += 'for 18';
+            else description += `on ${roundType} 9`;
+        };
         return {
+            description,
             handicap,
             index: ++index,
             method,

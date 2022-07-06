@@ -6,7 +6,6 @@ const User = require('../models/user');
 const { COUNTRY_CODES } = require('../constants');
 
 const { createCourse, findRegions, searchCourses } = require('../utilities/externalApis');
-const sort = require('../utilities/sort');
 
 async function create (req, res) {
     res.send('here')
@@ -107,7 +106,7 @@ async function save (req, res) {
 
 async function show (req, res) {
     const allCourses = await Course.find({}, '_id name tees');
-    const courses = sort(allCourses, 'name');
+    const courses = allCourses.sortAlphabetically('name');
     res.render('courses/index', { courses });
 };
 

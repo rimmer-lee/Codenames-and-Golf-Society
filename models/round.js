@@ -8,22 +8,6 @@ const { BREAKDOWN_OBJECT, GAMES, ROUND_TYPES } = require('../constants');
 
 const formatDate = require('../utilities/formatDate');
 
-// shared with public/scripts/rounds/shared-functions.js
-Array.prototype.sortAlphabetically = function(property = '') {
-    function getProperty(property) {
-        let object = this;
-        for (const p of property.split('.')) object = object[p];
-        return object;
-    };
-    return this.sort((a, b) => {
-        const upperA = getProperty.call(a, property).toUpperCase();
-        const upperB = getProperty.call(b, property).toUpperCase();
-        if (upperA < upperB) return -1;
-        if (upperA > upperB) return 1;
-        return 0;
-    })
-};
-
 // shared with public/scripts/rounds/update.js
 function calculateGames(course = { tees: [] }, games = [],  players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
@@ -106,11 +90,11 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
             return { id, points };
         });
         game.summary = (function() {
+            const gameComplete = !game.scores.some(({ points }) => points.some(point => point === null));
             if (name === 'Match Play') {
                 const { id, points } = game.scores[0];
                 const nameOne = getName(id, players, game.team);
                 const nameTwo = getName(game.scores[1].id, players, game.team);
-                const gameComplete = !points.some(point => point === null);
                 const lengthOfPoints = points.length;
                 let currentScore = 0;
                 for (let i = 0; i < lengthOfPoints; i++) {
@@ -151,12 +135,10 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 const equalTotals = sortedTotals.filter(sortedTotal => sortedTotal.total === t).sortAlphabetically('id');
                 const string = equalTotals.filter(equalTotal => equalTotal.total === t).map(({ id, total }, i) => {
                     if (i !== equalTotals.length - 1) return id;
-                    if (index === 0) return `${id} ${allSquare ? 'tied' : `lead${equalTotals.length === 1 ? 's' : ''}`} (${total})`;
+                    if (index === 0) return `${id} ${allSquare ? 'tied' : `${gameComplete ? 'win' : 'lead'}${equalTotals.length === 1 ? 's' : ''}`} (${total})`;
                     return `${id} (${Math.abs(total)})`;
                 }).join(', ');
-                const lastInstance = string.lastIndexOf(', ');
-                if (lastInstance === -1) return string;
-                return `${string.substr(0, lastInstance)} and ${string.substr(lastInstance + 2)}`;
+                return string.replaceLastInstance();
             }).join('; ');
         }());
     };

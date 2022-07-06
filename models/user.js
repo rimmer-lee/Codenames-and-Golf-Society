@@ -5,7 +5,6 @@ const Schema = mongoose.Schema;
 const { GENDERS, NAME_TITLES, NON_MEMBERS, ROLES } = require('../constants');
 
 const { customDate } = require('../utilities/formatDate');
-const sort = require('../utilities/sort');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -142,12 +141,12 @@ UserSchema.virtual('name.initials').get(function() {
 
 UserSchema.statics.findMembers = async function() {
     const members = await this.find({ 'role': { $nin: NON_MEMBERS } });
-    return sort(members, 'name.friendly');
+    return members.sortAlphabeticall('name.friendly');
 };
 
 UserSchema.statics.findPlayers = async function() {
     const players = await this.find({ 'role': { $ne: 'super' } });
-    return sort(players, 'name.friendly');
+    return players.sortAlphabetically('name.friendly');
 };
 
 module.exports = mongoose.model('User', UserSchema);

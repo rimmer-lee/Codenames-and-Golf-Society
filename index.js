@@ -17,7 +17,7 @@ const passport = require('passport');
 const path = require('path');
 const session = require('express-session');
 
-require('./utilities/stringPrototype');
+require('./utilities/prototypes');
 
 const ExpressError = require(path.join(__dirname, 'utilities', 'ExpressError'));
 
