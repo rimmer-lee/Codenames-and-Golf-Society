@@ -115,13 +115,13 @@ UserSchema.virtual('name.friendly').get(function() {
 });
 
 UserSchema.virtual('name.initialed').get(function() {
-    const { first = '', middle = [], last = '' } = this.name;
+    const { first = ' ', middle = [], last = ' ' } = this.name;
     if (!first && !last) return;
     return `${first[0]}. ${middle.length > 0 ? middle.map(m => `${m[0]}.`).join(' ') + ' ' : ''}${last}`;
 });
 
 UserSchema.virtual('name.initials').get(function() {
-    const { knownAs = '', first = '', middle = [], last = '' } = this.name;
+    const { knownAs = ' ', first = ' ', middle = [], last = ' ' } = this.name;
     if (!knownAs && !last) return;
     return {
         short: `${knownAs[0]}${last[0]}`,
