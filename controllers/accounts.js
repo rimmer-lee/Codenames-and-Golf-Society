@@ -2,8 +2,6 @@ const User = require('../models/user');
 
 const { customDate } = require('../utilities/formatDate');
 
-require('../utilities/capitalize');
-
 async function checkValues (req, res) {
     const key = Object.keys(req.query)[0];
     const users = await User.find({ [key]: req.query[key] });
