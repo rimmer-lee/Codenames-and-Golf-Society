@@ -1,3 +1,9 @@
+String.prototype.replaceLastInstance = function(delimiter = ', ', replacementValue = ' and ') {
+    const lastInstance = this.lastIndexOf(delimiter);
+    if (lastInstance === -1) return this;
+    return `${this.substring(0, lastInstance)}${replacementValue}${this.substring(lastInstance + delimiter.length)}`;
+};
+
 // shared with models/round.js
 function calculateGames(course = { tees: [] }, games = [],  players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
@@ -80,11 +86,11 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
             return { id, points };
         });
         game.summary = (function() {
+            const gameComplete = !game.scores.some(({ points }) => points.some(point => point === null));
             if (name === 'Match Play') {
                 const { id, points } = game.scores[0];
                 const nameOne = getName(id, players, game.team);
                 const nameTwo = getName(game.scores[1].id, players, game.team);
-                const gameComplete = !points.some(point => point === null);
                 const lengthOfPoints = points.length;
                 let currentScore = 0;
                 for (let i = 0; i < lengthOfPoints; i++) {
@@ -125,12 +131,10 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 const equalTotals = sortedTotals.filter(sortedTotal => sortedTotal.total === t).sortAlphabetically('id');
                 const string = equalTotals.filter(equalTotal => equalTotal.total === t).map(({ id, total }, i) => {
                     if (i !== equalTotals.length - 1) return id;
-                    if (index === 0) return `${id} ${allSquare ? 'tied' : `lead${equalTotals.length === 1 ? 's' : ''}`} (${total})`;
+                    if (index === 0) return `${id} ${allSquare ? 'tied' : `${gameComplete ? 'win' : 'lead'}${equalTotals.length === 1 ? 's' : ''}`} (${total})`;
                     return `${id} (${Math.abs(total)})`;
                 }).join(', ');
-                const lastInstance = string.lastIndexOf(', ');
-                if (lastInstance === -1) return string;
-                return `${string.substr(0, lastInstance)} and ${string.substr(lastInstance + 2)}`;
+                return string.replaceLastInstance();
             }).join('; ');
         }());
     };
@@ -154,11 +158,12 @@ function getPlayerKeys(object = getRound()) {
 
 function getTee() {
     const { course } = getRound();
-    const teeObject = { name: '', holes: [] };
+    const teeObject = { id: '', name: '', holes: [] };
     if (!course) return teeObject;
     const { id, tee, tees } = course;
     if (!tee || !tees) return teeObject;
     const chosenTee = tees[tee];
+    teeObject.id = tee;
     teeObject.name = ((courses.find(course => course.id === id) || { tees: [] }).tees.find(({ id }) => id === tee) || {}).name;
     for (const index of Object.keys(chosenTee)) {
         const { distance, par, strokeIndex } = chosenTee[index];
@@ -301,7 +306,7 @@ function updateGames() {
         // const innerText = `Game ${+index.replace(/'/g, '')}: ${handicap ? 'Nett ' : ''}${method ? (method === 'Combined ' ? `${method} Score ` : `${method} Best `) : ''}${name}${roundType ? (roundType === 'full' ? ' for 18' : ` for ${roundType.capitalize()} 9`) : ''} - ${summary}`;
         const innerText = `Game ${+index.replace(/'/g, '')} - ${summary}`;
         toggleGrandparentVisibility(gamesSummary);
-        gamesSummary.insertBefore(createElement({ type: 'h5', classList: ['col', 'mb-0'], innerText }), null);
+        gamesSummary.insertBefore(createElement({ type: 'h5', classList: ['col', 'mb-0', 'text-center'], innerText }), null);
     };
 };
 
@@ -318,7 +323,7 @@ function updateParElement(player, par) {
 function updateScores() {
     const round = getRound();
     if (!round) return;
-    const teeName = getTee().name.toLowerCase();
+    const tee = getTee().id;
     for (const player of getPlayerKeys()) {
         const { hole } = round[player] || {};
         if (!hole) continue;
@@ -327,11 +332,11 @@ function updateScores() {
         for (const index of Object.keys(hole)) {
             const score = hole[index];
             if (!score) continue;
-            const scoreElement = document.querySelector(`[name="[${player}][hole][${index}]"]`);
+            const scoreElement = document.getElementById(`${player}|hole-${index}`);
             if (scoreElement) scoreElement.value = score;
             total += +score;
-            if (!teeName) continue;
-            const parValue = (document.getElementById(`${teeName}-${index}|par`) || {}).value;
+            if (!tee) continue;
+            const parValue = (document.getElementById(`${tee}-${index}|par`) || {}).value;
             if (parValue) par += +score - +parValue;
         };
         if (totalElement) totalElement.innerText = total;
