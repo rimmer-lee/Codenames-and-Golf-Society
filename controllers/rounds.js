@@ -167,15 +167,8 @@ async function view (req, res) {
         const teams = [ ...new Set(p.map(({ team }) => team).filter(team => team)) ];
         const players = p.map(({ player }) => S.find(score => score.player._id.toString() === player.toString()));
 
-        // logic shared with calculating game.summary
-        // const playerString = (function() {
-        //     const string = `Played between ${players.map(({ player }) => player.name.knownAs).join(', ')}`;
-        //     const lastInstance = string.lastIndexOf(', ');
-        //     if (lastInstance === -1) return string;
-        //     return `${string.substring(0, lastInstance)} and ${string.substring(lastInstance + 2)}`;
-        // })();
+        // should these be part of the model?
         const playerString = `Played between ${players.map(({ player }) => player.name.knownAs).join(', ').replaceLastInstance()}`;
-
         let description = '';
         if (handicap) description += 'Nett ';
         if (method) {
@@ -189,6 +182,7 @@ async function view (req, res) {
             if (roundType === 'Full') description += 'for 18';
             else description += `on ${roundType} 9`;
         };
+
         return {
             description,
             handicap,
