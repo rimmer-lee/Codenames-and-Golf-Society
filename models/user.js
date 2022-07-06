@@ -131,7 +131,7 @@ UserSchema.virtual('name.initials').get(function() {
 
 UserSchema.statics.findMembers = async function() {
     const members = await this.find({ 'role': { $nin: NON_MEMBERS } });
-    return members.sortAlphabeticall('name.friendly');
+    return members.sortAlphabetically('name.friendly');
 };
 
 UserSchema.statics.findPlayers = async function() {
