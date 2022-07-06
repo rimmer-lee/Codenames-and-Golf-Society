@@ -47,11 +47,9 @@
             <td>
                 <div class="d-flex flex-column">
                     <% for (const score of round.scores) { %>
-                    <div class="d-flex justify-content-center align-items-center">
-                        <a href="/players/<%= score.player.id %>">
-                            <%= score.player.name.knownAs %>
-                        </a>
-                    </div>
+                    <a class="text-center" href="/players/<%= score.player.id %>">
+                        <%= score.player.name.knownAs %>
+                    </a>
                     <% }; %>
                 </div>
             </td>
