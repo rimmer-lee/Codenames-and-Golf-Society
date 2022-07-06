@@ -79,19 +79,9 @@ UserSchema.pre('save', async function(next) {
     const { full } = this.name;
     if (!full) return next();
     const names = full.split(' ');
-    for (let i = 1; i < 4; i++) {
-        switch (i) {
-            case 1:
-                this.name.first = names.shift();
-                return next();
-            case 2:
-                this.name.last = names.pop();
-                return next();
-            case 3:
-                this.name.middle = names;
-                return next();
-        };
-    };
+    this.name.first = names.shift();
+    this.name.last = names.pop();
+    this.name.middle = names;
     next();
 });
 
