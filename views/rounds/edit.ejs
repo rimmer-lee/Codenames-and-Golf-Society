@@ -9,14 +9,13 @@
             <div class="d-flex justify-content-end">
                 <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" visibility="hidden" readonly>
                 <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" visibility="hidden" readonly>
-                <!-- <input id="delete" class="btn btn-danger me-2" type="button"  data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly> -->
+                <% if (ADMIN_ACCESS) { %>
+                <input id="delete" class="btn btn-danger me-2" type="button"  data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly>
+                <% }; %>
             </div>
         </div>
         <% }; %>
     </div>
-
-    <!-- show demerits??? -->
-
     <div class="row">
         <div class="col-12">
             <div id="accordion" class="accordion">
@@ -74,7 +73,7 @@
                                     <div class="form-floating">
                                         <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]">
                                             <% for (const t of course.tees) { %>
-                                            <option value="<%= t.id %>"<%= t._id == tee._id ? ' selected' : '' %>><%= t.name.long %></option>
+                                            <option value="<%= t.id %>"<%= t._id == tee._id ? ' selected' : '' %>><%= t.names.long %></option>
                                             <% }; %>
                                         </select>
                                         <label for="tee-select">Tee</label>
@@ -230,7 +229,7 @@
                                 <% }; %>
                             </div>
                             <% } else { %>
-                            <div class="g-3 justify-content-center row row-cols-2 row-cols-md-4">
+                            <div class="g-3 justify-content-center row">
                                 <%- include('../partials/tables/rounds/playing-group', { playingGroup: playingGroups[0] }) %>
                             </div>
                             <% }; %>
@@ -353,18 +352,14 @@
                                                             </div>
                                                         </div>
                                                         <% }; %>
-                                                        <!-- <div class="col-12">
+                                                        <div class="col-12">
                                                             <input class="btn btn-danger w-100" type="button" value="Remove Game">
-                                                        </div> -->
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 mt-3">
-                                        <button id="add-game" class="btn btn-success w-100" type="button">Add Game</button>
-                                    </div>
-
                                 </div>
                                 <% continue; %>
                                 <% }; %>
@@ -376,7 +371,7 @@
                                                     <%= `Game ${game.index}` %>
                                                 </div>
                                                 <h4 class="col text-center">
-                                                    <%= `${game.handicap ? 'Nett ' : ''}${game.method ? (game.method === 'Combined' ? `${game.method} Score ` : `${game.method} Ball `) : ''}${game.name}${game.roundType ? (game.roundType === 'Full' ? ' for 18' : ` on ${game.roundType} 9`) : ''}` %>
+                                                    <%= game.description %>
                                                 </h4>
                                                 <h5 class="col text-center">
                                                     <%= game.summary %>
@@ -389,7 +384,12 @@
                                     </div>
                                 </div>
                                 <% }; %>
+                                <% }; %>
                             </div>
+                            <% if (EDIT_ACCESS) { %>
+                                <div class="mt-3">
+                                    <button id="add-game" class="btn btn-success w-100" type="button">Add Game</button>
+                                </div>
                             <% }; %>
                         </div>
                     </div>
