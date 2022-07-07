@@ -188,3 +188,9 @@ table#round tr > * {
 table#rounds-table td {
     min-width: 90px;
 }
+
+table#players thead i.bi::before {
+    --font-size: 1.6em;
+    font-size: var(--font-size);
+    vertical-align: calc(var(--font-size) * -0.125);
+}

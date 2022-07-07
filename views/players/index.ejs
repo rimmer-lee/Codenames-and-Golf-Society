@@ -20,7 +20,7 @@
                     Player
                 </div>
                 <div class="d-md-none">
-                    Plyr.
+                    <i class="bi bi-person"></i>
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -28,7 +28,7 @@
                     Rounds Played
                 </div>
                 <div class="d-md-none">
-                    Rnds.
+                    <i class="bi bi-circle"></i>
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -36,7 +36,7 @@
                     Quorums Played
                 </div>
                 <div class="d-md-none">
-                    Qrms.
+                    <i class="bi bi-play-circle"></i>
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -44,7 +44,7 @@
                     Infractions
                 </div>
                 <div class="d-md-none">
-                    Infrcts.
+                    <i class="bi bi-exclamation-triangle"></i>
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -52,7 +52,7 @@
                     Titles Held
                 </div>
                 <div class="d-md-none">
-                    Ttls.
+                    <i class="bi bi-award"></i>
                 </div>
             </td>
             <td class="text-center align-middle" scope="col">
@@ -60,7 +60,7 @@
                     Drinks Bought
                 </div>
                 <div class="d-md-none">
-                    Drnks.
+                    <i class="bi bi-droplet"></i>
                 </div>
             </td>
         </tr>
@@ -103,24 +103,24 @@
         <% }; %>
     </tbody>
 </table>
-<div id="key" class="border border-2 <%= players.length === 0 ? "d-none " : "" %></div>d-md-none g-2 my-3 mx-0 pb-2 rounded row row-cols-3"<%= players.length === 0 ? " visibility=hidden" : "" %>>
-    <div class="align-items-center col d-flex justify-content-center">
-        <span class="fw-bold">Pl</span><span class="text-muted">a</span><span class="fw-bold">y</span><span class="text-muted">e</span><span class="fw-bold">r</span>
+<div id="key" class="border border-2 <%= players.length === 0 ? "d-none " : "" %>d-md-none g-2 my-3 mx-0 pb-2 rounded row row-cols-3"<%= players.length === 0 ? " visibility=hidden" : "" %>>
+    <div class="align-items-center col d-flex justify-content-evenly">
+        <i class="bi bi-person"></i>Players
     </div>
-    <div class="align-items-center col d-flex justify-content-center">
-        <span class="fw-bold">Q</span><span class="text-muted">uo</span><span class="fw-bold">r</span><span class="text-muted">u</span><span class="fw-bold">ms</span>
+    <div class="align-items-center col d-flex justify-content-evenly">
+        <i class="bi bi-play-circle"></i>Quorums
     </div>
-    <div class="align-items-center col d-flex justify-content-center">
-        <span class="fw-bold">T</span><span class="text-muted">i</span><span class="fw-bold">tl</span><span class="text-muted">e</span><span class="fw-bold">s</span>
+    <div class="align-items-center col d-flex justify-content-evenly">
+        <i class="bi bi-award"></i>Titles
     </div>
-    <div class="align-items-center col d-flex justify-content-center">
-        <span class="fw-bold">R</span><span class="text-muted">ou</span><span class="fw-bold">nds</span>
+    <div class="align-items-center col d-flex justify-content-evenly">
+        <i class="bi bi-circle"></i>Rounds
     </div>
-    <div class="align-items-center col d-flex justify-content-center">
-        <span class="fw-bold">Inf</span><span class="text-muted">a</span><span class="fw-bold">ct</span><span class="text-muted">ion</span><span class="fw-bold">s</span>
+    <div class="align-items-center col d-flex justify-content-evenly">
+        <i class="bi bi-exclamation-triangle"></i>Infractions
     </div>
-    <div class="align-items-center col d-flex justify-content-center">
-        <span class="fw-bold">Dr</span><span class="text-muted">i</span><span class="fw-bold">nks</span>
+    <div class="align-items-center col d-flex justify-content-evenly">
+        <i class="bi bi-droplet"></i>Drinks
     </div>
 </div>
 <div id="no-data" class="<%= players.length > 0 ? "d-none" : "" %>"<%= players.length > 0 ? " visibility=hidden" : "" %>>
