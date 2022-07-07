@@ -67,11 +67,10 @@ table#round input,
     width: auto;
 }
 
-/* needs optimizing to fit in the table cell */
 table img {
-    object-fit: cover;
-    width: 100%;
-    height: 100px;
+    --size: 50px;
+    max-height: var(--size);
+    max-width: var(--size);
 }
 
 .hole td {

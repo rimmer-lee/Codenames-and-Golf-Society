@@ -22,23 +22,21 @@
                 <% for (const player of data[0].players) { %>
                 <th class="align-top" scope="col" data-player>
                     <div class="d-flex flex-column">
-                        <div class="text-center">
+                        <a class="link-light text-center" href="/players/<%= player.id %>">
                             <div class="d-none d-md-block">
                                 <%= player.name.knownAs %>
                             </div>
                             <div class="d-md-none">
                                 <%= player.name.initials.short %>
                             </div>
-                        </div>
+                        </a>
                         <% for (const title of player.titles) { %>
                         <% const t = titles.find(({ value }) => title === value); %>
+                        <!-- <a class="col d-flex link-light p-0" href=""> -->
                         <div class="col d-flex p-0">
                             <i class="mx-auto bi <%= t.icon %>"></i>
                         </div>
-                        <!-- add link to titles page to see history of titles? -->
-                        <!-- <a class="col d-flex p-0" href="">
-                            <i class="mx-auto bi <%= t.icon %>"></i>
-                        </a> -->
+                        </a>
                         <% }; %>
                     </div>
                 </th>
@@ -46,7 +44,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <tr class="align-middle">
                 <th id="new-demerit-head" class="table-secondary" colspan="<%= data[0].players.length + 1 %>" scope="row">
                     <div class="row">
                         <div class="col d-flex align-items-center">Demerits</div>
@@ -59,7 +57,7 @@
                 </th>
             </tr>
             <% for (const demerit of data[0].demerits) { %>
-            <tr data-date>
+            <tr class="align-middle" data-date>
                 <th class="d-flex justify-content-end" scope="row">
                     <a href="/demerits/edit?d=<%= demerit.date %>">
                         <%= demerit.date %>
@@ -76,7 +74,7 @@
             </tr>
             <% }; %>
             <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Total', property: 'demerits' }) %>
-            <tr>
+            <tr class="align-middle">
                 <th id="new-drink-head" class="table-secondary" colspan="<%= data[0].players.length + 1 %>" scope="row">
                     <div class="row">
                         <div class="col d-flex align-items-center">Drinks</div>
@@ -89,7 +87,7 @@
                 </th>
             </tr>
             <% for (const drink of data[0].drinks) { %>
-            <tr data-date>
+            <tr class="align-middle" data-date>
                 <th class="d-flex justify-content-end" scope="row">
                     <a href="/demerits/drinks/edit?d=<%= drink.date %>">
                         <%= drink.date %>
@@ -107,12 +105,12 @@
             <% }; %>
             <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Owed', property: 'owed' }) %>
             <%- include('../partials/tables/demerits/row', { players: data[0].players, title: 'Balance', property: 'balance' }) %>
-            <tr id ="bbq-row">
+            <tr id ="bbq-row" class="align-middle">
                 <th scope="row">BBQ</th>
                 <% for (const player of data[0].players) { %>
-                <td data-player>
+                <td class="text-center" data-player>
                     <% if (player.bbq) { %>
-                    <img class="img-fluid" src="/images/bbq.png" alt="bbq">
+                    <img src="/images/bbq.png" alt="bbq">
                     <% }; %>
                 </td>
                 <% }; %>

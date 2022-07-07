@@ -12,7 +12,8 @@ document.getElementById('year').addEventListener('change', function() {
             const value = `/demerits/edit?d=${date}`;
             const element = {
                 type: 'tr',
-                attributes: [{ id: 'data-date' }],
+                classList: ['align-middle'],
+                attributes: [{ id: 'data-date', value: '' }],
                 children: [
                     {
                         type: 'th',
@@ -53,21 +54,23 @@ document.getElementById('year').addEventListener('change', function() {
     for (const playerElement of playerElements) playerElement.remove();
     for (const element of [newDemeritHead, newDrinkHead]) element.setAttribute('colspan', numberOfPlayers);
     for (const player of players) {
-        const { name, titles } = player;
+        const { id, name, titles } = player;
         const { initials, knownAs } = name;
         const playerElement = {
             type: 'th',
             classList: ['align-top'],
             attributes: [
                 { id: 'scope', value: 'col' },
-                { id: 'data-player' }
+                { id: 'data-player', value: '' }
             ],
             children: [
                 {
                     classList: ['d-flex', 'flex-column'],
                     children: [
                         {
-                            classList: ['text-center'],
+                            type: 'a',
+                            classList: ['link-light', 'text-center'],
+                            attributes: [{ id: 'href', value: `/players/${id}` }],
                             children: [
                                 {
                                     classList: ['d-none', 'd-md-block'],
@@ -87,26 +90,23 @@ document.getElementById('year').addEventListener('change', function() {
             const { icon } = allTitles.find(({ value }) => title === value);
             if (!icon) continue;
             playerElement.children[0].children.push({
-                classList: ['col', 'd-flex', 'p-0'],
+                // type: 'a',
+                classList: ['col', 'd-flex', 'link-light', 'p-0'],
+                // attributes: [{ id: 'href', value: '' }],
                 children: [
                     {
                         type: 'i',
                         classList: ['mx-auto', 'bi', icon]
                     }
                 ]
-
-                //  <!-- add link to titles page to see history of titles? -->
-                //  <a class="col d-flex p-0" href="">
-                //      <i class="mx-auto bi <%= t.icon %>"></i>
-                //  </a>
-
             });
         };
         for (const property of ['demerits', 'owed', 'balance', 'bbq']) {
             const value = player[property];
             const dataElement = {
                 type: 'td',
-                attributes: [{ id: 'data-player' }]
+                classList: ['text-center'],
+                attributes: [{ id: 'data-player', value: '' }]
             };
             if (property !== 'bbq') {
                 dataElement.classList = ['text-center'];
@@ -115,7 +115,6 @@ document.getElementById('year').addEventListener('change', function() {
                 dataElement.children = [
                     {
                         type: 'img',
-                        classList: ['img-fluid'],
                         attributes: [
                             { id: 'src', value: '/images/bbq.png' },
                             { id: 'alt', value: 'bbq'}
