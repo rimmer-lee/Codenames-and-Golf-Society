@@ -126,8 +126,6 @@ document.getElementById('year').addEventListener('change', function() {
         };
         playerHeadingRow.insertBefore(createElement(playerElement), null);
     };
-
-    // https://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically
     createRows(demerits, 'demerits', 'demerits');
     createRows(drinks, 'drinks', 'owed');
 });
