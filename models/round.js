@@ -177,7 +177,6 @@ function parScoreClass(parScore) {
 const options = { toJSON: { virtuals: true } };
 
 const ScoreSchema = new Schema({
-    // classes: { shots: [ String ] },
     handicap: Number,
     player: {
         ref: 'User',
@@ -193,15 +192,12 @@ const ScoreSchema = new Schema({
     },
     scores: {
         nett: [ Number ],
-
-        // par: BREAKDOWN_OBJECT,
         par: {
             back: Number,
             front: Number,
             full: Number,
             shots: [ Number ]
         },
-
         shots: BREAKDOWN_OBJECT
     },
     shots: [ Number ],
@@ -317,10 +313,6 @@ RoundSchema.pre('save', async function(next) {
                 break;
             };
         };
-
-        // should be virtal
-        // score.classes = { shots: [] };
-
         score.scores = {
             nett: [],
             par: { front: 0, back: 0, full: 0, shots: [] },
