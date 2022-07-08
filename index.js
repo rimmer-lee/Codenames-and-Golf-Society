@@ -332,6 +332,8 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 //      - for handicap enabled, offer standard or competition (deduct lower handicap from others - applicable for Stableford and match play)
 //      - move tee from round schema to score schema and allow individual players to choose which tee they're playing off
 
+// live scoring with socket.io()
+
 // prevent users from navigating away from the reset password page when forced to reset password i.e. login for first time with default password or reset password
 
 // should utilities files be combined in a utilities.js???
