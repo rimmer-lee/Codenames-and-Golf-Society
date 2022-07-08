@@ -1,15 +1,24 @@
-Array.prototype.sortAlphabetically = function(property = '') {
-    function getProperty(property) {
-        let object = this;
-        for (const p of property.split('.')) object = object[p];
-        return object;
-    };
+function getProperty(path) {
+    let o = this;
+    for (const p of path.split('.')) o = o[p];
+    return o;
+};
+
+Array.prototype.sortAlphabetically = function(path = '') {
     return this.sort((a, b) => {
-        const upperA = getProperty.call(a, property).toUpperCase();
-        const upperB = getProperty.call(b, property).toUpperCase();
+        const upperA = getProperty.call(a, path).toUpperCase();
+        const upperB = getProperty.call(b, path).toUpperCase();
         if (upperA < upperB) return -1;
         if (upperA > upperB) return 1;
         return 0;
+    })
+};
+
+Array.prototype.sortBy = function(ascending = true, path = '') {
+    return this.sort((a, b) => {
+        const aValue = getProperty.call(a, path);
+        const bValue = getProperty.call(b, path);
+        return ascending ? aValue - bValue : bValue - aValue;
     })
 };
 
