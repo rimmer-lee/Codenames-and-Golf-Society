@@ -20,24 +20,19 @@ document.getElementById('year').addEventListener('change', function() {
         const { drinks, id, infractions, name, quorums, rounds, titles } = player;
         const children = titles.map(({ class: tClass, icon, method, value }) => {
             return {
+                // type: 'a',
                 classList: ['btn', `btn-${tClass}`, 'py-0', 'px-1'],
-                attributes: [
-                    { id: 'data-bs-toggle', value: 'tooltip' },
-                    { id: 'data-bs-placement', value: 'top' },
-                    { id: 'title', value: `${method} ${value}` }
-                ],
+                // attributes: [
+                //     { id: 'data-bs-toggle', value: 'tooltip' },
+                //     { id: 'data-bs-placement', value: 'top' },
+                //     { id: 'title', value: `${method} ${value}` }
+                // ],
                 children: [
                     {
                         type: 'i',
                         classList: ['bi', icon]
                     }
                 ]
-
-                //  <!-- add link to titles page to see history of titles? -->
-                //  <a class="col d-flex p-0" href="">
-                //      <i class="mx-auto bi <%= t.icon %>"></i>
-                //  </a>
-
             }
         });
         tableBody.insertBefore(createElement({

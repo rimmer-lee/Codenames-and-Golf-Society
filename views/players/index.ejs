@@ -90,9 +90,11 @@
             <td>
                 <div class="d-flex justify-content-evenly align-items-center">
                     <% for (const title of player.titles) { %>
-                    <div class="btn btn-<%= title.class %> py-0 px-1" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= title.title %> <%= title.value %>">
+                    <!-- <a class="btn btn-<%= title.class %> py-0 px-1" href=""> -->
+                    <div class="btn btn-<%= title.class %> py-0 px-1" href="">
                         <i class="bi <%= title.icon %>"></i>
                     </div>
+                    <!-- </a> -->
                     <% }; %>
                 </div>
             </td>
