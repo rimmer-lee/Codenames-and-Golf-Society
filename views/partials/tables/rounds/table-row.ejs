@@ -23,7 +23,7 @@
         <div class="d-flex align-items-center justify-content-center table-input">
             <label for="<%= i - 1 %>|hole-<%= i %>" class="d-none"></label>
             <input id="<%= i - 1 %>|hole-<%= i %>" class="text-center" type="number" min="1" name="[<%= i - 1 %>][hole]" value="<%= score.shots[i - 1] || "" %>"<%= !EDIT_ACCESS && " disabled" %>>
-            <div class="hole-score<%= ` ${score.classes.shots[i - 1]}` || "" %>"></div>
+            <div class="hole-score<%= ` ${score.classes.par.shots[i - 1]}` || "" %>"></div>
         </div>
     </td>
     <% }; %>
