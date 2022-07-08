@@ -177,7 +177,7 @@ function parScoreClass(parScore) {
 const options = { toJSON: { virtuals: true } };
 
 const ScoreSchema = new Schema({
-    classes: { shots: [ String ] },
+    // classes: { shots: [ String ] },
     handicap: Number,
     player: {
         ref: 'User',
@@ -193,7 +193,15 @@ const ScoreSchema = new Schema({
     },
     scores: {
         nett: [ Number ],
-        par: BREAKDOWN_OBJECT,
+
+        // par: BREAKDOWN_OBJECT,
+        par: {
+            back: Number,
+            front: Number,
+            full: Number,
+            shots: [ Number ]
+        },
+
         shots: BREAKDOWN_OBJECT
     },
     shots: [ Number ],
@@ -309,10 +317,13 @@ RoundSchema.pre('save', async function(next) {
                 break;
             };
         };
-        score.classes = { shots: [] };
+
+        // should be virtal
+        // score.classes = { shots: [] };
+
         score.scores = {
             nett: [],
-            par: { front: 0, back: 0, full: 0 },
+            par: { front: 0, back: 0, full: 0, shots: [] },
             shots: {
                 front: score.shots.slice(0, 9).reduce((sum, value) => sum += value, 0),
                 back: score.shots.slice(9).reduce((sum, value) => sum += value, 0),
@@ -324,13 +335,13 @@ RoundSchema.pre('save', async function(next) {
             const shot = +score.shots[index - 1];
             if (!shot || !par) {
                 score.scores.nett.push(null);
-                score.classes.shots.push('');
+                score.scores.par.shots.push(null);
                 continue;
             };
             const doubleBogey = +par + 2;
             const parScore = shot - par;
             const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
-            score.classes.shots.push(parScoreClass(parScore));
+            score.scores.par.shots.push(parScore);
             score.scores.nett.push(nettScore > doubleBogey ? doubleBogey : nettScore);
             if (index < 10) score.scores.par.front += parScore;
             if (index > 9) score.scores.par.back += parScore;
@@ -404,14 +415,14 @@ RoundSchema.virtual('formattedDate').get(function () {
     };
 });
 
-ScoreSchema.virtual('classes.par').get(function () {
+ScoreSchema.virtual('classes').get(function () {
     const { par } = this.scores;
     const classesObject = {};
     for (const key of Object.keys(par)) {
         const value = par[key] || 0;
-        classesObject[key] = parClass(value);
+        classesObject[key] = value instanceof Array ? value.map(v => parScoreClass(v)) : parClass(value);
     };
-    return classesObject;
+    return { par: classesObject };
 });
 
 module.exports = mongoose.model('Round', RoundSchema);
