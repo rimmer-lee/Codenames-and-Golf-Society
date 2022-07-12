@@ -1,3 +1,5 @@
+// move to a shared utility file
+// use in controllers/players.js
 function getProperty(path) {
     let o = this;
     for (const p of path.split('.')) o = o[p];
