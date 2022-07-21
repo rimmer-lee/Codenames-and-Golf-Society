@@ -14,7 +14,7 @@ Array.prototype.sortAlphabetically = function(path = false) {
         if (upperA < upperB) return -1;
         if (upperA > upperB) return 1;
         return 0;
-    })
+    });
 };
 
 Array.prototype.sortBy = function(ascending = true, path = '') {
@@ -22,7 +22,7 @@ Array.prototype.sortBy = function(ascending = true, path = '') {
         const aValue = getProperty.call(a, path);
         const bValue = getProperty.call(b, path);
         return ascending ? aValue - bValue : bValue - aValue;
-    })
+    });
 };
 
 Date.prototype.custom = function(format) {
