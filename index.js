@@ -327,9 +327,12 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // readImage();
 
 
+// make container a fixed width for wide screens
+
 // for rounds/new
 //      - add feature to name teams
 //      - for handicap enabled, offer standard or competition (deduct lower handicap from others - applicable for Stableford and match play)
+//      - - add handicap modifier e.g. 85% handicap
 //      - move tee from round schema to score schema and allow individual players to choose which tee they're playing off
 
 // live scoring with socket.io()
