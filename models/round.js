@@ -6,8 +6,6 @@ const User = require('./user');
 
 const { BREAKDOWN_OBJECT, GAMES, ROUND_TYPES } = require('../constants');
 
-const formatDate = require('../utilities/formatDate');
-
 // shared with public/scripts/rounds/update.js
 function calculateGames(course = { tees: [] }, games = [],  players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
@@ -159,6 +157,7 @@ function handicapShots(handicap = 54) {
     };
 };
 
+// shared with controllers/players.js
 function parClass(par) {
     if (par > 0) return 'f-over';
     if (par < 0) return 'f-under';
@@ -171,7 +170,7 @@ function parScoreClass(parScore) {
     if (parScore === -1) return 'birdie';
     if (parScore === 1) return 'bogey';
     if (parScore > 1) return 'double-bogey';
-    return '';
+    return 'par';
 };
 
 const options = { toJSON: { virtuals: true } };
@@ -401,9 +400,9 @@ RoundSchema.pre('save', async function(next) {
 RoundSchema.virtual('formattedDate').get(function () {
     const { date } = this;
     return {
-        datePicker: formatDate.customDate('yyyy-mm-dd', date),
-        friendly: formatDate.customDate('dd/mm/yyyy', date),
-        full: formatDate.fullDate(date)
+        datePicker: date.custom('yyyy-mm-dd'),
+        friendly: date.custom('dd/mm/yyyy'),
+        full: date.full()
     };
 });
 
