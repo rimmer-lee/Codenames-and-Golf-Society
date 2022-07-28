@@ -1,3 +1,7 @@
+:root {
+    --icon-size: 0.8rem;
+}
+
 /* Bootstrap Extra Small (xs) */
 @media (max-width: 576px) {
     .course-tees td {
@@ -79,10 +83,6 @@ table img {
     /* height: calc(40px + 2px / 3); */
 }
 
-.player-table td {
-    width: 33%;
-}
-
 .hole tr input,
 table#course input,
 table#round div:not(.table-input) input {
@@ -92,10 +92,6 @@ table#round div:not(.table-input) input {
 table.summary td *,
 table.summary td {
     min-width: 60px;
-}
-
-table#courses > tbody > tr:hover {
-    cursor: pointer;
 }
 
 input:not(:focus) + .birdie::before,
@@ -167,29 +163,54 @@ input:not(:focus) + .double-bogey::after {
 }
 
 table#course tr > *,
-table#round tr > * {
-    --width: 90px;
+table#round tr > *,
+table.player-table td {
     max-width: var(--width);
     min-width: var(--width);
 }
 
+table.player-table td {
+    --width: 125px;
+}
+
+table#course tr > *,
+table#round tr > * {
+    --width: 90px;
+}
+
+.caret-square,
 .hole-score {
     padding-bottom: var(--size);
     position: absolute;
     width: var(--size);
-    z-index: -1;
+    z-index: var(--z);
 }
 
 #players td {
     width: calc(100% / 6);
 }
 
-table#rounds-table td {
-    min-width: 90px;
-}
-
 table#players thead i.bi::before {
     --font-size: 1.6em;
     font-size: var(--font-size);
     vertical-align: calc(var(--font-size) * -0.125);
+}
+
+table#rounds-table > thead > tr > td i[class^="bi-"] {
+    font-size: var(--icon-size);
+}
+
+table.player-table td[data-direction][data-path]:hover,
+.caret-square:hover,
+table#courses > tbody > tr:hover {
+    cursor: pointer;
+}
+
+.caret-square {
+    --size: var(--icon-size);
+    --z: 1;
+}
+
+.hole-square {
+    --z: -1;
 }

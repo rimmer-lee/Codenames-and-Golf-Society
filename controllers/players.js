@@ -7,6 +7,48 @@ const User = require('../models/user');
 const { ACTIONS, NON_MEMBERS, ROUND_TYPES, TITLES } = require('../constants');
 const { dates, years } = require('../utilities/seasons');
 
+// function favouriteString(array, ascending = true) {
+//     const orderedArray = array.sortBy(ascending, 'count');
+//     const lead = orderedArray[0].count;
+//     const favourites = orderedArray.filter(({ count }) => count === lead);
+//     const string = ` - ${favourites.map(({ value }) => value).sortAlphabetically().join(', ').replaceLastInstance()} (${lead})`
+//     if (favourites.length > 1) return `s${string}`;
+//     return string;
+// };
+
+// function getBest(data = {}, path = '') {
+//     return getData(data, path).sortBy(true, 'value')[0];
+// };
+
+// function getData(data = {}, path = '') {
+//     const r = path.split('.').pop();
+//     return [ ...new Set(data.filter(({ roundType }) => r === 'full' ? r === roundType : true)
+//         .map(d => getProperty.call(d, path))) ]
+//     .map(value => {
+//         return {
+//             value,
+//             count: data.filter(d => getProperty.call(d, path) === value).length
+//         }
+//     });
+// };
+
+// function getFavourites(data = {}, path = '') {
+//     const d = getData(data, path).sortBy(false, 'count');
+//     const lead = d[0].count;
+//     const favourites = d.filter(({ count }) => count === lead);
+//     const courseString = ` - ${favourites.map(({ value }) => value).sortAlphabetically().join(', ').replaceLastInstance()} (${lead})`
+//     if (favourites.length > 1) return `s${courseString}`;
+//     return courseString;
+// };
+
+// shared with utilities/prototypes.js
+// function getProperty(path) {
+//     if (!path) return this;
+//     let o = this;
+//     for (const p of path.split('.')) o = o[p];
+//     return o;
+// };
+
 function isBetweenDates(year, value) {
     const { endDate, startDate } = dates(year);
     return value >= startDate && value <= endDate;
@@ -14,6 +56,17 @@ function isBetweenDates(year, value) {
 
 function isMember(role) {
     return !NON_MEMBERS.some(r => r === role);
+};
+
+// function mostRecent(array = [], limit = 3) {
+//     return array.slice(0, limit);
+// };
+
+// shared with models/round.js
+function parClass(par) {
+    if (par > 0) return 'f-over';
+    if (par < 0) return 'f-under';
+    return 'f-level';
 };
 
 async function show (req, res) {
@@ -70,173 +123,234 @@ async function show (req, res) {
 };
 
 async function view (req, res) {
+    try {
 
-    req.flash('info', 'Apologies, page under construction')
-    return res.redirect('/players');
+        // req.flash('info', 'Apologies, page under construction')
+        // return res.redirect('/players');
 
-    const { id: playerId } = req.params;
-    const players = await User.findPlayers();
-    const player = players.find(({ id }) => id === playerId);
-    const playerDemerits = await Demerit.find({ 'player': playerId }).populate('rule').populate('action.titles').sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
-    const playerDrinks = await Drink.find({ 'player': playerId }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
-    const playerRounds = await Round.find({ 'scores.player': playerId }).populate('course').sort({ 'date': -1 });
-    const demeritsByDay = [ ...new Set(playerDemerits.map(({ when }) => when.formattedDate.friendly)) ].map(date => {
-        return {
-            date,
-            demerits: playerDemerits.filter(({ when }) => when.formattedDate.friendly === date)
-                .reduce((sum, { action }) => sum + action.demerits, 0)
-        };
-    });
-    const drinksByDay = [ ...new Set(playerDrinks.map(({ when }) => when.formattedDate.friendly)) ].map(date => {
-        return {
-            date,
-            drinks: playerDrinks.filter(({ when }) => when.formattedDate.friendly === date)
-                .reduce((sum, { value }) => sum + value, 0)
-        };
-    });
-
-    const roundData = playerRounds.map(({ id, course, formattedDate: date, scores }) => {
-        const { scores: roundScore } = (scores.find(({ player }) => player.toString() === playerId) || {});
-        const playingPartners = scores.filter(({ player }) => player.toString() !== playerId);
-        const par = `${parScore > 0 ? '+' : ''}${parScore}`;
-        return { id, course: course.name, date, par: roundScore.par.full, score, class: parClass, playingPartners };
-    }).filter(({ score }) => score !== 0);
-
-    const scores = [ ...new Set(roundData.map(({ score }) => score)) ].map(score => {
-        return {
-            score,
-            count: roundData.filter(round => round.score === score).length
-        }
-    });
-    const pars = [ ...new Set(roundData.map(({ par, class: spanClass }) => ({ par, spanClass }))) ].map(({ par, spanClass }) => {
-        return {
-            par,
-            class: spanClass,
-            count: roundData.filter(round => round.par === par).length
-        }
-    });
-
-    const favouriteCourses = [ ...new Set(roundData.map(({ course }) => course)) ].map(course => {
-        return {
-            course,
-            count: roundData.filter(round => round.course === course).length
-        };
-    }).sort((a, b) => b.count - a.count);
-    const favouriteCourse = favouriteCourses.filter(({ count }) => count === favouriteCourses[0].count);
-
-    const favouritePlayers = players.filter(({ id }) => id !== playerId).map(({ id, name }) => ({ id, name, rounds: 0 }));
-    for (const round of roundData) {
-        for (const playingPartner of round.playingPartners) {
-            favouritePlayers.find(({ id }) => id == playingPartner.player).rounds++;
-        };
-    };
-    // why do we need the console log?
-    console.log(favouritePlayers.sort((a, b) => b.rounds - a.rounds)[0].rounds)
-    const favouritePlayer = favouritePlayers.filter(({ rounds }) => rounds === favouritePlayers.sort((a, b) => b.rounds - a.rounds)[0].rounds);
-
-    const demerits = {
-        mostRecent: playerDemerits.map(({ action, when }) => {
-            const { demerits, titles } = action;
-            return {
-                date: when.formattedDate.friendly, demerits,
-                titles: titles.map(({ method, name }) => {
-                    const { icon } = TITLES.find(({ value }) => value === name);
-                    const action = ACTIONS.find(action => action.method === method);
-                    return { name, action: action.title, icon, class: action.class };
-                })
-            };
-        }).slice(0, 3),
-        mostCommon: [ ...new Set(playerDemerits.map(({ rule }) => rule)) ].map(rule => {
-            return {
-                rule,
-                count: playerDemerits.filter(demerit => demerit.rule === rule).length
-            };
-        }).sort((a, b) => b.count - a.count)[0],
-        biggest: demeritsByDay.sort((a, b) => b.demerits - a.demerits)[0],
-        smallest: demeritsByDay.sort((a, b) => a.demerits - b.demerits)[0]
-    };
-    const drinks = {
-        mostRecent: playerDrinks.slice(0, 3),
-        biggest: drinksByDay.sort((a, b) => b.drinks - a.drinks)[0],
-        smallest: drinksByDay.sort((a, b) => a.drinks - b.drinks)[0]
-    };
-    const rounds = {
-        mostRecent: roundData.slice(0, 3),
-        best: {
-            shots: scores.sort((a, b) => b.score - a.score)[0],
-            par: pars.sort((a, b) => b.par - a.par)[0]
-        },
-        worst: {
-            shots: scores.sort((a, b) => a.score - b.score)[0],
-            par: pars.sort((a, b) => a.par - b.par)[0]
-        },
-        favourite: {
-            course: {
-                plural: favouriteCourse.length > 1 ? 's' : '',
-                string: favouriteCourse.map(({ course }) => course).join(', ').replace(/,([^,]*)$/, ' and' + '$1'),
-                count: favouriteCourse[0].count
+        const { id: playerId } = req.params;
+        const player = await User.findById(playerId);
+        const De = await Demerit.find({ 'player': playerId }).populate('rule').populate('action.titles').sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
+        const Dr = await Drink.find({ 'player': playerId }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
+        const R = await Round.find({ 'scores.player': playerId }).populate('course').populate('scores.player').sort({ 'date': -1 });
+        const headings = {
+            demerits: {
+                table: [
+                    { heading: 'Date', path: 'date.friendly' },
+                    { heading: 'Hole', path: 'hole' },
+                    { heading: 'Demerits', path: 'demerits' },
+                    { heading: 'Rule', path: 'rule.rule' },
+                    { heading: 'Titles', path: 'titles.string' }
+                ]
             },
-            partner: {
-                plural: favouritePlayer.length > 1 ? 's' : '',
-                string: favouritePlayer.map(({ name }) => name.friendly).join(', ').replace(/,([^,]*)$/, ' and' + '$1'),
-                count: favouritePlayer[0].rounds
+            drinks: {
+                table: [
+                    { heading: 'Date', path: 'date.friendly' },
+                    { heading: 'Drinks', path: 'drinks' }
+                ]
             },
-            teammate: {
-                plural: '',
-                string: '',
-                count: 0
+            rounds: {
+                performance: [
+                    { heading: 'Eagles (or better)', value: 'eagle' },
+                    { heading: 'Birdies', value: 'birdie' },
+                    { heading: 'Pars', value: 'par' },
+                    { heading: 'Bogeys', value: 'bogey' },
+                    { heading: 'Double Bogeys (or worse)', value: 'double-bogey' }
+                ],
+                table: [
+                    { heading: 'Date', path: 'date.friendly' },
+                    { heading: 'Course', path: 'course.name' },
+                    { heading: 'Shots', path: 'shots' },
+                    { heading: 'Par', path: 'par.score' },
+                    { heading: 'Eagles (or Better)', path: 'performance.eagle' },
+                    { heading: 'Birdies', path: 'performance.birdie' },
+                    { heading: 'Pars', path: 'performance.par' },
+                    { heading: 'Bogeys', path: 'performance.bogey' },
+                    { heading: 'Double Bogeys (or Worse)', path: 'performance.double-bogey' },
+                    { heading: 'Players', path: 'players.string' },
+                    { heading: 'Games', path: 'games.string' }
+                ]
             }
-        }
+        };
+        const PARS = headings.rounds.performance.map(({ value }) => value);
+        const demeritData = De.map(({ action, rule, when }) => {
+            const { date, formattedDate, hole } = when.toJSON();
+            const { demerits, titles: t } = action;
+            const { description, index } = rule;
+            const titles = t.map(({ name, method }) => {
+                const { class: c, title: action } = ACTIONS.find(({ method: m }) => m === method);
+                const { icon } = TITLES.find(({ value }) => value === name);
+                return { action, class: c, name, icon };
+            })
+            return {
+                date: {
+                    friendly: formattedDate.friendly,
+                    weekday: date.weekday()
+                },
+                demerits,
+                hole,
+                rule: {
+                    index,
+
+                    // hard code first description for now
+                    rule: `${index}. ${encodeURI(description[0].replace(/'/g, '`'))}`
+
+                },
+                titles: {
+                    titles,
+                    string: titles.map(({ action, name }) => (`${action} ${name}`)).join(', ')
+                }
+            };
+        });
+        const drinkData = Dr.map(({ value: drinks, when}) => {
+            const { date, formattedDate } = when;
+            return {
+                date: {
+                    friendly: formattedDate.friendly,
+                    weekday: date.weekday()
+                },
+                drinks
+            };
+        });
+        const roundData = R.map(({ course, date, formattedDate, _id, games: g, scores }) => {
+            const { friendly } = formattedDate;
+            const games = g.filter(({ players }) => players.some(({ player }) => player.toString() === playerId)).map(game => {
+                    const { handicap, method, name, roundType, summary } = game;
+                    const description = `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
+                    return { description, name, summary };
+                }).sortAlphabetically('description');
+            const players = scores.filter(({ player }) => player._id.toString() !== playerId).map(({ player }) => {
+                const { id, name } = player;
+                const { initials, knownAs } = name;
+                return { id, initials, knownAs };
+            });
+            const score = scores.find(({ player }) => player._id.toString() === playerId);
+            const performance = (function() {
+                const performance = score.classes.par.shots.reduce((all, value) => {
+                    if (value in all) all[value]++;
+                    else all[value] = 1;
+                    return all;
+                }, {});
+                for (const par of PARS) {
+                    if (!performance[par]) performance[par] = 0;
+                };
+                return performance;
+            })();
+            return {
+                _id,
+                course: {
+                    id: course.id,
+                    name: course.name
+                },
+                date: {
+                    friendly,
+                    weekday: date.weekday()
+                },
+                games: {
+                    games,
+                    string: games.map(({ description }) => description).sortAlphabetically().join(', ')
+                },
+                handicap: score.handicap,
+                par: {
+                    class: score.classes.full,
+                    score: score.scores.par.full
+                },
+                performance,
+                players: {
+                    players,
+                    string: players.map(({ knownAs }) => knownAs).sortAlphabetically().join(', ')
+                },
+                playingGroup: score.playingGroup,
+                round: score.roundType,
+                shots: score.scores.shots.full
+            };
+        });
+        const performance = (function() {
+            const performance = {};
+            for (const par of PARS) performance[par] = 0;
+            for (const round of roundData) {
+                for (const par of PARS) performance[par] += round.performance[par];
+            };
+            return performance;
+        })();
+        const data = {
+            demerits: {
+                all: demeritData,
+                filters: []
+            },
+            drinks: {
+                all: drinkData,
+                filters: []
+            },
+            rounds: {
+                all: roundData,
+                filters: [],
+                performance
+            }
+        };
+        for (const key of Object.keys(data)) data[key].active = data[key].all.length > 0;
+
+        // create some ranking rather than hard code this
+        for (const key of ['rounds', 'demerits', 'drinks']) {
+            const { active } = data[key];
+            if (active) {
+                data[key].selected = active;
+                break;
+            };
+        };
+
+        // const handicapDifferentials = [];
+        // const { starting } = player.handicap;
+        // player.handicap.progression = [{ handicap: starting ? starting : 54.0 }];
+        // for (const round of R) {
+        //     const { course, date, scores, tee } = round;
+        //     const { holes, ratings } = course.tees.find(({ _id }) => _id.toString() === tee);
+        //     const { roundType, shots } = scores.find(({ player }) => player == playerId);
+        //     const adjustedShots = []
+        //     let roundHandicap = player.handicap.progression[player.handicap.progression.length - 1].handicap;
+        //     if (roundType === 'practice') continue;
+        //     if (roundType !== 'full') roundHandicap = roundHandicap / 2;
+        //     const { start, end } = ROUND_TYPES.find(({ name }) => name === roundType);
+        //     const holesPlayed = end - start;
+        //     let adjustment = 0;
+        //     let differentials;
+        //     roundHandicap = Math.floor(roundHandicap);
+        //     holes.forEach((hole, holeIndex) => {
+        //         if (holeIndex < start || holeIndex > end) return;
+        //         const { par, strokeIndex } = hole;
+        //         const handicapShots = Math.floor(roundHandicap / holesPlayed, 0) + +(strokeIndex < roundHandicap % holesPlayed);
+        //         const shot = shots[holeIndex];
+        //         const maxScore = par + handicapShots + 2;
+        //         adjustedShots.push(shot > maxScore ? maxScore : shot);
+        //     });
+        //     handicapDifferentials.push(Math.round(10 * (adjustedShots.reduce((sum, value) => sum += value, 0) - ratings.course[roundType]) * 113 / ratings.slope[roundType]) / 10);
+
+        //     // need to handle plus handicaps i.e. really good golfers
+
+        //     if (handicapDifferentials.length < 3) continue;
+        //     else if (handicapDifferentials.length < 6) differentials = 1;
+        //     else if (handicapDifferentials.length < 9) differentials = 2;
+        //     else if (handicapDifferentials.length < 12) differentials = 3;
+        //     else if (handicapDifferentials.length < 15) differentials = 4;
+        //     else if (handicapDifferentials.length < 17) differentials = 5;
+        //     else if (handicapDifferentials.length < 19) differentials = 6;
+        //     else if (handicapDifferentials.length < 20) differentials = 7;
+        //     else differentials = 8;
+        //     if ([4, 6].indexOf(handicapDifferentials.length) !== -1) adjustment = 1;
+        //     else if (handicapDifferentials.length === 3) adjustment = 2;
+        //     const handicap = handicapDifferentials.sort((a, b) => a - b).slice(0, differentials).reduce((sum, value) => sum += value, 0) / differentials - adjustment;
+        //     player.handicap.progression.push({ date, handicap });
+        // };
+        // console.log(handicapDifferentials)
+        // console.log(player.handicap)
+
+
+        res.render('players/view', { data, headings, player });
+    } catch (error) {
+        console.log(error);
+        req.flash('error', 'Apologies, something went wrong.');
+        return res.redirect('/players');
     };
-
-
-    // const handicapDifferentials = [];
-    // const { starting } = player.handicap;
-    // player.handicap.progression = [{ handicap: starting ? starting : 54.0 }];
-    // for (const round of playerRounds) {
-    //     const { course, date, scores, tee } = round;
-    //     const { holes, ratings } = course.tees.find(({ _id }) => _id.toString() === tee);
-    //     const { roundType, shots } = scores.find(({ player }) => player == playerId);
-    //     const adjustedShots = []
-    //     let roundHandicap = player.handicap.progression[player.handicap.progression.length - 1].handicap;
-    //     if (roundType === 'practice') continue;
-    //     if (roundType !== 'full') roundHandicap = roundHandicap / 2;
-    //     const { start, end } = ROUND_TYPES.find(({ name }) => name === roundType);
-    //     const holesPlayed = end - start;
-    //     let adjustment = 0;
-    //     let differentials;
-    //     roundHandicap = Math.floor(roundHandicap);
-    //     holes.forEach((hole, holeIndex) => {
-    //         if (holeIndex < start || holeIndex > end) return;
-    //         const { par, strokeIndex } = hole;
-    //         const handicapShots = Math.floor(roundHandicap / holesPlayed, 0) + +(strokeIndex < roundHandicap % holesPlayed);
-    //         const shot = shots[holeIndex];
-    //         const maxScore = par + handicapShots + 2;
-    //         adjustedShots.push(shot > maxScore ? maxScore : shot);
-    //     });
-    //     handicapDifferentials.push(Math.round(10 * (adjustedShots.reduce((sum, value) => sum += value, 0) - ratings.course[roundType]) * 113 / ratings.slope[roundType]) / 10);
-
-    //     // need to handle plus handicaps i.e. really good golfers
-
-    //     if (handicapDifferentials.length < 3) continue;
-    //     else if (handicapDifferentials.length < 6) differentials = 1;
-    //     else if (handicapDifferentials.length < 9) differentials = 2;
-    //     else if (handicapDifferentials.length < 12) differentials = 3;
-    //     else if (handicapDifferentials.length < 15) differentials = 4;
-    //     else if (handicapDifferentials.length < 17) differentials = 5;
-    //     else if (handicapDifferentials.length < 19) differentials = 6;
-    //     else if (handicapDifferentials.length < 20) differentials = 7;
-    //     else differentials = 8;
-    //     if ([4, 6].indexOf(handicapDifferentials.length) !== -1) adjustment = 1;
-    //     else if (handicapDifferentials.length === 3) adjustment = 2;
-    //     const handicap = handicapDifferentials.sort((a, b) => a - b).slice(0, differentials).reduce((sum, value) => sum += value, 0) / differentials - adjustment;
-    //     player.handicap.progression.push({ date, handicap });
-    // };
-    // console.log(handicapDifferentials)
-    // console.log(player.handicap)
-
-
-    res.render('players/view', { demerits, drinks, player, rounds });
 };
 
 module.exports = { show, view };

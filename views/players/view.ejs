@@ -1,167 +1,248 @@
 <% layout('layouts/boilerplate') %>
+<% block('head').append('<script>console.</script>') %>
 <div class="row my-3 pb-2 border-bottom border-1">
     <h1><%= player.name.friendly %></h1>
 </div>
+
+<!-- add filters -->
+
 <nav>
     <div class="nav nav-tabs nav-fill mb-2" role="tablist">
-        <% if (rounds.mostRecent.length > 0) { %>
-        <button id="rounds-tab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab" aria-controls="rounds" aria-selected="true">Rounds</button>
+        <% if (data.rounds.active) { %>
+        <button class="nav-link<%= data.rounds.selected ? " active" : "" %>" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab" aria-controls="rounds" aria-selected="<%= data.rounds.selected %>">Rounds</button>
         <% }; %>
-        <% if (demerits.mostRecent.length > 0) { %>
-        <button id="demerits-tab" class="nav-link" data-bs-toggle="tab" data-bs-target="#demerits" type="button" role="tab" aria-controls="demerits" aria-selected="false">Demerits</button>
+        <% if (data.demerits.active) { %>
+        <button class="nav-link<%= data.demerits.selected ? " active" : "" %>" data-bs-toggle="tab" data-bs-target="#demerits" type="button" role="tab" aria-controls="demerits" aria-selected="<%= data.rounds.selected %>">Demerits</button>
         <% }; %>
-        <% if (drinks.mostRecent.length > 0) { %>
-        <button id="drinks-tab" class="nav-link" data-bs-toggle="tab" data-bs-target="#drinks" type="button" role="tab" aria-controls="drinks" aria-selected="false">Drinks</button>
+        <% if (data.drinks.active) { %>
+        <button class="nav-link<%= data.drinks.selected ? " active" : "" %>" data-bs-toggle="tab" data-bs-target="#drinks" type="button" role="tab" aria-controls="drinks" aria-selected="<%= data.rounds.selected %>">Drinks</button>
         <% }; %>
     </div>
 </nav>
 <div class="tab-content">
-    <% if (rounds.mostRecent.length > 0) { %>
-    <div id="rounds" class="tab-pane fade show active" role="tabpanel" aria-labelledby="rounds-tab">
-        <div class="row gy-4">
-            <!-- <div class="col-12">
-                <h4>
-                    General
-                </h4>
-                <div class="row">
-                    <div class="col text-center">
-                        <h6 class="text-decoration-underline">Handicap</h6>
-                        <div></div>
+    <% if (data.rounds.active) { %>
+    <div id="rounds" class="tab-pane fade<%= data.rounds.selected ? " show active" : "" %> role="tabpanel" aria-labelledby="rounds-tab">
+        <div class="gy-4 mt-1 row row-cols-1">
+            <div class="col">
+                <h4>Hole Performance</h4>
+                <div class="row text-center">
+                    <% for (const header of headings.rounds.performance) { %>
+                    <div class="col d-flex flex-column">
+                        <h6><%= header.heading %></h6>
+                        <div class="flex-fill fw-light">
+                            <%= data.rounds.performance[header.value] %>
+                        </div>
                     </div>
-                    <div class="col text-center">
-                        <h6 class="text-decoration-underline">Number of Rounds</h6>
-                        <div></div>
-                    </div>
-                    <div class="col text-center">
-                        <h6 class="text-decoration-underline">Average Score</h6>
-                        last x number of rounds
-                        <div></div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="col-12">
-                <h4>
-                    Best Performances
-                </h4>
-                <div class="row">
-                    <div class="col text-center">
-                        <h6 class="text-decoration-underline">Shots</h6>
-                        <div><%= rounds.best.shots.score %><%= rounds.best.shots.count > 1 ? ` (${rounds.best.shots.count})` : '' %></div>
-                    </div>
-                    <div class="col text-center">
-                        <h6 class="text-decoration-underline">Par</h6>
-                        <div><span class="<%= rounds.best.par.class %>"><%= rounds.best.par.par %></span><%= rounds.best.par.count > 1 ? ` (${rounds.best.par.count})` : '' %></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12">
-                <h4>
-                    Latest Rounds
-                </h4>
-                <ul>
-                    <% for (const round of rounds.mostRecent) { %>
-                    <li>
-                        <a href="/rounds/<%= round.id %>">
-                            <span class="d-none d-lg-inline"><%= round.date.full %></span><span class="d-lg-none"><%= round.date.friendly %></span> at <%= round.course %> - <%= round.score %> (<span class="<%= round.class %>"><%= round.par %></span>)
-                        </a>
-                    </li>
                     <% }; %>
-                </ul>
+                </div>
             </div>
-            <div class="col-12">
-                <h4>
-                    Favourite
-                </h4>
-                <ul>
-                    <li>
-                        Course<%= rounds.favourite.course.plural %> - <%= rounds.favourite.course.string %> (<%= rounds.favourite.course.count %>)
-                    </li>
-                    <li>
-                        Playing Partner<%= rounds.favourite.partner.plural %> - <%= rounds.favourite.partner.string %> (<%= rounds.favourite.partner.count %>)
-                    </li>
-                    <!-- <li>
-                        Teammate<%= rounds.favourite.teammate.plural %> - <%= rounds.favourite.teammate.string %>
-                    </li> -->
-                </ul>
+            <!-- <div class="col">
+                <h4>Filters</h4>
+            </div> -->
+            <div class="col">
+                <div class="table-responsive">
+                    <table id="rounds-table" class="table table-sm table-bordered table-dark lh-lg player-table">
+                        <thead>
+                            <tr class="align-middle fw-bold text-center">
+                                <% for (const header of headings.rounds.table) { %>
+                                <td scope="col" data-direction="<%= header.heading === 'Date' ? 'descending' : 'ascending' %>" data-path="<%= header.path %>">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1 m-auto">
+                                            <%= header.heading %>
+                                        </div>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <% for (const direction of [{ class: 'bottom', icon: 'up', value: 'ascending' }, { class: 'top', icon: 'down', value: 'descending' }]) { %>
+                                            <div class="d-flex justify-content-center align-items-center">
+                                                <i class="bi-caret-<%= direction.icon %>"></i>
+                                                <div class="caret-square" data-direction="<%= direction.value %>" data-path="<%= header.path %>"></div>
+                                            </div>
+                                            <% }; %>
+                                        </div>
+                                    </div>
+                                </td>
+                                <% }; %>
+                            </tr>
+                        </thead>
+                        <tbody class="table-light text-center">
+                            <% for (const round of data.rounds.all) { %>
+                            <tr>
+                                <td>
+                                    <a href="/rounds/<%= round._id %>">
+                                        <%= round.date.friendly %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="/rounds/courses/<%= round.course.id %>">
+                                        <%= round.course.name %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <%= round.shots %>
+                                </td>
+                                <td class="<%= round.par.class %>">
+                                    <%= round.par.score %>
+                                </td>
+                                <td>
+                                    <%= round.performance.eagle %>
+                                </td>
+                                <td>
+                                    <%= round.performance.birdie %>
+                                </td>
+                                <td>
+                                    <%= round.performance.par %>
+                                </td>
+                                <td>
+                                    <%= round.performance.bogey %>
+                                </td>
+                                <td>
+                                    <%= round.performance['double-bogey'] %>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <% for (const player of round.players.players) { %>
+                                        <a href="/players/<%= player.id %>">
+                                            <%= player.knownAs %>
+                                        </a>
+                                        <% }; %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="g-2 row row-cols-1">
+                                        <% for (const game of round.games.games) { %>
+                                        <div class="col d-flex flex-column">
+                                            <div>
+                                                <%= game.description %>
+                                            </div>
+                                            <div class="fw-light">
+                                                <%= game.summary %>
+                                            </div>
+                                        </div>
+                                        <% }; %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }; %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
     <% }; %>
-    <% if (demerits.mostRecent.length > 0) { %>
-    <div id="demerits" class="tab-pane fade" role="tabpanel" aria-labelledby="demerits-tab">
-        <h4>
-            Demerits
-        </h4>
-        <table class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
-            <thead>
-                <tr>
-                    <% for (const header of ['Date', 'Demerits', 'Titles']) { %>
-                    <td class="text-center" scope="col">
-                        <%= header %>
-                    </td>
-                    <% }; %>
-                </tr>
-            </thead>
-            <tbody class="table-light">
-                <% for (const demerit of demerits.mostRecent) { %>
-                <tr>
-                    <td class="text-center">
-                        <a href="/demerits/edit?d=<%= demerit.date %>">
-                            <%= demerit.date %>
-                        </a>
-                    </td>
-                    <td class="text-center">
-                        <%= demerit.demerits %>
-                    </td>
-                    <td>
-                        <div class="d-flex justify-content-evenly align-items-center">
-                            <% for (const title of demerit.titles) { %>
-                            <div>
+    <% if (data.demerits.active) { %>
+    <div id="demerits" class="tab-pane fade<%= data.demerits.selected ? " show active" : "" %>" role="tabpanel" aria-labelledby="demerits-tab">
+        <div class="table-responsive">
+            <table id="demerits-table" class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
+                <thead>
+                    <tr class="align-middle fw-bold text-center">
+                        <% for (const header of headings.demerits.table) { %>
+                        <td scope="col" data-direction="<%= header.heading === 'Date' ? 'descending' : 'ascending' %>" data-path="<%= header.path %>">
+                            <div class="d-flex">
+                                <div class="flex-grow-1 m-auto">
+                                    <%= header.heading %>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                    <% for (const direction of [{ class: 'bottom', icon: 'up', value: 'ascending' }, { class: 'top', icon: 'down', value: 'descending' }]) { %>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <i class="bi-caret-<%= direction.icon %>"></i>
+                                        <div class="caret-square" data-direction="<%= direction.value %>" data-path="<%= header.path %>"></div>
+                                    </div>
+                                    <% }; %>
+                                </div>
+                            </div>
+                        </td>
+                        <% }; %>
+                    </tr>
+                </thead>
+                <tbody class="table-light text-center">
+                    <% for (const demerit of data.demerits.all) { %>
+                    <tr>
+                        <td>
+                            <a href="/demerits/edit?d=<%= demerit.date.friendly %>">
+                                <%= demerit.date.friendly %>
+                            </a>
+                        </td>
+                        <td>
+                            <%= demerit.hole %>
+                        </td>
+                        <td>
+                            <%= demerit.demerits %>
+                        </td>
+                        <td>
+                            <%= decodeURI(demerit.rule.rule).replace(/`/g, "'") %>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-evenly align-items-center">
+                                <% for (const title of demerit.titles.titles) { %>
                                 <div class="btn btn-<%= title.class %>" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= title.action %> <%= title.name %>">
                                     <div class="d-flex p-0">
                                         <i class="mx-auto bi <%= title.icon %>"></i>
                                     </div>
                                 </div>
+                                <% }; %>
                             </div>
-                            <% }; %>
-                        </div>
-                    </td>
-                </tr>
-                <% }; %>
-            </tbody>
-        </table>
+                        </td>
+                    </tr>
+                    <% }; %>
+                </tbody>
+            </table>
+        </div>
     </div>
     <% }; %>
-    <% if (drinks.mostRecent.length > 0) { %>
-    <div id="drinks" class="tab-pane fade" role="tabpanel" aria-labelledby="contact-tab">
-        <h4>
-            Drinks
-        </h4>
-        <table class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
-            <thead>
-                <tr>
-                    <% for (const header of ['Date', 'Drinks']) { %>
-                    <td class="text-center" scope="col">
-                        <%= header %>
-                    </td>
+    <% if (data.drinks.active) { %>
+    <div id="drinks" class="tab-pane fade<%= data.drinks.selected ? " show active" : "" %>" role="tabpanel" aria-labelledby="drinks-tab">
+        <div class="table-responsive">
+            <table id="drinks-table" class="table table-sm table-bordered table-dark mb-0 lh-lg player-table">
+                <thead>
+                    <tr class="align-middle fw-bold text-center">
+                        <% for (const header of headings.drinks.table) { %>
+                        <td scope="col" data-direction="<%= header.heading === 'Date' ? 'descending' : 'ascending' %>" data-path="<%= header.path %>">
+                            <div class="d-flex">
+                                <div class="flex-grow-1 m-auto">
+                                    <%= header.heading %>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                    <% for (const direction of [{ class: 'bottom', icon: 'up', value: 'ascending' }, { class: 'top', icon: 'down', value: 'descending' }]) { %>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <i class="bi-caret-<%= direction.icon %>"></i>
+                                        <div class="caret-square" data-direction="<%= direction.value %>" data-path="<%= header.path %>"></div>
+                                    </div>
+                                    <% }; %>
+                                </div>
+                            </div>
+                        </td>
+                        <% }; %>
+                    </tr>
+                </thead>
+                <tbody class="table-light text-center">
+                    <% for (const drink of data.drinks.all) { %>
+                    <tr>
+                        <td>
+                            <a href="/demerits/drinks/edit?d=<%= drink.date.friendly %>">
+                                <%= drink.date.friendly %>
+                            </a>
+                        </td>
+                        <td>
+                            <%= drink.drinks %>
+                        </td>
+                    </tr>
                     <% }; %>
-                </tr>
-            </thead>
-            <tbody class="table-light">
-                <% for (const drink of drinks.mostRecent) { %>
-                <tr>
-                    <td class="text-center">
-                        <a href="/demerits/drinks/edit?d=<%= drink.date %>">
-                            <%= drink.date %>
-                        </a>
-                    </td>
-                    <td class="text-center">
-                        <%= drink.drinks %>
-                    </td>
-                </tr>
-                <% }; %>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
     <% }; %>
 </div>
+<script src="/scripts/create-element.js"></script>
+<script src="/scripts/players/sort-table.js"></script>
+<script>
+    const data = JSON.parse('<%- JSON.stringify(data) %>');
+    data.demerits.all = data.demerits.all.map(({ rule, ...demerit }) => {
+        const { index, rule: r } = rule;
+        demerit.rule = {
+            index,
+            rule: decodeURI(r).replace(/`/g, "'")
+        };
+        return demerit;
+    });
+</script>
