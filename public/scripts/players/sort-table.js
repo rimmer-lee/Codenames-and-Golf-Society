@@ -23,6 +23,10 @@ function getProperty(path) {
     return o;
 };
 
+function iconClass(direction) {
+    return `bi-caret-${direction === 'ascending' ? 'down' : 'up'}`
+};
+
 for (const element of document.querySelectorAll('[data-direction][data-path]')) {
     element.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -31,19 +35,15 @@ for (const element of document.querySelectorAll('[data-direction][data-path]')) 
         const [ , id ] = table.id.match(/^(.*)-table$/);
         const { direction, path } = this.dataset;
         const sortedData = data[id].all.sortBy(direction === ASCENDING, path);
-        const classList = [];
-        for (const td of table.querySelectorAll(TD_SELECTOR)) {
-            td.dataset.direction = ASCENDING;
-            for (const icon of td.querySelectorAll('i')) icon.remove();
+        for (const icon of table.querySelectorAll('i[class$="-fill"]')) {
+            for (const c of Array.from(icon.classList).filter(c => /^bi\-caret\-.*/.test(c))) {
+                const [ , className ] = c.match(/^(bi\-caret\-(?:down|up))(?:\-fill)?/);
+                icon.className = className;
+            };
         };
-        if (direction === ASCENDING) {
-            this.closest(TD_SELECTOR).dataset.direction = DESCENDING;
-            classList.push('bi-caret-down');
-        } else classList.push('bi-caret-up');
-        this.querySelector('.vertical-align').insertBefore(createElement({
-            type: 'i',
-            classList
-        }), null);
+        this.closest('td').querySelector(`i.${iconClass(direction)}`).className = `${iconClass(direction)}-fill`;
+        for (const td of table.querySelectorAll(TD_SELECTOR)) td.dataset.direction = DESCENDING;
+        if (direction === DESCENDING) this.closest(TD_SELECTOR).dataset.direction = ASCENDING;
         while (tableBody.children.length > 0) tableBody.children[0].remove();
         switch (id) {
             case 'demerits':
