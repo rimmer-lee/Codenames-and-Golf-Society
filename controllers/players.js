@@ -136,7 +136,7 @@ async function view (req, res) {
         const headings = {
             demerits: {
                 table: [
-                    { heading: 'Date', path: 'date.friendly' },
+                    { heading: 'Date', path: 'date.date' },
                     { heading: 'Hole', path: 'hole' },
                     { heading: 'Demerits', path: 'demerits' },
                     { heading: 'Rule', path: 'rule.rule' },
@@ -145,7 +145,7 @@ async function view (req, res) {
             },
             drinks: {
                 table: [
-                    { heading: 'Date', path: 'date.friendly' },
+                    { heading: 'Date', path: 'date.date' },
                     { heading: 'Drinks', path: 'drinks' }
                 ]
             },
@@ -158,7 +158,7 @@ async function view (req, res) {
                     { heading: 'Double Bogeys (or worse)', value: 'double-bogey' }
                 ],
                 table: [
-                    { heading: 'Date', path: 'date.friendly' },
+                    { heading: 'Date', path: 'date.date' },
                     { heading: 'Course', path: 'course.name' },
                     { heading: 'Shots', path: 'shots' },
                     { heading: 'Par', path: 'par.score' },
@@ -184,6 +184,7 @@ async function view (req, res) {
             })
             return {
                 date: {
+                    date,
                     friendly: formattedDate.friendly,
                     weekday: date.weekday()
                 },
@@ -206,6 +207,7 @@ async function view (req, res) {
             const { date, formattedDate } = when;
             return {
                 date: {
+                    date,
                     friendly: formattedDate.friendly,
                     weekday: date.weekday()
                 },
@@ -243,6 +245,7 @@ async function view (req, res) {
                     name: course.name
                 },
                 date: {
+                    date,
                     friendly,
                     weekday: date.weekday()
                 },
