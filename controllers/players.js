@@ -174,7 +174,7 @@ async function view (req, res) {
         };
         const PARS = headings.rounds.performance.map(({ value }) => value);
         const demeritData = De.map(({ action, rule, when }) => {
-            const { date, formattedDate, hole } = when.toJSON();
+            const { date, formattedDate, hole = 0 } = when.toJSON();
             const { demerits, titles: t } = action;
             const { description, index } = rule;
             const titles = t.map(({ name, method }) => {

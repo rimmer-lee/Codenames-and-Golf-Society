@@ -4,16 +4,14 @@ const TD_SELECTOR = 'td[data-direction][data-path]';
 
 Array.prototype.sortBy = function(ascending = true, path = '') {
     return this.sort((a, b) => {
-        const aValue = getProperty.call(a, path)
-        const bValue = getProperty.call(b, path)
+        const aValue = getProperty.call(a, path);
+        const bValue = getProperty.call(b, path);
         if (typeof aValue === 'number' && typeof bValue === 'number') {
             return ascending ? aValue - bValue : bValue - aValue;
         };
-        const aUpper = aValue.toUpperCase();
-        const bUpper = bValue.toUpperCase();
         const multiplier = ascending && 1 || -1;
-        if (aUpper < bUpper) return -1 * multiplier;
-        if (aUpper > bUpper) return 1 * multiplier;
+        if (aValue < bValue) return -1 * multiplier;
+        if (aValue > bValue) return 1 * multiplier;
         return 0;
     });
 };
