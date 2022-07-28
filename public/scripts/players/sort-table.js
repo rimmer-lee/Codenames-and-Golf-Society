@@ -1,8 +1,9 @@
 const ASCENDING = 'ascending';
 const DESCENDING = 'descending';
-const TD_SELECTOR = 'td[data-direction][data-path]';
+const TD_SELECTOR = 'td[data-path]';
 
 Array.prototype.sortBy = function(ascending = true, path = '') {
+    const dateStringRegex = new RegExp(/\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.\d{3}Z/);
     return this.sort((a, b) => {
         const aValue = getProperty.call(a, path);
         const bValue = getProperty.call(b, path);
@@ -10,8 +11,9 @@ Array.prototype.sortBy = function(ascending = true, path = '') {
             return ascending ? aValue - bValue : bValue - aValue;
         };
         const multiplier = ascending && 1 || -1;
-        if (aValue < bValue) return -1 * multiplier;
-        if (aValue > bValue) return 1 * multiplier;
+        const isDate = dateStringRegex.test(aValue) && dateStringRegex.test(bValue) ? -1 : 1;
+        if (aValue < bValue) return -1 * multiplier * isDate;
+        if (aValue > bValue) return 1 * multiplier * isDate;
         return 0;
     });
 };
@@ -27,23 +29,29 @@ function iconClass(direction) {
     return `bi-caret-${direction === 'ascending' ? 'down' : 'up'}`
 };
 
-for (const element of document.querySelectorAll('[data-direction][data-path]')) {
+for (const element of document.querySelectorAll('[data-path]')) {
     element.addEventListener('click', function(e) {
         e.stopPropagation();
         const table = this.closest('table');
+        const td = this.closest('td');
         const tableBody = table.querySelector('tbody');
         const [ , id ] = table.id.match(/^(.*)-table$/);
-        const { direction, path } = this.dataset;
+        const { path } = this.dataset;
+        const direction = this.dataset?.direction === 'ascending' ? 'descending' : 'ascending';
         const sortedData = data[id].all.sortBy(direction === ASCENDING, path);
-        for (const icon of table.querySelectorAll('i[class$="-fill"]')) {
-            for (const c of Array.from(icon.classList).filter(c => /^bi\-caret\-.*/.test(c))) {
-                const [ , className ] = c.match(/^(bi\-caret\-(?:down|up))(?:\-fill)?/);
-                icon.className = className;
-            };
+        const icon = this.closest('td').querySelector(`i[data-direction="${direction}"]`);
+        for (const i of table.querySelectorAll('i[class$="-fill"]')) {
+            i.classList = Array.from(i.classList).map(c => {
+                if (!/^bi\-caret\-.*/.test(c)) return c;
+                return c.match(/^(bi\-caret\-(?:down|up))(?:\-fill)?/)[1];
+            });
         };
-        this.closest('td').querySelector(`i.${iconClass(direction)}`).className = `${iconClass(direction)}-fill`;
-        for (const td of table.querySelectorAll(TD_SELECTOR)) td.dataset.direction = DESCENDING;
-        if (direction === DESCENDING) this.closest(TD_SELECTOR).dataset.direction = ASCENDING;
+        icon.className = `${icon.className}-fill`;
+        if (td.dataset.direction && td.dataset.direction === 'ascending') td.dataset.direction = 'descending';
+        else {
+            for (const element of table.querySelectorAll('td[data-direction]')) delete element.dataset.direction;
+            td.dataset.direction = 'ascending';
+        };
         while (tableBody.children.length > 0) tableBody.children[0].remove();
         switch (id) {
             case 'demerits':
