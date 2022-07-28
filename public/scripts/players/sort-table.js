@@ -23,7 +23,7 @@ function getProperty(path) {
     return o;
 };
 
-for (const element of document.querySelectorAll('[data-direction][data-direction]')) {
+for (const element of document.querySelectorAll('[data-direction][data-path]')) {
     element.addEventListener('click', function(e) {
         e.stopPropagation();
         const table = this.closest('table');
@@ -31,8 +31,19 @@ for (const element of document.querySelectorAll('[data-direction][data-direction
         const [ , id ] = table.id.match(/^(.*)-table$/);
         const { direction, path } = this.dataset;
         const sortedData = data[id].all.sortBy(direction === ASCENDING, path);
-        for (const td of table.querySelectorAll(TD_SELECTOR)) td.dataset.direction = ASCENDING;
-        if (direction === ASCENDING) this.closest(TD_SELECTOR).dataset.direction = DESCENDING;
+        const classList = [];
+        for (const td of table.querySelectorAll(TD_SELECTOR)) {
+            td.dataset.direction = ASCENDING;
+            for (const icon of td.querySelectorAll('i')) icon.remove();
+        };
+        if (direction === ASCENDING) {
+            this.closest(TD_SELECTOR).dataset.direction = DESCENDING;
+            classList.push('bi-caret-down');
+        } else classList.push('bi-caret-up');
+        this.querySelector('.vertical-align').insertBefore(createElement({
+            type: 'i',
+            classList
+        }), null);
         while (tableBody.children.length > 0) tableBody.children[0].remove();
         switch (id) {
             case 'demerits':
