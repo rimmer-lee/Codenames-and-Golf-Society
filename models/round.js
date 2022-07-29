@@ -55,9 +55,10 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
             if (!game.team) return gameScores;
             return [ ...new Set(gameScores.map(({ team }) => team)) ].map(id => {
                 const playerScores = gameScores.filter(score => score.team === id).map(({ score }) => score);
-                const score = playerScores.map(scores => {
-                    const holeScores = scores.filter(score => score);
-                    if (scores.length !== holeScores.length) return null;
+                const players = playerScores.length;
+                const score = Array.from({ length: (end - start) }).map((a, i) => {
+                    const holeScores = playerScores.map(score => score[i]).flat();
+                    if (players !== holeScores.length) return null;
                     if (method === 'Best') return Math.min( ...holeScores );
                     if (method === 'Combined') return holeScores.reduce((sum, value) => sum += value, 0);
                     if (method === 'Worst') return Math.max( ...holeScores );
