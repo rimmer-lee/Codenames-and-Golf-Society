@@ -2,20 +2,17 @@
 <form class="mb-3" method="POST" action="/rounds/<%= id %>?_method=PUT" novalidate>
     <div class="d-flex my-3 pb-2 border-bottom border-1">
         <div class="flex-grow-1">
-            <h1 class="d-inline me-2"><%= course.name %> on <span
-                    class="d-none d-lg-inline"><%= date.full %></span><span
-                    class="d-lg-none"><%= date.friendly %></span></h1>
+            <h1 class="d-inline me-2">
+                <%= course.name %> on <span class="d-none d-lg-inline"><%= date.full %></span><span class="d-lg-none"><%= date.friendly %></span>
+            </h1>
         </div>
         <% if (EDIT_ACCESS) { %>
         <div>
             <div class="d-flex justify-content-end">
-                <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" visibility="hidden"
-                    readonly>
-                <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" visibility="hidden"
-                    readonly>
+                <input id="undo" class="btn btn-warning me-2 d-none" type="button" value="Undo" visibility="hidden" readonly>
+                <input id="save" class="btn btn-primary me-2 d-none" type="submit" value="Save" visibility="hidden" readonly>
                 <% if (ADMIN_ACCESS) { %>
-                <input id="delete" class="btn btn-danger me-2" type="button" data-bs-toggle="modal"
-                    data-bs-target="#delete-modal" value="Delete" readonly>
+                <input id="delete" class="btn btn-danger me-2" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal" value="Delete" readonly>
                 <% }; %>
             </div>
         </div>
@@ -26,21 +23,18 @@
             <div id="accordion" class="accordion">
                 <div class="accordion-item">
                     <h2 id="round-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#round-accordion-item-body-parent" aria-expanded="false"
-                            aria-controls="round-accordion-item-body-parent">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#round-accordion-item-body-parent" aria-expanded="false" aria-controls="round-accordion-item-body-parent">
                             Round
                         </button>
                     </h2>
-                    <div id="round-accordion-item-body-parent" class="accordion-collapse collapse"
-                        aria-labelledby="round-accordion-item-heading">
+                    <div id="round-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="round-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <% if (EDIT_ACCESS) { %>
                             <div class="form-floating">
-                                <input id="date" class="form-control" type="date" placeholder="Date"
-                                    name="[round][date]" value="<%= date.datePicker %>" max="<%= currentDate %>"
-                                    required>
-                                <label for="date">Date</label>
+                                <input id="date" class="form-control" type="date" placeholder="Date" name="[round][date]" value="<%= date.datePicker %>" max="<%= currentDate %>" required>
+                                <label for="date">
+                                    Date
+                                </label>
                                 <div class="invalid-feedback">
                                     <div class="d-flex justify-content-end">
                                         Please select a date.
@@ -48,35 +42,37 @@
                                 </div>
                             </div>
                             <% } else { %>
-                            <h4 class="mb-0 px-3"><%= date.full %></h4>
+                            <h4 class="mb-0 px-3">
+                                <%= date.full %>
+                            </h4>
                             <% }; %>
                         </div>
                     </div>
                 </div>
                 <div class="accordion-item">
                     <h2 id="course-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#course-accordion-item-body-parent" aria-expanded="false"
-                            aria-controls="course-accordion-item-body-parent">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#course-accordion-item-body-parent" aria-expanded="false" aria-controls="course-accordion-item-body-parent">
                             Course
                         </button>
                     </h2>
-                    <div id="course-accordion-item-body-parent" class="accordion-collapse collapse"
-                        aria-labelledby="course-accordion-item-heading">
+                    <div id="course-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="course-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <div class="row g-2">
                                 <% if (EDIT_ACCESS) { %>
                                 <div class="col">
                                     <div class="form-floating">
-                                        <select id="course-select" class="form-select text-capitalize text-wrap"
-                                            aria-label="course" name="[course][id]" required>
-                                            <option disabled>Select Course</option>
+                                        <select id="course-select" class="form-select text-capitalize text-wrap" aria-label="course" name="[course][id]" required>
+                                            <option disabled>
+                                                Select Course
+                                            </option>
                                             <% for (const c of courses) { %>
                                             <option value="<%= c.id %>" <%= c.id === course.id ? ' selected' : '' %>>
                                                 <%= c.name %></option>
                                             <% }; %>
                                         </select>
-                                        <label for="course-select">Course</label>
+                                        <label for="course-select">
+                                            Course
+                                        </label>
                                         <div class="invalid-feedback">
                                             <div class="d-flex justify-content-end">
                                                 Please select a course.
@@ -86,14 +82,16 @@
                                 </div>
                                 <div class="col-12 col-md-4">
                                     <div class="form-floating">
-                                        <select id="tee-select" class="form-select text-capitalize" aria-label="tee"
-                                            name="[course][tee]">
+                                        <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]">
                                             <% for (const t of course.tees) { %>
                                             <option value="<%= t.id %>" <%= t._id == tee._id ? ' selected' : '' %>>
-                                                <%= t.names.long %></option>
+                                                <%= t.names.long %>
+                                            </option>
                                             <% }; %>
                                         </select>
-                                        <label for="tee-select">Tee</label>
+                                        <label for="tee-select">
+                                            Tee
+                                        </label>
                                     </div>
                                 </div>
                                 <% } else { %>
@@ -102,118 +100,95 @@
                                 </h4>
                                 <% }; %>
                                 <div class="col-12">
-                                    <table id="tees" class="table table-sm table-bordered mb-0">
+                                    <table id="tees" class="table table-sm table-bordered text-center mb-0">
                                         <thead class="table-dark">
                                             <tr class="d-none d-lg-table-row">
                                                 <th scope="col" rowspan="2">
-                                                    <div class="text-center">
-                                                        Tee
-                                                    </div>
+                                                    Tee
                                                 </th>
                                                 <th scope="col" rowspan="2">
-                                                    <div class="text-center">
-                                                        Par
-                                                    </div>
+                                                    Par
                                                 </th>
                                                 <th scope="col" colspan="3">
-                                                    <div class="text-center">
-                                                        Course Rating
-                                                    </div>
+                                                    Course Rating
                                                 </th>
                                                 <th scope="col" rowspan="2">
-                                                    <div class="text-center">
-                                                        Bogey Rating
-                                                    </div>
+                                                    Bogey Rating
                                                 </th>
                                                 <th scope="col" colspan="3">
-                                                    <div class="text-center">
-                                                        Slope Rating
-                                                    </div>
+                                                    Slope Rating
                                                 </th>
                                             </tr>
                                             <tr>
                                                 <th class="d-table-cell d-lg-none" scope="col">
-                                                    <div class="text-center">
-                                                        Tee
-                                                    </div>
+                                                    Tee
                                                 </th>
                                                 <th class="d-table-cell d-lg-none" scope="col">
-                                                    <div class="text-center">
-                                                        Par
-                                                    </div>
+                                                    Par
                                                 </th>
                                                 <th scope="col">
-                                                    <div class="d-none d-lg-block text-center">
+                                                    <div class="d-none d-lg-block">
                                                         Full
                                                     </div>
-                                                    <div class="d-block d-lg-none text-center">
+                                                    <div class="d-block d-lg-none">
                                                         Course
                                                     </div>
                                                 </th>
                                                 <th class="d-none d-lg-table-cell" scope="col">
-                                                    <div class="text-center">
-                                                        Front
-                                                    </div>
+                                                    Front
                                                 </th>
                                                 <th class="d-none d-lg-table-cell" scope="col">
-                                                    <div class="text-center">
-                                                        Back
-                                                    </div>
+                                                    Back
                                                 </th>
                                                 <th scope="col">
-                                                    <div class="d-none d-lg-block text-center">
+                                                    <div class="d-none d-lg-block">
                                                         Full
                                                     </div>
-                                                    <div class="d-block d-lg-none text-center">
+                                                    <div class="d-block d-lg-none">
                                                         Slope
                                                     </div>
                                                 </th>
                                                 <th class="d-none d-lg-table-cell" scope="col">
-                                                    <div class="text-center">
-                                                        Front
-                                                    </div>
+                                                    Front
                                                 </th>
                                                 <th class="d-none d-lg-table-cell" scope="col">
-                                                    <div class="text-center">
-                                                        Back
-                                                    </div>
+                                                    Back
                                                 </th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <% for (const t of course.tees) { %>
-                                            <tr
-                                                class="<%= t.colour.class.table %><%= t._id === tee._id ? ' fw-bold' : '' %>">
+                                            <tr class="<%= t.colour.class.table %><%= t._id === tee._id ? ' fw-bold' : '' %>">
                                                 <td class="align-middle">
-                                                    <div class="d-none d-md-block text-center">
+                                                    <div class="d-none d-md-block">
                                                         <%= t.names.long %>
                                                     </div>
-                                                    <div class="d-block d-md-none text-center">
+                                                    <div class="d-block d-md-none">
                                                         <%= t.names.short %>
                                                     </div>
                                                 </td>
-                                                <td class="align-middle text-center">
+                                                <td class="align-middle">
                                                     <%= t.par.full %>
                                                 </td>
-                                                <td class="align-middle text-center">
+                                                <td class="align-middle">
                                                     <%= t.ratings.course.full.toFixed(1) %>
                                                 </td>
-                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                <td class="d-none d-lg-table-cell align-middle">
                                                     <%= t.ratings.course.front.toFixed(1) %>
                                                 </td>
-                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                <td class="d-none d-lg-table-cell align-middle">
                                                     <%= t.ratings.course.back.toFixed(1) %>
                                                 </td>
-                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                <td class="d-none d-lg-table-cell align-middle">
                                                     <%= t.ratings.bogey.toFixed(1) %>
                                                 </td>
-                                                <td class="align-middle text-center">
+                                                <td class="align-middle">
                                                     <%= t.ratings.slope.full %>
                                                 </td>
-                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                <td class="d-none d-lg-table-cell align-middle">
                                                     <%= t.ratings.slope.front %>
                                                 </td>
-                                                <td class="d-none d-lg-table-cell align-middle text-center">
+                                                <td class="d-none d-lg-table-cell align-middle">
                                                     <%= t.ratings.slope.back %>
                                                 </td>
                                             </tr>
@@ -227,14 +202,11 @@
                 </div>
                 <div class="accordion-item">
                     <h2 id="players-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#players-accordion-item-body-parent" aria-expanded="false"
-                            aria-controls="players-accordion-item-body-parent">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#players-accordion-item-body-parent" aria-expanded="false" aria-controls="players-accordion-item-body-parent">
                             Players
                         </button>
                     </h2>
-                    <div id="players-accordion-item-body-parent" class="accordion-collapse collapse"
-                        aria-labelledby="players-accordion-item-heading">
+                    <div id="players-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="players-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <% if (playingGroups.length > 1) { %>
                             <div class="row g-3 mx-0">
@@ -259,14 +231,11 @@
                 </div>
                 <div class="accordion-item">
                     <h2 id="game-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#game-accordion-item-body-parent" aria-expanded="false"
-                            aria-controls="game-accordion-item-body-parent">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#game-accordion-item-body-parent" aria-expanded="false" aria-controls="game-accordion-item-body-parent">
                             Games
                         </button>
                     </h2>
-                    <div id="game-accordion-item-body-parent" class="accordion-collapse collapse"
-                        aria-labelledby="game-accordion-item-heading">
+                    <div id="game-accordion-item-body-parent" class="accordion-collapse collapse" aria-labelledby="game-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <% if (!EDIT_ACCESS && games.length === 0) { %>
                             <div class="row gy-3">
@@ -282,73 +251,58 @@
                                     <div class="accordion">
                                         <div class="accordion-item">
                                             <h2 id="game-<%= game.index %>|heading" class="accordion-header">
-                                                <button class="accordion-button" aria-controls="game-<%= game.index %>"
-                                                    aria-expanded="true" data-bs-target="#game-<%= game.index %>"
-                                                    data-bs-toggle="collapse" title="Game <%= game.index %>"
-                                                    type="button">
+                                                <button class="accordion-button" aria-controls="game-<%= game.index %>" aria-expanded="true" data-bs-target="#game-<%= game.index %>" data-bs-toggle="collapse" title="Game <%= game.index %>" type="button">
                                                     Game <%= game.index %>
                                                 </button>
                                             </h2>
-                                            <div id="game-<%= game.index %>" class="accordion-collapse collapse show"
-                                                aria-labelledby="game-<%= game.index %>|heading">
+                                            <div id="game-<%= game.index %>" class="accordion-collapse collapse show" aria-labelledby="game-<%= game.index %>|heading">
                                                 <div class="accordion-body">
                                                     <div class="row gx-2 gy-3">
                                                         <div class="col-12">
                                                             <div class="form-floating">
-                                                                <select class="form-select text-capitalize text-wrap"
-                                                                    id="game-<%= game.index %>|select"
-                                                                    name="[game]['<%= game.index %>'][name]"
-                                                                    aria-label="game select">
-                                                                    <option disabled="true">Select Game</option>
+                                                                <select class="form-select text-capitalize text-wrap" id="game-<%= game.index %>|select" name="[game]['<%= game.index %>'][name]" aria-label="game select">
+                                                                    <option disabled="true">
+                                                                        Select Game
+                                                                    </option>
                                                                     <% for (const GAME of GAMES) { %>
-                                                                    <option value="<%= GAME.name %>"
-                                                                        <%= GAME.name === game.name ? " selected" : "" %>>
-                                                                        <%= GAME.name %></option>
+                                                                    <option value="<%= GAME.name %>" <%= GAME.name === game.name ? " selected" : "" %>>
+                                                                        <%= GAME.name %>
+                                                                    </option>
                                                                     <% }; %>
                                                                 </select>
                                                                 <label for="game-1|select">Game</label>
                                                                 <div class="invalid-feedback">
-                                                                    <div class="d-flex justify-content-end">Please
-                                                                        select a game.</div>
+                                                                    <div class="d-flex justify-content-end">
+                                                                        Please select a game.
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="col-12 px-4 d-none" visibility="hidden">
-                                                            <p class="mb-0 text-overflow text-muted"
-                                                                id="game-<%= game.index %>|description" readonly="true"
-                                                                rows="1"></p>
+                                                            <p class="mb-0 text-overflow text-muted" id="game-<%= game.index %>|description" readonly="true" rows="1"></p>
                                                         </div>
                                                         <div class="col-12">
-                                                            <div
-                                                                class="game-element fixed-game-element-height d-flex justify-content-evenly align-items-center">
+                                                            <div class="game-element fixed-game-element-height d-flex justify-content-evenly align-items-center">
 
                                                                 <!-- move logic to server -->
                                                                 <% for (const ROUND_TYPE of ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0).map(({ name }) => name)) { %>
                                                                 <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input"
-                                                                        id="game-<%= game.index %>|round|<%= ROUND_TYPE %>"
-                                                                        name="[game]['<%= game.index %>'][round]"
-                                                                        type="radio" value="<%= ROUND_TYPE %>"
-                                                                        <%= ROUND_TYPE === game.roundType.toLowerCase() && " checked" %>>
-                                                                    <label class="form-check-label"
-                                                                        for="game-<%= game.index %>|round|<%= ROUND_TYPE %>"><%= ROUND_TYPE.split(' ').map(s => s[0].toUpperCase() + s.substring(1)).join(' ') %></label>
+                                                                    <input class="form-check-input" id="game-<%= game.index %>|round|<%= ROUND_TYPE %>" name="[game]['<%= game.index %>'][round]" type="radio" value="<%= ROUND_TYPE %>" <%= ROUND_TYPE === game.roundType.toLowerCase() && " checked" %>>
+                                                                    <label class="form-check-label" for="game-<%= game.index %>|round|<%= ROUND_TYPE %>">
+                                                                        <%= ROUND_TYPE.split(' ').map(s => s[0].toUpperCase() + s.substring(1)).join(' ') %>
+                                                                    </label>
                                                                 </div>
                                                                 <% }; %>
 
                                                             </div>
                                                         </div>
                                                         <div class="col-12">
-                                                            <div
-                                                                class="game-element fixed-game-element-height d-flex align-items-center justify-content-center">
+                                                            <div class="game-element fixed-game-element-height d-flex align-items-center justify-content-center">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input"
-                                                                        id="game-<%= game.index %>|handicap"
-                                                                        name="[game]['<%= game.index %>'][handicap]"
-                                                                        type="checkbox"
-                                                                        <%= game.handicap && " checked" %>>
-                                                                    <label class="form-check-label"
-                                                                        for="game-<%= game.index %>|handicap">Handicap
-                                                                        Adjusted</label>
+                                                                    <input class="form-check-input" id="game-<%= game.index %>|handicap" name="[game]['<%= game.index %>'][handicap]" type="checkbox" <%= game.handicap && " checked" %>>
+                                                                    <label class="form-check-label" for="game-<%= game.index %>|handicap">
+                                                                        Handicap Adjusted
+                                                                    </label>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -361,20 +315,12 @@
                                                                         <div class="border border-1 rounded p-2">
                                                                             <div class="row g-2">
                                                                                 <div class="col">
-                                                                                    <div
-                                                                                        class="d-flex justify-content-center align-items-center">
-                                                                                        <div
-                                                                                            class="form-check form-switch">
-                                                                                            <input
-                                                                                                class="form-check-input"
-                                                                                                id="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation"
-                                                                                                name="[game]['<%= game.index %>'][<%= player.score.playingGroup.player %>][participation]"
-                                                                                                type="checkbox"
-                                                                                                value="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation"
-                                                                                                checked>
-                                                                                            <label
-                                                                                                class="form-check-label fw-bold"
-                                                                                                for="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation"><%= player.score.player.name.knownAs %></label>
+                                                                                    <div class="d-flex justify-content-center align-items-center">
+                                                                                        <div class="form-check form-switch">
+                                                                                            <input class="form-check-input" id="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation" name="[game]['<%= game.index %>'][<%= player.score.playingGroup.player %>][participation]" type="checkbox" value="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation" checked>
+                                                                                            <label class="form-check-label fw-bold" for="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation">
+                                                                                                <%= player.score.player.name.knownAs %>
+                                                                                            </label>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -402,24 +348,21 @@
                                                         <% if (game.method) { %>
                                                         <div class="col-12">
                                                             <div class="form-floating">
-                                                                <select class="form-select text-capitalize text-wrap"
-                                                                    id="game-<%= game.index %>|method"
-                                                                    name="[game]['<%= game.index %>'][method]"
-                                                                    aria-label="game method">
+                                                                <select class="form-select text-capitalize text-wrap" id="game-<%= game.index %>|method" name="[game]['<%= game.index %>'][method]" aria-label="game method">
                                                                     <% for (const method of ((GAMES.find(({ name }) => name === game.name) || { options: [] }).options.find(({ type }) => type === 'method') || { values: [] }).values) { %>
-                                                                    <option value="<%= method %>"
-                                                                        <%= method === game.method ? " selected" : "" %>>
-                                                                        <%= method %></option>
+                                                                    <option value="<%= method %>" <%= method === game.method ? " selected" : "" %>>
+                                                                        <%= method %>
+                                                                    </option>
                                                                     <% }; %>
                                                                 </select>
-                                                                <label
-                                                                    for="game-<%= game.index %>|method">Method</label>
+                                                                <label for="game-<%= game.index %>|method">
+                                                                    Method
+                                                                </label>
                                                             </div>
                                                         </div>
                                                         <% }; %>
                                                         <div class="col-12">
-                                                            <input class="btn btn-danger w-100" type="button"
-                                                                value="Remove Game">
+                                                            <input class="btn btn-danger w-100" type="button" value="Remove Game">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -594,14 +537,11 @@
                 <% if (EDIT_ACCESS) { %>
                 <div class="accordion-item">
                     <h2 id="summary-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#summary-accordion-item-body-parent" aria-expanded="true"
-                            aria-controls="summary-accordion-item-body-parent">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#summary-accordion-item-body-parent" aria-expanded="true" aria-controls="summary-accordion-item-body-parent">
                             Summary
                         </button>
                     </h2>
-                    <div id="summary-accordion-item-body-parent" class="accordion-collapse collapse show"
-                        aria-labelledby="summary-accordion-item-heading">
+                    <div id="summary-accordion-item-body-parent" class="accordion-collapse collapse show" aria-labelledby="summary-accordion-item-heading">
                         <div class="accordion-body p-3">
 
                             <div class="row gy-3">
@@ -614,18 +554,15 @@
                                             <h4 class="col mb-0 px-0">
                                                 <div class="row row-cols-1">
                                                     <div class="col text-center">
-                                                        <div class="d-none d-md-block"><%= score.player.name.knownAs %>
+                                                        <div class="d-none d-md-block">
+                                                            <%= score.player.name.knownAs %>
                                                         </div>
                                                         <div class="d-block d-md-none">
-                                                            <%= score.player.name.initials.short %></div>
+                                                            <%= score.player.name.initials.short %>
+                                                        </div>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <span
-                                                            id="<%= score.playingGroup.player %>|score"><%= score.scores.shots.full %></span>
-                                                        <span> (</span>
-                                                        <span class="<%= score.classes.par.full %>"
-                                                            id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span>
-                                                        <span>)</span>
+                                                        <span id="<%= score.playingGroup.player %>|score"><%= score.scores.shots.full %></span><span> (</span><span class="<%= score.classes.par.full %>" id="<%= score.playingGroup.player %>|par"><%= score.scores.par.full %></span><span>)</span>
                                                     </div>
                                                 </div>
                                             </h4>
@@ -640,10 +577,11 @@
                                     <div class="col-12 d-none" visibility="hidden">
                                         <% }; %>
                                         <div class="border border-1 border-primary rounded p-3">
-                                            <div id="games-summary"
-                                                class="row row-cols-auto gy-2 justify-content-center">
+                                            <div id="games-summary" class="row row-cols-auto gy-2 justify-content-center">
                                                 <% for (const game of games) { %>
-                                                <h5 class="col mb-0"><%= `Game ${game.index} - ${game.summary}` %></h5>
+                                                <h5 class="col mb-0">
+                                                    <%= `Game ${game.index} - ${game.summary}` %>
+                                                </h5>
                                                 <% }; %>
                                             </div>
                                         </div>
