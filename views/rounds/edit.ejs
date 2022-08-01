@@ -367,14 +367,14 @@
                                                                                             class="form-check form-switch">
                                                                                             <input
                                                                                                 class="form-check-input"
-                                                                                                id="game-<%= game.index %>|<%= player.playingGroup.player %>|participation"
-                                                                                                name="[game]['<%= game.index %>'][<%= player.playingGroup.player %>][participation]"
+                                                                                                id="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation"
+                                                                                                name="[game]['<%= game.index %>'][<%= player.score.playingGroup.player %>][participation]"
                                                                                                 type="checkbox"
-                                                                                                value="game-<%= game.index %>|<%= player.playingGroup.player %>|participation"
+                                                                                                value="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation"
                                                                                                 checked>
                                                                                             <label
                                                                                                 class="form-check-label fw-bold"
-                                                                                                for="game-<%= game.index %>|<%= player.playingGroup.player %>|participation"><%= player.player.name.knownAs %></label>
+                                                                                                for="game-<%= game.index %>|<%= player.score.playingGroup.player %>|participation"><%= player.score.player.name.knownAs %></label>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>

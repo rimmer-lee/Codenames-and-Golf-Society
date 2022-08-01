@@ -163,26 +163,19 @@ async function view (req, res) {
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
     const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round.toJSON();
     const currentDate = customDate('yyyy-mm-dd');
-    const games = G.map(({ handicap, method, name, players: p, roundType, summary }, index) => {
+    const games = G.map(({ description: d, handicap, method, name, players: p, roundType, summary }, index) => {
         const teams = [ ...new Set(p.map(({ team }) => team).filter(team => team)) ];
-        const players = p.map(({ player }) => S.find(score => score.player._id.toString() === player.toString()));
+        const players = p.map(({ player, team }) => ({ score: S.find(score => score.player._id.toString() === player.toString()), team }));
 
         // should these be part of the model?
-        const playerString = `Played between ${players.map(({ player }) => player.name.knownAs).join(', ').replaceLastInstance()}`;
-        let description = '';
-        if (handicap) description += 'Nett ';
-        if (method) {
-            if (method === 'Combined') description += 'Combined Score';
-            else description += `${method} Ball`;
-            description += ' ';
-        };
-        description += name;
-        if (roundType) {
-            description += ' ';
-            if (roundType === 'Full') description += 'for 18';
-            else description += `on ${roundType} 9`;
-        };
+        const playerString = (function() {
+            if (teams.length > 0) return teams.map(team => {
+                return `${players.filter(player => player.team === team).map(({ score }) => score.player.name.knownAs).join(', ').replaceLastInstance()} (${team.toUpperCase()})`;
+            }).join(' vs. ');
+            return `Played between ${players.map(({ score }) => score.player.name.knownAs).join(', ').replaceLastInstance()}`;
+        })();
 
+        const description = d || `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
         return {
             description,
             handicap,
