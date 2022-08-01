@@ -5,7 +5,6 @@ function updateDescription() {
     const demerit = section.querySelector('[id*="demerit"][type=number]');
     const rule = rules.map(({ rules }) => rules).flat().find(({ _id }) => _id == this.value);
     for (const checkbox of section.querySelectorAll('[type="checkbox"]')) checkbox.checked = false;
-    updateCloseButtons(this.closest('.modal'));
     if (!rule) {
         ruleDescriptionParent.classList.add('d-none');
         ruleDescriptionParent.setAttribute('visibility', 'hidden');
