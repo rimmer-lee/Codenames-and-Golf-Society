@@ -1,14 +1,13 @@
-<% if (existingTitles) for (const existingTitle of existingTitles) titles.find(({ value }) => value === existingTitle.name)[existingTitle.method] = true; %>
 <% for (const action of actions) { %>
 <div class="col-12">
     <div class="row mx-0">
         <div class="col-4 col-form-label d-flex align-items-center fw-bold"><%= action.title %> Title</div>
         <div class="col px-0">
             <div class="row me-0">
-                <div class="btn-group" role="group" aria-label="Title checkbox toggle group">        
+                <div class="btn-group" role="group" aria-label="Title checkbox toggle group">
                     <% for (const title of titles) { %>
                     <% const reference = `${(id ? `${id}|` : '')}${action.method}|${title.id}`; %>
-                    <input id="<%= reference %>" class="btn-check" type="checkbox" name="<%= name %>" value="<%= `${action.method}|${title.value}` %>"<%= title[action.method] ? " checked" : "" %>>
+                    <input id="<%= reference %>" class="btn-check" type="checkbox" name="<%= name %>" value="<%= `${action.method}|${title.value}` %>"<%= existingTitles.find(({ method, name }) => method === action.method && name === title.value) ? " checked" : "" %>>
                     <label for="<%= reference %>" class="btn btn-outline-<%= action.class %>">
                         <div class="d-flex p-0">
                             <i class="mx-auto bi <%= title.icon %>"></i>

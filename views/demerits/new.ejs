@@ -13,7 +13,7 @@
                     <%- include('../partials/forms/demerits/demerit', { id: '0|demerit', name: 'demerit[0][action][demerits]', value: 0 }) %>
                     <%- include('../partials/forms/demerits/rule', { id: '0|rule', name: 'demerit[0][rule]', rules: rules[0].rules, selected: false }) %>
                     <%- include('../partials/forms/demerits/rule-description', { description: false }) %>
-                    <%- include('../partials/forms/demerits/title', { id: '0', name: 'demerit[0][action][titles]', existingTitles: false }) %>
+                    <%- include('../partials/forms/demerits/title', { id: '0', name: 'demerit[0][action][titles]', existingTitles: [] }) %>
                     <%- include('../partials/forms/demerits/comments', { id: '0|comments', name: 'demerit[0][comments]', value: '' }) %>
                     <%- include('../partials/forms/demerits/remove', { page: 'Demerit' }) %>
                 </div>
