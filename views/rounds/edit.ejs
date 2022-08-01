@@ -244,7 +244,7 @@
                                 </h4>
                             </div>
                             <% } else { %>
-                            <div class="g-3 justify-content-center row row-cols-1 row-cols-md-2">
+                            <div class="g-3 justify-content-center row row-cols-1 row-cols-lg-2">
                                 <% for (const game of games) { %>
                                 <% if (EDIT_ACCESS) { %>
                                 <div class="col-12">
@@ -405,15 +405,11 @@
                 </div>
                 <div class="accordion-item">
                     <h2 id="scorecard-accordion-item-heading" class="accordion-header">
-                        <button class="accordion-button<%= EDIT_ACCESS ? ' collapsed' : '' %>" type="button"
-                            data-bs-toggle="collapse" data-bs-target="#scorecard-accordion-item-body-parent"
-                            aria-expanded="<%= !EDIT_ACCESS %>" aria-controls="scorecard-accordion-item-body-parent">
+                        <button class="accordion-button<%= EDIT_ACCESS ? ' collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#scorecard-accordion-item-body-parent" aria-expanded="<%= !EDIT_ACCESS %>" aria-controls="scorecard-accordion-item-body-parent">
                             Scorecard
                         </button>
                     </h2>
-                    <div id="scorecard-accordion-item-body-parent"
-                        class="accordion-collapse collapse<%= !EDIT_ACCESS ? ' show' : '' %>"
-                        aria-labelledby="scorecard-accordion-item-heading">
+                    <div id="scorecard-accordion-item-body-parent" class="accordion-collapse collapse<%= !EDIT_ACCESS ? ' show' : '' %>" aria-labelledby="scorecard-accordion-item-heading">
                         <div class="accordion-body p-3">
                             <div class="table-responsive">
                                 <table id="round" class="table table-bordered table-striped">
