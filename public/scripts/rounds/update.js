@@ -10,6 +10,7 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
         const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
         // if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
         const { handicap, method, players: gamePlayers, roundType = 'full', scoring } = game;
+        game.description = '';
         game.scores = [];
         game.summary = '';
         game.team = gamePlayers.some(({ team }) => team && team !== 'none');
@@ -138,6 +139,7 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 return string.replaceLastInstance();
             }).join('; ');
         }());
+        game.description = `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
     };
     return games;
 };

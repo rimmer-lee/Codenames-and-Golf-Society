@@ -218,7 +218,7 @@ async function view (req, res) {
             const { friendly } = formattedDate;
             const games = g.filter(({ players }) => players.some(({ player }) => player.toString() === playerId)).map(game => {
                     const { handicap, method, name, roundType, summary } = game;
-                    const description = `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
+                    const description = game.description || `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
                     return { description, name, summary };
                 }).sortAlphabetically('description');
             const players = scores.filter(({ player }) => player._id.toString() !== playerId).map(({ player }) => {
