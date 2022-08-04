@@ -17,12 +17,12 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
         if ((game.team ? [ ...new Set(gamePlayers.map(({ team }) => team)) ].length : gamePlayers.length) < defaultPlayersObject.minimum) continue;
         const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
         const handicapAdjustment = (function() {
-            if (handicap !== 'competition') return 0;
-            return Math.min(
-                ...scores.filter(({ player }) => {
-                    return gamePlayers.some(gamePlayer => player._id.toString() === gamePlayer.player._id.toString());
-                }).map(({ handicap }) => +handicap)
-            );
+            if (handicap === 'competition') return Math.min(
+                    ...scores.filter(({ player }) => {
+                        return gamePlayers.some(gamePlayer => player._id.toString() === gamePlayer.player._id.toString());
+                    }).map(({ handicap }) => +handicap)
+                );
+            return 0;
         })();
         const gameScores = (function() {
             const gameScores = gamePlayers.map(p => {
@@ -32,21 +32,19 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
 
                 // move to separate function for use in calculating score values???
                 const score = (function() {
-                    if (handicap !== 'none') {
-                        const { handicap: playerHandicap, shots, tee } = scoreObject;
-                        const { shotsPerHole, holesWithAShot } = handicapShots(playerHandicap - handicapAdjustment);
-                        const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == tee) || defaultTee;
-                        return holes.map(({ index, par, strokeIndex }) => {
-                            const shot = +shots[index - 1];
-                            if (!shot || !par) return null;
-                            const doubleBogey = +par + 2;
-                            const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
-                            if (name !== 'Stableford' && scoring !== 'stableford') return nettScore > doubleBogey ? doubleBogey : nettScore;
-                            const nettParScore = doubleBogey - nettScore;
-                            return nettParScore < 0 ? 0 : nettParScore;
-                        });
-                    };
-                    return scoreObject.shots;
+                    if (handicap === 'none') return scoreObject.shots;
+                    const { handicap: playerHandicap, shots, tee } = scoreObject;
+                    const { shotsPerHole, holesWithAShot } = handicapShots(playerHandicap - handicapAdjustment);
+                    const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == tee) || defaultTee;
+                    return holes.map(({ index, par, strokeIndex }) => {
+                        const shot = +shots[index - 1];
+                        if (!shot || !par) return null;
+                        const doubleBogey = +par + 2;
+                        const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
+                        if (name !== 'Stableford' && scoring !== 'stableford') return nettScore > doubleBogey ? doubleBogey : nettScore;
+                        const nettParScore = doubleBogey - nettScore;
+                        return nettParScore < 0 ? 0 : nettParScore;
+                    });
                 })().slice(start, end);
 
                 return { id, score, team };
