@@ -96,84 +96,135 @@ module.exports = {
         { name: 'Zambia', 'alpha-3': 'ZAM' },
         { name: 'Zimbabwe', 'alpha-3': 'ZIM' }
     ],
-    GAMES: [
-        {
-            description: '',
-            handicap: {
-                adjustable: true,
-                default: false
+    GAMES: {
+        handicap: [
+            {
+                description: 'The participating player with the lowest handicap is taken as the baseline with all handicaps having the baseline deducted from them. The participating player with the lowest handicap is, therefore, playing off scratch.',
+                id: 'competition',
+                order: 2,
+                value: 'Competition'
             },
-            name: 'Match Play',
-            options: [
-                {
-                    for: 'team',
-                    type: 'method',
-                    values: [
-                        'Best',
-                        'Combined',
-                        'Worst'
-                    ]
-                }
-            ],
-            players: {
-                for: [
-                    'individual',
-                    'team'
-                ],
-                maximum: 2,
-                minimum: 2
+            {
+                description: 'The player\'s handicap is used.',
+                id: 'standard',
+                order: 1,
+                value: 'Standard'
             }
-        },
-        {
-            handicap: {
-                adjustable: true,
-                default: false
+        ],
+        method: [
+            {
+                description: 'The \'Best\' (lowest) score is used as the team\'s score.',
+                filters: { teams: { even: false, minimum: 1 } },
+                id: 'best',
+                order: 1,
+                value: 'Best'
             },
-            name: 'Stroke Play',
-            options: [
-                {
-                    for: 'team',
-                    type: 'method',
-                    values: [
-                        'Best',
-                        'Combined',
-                        'Worst'
-                    ]
-                }
-            ],
-            players: {
-                for: [
-                    'individual',
-                    'team'
-                ],
-                minimum: 2
-            }
-        },
-        {
-            handicap: {
-                adjustable: true,
-                default: false,
+            {
+                description: 'The scores of all teammates are summed together.',
+                filters: { teams: { even: true, minimum: 2 } },
+                id: 'combined',
+                order: 2,
+                value: 'Combined'
             },
-            name: 'Skins',
-            options: [],
-            players: {
-                for: [ 'individual' ],
-                minimum: 2
-            }
-        },
-        {
-            handicap: {
-                adjustable: false,
-                default: true
+            {
+                description: 'The \'Best\' (lowest) score is used to play against the \'Best\' score of the opposition and the \'Worst\' (highest) score is used to play against the \'Worst\' score of the opposition. If a team wins both match ups or 1 match up and ties the other then 1 point is scored for that team. If a team wins 1 match up and loses the other or if both match ups are tied then 0 points are scored.',
+                filters: { teams: { even: true, minimum: 2 } },
+                id: 'high/low',
+                order: 3,
+                value: 'High/Low'
             },
-            name: 'Stableford',
-            options: [],
-            players: {
-                for: [ 'individual' ],
-                minimum: 1
+            {
+                description: 'The \'Worst\' (highest) score is used as the team\'s score.',
+                filters: { teams: { even: false, minimum: 1 } },
+                id: 'worst',
+                order: 4,
+                value: 'Worst'
             }
-        }
-    ],
+        ],
+        game: [
+            {
+                description: 'In match play, the lowest score on a hole wins that hole. The match is over when one player or side leads by more holes than there are still to play. A 4&3 victory is when one side is four holes up with only three holes to play.',
+                filters: {
+                    players: {
+                        for: [ 'individual', 'team' ],
+                        maximum: 2,
+                        minimum: 2
+                    },
+                    method: ['best', 'combined', 'high/low', 'worst'],
+                    scoring: ['nett', 'shots', 'stableford']
+                },
+                handicap: false,
+                id: 'match-play',
+                order: 1,
+                value: 'Match Play'
+            },
+            {
+                description: 'Players must register their score on every single hole, it doesn\`t matter how many shots they\`ve had, they must still produce a score. After the completion of the 18-holes, the scores are added up to give an overall total. The winner is the one with the lowest amount of strokes.',
+                filters: {
+                    players: {
+                        for: [ 'individual', 'team' ],
+                        minimum: 2
+                    },
+                    method: ['best', 'combined', 'high/low', 'worst'],
+                    scoring: ['nett', 'shots', 'stableford']
+                },
+                handicap: false,
+                id: 'stroke-play',
+                order: 2,
+                value: 'Stroke Play'
+            },
+            {
+                description: 'If a player wins the hole outright, then they win the skin. If no-one wins the hole outright, the value of the skin gets added to the skin for the next hole. All players are able to compete for these held-over skins, even if they had not been involved in the tie for the win on the previous hole.',
+                filters: {
+                    players: {
+                        for: [ 'individual', 'team' ],
+                        minimum: 2
+                    },
+                    method: ['best', 'combined', 'high/low', 'worst'],
+                    scoring: ['nett', 'shots', 'stableford']
+                },
+                handicap: false,
+                id: 'skins',
+                order: 3,
+                value: 'Skins'
+            },
+            {
+                description: 'Stableford is a very common scoring system in golf whereby points are awarded on each hole according to how the player does against their own handicap.',
+                filters: {
+                    players: {
+                        for: [ 'individual' ],
+                        minimum: 1
+                    },
+                    method: [],
+                    scoring: ['stableford']
+                },
+                handicap: true,
+                id: 'stableford',
+                order: 4,
+                value: 'Stableford'
+            }
+        ],
+        scoring: [
+            {
+                description: 'Handicap adjusted shots are used.',
+                id: 'nett',
+                order: 2,
+                value: 'Nett'
+            },
+            {
+                description: 'Unadjusted shots are used.',
+                id: 'shots',
+                order: 1,
+                value: 'Shots'
+            },
+            {
+                description: 'Stableford calculated points are used.',
+                id: 'stableford',
+                order: 3,
+                value: 'Stableford'
+            }
+        ]
+    },
     GENDERS: ['ambiguous', 'female', 'male', 'trans'],
     NAME_TITLES: ['Master', 'Mr', 'Ms', 'Miss', 'Mrs', 'Mx', 'Lord', 'Lady', 'Sir', 'Dame', 'Dr', 'Prof'],
     NON_MEMBERS: ['guest', 'super'],
