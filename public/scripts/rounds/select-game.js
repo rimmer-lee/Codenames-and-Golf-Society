@@ -1,9 +1,10 @@
-const gameSelectSelector = 'select.form-select[id^="game-"][id$="|select"]';
-const gamePlayersSelector = '[id^="game-"][id$="|players"]';
+const GAME_SELECT_SELECTOR = `select.form-select${gameElementId('game')}`;
+const gamePlayersSelector = gameElementId('players');
 
 function addGame() {
     const gameAccordionElement = this.closest('.row').querySelector('.accordion');
     const gameAccordionParentElement = gameAccordionElement.parentElement;
+    const selectedPlayers = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player').length;
     const gameIndex = ++gameAccordionElement.children.length;
     const gameReference = `game-${gameIndex}`;
     const newItemElementObject = {
@@ -54,13 +55,14 @@ function addGame() {
                                                         type: 'select',
                                                         classList: ['form-select', 'text-capitalize', 'text-wrap'],
                                                         attributes: [
-                                                            { id: 'id', value: `${gameReference}|select` },
-                                                            { id: 'name', value: `[game]['${gameIndex}'][name]` },
+                                                            { id: 'id', value: `${gameReference}|game` },
+                                                            { id: 'name', value: `[game]['${gameIndex}'][game]` },
                                                             { id: 'aria-label', value: 'game select' }
                                                         ],
                                                         addEventListener: [
                                                             { type: 'change', listener: selectGame },
-                                                            { type: 'change', listener: updateData }
+                                                            { type: 'change', listener: updateData },
+                                                            { type: 'change', listener: updateDescription }
                                                         ],
                                                         children: [
                                                             {
@@ -70,12 +72,13 @@ function addGame() {
                                                                     { id: 'selected', value: true }
                                                                 ],
                                                                 innerText: 'Select Game'
-                                                            }
+                                                            },
+                                                            ...gameSelectOptions(selectedPlayers)
                                                         ]
                                                     },
                                                     {
                                                         type: 'label',
-                                                        attributes: [{ id: 'for', value: `${gameReference}|select` }],
+                                                        attributes: [{ id: 'for', value: `${gameReference}|game` }],
                                                         innerText: 'Game'
                                                     },
                                                     {
@@ -88,22 +91,8 @@ function addGame() {
                                                         ]
                                                     }
                                                 ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        classList: ['col-12', 'px-4', 'd-none'],
-                                        attributes: [{ id: 'visibility', value: 'hidden' }],
-                                        children: [
-                                            {
-                                                type: 'p',
-                                                classList: ['mb-0', 'text-overflow', 'text-muted'],
-                                                attributes: [
-                                                    { id: 'id', value: `${gameReference}|description` },
-                                                    { id: 'readonly', value: true },
-                                                    { id: 'rows', value: '1' }
-                                                ]
-                                            }
+                                            },
+                                            descriptionElementObject(gameReference, 'game')
                                         ]
                                     },
                                     {
@@ -111,66 +100,115 @@ function addGame() {
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
                                         children: [
                                             {
-                                                classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'justify-content-evenly', 'align-items-center'],
-                                                children: []
-                                            }
-                                        ]
-                                    },
-
-                                    // {
-                                    //     classList: ['col-12', 'd-none'],
-                                    //     attributes: [{ id: 'visibility', value: 'hidden' }],
-                                    //     children: [
-                                    //         {
-                                    //             classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'justify-content-evenly', 'align-items-center'],
-                                    //             children: []
-                                    //         }
-                                    //     ]
-                                    // },
-                                    // {
-                                    //     classList: ['col-12', 'd-none'],
-                                    //     attributes: [{ id: 'visibility', value: 'hidden' }],
-                                    //     children: [
-                                    //         {
-                                    //             classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'align-items-center', 'justify-content-center'],
-                                    //             children: []
-                                    //         }
-                                    //     ]
-                                    // },
-
-                                    {
-                                        classList: ['col-12', 'd-none'],
-                                        attributes: [{ id: 'visibility', value: 'hidden' }],
-                                        children: [
-                                            {
-                                                classList: ['game-element', 'fixed-game-element-height', 'd-flex', 'align-items-center', 'justify-content-center'],
+                                                classList: ['align-items-center', 'd-flex', 'fixed-game-element-height', 'game-element', 'position-relative'],
                                                 children: [
                                                     {
-                                                        classList: ['form-check', 'form-switch'],
-                                                        children: [
-                                                            {
-                                                                type: 'input',
-                                                                classList: ['form-check-input'],
-                                                                attributes: [
-                                                                    { id: 'id', value: `${gameReference}|handicap` },
-                                                                    { id: 'name', value: `[game]['${gameIndex}'][handicap]` },
-                                                                    { id: 'type', value: 'checkbox' }
-                                                                ],
-                                                                addEventListener: [{ type: 'change', listener: updateData }]
-                                                            },
-                                                            {
-                                                                type: 'label',
-                                                                classList: ['form-check-label'],
-                                                                attributes: [{ id: 'for', value: `${gameReference}|handicap` }],
-                                                                innerText: 'Handicap Adjusted'
-                                                            }
-                                                        ]
+                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                        children: ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0)
+                                                            .map(({ name }) => {
+                                                                const value = `${gameReference}|round|${name}`;
+                                                                return {
+                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                    children: [
+                                                                        {
+                                                                            type: 'input',
+                                                                            classList: ['form-check-input'],
+                                                                            attributes: [
+                                                                                { id: 'id', value },
+                                                                                { id: 'name', value: `[game]['${gameIndex}'][round]` },
+                                                                                { id: 'type', value: 'radio' },
+                                                                                { id: 'value', value: name }
+                                                                            ],
+                                                                            addEventListener: [{ type: 'change', listener: updateData }]
+                                                                        },
+                                                                        {
+                                                                            type: 'label',
+                                                                            classList: ['form-check-label'],
+                                                                            attributes: [{ id: 'for', value }],
+                                                                            innerText: `${name[0].toUpperCase()}${name.substring(1)}`
+                                                                        }
+                                                                    ]
+                                                                };
+                                                            })
+                                                    },
+                                                    {
+                                                        classList: ['floating-label'],
+                                                        innerText: 'Round'
                                                     }
                                                 ]
                                             }
                                         ]
                                     },
-
+                                    {
+                                        classList: ['col-12', 'd-none'],
+                                        attributes: [{ id: 'visibility', value: 'hidden' }],
+                                        children: [
+                                            {
+                                                classList: ['align-items-center', 'd-flex', 'fixed-game-element-height', 'game-element', 'position-relative'],
+                                                children: [
+                                                    {
+                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                        children: []
+                                                    },
+                                                    {
+                                                        classList: ['floating-label'],
+                                                        innerText: 'Scoring'
+                                                    }
+                                                ]
+                                            },
+                                            descriptionElementObject(gameReference, 'scoring')
+                                        ]
+                                    },
+                                    {
+                                        classList: ['col-12', 'd-none'],
+                                        attributes: [{ id: 'visibility', value: 'hidden' }],
+                                        children: [
+                                            {
+                                                classList: ['align-items-center', 'd-flex', 'fixed-game-element-height', 'game-element', 'position-relative'],
+                                                children: [
+                                                    {
+                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                        children: GAMES.handicap
+                                                            .sort((a, b) => a.order - b.order)
+                                                            .map(({ id: v, value: innerText }) => {
+                                                                const value = `${gameReference}|handicap|${v}`;
+                                                                return {
+                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                    children: [
+                                                                        {
+                                                                            type: 'input',
+                                                                            classList: ['form-check-input'],
+                                                                            attributes: [
+                                                                                { id: 'id', value },
+                                                                                { id: 'disabled', value: true },
+                                                                                { id: 'name', value: `[game]['${gameIndex}'][handicap]` },
+                                                                                { id: 'type', value: 'radio' },
+                                                                                { id: 'value', value: v }
+                                                                            ],
+                                                                            addEventListener: [
+                                                                                { type: 'change', listener: updateData },
+                                                                                { type: 'change', listener: updateDescription }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            type: 'label',
+                                                                            classList: ['form-check-label'],
+                                                                            attributes: [{ id: 'for', value }],
+                                                                            innerText
+                                                                        }
+                                                                    ]
+                                                                };
+                                                            })
+                                                    },
+                                                    {
+                                                        classList: ['floating-label'],
+                                                        innerText: 'Handicap'
+                                                    }
+                                                ]
+                                            },
+                                            descriptionElementObject(gameReference, 'handicap')
+                                        ]
+                                    },
                                     {
                                         classList: ['col-12', 'd-none'],
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
@@ -202,7 +240,10 @@ function addGame() {
                                                             { id: 'name', value: `[game]['${gameIndex}'][method]` },
                                                             { id: 'aria-label', value: 'game method' }
                                                         ],
-                                                        addEventListener: [{ type: 'change', listener: updateData }],
+                                                        addEventListener: [
+                                                            { type: 'change', listener: updateData },
+                                                            { type: 'change', listener: updateDescription }
+                                                        ],
                                                         children: [
                                                             {
                                                                 type: 'option',
@@ -220,7 +261,8 @@ function addGame() {
                                                         innerText: 'Method'
                                                     }
                                                 ]
-                                            }
+                                            },
+                                            descriptionElementObject(gameReference, 'method')
                                         ]
                                     },
                                     {
@@ -245,90 +287,8 @@ function addGame() {
             }
         ]
     };
-    for (const roundType of ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0)) {
-        const { name } = roundType;
-        const value = `${gameReference}|round|${name}`;
-        const radioButtonElementObject = {
-            classList: ['form-check', 'form-check-inline'],
-            children: [
-                {
-                    type: 'input',
-                    classList: ['form-check-input'],
-                    attributes: [
-                        { id: 'id', value },
-                        { id: 'name', value: `[game]['${gameIndex}'][round]` },
-                        { id: 'type', value: 'radio' },
-                        { id: 'value', value: name }
-                    ],
-                    addEventListener: [{ type: 'change', listener: updateData }]
-                },
-                {
-                    type: 'label',
-                    classList: ['form-check-label'],
-                    attributes: [{ id: 'for', value }],
-                    innerText: `${name[0].toUpperCase()}${name.substring(1)}`
-                }
-            ]
-        };
-        if (name === 'full') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
-        newItemElementObject.children[1].children[0].children[0].children[2].children[0].children.push(radioButtonElementObject);
-    };
-    // for (const scoring of ['Shots', 'Nett', 'Stableford']) {
-    //     const value = `${gameReference}|scoring|${scoring}`;
-    //     const radioButtonElementObject = {
-    //         classList: ['form-check', 'form-check-inline'],
-    //         children: [
-    //             {
-    //                 type: 'input',
-    //                 classList: ['form-check-input'],
-    //                 attributes: [
-    //                     { id: 'id', value },
-    //                     { id: 'name', value: `[game]['${gameIndex}'][scoring]` },
-    //                     { id: 'type', value: 'radio' },
-    //                     { id: 'value', value: scoring.toLowerCase() }
-    //                 ],
-    //                 addEventListener: [{ type: 'change', listener: updateData }]
-    //             },
-    //             {
-    //                 type: 'label',
-    //                 classList: ['form-check-label'],
-    //                 attributes: [{ id: 'for', value }],
-    //                 innerText: scoring
-    //             }
-    //         ]
-    //     };
-    //     if (scoring === 'Shots') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
-    //     newItemElementObject.children[1].children[0].children[0].children[3].children[0].children.push(radioButtonElementObject);
-    // };
-    // for (const handicaps of ['Standard', 'Competition']) {
-    //     const value = `${gameReference}|handicap|${handicaps}`;
-    //     const radioButtonElementObject = {
-    //         classList: ['form-check', 'form-check-inline'],
-    //         children: [
-    //             {
-    //                 type: 'input',
-    //                 classList: ['form-check-input'],
-    //                 attributes: [
-    //                     { id: 'id', value },
-    //                     { id: 'name', value: `[game]['${gameIndex}'][handicap]` },
-    //                     { id: 'type', value: 'radio' },
-    //                     { id: 'value', value: handicaps.toLowerCase() }
-    //                 ],
-    //                 addEventListener: [{ type: 'change', listener: updateData }]
-    //             },
-    //             {
-    //                 type: 'label',
-    //                 classList: ['form-check-label'],
-    //                 attributes: [{ id: 'for', value }],
-    //                 innerText: handicaps
-    //             }
-    //         ]
-    //     };
-    //     if (handicaps === 'Standard') radioButtonElementObject.children[0].attributes.push({ id: 'checked', value: true });
-    //     newItemElementObject.children[1].children[0].children[0].children[4].children[0].children.push(radioButtonElementObject);
-    // };
     gameAccordionElement.insertBefore(createElement(newItemElementObject), null);
-    updateGameOptions();
+    document.getElementById(`${gameReference}|round|full`).checked = true;
     toggleVisibility(gameAccordionParentElement);
 };
 
@@ -384,23 +344,21 @@ function addPlayerToGame(game, player, innerText) {
 };
 
 function changeParticipation() {
-    const parentAccordionBody = this.closest('.accordion-body');
-    const gameSelect = parentAccordionBody.querySelector(gameSelectSelector);
-    const gamePlayersElement = parentAccordionBody.querySelector(gamePlayersSelector);
-    const participationCheckboxes = Array.from(gamePlayersElement.querySelectorAll('input[type=checkbox]'));
+    const gameReference = getGameReference(this);
+    const participationCheckboxes = Array.from(document.querySelectorAll(`[id="${gameReference}|players"] input[type=checkbox]`));
     const participationLabelElement = this.parentElement.querySelector('label');
-    const { text } = gameSelect[gameSelect.selectedIndex];
-    const { players } = GAMES.find(({ name }) => name === text)
-    const teamGame = players.for.some(value => value === 'team');
-    const { maximum: maximumPlayers, minimum: minimumPlayers } = players;
+    const gameSelectValue = document.getElementById(`${gameReference}|game`).value;
+
+    // need to check if it all exists
+    const { for: f, maximum, minimum } = GAMES.game.find(({ id }) => id === gameSelectValue).filters.players;
+
     const { checked } = this;
-    const [ gameReference ] = this.id.split('|');
     participationLabelElement.classList.toggle('text-muted', !checked);
     participationLabelElement.classList.toggle('fw-bold', checked);
-    if (teamGame) {
+    if (f.includes('team')) {
         const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked).length;
-        const minimum = minimumPlayers === maximumPlayers ? 0 : -1;
-        const teams = maximumPlayers ? Math.min(maximumPlayers, checkedParticipationCheckboxes) : checkedParticipationCheckboxes;
+        const startingValue = +(minimum === maximum) - 1;
+        const teams = maximum ? Math.min(maximum, checkedParticipationCheckboxes) : checkedParticipationCheckboxes;
         for (const participationCheckbox of participationCheckboxes) {
             const participationCheckboxRow = participationCheckbox.closest('.row');
             const radioButton = participationCheckboxRow.querySelector('input.form-check-input[type=radio]');
@@ -408,30 +366,39 @@ function changeParticipation() {
             const [ , playerReference ] = participationCheckbox.id.split('|');
             if (radioButton) radioButton.closest('.col').remove();
             if (!participationCheckbox.checked || checkedParticipationCheckboxes < 3) continue;
-            const radioButtonElementObject = {
+            participationCheckbox.closest('.row').insertBefore(createElement({
                 classList: ['col'],
                 children: [
                     {
                         classList: ['d-flex', 'justify-content-evenly', 'align-items-center'],
-                        children: []
+                        children: Array.from({ length: teams }, (_, i) => i + startingValue).map(i => {
+                            return teamRadioButtonObject(
+                                gameReference,
+                                playerReference,
+                                i < 0 ? 'None' : letterFromNumber(i).toUpperCase(),
+                                checkedValue || (startingValue < 0 ? 'none' : 'a')
+                            )
+                        })
                     }
                 ]
-            };
-            for (let i = minimum; i < teams; i++) {
-                radioButtonElementObject.children[0].children.push(
-                    teamRadioButtonObject(
-                        gameReference,
-                        playerReference,
-                        i < 0 ? 'None' : letterFromNumber(i).toUpperCase(),
-                        checkedValue || (minimum < 0 ? 'none' : 'a')
-                    )
-                );
-            };
-            participationCheckbox.closest('.row').insertBefore(createElement(radioButtonElementObject), null);
+            }), null);
         };
         updateMethodSelect.call(this);
     };
     updateData();
+};
+
+function changeScoringType() {
+    const { id, value } = this;
+    const [ gameReference ] = id.split('|');
+    const gameHandicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|"][type="radio"]`);
+    const firstGameHandicapRadioButton = gameHandicapRadioButtons[0];
+    const enableHandicap = value !== 'shots'
+    toggleVisibility(firstGameHandicapRadioButton.closest('.col-12'), enableHandicap);
+    for (const button of gameHandicapRadioButtons) button.disabled = !enableHandicap;
+    firstGameHandicapRadioButton.checked = true;
+    updateDescription.call(this);
+    updateDescription.call(firstGameHandicapRadioButton);
 };
 
 function changeTeam() {
@@ -439,41 +406,84 @@ function changeTeam() {
     updateData();
 };
 
+function descriptionElementObject(gameReference, descriptionReference) {
+    return {
+        classList: ['d-none', 'pt-2', 'px-4'],
+        attributes: [{ id: 'visibility', value: 'hidden' }],
+        children: [
+            {
+                type: 'p',
+                classList: ['mb-0', 'text-center', 'text-overflow', 'text-muted'],
+                attributes: [
+                    { id: 'id', value: `${gameReference}|${descriptionReference}-description` },
+                    { id: 'readonly', value: true },
+                    { id: 'rows', value: '1' }
+                ]
+            }
+        ]
+    };
+};
+
+function gameElementId(value) {
+    return `[id^="game-"][id*="|${value}"]`;
+};
+
+function gameSelectOptions(players) {
+    return GAMES.game.filter(({ filters }) => players >= filters.players.minimum)
+        .sort((a, b) => a.order - b.order)
+        .map(({ id: value, value: innerText }) => {
+            return {
+                type: 'option',
+                attributes: [{ id: 'value', value }],
+                innerText
+            }
+        })
+};
+
+function getGameIndex(id) {
+    return (id.match(/game\-(\d+)/) || Array.from({ length: 2 }))[1];
+};
+
+function getGameReference(element) {
+    return element.id.split('|')[0];
+};
+
 function removeGame() {
     const gameAccordionElement = this.closest('.accordion');
     const gameAccordionParentElement = gameAccordionElement.parentElement;
     this.closest('.accordion-item').remove();
     toggleVisibility(gameAccordionParentElement, gameAccordionElement.children.length > 0);
-    document.querySelectorAll(gameSelectSelector).forEach((gameSelect, index) => {
-        const [ , game ] = gameSelect.id.match(/game-(.+)\|select/);
+    document.querySelectorAll(GAME_SELECT_SELECTOR).forEach((gameSelect, index) => {
+        const gameIndex = getGameIndex(gameSelect.id);
+        if (!gameIndex) return;
         // updateAttributes(
         //     ['aria-controls', 'aria-labelledby', 'data-bs-target', 'for', 'id', 'name', 'title', 'value'],
-        //     game,
+        //     gameIndex,
         //     index + 1
         // );
 
-        for (const idElement of document.querySelectorAll(`[id*="${game}"]`)) {
-            idElement.id = idElement.id.replaceAll(game, index + 1);
+        for (const idElement of document.querySelectorAll(`[id*="${gameIndex}"]`)) {
+            idElement.id = idElement.id.replaceAll(gameIndex, index + 1);
         };
-        for (const nameElement of document.querySelectorAll(`[name*="${game}"]`)) {
-            nameElement.name = nameElement.name.replaceAll(game, index + 1);
-        };
-
-        for (const ariaControlsElement of document.querySelectorAll(`[aria-controls*="${game}"]`)) {
-            ariaControlsElement.attributes['aria-controls'].value = ariaControlsElement.attributes['aria-controls'].value.replaceAll(game, index + 1);
-        };
-        for (const ariaLabelledByElement of document.querySelectorAll(`[aria-labelledby*="${game}"]`)) {
-            ariaLabelledByElement.attributes['aria-labelledby'].value = ariaLabelledByElement.attributes['aria-labelledby'].value.replaceAll(game, index + 1);
-        };
-        for (const bsTargetElement of document.querySelectorAll(`[data-bs-target*="${game}"]`)) {
-            bsTargetElement.attributes['data-bs-target'].value = bsTargetElement.attributes['data-bs-target'].value.replaceAll(game, index + 1);
-        };
-        for (const forElement of document.querySelectorAll(`[for*="${game}"]`)) {
-            forElement.attributes.for.value = forElement.attributes.for.value.replaceAll(game, index + 1);
+        for (const nameElement of document.querySelectorAll(`[name*="${gameIndex}"]`)) {
+            nameElement.name = nameElement.name.replaceAll(gameIndex, index + 1);
         };
 
-        for (const titleElement of document.querySelectorAll(`[title*="${game}"]`)) {
-            const titleValue = titleElement.attributes.title.value.replaceAll(game, index + 1);
+        for (const ariaControlsElement of document.querySelectorAll(`[aria-controls*="${gameIndex}"]`)) {
+            ariaControlsElement.attributes['aria-controls'].value = ariaControlsElement.attributes['aria-controls'].value.replaceAll(gameIndex, index + 1);
+        };
+        for (const ariaLabelledByElement of document.querySelectorAll(`[aria-labelledby*="${gameIndex}"]`)) {
+            ariaLabelledByElement.attributes['aria-labelledby'].value = ariaLabelledByElement.attributes['aria-labelledby'].value.replaceAll(gameIndex, index + 1);
+        };
+        for (const bsTargetElement of document.querySelectorAll(`[data-bs-target*="${gameIndex}"]`)) {
+            bsTargetElement.attributes['data-bs-target'].value = bsTargetElement.attributes['data-bs-target'].value.replaceAll(gameIndex, index + 1);
+        };
+        for (const forElement of document.querySelectorAll(`[for*="${gameIndex}"]`)) {
+            forElement.attributes.for.value = forElement.attributes.for.value.replaceAll(gameIndex, index + 1);
+        };
+
+        for (const titleElement of document.querySelectorAll(`[title*="${gameIndex}"]`)) {
+            const titleValue = titleElement.attributes.title.value.replaceAll(gameIndex, index + 1);
             titleElement.attributes.title.value = titleValue;
             titleElement.innerText = titleValue;
         };
@@ -483,53 +493,77 @@ function removeGame() {
 };
 
 function selectGame() {
-    const parentAccordionBody = this.closest('.accordion-body');
+    const gameReference = getGameReference(this);
+    const gamePlayersElement = document.getElementById(`${gameReference}|players`);
+    const gameHandicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
+    const handicapRadioButtons = document.querySelectorAll(`input${gameElementId('handicap|')}`);
+    const gameMethodSelect = document.getElementById(`${gameReference}|method`);
+    const gameRoundParent = this.closest('.accordion-body').querySelector(`input${gameElementId('round')}[type="radio"]`).closest('.col-12');
 
-    // const gameScoringRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|scoring|"][type="radio"]');
-    const gameHandicapRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|handicap|"][type="radio"]');
+    // find a better way to select the element
+    const gameScoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.align-items-center.d-flex.flex-fill.justify-content-evenly');
 
-    const gameHandicapCheckbox = parentAccordionBody.querySelector('input[id^="game-"][id$="|handicap"][type="checkbox"]');
-
-    const gameMethodSelect = parentAccordionBody.querySelector('select[id^="game-"][id$="|method"]');
-    const gameRoundRadioButton = parentAccordionBody.querySelector('input[id^="game-"][id*="|round|"][type="radio"]');
-    const gamePlayersElement = parentAccordionBody.querySelector(gamePlayersSelector);
-    const [ gameReference ] = this.id.split('|');
     this.classList.remove('is-invalid');
-
-    // toggleVisibility(gameScoringRadioButton.closest('.col-12'), false);
-    // toggleVisibility(gameHandicapRadioButton.closest('.col-12'), false);
-
-    toggleVisibility(gameHandicapCheckbox.closest('.col-12'), false);
-    gameHandicapCheckbox.removeAttribute('disabled');
-    toggleVisibility(gamePlayersElement.closest('.col-12'), false);
+    toggleVisibility(gameHandicapParent, false);
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
-    toggleVisibility(gameRoundRadioButton.closest('.col-12'), false);
-    while (gamePlayersElement.children.length > 0) gamePlayersElement.children[0].remove();
+    toggleVisibility(gamePlayersElement.closest('.col-12'), false);
+    toggleVisibility(gameRoundParent, false);
+    toggleVisibility(gameScoringParent.closest('.col-12'), false);
+    updateDescription.call(this);
+    for (const handicap of handicapRadioButtons) handicap.disabled = true;
     while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
+    while (gamePlayersElement.children.length > 0) gamePlayersElement.children[0].remove();
+    while (gameScoringParent.children.length > 0) gameScoringParent.children[0].remove();
     if (!this.value || this.value === 'Select Game') return this.classList.add('is-invalid');
     const playerSelects = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player');
-    const game = GAMES.find(({ name }) => name === this.value);
-    if (!game || game.players.minimum > playerSelects.length) {
+    const { filters, players } = GAMES.game.find(({ id }) => id === this.value);
+    if (players?.minimum > playerSelects.length) {
         this.children[0].selected = true;
         return this.classList.add('is-invalid');
     };
-
-    // toggleVisibility(gameScoringRadioButton.closest('.col-12'));
-    // toggleVisibility(gameHandicapRadioButton.closest('.col-12'));
-
-    toggleVisibility(gameHandicapCheckbox.closest('.col-12'));
-    toggleVisibility(gameRoundRadioButton.closest('.col-12'));
-
-    if (!game.handicap.adjustable) gameHandicapCheckbox.setAttribute('disabled', true);
-    gameHandicapCheckbox.checked = game.handicap.default;
-
+    const gameIndex = getGameIndex(gameReference) || 0;
     toggleVisibility(gamePlayersElement.closest('.col-12'));
+    toggleVisibility(gameRoundParent);
+    toggleVisibility(gameScoringParent.closest('.col-12'));
     for (const playerSelect of playerSelects) {
         const { id, selectedIndex } = playerSelect;
         const [ playerReference ] = id.split('|');
         const playerName = playerSelect[selectedIndex].innerText;
         addPlayerToGame(gameReference, playerReference, playerName);
     };
+    for (const scoring of GAMES.scoring.filter(({ id }) => filters.scoring.includes(id)).sort((a, b) => a.order - b.order)) {
+        const { id: v, value: innerText } = scoring;
+        const value = `${gameReference}|scoring|${v}`;
+        gameScoringParent.insertBefore(createElement({
+            classList: ['form-check', 'form-check-inline'],
+            children: [
+                {
+                    type: 'input',
+                    classList: ['form-check-input'],
+                    attributes: [
+                        { id: 'id', value },
+                        { id: 'name', value: `[game]['${gameIndex}'][scoring]` },
+                        { id: 'type', value: 'radio' },
+                        { id: 'value', value: v }
+                    ],
+                    addEventListener: [
+                        { type: 'change', listener: changeScoringType },
+                        { type: 'change', listener: updateData },
+                        { type: 'change', listener: updateDescription }
+                    ]
+                },
+                {
+                    type: 'label',
+                    classList: ['form-check-label'],
+                    attributes: [{ id: 'for', value }],
+                    innerText
+                }
+            ]
+        }), null);
+    };
+    const firstScoringRadioButton = gameScoringParent.querySelector(`input${gameElementId('scoring|')}`);
+    firstScoringRadioButton.checked = true;
+    changeScoringType.call(firstScoringRadioButton);
 };
 
 function teamRadioButtonObject(game, player, team, checkedValue = '') {
@@ -557,55 +591,53 @@ function teamRadioButtonObject(game, player, team, checkedValue = '') {
             }
         ]
     };
-    if (checkedValue === lowerTeam) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true });
+    if (checkedValue === lowerTeam) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true});
     return teamRadioButtonObject;
 };
 
+function updateDescription() {
+    const { id, value } = this;
+    const [ gameReference, type ] = id.split('|');
+    const { description } = GAMES[type].find(({ id }) => id === value) || {};
+    const descriptionElement = document.getElementById(`${gameReference}|${type}-description`);
+    descriptionElement.innerText = description;
+    toggleVisibility(descriptionElement.parentElement, !!description);
+};
+
 function updateGameOptions() {
-    const gameSelects = document.querySelectorAll(gameSelectSelector);
+    const gameSelects = document.querySelectorAll(GAME_SELECT_SELECTOR);
     const selectedPlayers = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player').length;
-    const applicableGames = GAMES.filter(({ players }) => players.minimum <= selectedPlayers);
     for (const gameSelect of gameSelects) {
         const currentValue = gameSelect.value;
         while (gameSelect.children.length > 1) gameSelect.children[1].remove();
-        for (const game of applicableGames) {
-            const value = game.name;
-            gameSelect.insertBefore(createElement({
-                type: 'option',
-                attributes: [{ id: 'value', value }],
-                innerText: value
-            }), null);
-        };
+        for (const option of gameSelectOptions(selectedPlayers)) gameSelect.insertBefore(createElement(option), null);
         const selectedOption = Array.from(gameSelect.children).find(({ value }) => value === currentValue);
         if (selectedOption) selectedOption.selected = true;
+        else gameSelect.children[0].selected = true;
+        selectGame.call(gameSelect);
     };
 };
 
 function updateMethodSelect() {
-    const parentAccordionBody = this.closest('.accordion-body');
-    const gameSelect = parentAccordionBody.querySelector(gameSelectSelector);
-    const gameMethodSelect = parentAccordionBody.querySelector('[id^="game-"][id$="|method"]');
-    const game = GAMES.find(({ name }) => name === gameSelect[gameSelect.selectedIndex].text)
-    while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
+    const gameReference = getGameReference(this);
+    const gameMethodSelect = document.getElementById(`${gameReference}|method`);
+    const gameSelectValue = document.getElementById(`${gameReference}|game`).value;
+    const gameMethods = (GAMES.game.find(({ id }) => id === gameSelectValue) || { filters: { method: GAMES.method }}).filters.method;
+    if (!gameMethods) return;
+    const methods = GAMES.method.filter(({ id }) => gameMethods.includes(id));
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
-    if (!game) return;
-    const method = game.options.find(({ type }) => type === 'method');
-    if (!method) return;
-    const gamePlayersElement = parentAccordionBody.querySelector(gamePlayersSelector);
-    const checkedParticipationCheckboxes = Array.from(gamePlayersElement.querySelectorAll('input[type=checkbox]')).filter(({ checked }) => checked).length;
-    const maximumPlayers = game.players.maximum;
-    const participatingPlayers = maximumPlayers ? Math.min(maximumPlayers, checkedParticipationCheckboxes) : checkedParticipationCheckboxes;
-    for (let i = 0; i < participatingPlayers; i++) {
-        const team = letterFromNumber(i);
-        if (gamePlayersElement.querySelectorAll(`.col:not(.d-none) [type=radio][value=${team}]:checked`).length > 1) {
-            toggleVisibility(gameMethodSelect.closest('.col-12'));
-            method.values.forEach((value, index) => {
-                const attributes = [{ id: 'value', value }];
-                if (index === 0) attributes.push({ id: 'selected', value: true });
-                appendOption(value, gameMethodSelect, [{ id: 'value', value }]);
-            });
-            break;
-        };
+    while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
+    if (!methods || methods.length === 0) return;
+    const teams = [ ...new Set(Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:not([id$="none"]):checked`)).map(({ value }) => value)) ]
+        .map(team => ({ players: document.querySelectorAll(`[id^="${gameReference}|"][id$="|team-${team}"]:checked`).length, team }));
+    if (teams.length <= 1) return;
+    const equalTeams = teams.every(({ players }) => teams[0].players === players);
+    const methodsToAdd = methods.filter(({ filters }) => ((filters.teams.even ? equalTeams : true) && teams.every(({ players }) => players >= filters.teams.minimum)))
+        .map(({ id: value, value: v }) => ({ v, value }));
+    toggleVisibility(gameMethodSelect.closest('.col-12'));
+    for (const method of methodsToAdd) {
+        const { v, value } = method;
+        appendOption(v, gameMethodSelect, [{ id: 'value', value }]);
     };
 };
 

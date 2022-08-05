@@ -110,7 +110,10 @@ function removePlayer() {
             nameElement.name = nameElement.name.replaceAll(player, newPlayer);
         };
     });
-    for (const gameAccordionBody of document.querySelectorAll('#game .accordion-body .accordion .accordion-body')) updateMethodSelect.call(gameAccordionBody);
+    for (const gameAccordionBody of document.querySelectorAll(GAME_SELECT_SELECTOR)) {
+        updateGameOptions.call(gameAccordionBody);
+        updateMethodSelect.call(gameAccordionBody);
+    };
     updateData();
 };
 
