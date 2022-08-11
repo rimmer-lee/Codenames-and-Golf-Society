@@ -7,6 +7,7 @@ function addGame() {
     const selectedPlayers = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player').length;
     const gameIndex = ++gameAccordionElement.children.length;
     const gameReference = `game-${gameIndex}`;
+    const handicapMultiplierId = `${gameReference}|handicap-multiplier`;
     const newItemElementObject = {
         classList: ['accordion-item'],
         children: [
@@ -164,49 +165,112 @@ function addGame() {
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
                                         children: [
                                             {
-                                                classList: ['align-items-center', 'd-flex', 'fixed-game-element-height', 'game-element', 'position-relative'],
+                                                classList: ['fixed-game-element-height', 'game-element', 'position-relative'],
                                                 children: [
                                                     {
-                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
-                                                        children: GAMES.handicap
-                                                            .sort((a, b) => a.order - b.order)
-                                                            .map(({ id: v, value: innerText }) => {
-                                                                const value = `${gameReference}|handicap|${v}`;
-                                                                return {
-                                                                    classList: ['form-check', 'form-check-inline'],
-                                                                    children: [
-                                                                        {
-                                                                            type: 'input',
-                                                                            classList: ['form-check-input'],
-                                                                            attributes: [
-                                                                                { id: 'id', value },
-                                                                                { id: 'disabled', value: true },
-                                                                                { id: 'name', value: `[game]['${gameIndex}'][handicap]` },
-                                                                                { id: 'type', value: 'radio' },
-                                                                                { id: 'value', value: v }
-                                                                            ],
-                                                                            addEventListener: [
-                                                                                { type: 'change', listener: updateData },
-                                                                                { type: 'change', listener: updateDescription }
-                                                                            ]
-                                                                        },
-                                                                        {
-                                                                            type: 'label',
-                                                                            classList: ['form-check-label'],
-                                                                            attributes: [{ id: 'for', value }],
-                                                                            innerText
-                                                                        }
-                                                                    ]
-                                                                };
-                                                            })
-                                                    },
-                                                    {
-                                                        classList: ['floating-label'],
-                                                        innerText: 'Handicap'
+                                                        classList: ['row', 'row-cols-1'],
+                                                        children: [
+                                                            {
+                                                                classList: ['col'],
+                                                                children: [
+                                                                    {
+                                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                                        children: GAMES.handicap
+                                                                            .sort((a, b) => a.order - b.order)
+                                                                            .map(({ id: v, value: innerText }) => {
+                                                                                const value = `${gameReference}|handicap|type|${v}`;
+                                                                                return {
+                                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                                    children: [
+                                                                                        {
+                                                                                            type: 'input',
+                                                                                            classList: ['form-check-input'],
+                                                                                            attributes: [
+                                                                                                { id: 'id', value },
+                                                                                                { id: 'disabled', value: true },
+                                                                                                { id: 'name', value: `[game]['${gameIndex}'][handicap][type]` },
+                                                                                                { id: 'type', value: 'radio' },
+                                                                                                { id: 'value', value: v }
+                                                                                            ],
+                                                                                            addEventListener: [
+                                                                                                { type: 'change', listener: updateData },
+                                                                                                { type: 'change', listener: updateDescription }
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            type: 'label',
+                                                                                            classList: ['form-check-label'],
+                                                                                            attributes: [{ id: 'for', value }],
+                                                                                            innerText
+                                                                                        }
+                                                                                    ]
+                                                                                };
+                                                                            })
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                classList: ['col', 'd-none'],
+                                                                attributes: [{ id: 'visibility', value: 'hidden' }],
+                                                                children: [
+                                                                    {
+                                                                        classList: ['row'],
+                                                                        children: [
+                                                                            {
+                                                                                classList: ['col-6', 'mx-auto'],
+
+                                                                                children: [
+                                                                                    {
+                                                                                        classList: ['input-group', 'pb-1', 'pt-3'],
+                                                                                        children: [
+                                                                                            {
+                                                                                                type: 'label',
+                                                                                                classList: ['input-group-text'],
+                                                                                                attributes: [{ id: 'for', value: handicapMultiplierId }],
+                                                                                                innerText: 'Multiplier'
+                                                                                            },
+                                                                                            {
+                                                                                                type: 'input',
+                                                                                                classList: ['form-control', 'text-end'],
+                                                                                                attributes: [
+                                                                                                    { id: 'id', value: handicapMultiplierId },
+                                                                                                    { id: 'min', value: '0' },
+                                                                                                    { id: 'name', value: `[game]['${gameIndex}'][handicap][multiplier]` },
+                                                                                                    { id: 'step', value: '0.01' },
+                                                                                                    { id: 'type', value: 'number' },
+                                                                                                    { id: 'value', value: '100.00' }
+                                                                                                ],
+                                                                                                addEventListener: [
+                                                                                                    { type: 'input', listener: updateDescription },
+                                                                                                    { type: 'change', listener: function() {
+                                                                                                        return this.value = parseFloat(this.value).toFixed(2);
+                                                                                                    } },
+                                                                                                    { type: 'change', listener: updateData }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                classList: ['input-group-text'],
+                                                                                                innerText: '%'
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                classList: ['floating-label'],
+                                                                innerText: 'Handicap'
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             },
-                                            descriptionElementObject(gameReference, 'handicap')
+                                            descriptionElementObject(gameReference, 'handicap'),
+                                            descriptionElementObject(gameReference, 'handicap-multiplier')
                                         ]
                                     },
                                     {
@@ -304,32 +368,27 @@ function addPlayerToGame(game, player, innerText) {
                         classList: ['row', 'g-2'],
                         children: [
                             {
-                                classList: ['col'],
+                                classList: ['align-items-center', 'col', 'd-flex', 'justify-content-center'],
                                 children: [
                                     {
-                                        classList: ['d-flex', 'justify-content-center', 'align-items-center'],
+                                        classList: ['form-check', 'form-switch'],
                                         children: [
                                             {
-                                                classList: ['form-check', 'form-switch'],
-                                                children: [
-                                                    {
-                                                        type: 'input',
-                                                        classList: ['form-check-input'],
-                                                        attributes: [
-                                                            { id: 'id', value },
-                                                            { id: 'name', value: `[game]['${game.split('-')[1]}'][${player}][participation]` },
-                                                            { id: 'type', value: 'checkbox' },
-                                                            { id: 'value', value }
-                                                        ],
-                                                        addEventListener: [{ type: 'change', listener: changeParticipation }]
-                                                    },
-                                                    {
-                                                        type: 'label',
-                                                        classList: ['form-check-label', 'text-muted'],
-                                                        attributes: [{ id: 'for', value }],
-                                                        innerText
-                                                    }
-                                                ]
+                                                type: 'input',
+                                                classList: ['form-check-input'],
+                                                attributes: [
+                                                    { id: 'id', value },
+                                                    { id: 'name', value: `[game]['${getGameIndex(game)}'][${player}][participation]` },
+                                                    { id: 'type', value: 'checkbox' },
+                                                    { id: 'value', value }
+                                                ],
+                                                addEventListener: [{ type: 'change', listener: changeParticipation }]
+                                            },
+                                            {
+                                                type: 'label',
+                                                classList: ['form-check-label', 'text-muted'],
+                                                attributes: [{ id: 'for', value }],
+                                                innerText
                                             }
                                         ]
                                     }
@@ -356,29 +415,36 @@ function changeParticipation() {
     participationLabelElement.classList.toggle('text-muted', !checked);
     participationLabelElement.classList.toggle('fw-bold', checked);
     if (f.includes('team')) {
-        const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked).length;
-        const startingValue = +(minimum === maximum) - 1;
-        const teams = maximum ? Math.min(maximum, checkedParticipationCheckboxes) : checkedParticipationCheckboxes;
+        const participatingPlayers = participationCheckboxes.filter(({ checked }) => checked).length;
+        const teamNames = (function() {
+            const length = Math.min(maximum || participatingPlayers, participatingPlayers);
+            const startingValue = +(maximum === minimum) - 1;
+            const defaultTeamNames = Array.from({ length }, (_, i) => i + startingValue).map(i => {
+                if (i < 0) return { id: 'none', value: 'None' };
+                const id = letterFromNumber(i);
+                const value = id.toUpperCase();
+                return { id, value };
+            });
+            const idStart = `${(participationCheckboxes.find(({ checked }) => checked)?.id || '').split('|participation')[0]}|team-`;
+            if (!document.querySelector(`[id^="${idStart}"][id$="|name"]`)) return defaultTeamNames;
+            return defaultTeamNames.map(({ id, value: v }) => {
+                const value = document.getElementById(`${idStart}${id}}|name`)?.value || v;
+                return { id, value };
+            });
+        })();
         for (const participationCheckbox of participationCheckboxes) {
             const participationCheckboxRow = participationCheckbox.closest('.row');
             const radioButton = participationCheckboxRow.querySelector('input.form-check-input[type=radio]');
-            const checkedValue = (participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked') || {}).value;
+            const checkedId = (participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked') || {}).value || teamNames[0].id;
             const [ , playerReference ] = participationCheckbox.id.split('|');
             if (radioButton) radioButton.closest('.col').remove();
-            if (!participationCheckbox.checked || checkedParticipationCheckboxes < 3) continue;
+            if (!participationCheckbox.checked || participatingPlayers < 3) continue;
             participationCheckbox.closest('.row').insertBefore(createElement({
                 classList: ['col'],
                 children: [
                     {
-                        classList: ['d-flex', 'justify-content-evenly', 'align-items-center'],
-                        children: Array.from({ length: teams }, (_, i) => i + startingValue).map(i => {
-                            return teamRadioButtonObject(
-                                gameReference,
-                                playerReference,
-                                i < 0 ? 'None' : letterFromNumber(i).toUpperCase(),
-                                checkedValue || (startingValue < 0 ? 'none' : 'a')
-                            )
-                        })
+                        classList: ['g-2', 'row', 'row-cols-1'],
+                        children: teamNames.map(({ id, value }) => teamRadioButtonObject(gameReference, playerReference, id, value, checkedId))
                     }
                 ]
             }), null);
@@ -391,14 +457,17 @@ function changeParticipation() {
 function changeScoringType() {
     const { id, value } = this;
     const [ gameReference ] = id.split('|');
-    const gameHandicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|"][type="radio"]`);
-    const firstGameHandicapRadioButton = gameHandicapRadioButtons[0];
+    const handicapAdjustmentInput = document.getElementById(`${gameReference}|handicap-multiplier`);
+    const handicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|type|"][type="radio"]`);
+    const firstHandicapRadioButton = handicapRadioButtons[0];
     const enableHandicap = value !== 'shots'
-    toggleVisibility(firstGameHandicapRadioButton.closest('.col-12'), enableHandicap);
-    for (const button of gameHandicapRadioButtons) button.disabled = !enableHandicap;
-    firstGameHandicapRadioButton.checked = true;
+    toggleVisibility(firstHandicapRadioButton.closest('.col-12'), enableHandicap);
+    toggleVisibility(handicapAdjustmentInput.closest('.fixed-game-element-height.game-element.position-relative .col'), enableHandicap);
+    for (const button of handicapRadioButtons) button.disabled = !enableHandicap;
+    handicapAdjustmentInput.disabled = !enableHandicap;
+    firstHandicapRadioButton.checked = true;
     updateDescription.call(this);
-    updateDescription.call(firstGameHandicapRadioButton);
+    updateDescription.call(firstHandicapRadioButton);
 };
 
 function changeTeam() {
@@ -446,6 +515,13 @@ function getGameIndex(id) {
 
 function getGameReference(element) {
     return element.id.split('|')[0];
+};
+
+function handleTeamNameChanges() {
+    const { id, value } = this;
+    const [ , gameIndex, teamValue ] = (id.match(/game\-(\d+)\|.*\|team\-(\w+)\|name/) || Array.from({ length: 3 }))
+    for (const element of Array.from(document.querySelectorAll(`[id^="game-${gameIndex}|"][id$="|team-${teamValue}|name"]:not([id="${id}"])`))) element.value = value;
+    updateData();
 };
 
 function removeGame() {
@@ -496,7 +572,7 @@ function selectGame() {
     const gameReference = getGameReference(this);
     const gamePlayersElement = document.getElementById(`${gameReference}|players`);
     const gameHandicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
-    const handicapRadioButtons = document.querySelectorAll(`input${gameElementId('handicap|')}`);
+    const handicapRadioButtons = document.querySelectorAll(`input${gameElementId('handicap|type|')}[type="radio"]`);
     const gameMethodSelect = document.getElementById(`${gameReference}|method`);
     const gameRoundParent = this.closest('.accordion-body').querySelector(`input${gameElementId('round')}[type="radio"]`).closest('.col-12');
 
@@ -522,6 +598,7 @@ function selectGame() {
         return this.classList.add('is-invalid');
     };
     const gameIndex = getGameIndex(gameReference) || 0;
+    const scoringValues = GAMES.scoring.filter(({ id }) => filters.scoring.includes(id)).sort((a, b) => a.order - b.order);
     toggleVisibility(gamePlayersElement.closest('.col-12'));
     toggleVisibility(gameRoundParent);
     toggleVisibility(gameScoringParent.closest('.col-12'));
@@ -531,9 +608,9 @@ function selectGame() {
         const playerName = playerSelect[selectedIndex].innerText;
         addPlayerToGame(gameReference, playerReference, playerName);
     };
-    for (const scoring of GAMES.scoring.filter(({ id }) => filters.scoring.includes(id)).sort((a, b) => a.order - b.order)) {
-        const { id: v, value: innerText } = scoring;
-        const value = `${gameReference}|scoring|${v}`;
+    for (const scoring of scoringValues) {
+        const { id, value: innerText } = scoring;
+        const value = `${gameReference}|scoring|${id}`;
         gameScoringParent.insertBefore(createElement({
             classList: ['form-check', 'form-check-inline'],
             children: [
@@ -544,7 +621,7 @@ function selectGame() {
                         { id: 'id', value },
                         { id: 'name', value: `[game]['${gameIndex}'][scoring]` },
                         { id: 'type', value: 'radio' },
-                        { id: 'value', value: v }
+                        { id: 'value', value: id }
                     ],
                     addEventListener: [
                         { type: 'change', listener: changeScoringType },
@@ -566,39 +643,86 @@ function selectGame() {
     changeScoringType.call(firstScoringRadioButton);
 };
 
-function teamRadioButtonObject(game, player, team, checkedValue = '') {
-    const lowerTeam = team.toLowerCase();
-    const value = `${game}|${player}|team-${lowerTeam}`;
+function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
+    const gameIndex = getGameIndex(game);
+    const value = `${game}|${player}|team-${teamId}`;
+    const teamNameId = `${value}|name`;
+    const noneTeam = teamId === 'none';
     const teamRadioButtonObject = {
-        classList: ['form-check', 'form-check-inline'],
+        classList: noneTeam ? ['form-check', 'form-check-inline'] : ['d-flex', 'custom-name-element'],
         children: [
             {
                 type: 'input',
-                classList: ['form-check-input'],
+                classList: noneTeam ? ['form-check-input'] : ['form-check-input', 'me-2', 'my-auto'],
                 attributes: [
                     { id: 'id', value },
-                    { id: 'name', value: `[game]['${game.split('-')[1]}'][${player}][team]` },
+                    { id: 'name', value: `[game]['${gameIndex}'][${player}][team]` },
                     { id: 'type', value: 'radio' },
-                    { id: 'value', value: lowerTeam }
+                    { id: 'value', value: teamId }
                 ],
                 addEventListener: [{ type: 'change', listener: changeTeam }]
             },
             {
                 type: 'label',
-                classList: ['form-check-label'],
-                attributes: [{ id: 'for', value }],
-                innerText: team
+                classList: noneTeam ? ['form-check-label', 'ps-3'] : ['flex-fill', 'form-check-label'],
+                attributes: [{ id: 'for', value }]
             }
         ]
     };
-    if (checkedValue === lowerTeam) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true});
+    if (checkedValue === teamId) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true});
+    if (noneTeam) teamRadioButtonObject.children[1].innerText = 'None';
+    else teamRadioButtonObject.children[1].children = [
+            {
+                type: 'input',
+                classList: ['form-control'],
+                attributes: [
+                    { id: 'id', value: teamNameId },
+                    { id: 'name', value: `[game]['${gameIndex}'][team][${teamId}]` },
+                    { id: 'value', value: teamName }
+                ],
+                addEventListener: [{ type: 'input', listener: handleTeamNameChanges }]
+            },
+            {
+                type: 'label',
+                classList: ['d-none'],
+                attributes: [
+                    { id: 'for', value: teamNameId },
+                    { id: 'visibility', value: 'hidden' }
+                ]
+            }
+        ];
     return teamRadioButtonObject;
 };
 
 function updateDescription() {
     const { id, value } = this;
     const [ gameReference, type ] = id.split('|');
-    const { description } = GAMES[type].find(({ id }) => id === value) || {};
+    const { description } = GAMES[type]?.find(({ id }) => id === value) ||
+        {
+            calculations: {
+                get calculated() {
+                    return this.format(0.1 * value);
+                },
+                get decimal() {
+                    return this.format(this.calculated);
+                },
+                format: function(number) {
+                    return +parseFloat(number).toFixed(2);
+                },
+                get rounded() {
+                    return Math.floor(this.calculated);
+                }
+            },
+            get description() {
+                const { calculations, rounding } = this;
+                const { rounded, decimal } = calculations;
+                return `Handicaps will be adjusted by ${value}%. For example, a handicap of 10 will be adjusted to ${rounded} (10 x ${value}% = ${decimal}${rounding}).`
+            },
+            get rounding() {
+                const { calculated, rounded } = this.calculations;
+                return rounded === calculated ? '' : ` which is rounded down to ${rounded}`;
+            }
+        };
     const descriptionElement = document.getElementById(`${gameReference}|${type}-description`);
     descriptionElement.innerText = description;
     toggleVisibility(descriptionElement.parentElement, !!description);
