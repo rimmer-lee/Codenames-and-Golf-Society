@@ -403,6 +403,9 @@ function addPlayerToGame(game, player, innerText) {
 };
 
 function changeParticipation() {
+
+    // resetting teams
+
     const gameReference = getGameReference(this);
     const participationCheckboxes = Array.from(document.querySelectorAll(`[id="${gameReference}|players"] input[type=checkbox]`));
     const participationLabelElement = this.parentElement.querySelector('label');
@@ -434,9 +437,9 @@ function changeParticipation() {
         })();
         for (const participationCheckbox of participationCheckboxes) {
             const participationCheckboxRow = participationCheckbox.closest('.row');
+            const checkedId = participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked')?.value || teamNames[0]?.id;
             participationCheckboxRow.querySelector('input.form-check-input[type=radio]')?.closest('.col')?.remove();
             if (!participationCheckbox.checked || participatingPlayers < 3) continue;
-            const checkedId = participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked')?.value || teamNames[0]?.id;
             const [ , playerReference ] = participationCheckbox.id.split('|');
             participationCheckbox.closest('.row').insertBefore(createElement({
                 classList: ['col'],
