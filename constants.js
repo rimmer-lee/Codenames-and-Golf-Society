@@ -165,7 +165,7 @@ module.exports = {
                         for: [ 'individual', 'team' ],
                         minimum: 2
                     },
-                    method: ['best', 'combined', 'high/low', 'worst'],
+                    method: ['best', 'combined', 'worst'],
                     scoring: ['nett', 'shots', 'stableford']
                 },
                 handicap: false,
@@ -180,7 +180,7 @@ module.exports = {
                         for: [ 'individual', 'team' ],
                         minimum: 2
                     },
-                    method: ['best', 'combined', 'high/low', 'worst'],
+                    method: ['best', 'combined', 'worst'],
                     scoring: ['nett', 'shots', 'stableford']
                 },
                 handicap: false,
