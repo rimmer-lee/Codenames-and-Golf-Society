@@ -417,8 +417,8 @@ function changeParticipation() {
     if (f.includes('team')) {
         const participatingPlayers = participationCheckboxes.filter(({ checked }) => checked).length;
         const teamNames = (function() {
-            const length = Math.min(maximum || participatingPlayers, participatingPlayers);
             const startingValue = +(maximum === minimum) - 1;
+            const length = maximum || Math.floor(participatingPlayers / 2) - startingValue;
             const defaultTeamNames = Array.from({ length }, (_, i) => i + startingValue).map(i => {
                 if (i < 0) return { id: 'none', value: 'None' };
                 const id = letterFromNumber(i);
@@ -434,11 +434,10 @@ function changeParticipation() {
         })();
         for (const participationCheckbox of participationCheckboxes) {
             const participationCheckboxRow = participationCheckbox.closest('.row');
-            const radioButton = participationCheckboxRow.querySelector('input.form-check-input[type=radio]');
-            const checkedId = (participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked') || {}).value || teamNames[0].id;
-            const [ , playerReference ] = participationCheckbox.id.split('|');
-            if (radioButton) radioButton.closest('.col').remove();
+            participationCheckboxRow.querySelector('input.form-check-input[type=radio]')?.closest('.col')?.remove();
             if (!participationCheckbox.checked || participatingPlayers < 3) continue;
+            const checkedId = participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked')?.value || teamNames[0]?.id;
+            const [ , playerReference ] = participationCheckbox.id.split('|');
             participationCheckbox.closest('.row').insertBefore(createElement({
                 classList: ['col'],
                 children: [
@@ -664,12 +663,12 @@ function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
             },
             {
                 type: 'label',
-                classList: noneTeam ? ['form-check-label', 'ps-3'] : ['flex-fill', 'form-check-label'],
+                classList: noneTeam ? ['form-check-label'] : ['flex-fill', 'form-check-label'],
                 attributes: [{ id: 'for', value }]
             }
         ]
     };
-    if (checkedValue === teamId) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true});
+    if (checkedValue && checkedValue === teamId) teamRadioButtonObject.children[0].attributes.push({ id: 'checked', value: true});
     if (noneTeam) teamRadioButtonObject.children[1].innerText = 'None';
     else teamRadioButtonObject.children[1].children = [
             {
@@ -752,11 +751,14 @@ function updateMethodSelect() {
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
     while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
     if (!methods || methods.length === 0) return;
-    const teams = [ ...new Set(Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:not([id$="none"]):checked`)).map(({ value }) => value)) ]
-        .map(team => ({ players: document.querySelectorAll(`[id^="${gameReference}|"][id$="|team-${team}"]:checked`).length, team }));
-    if (teams.length <= 1) return;
-    const equalTeams = teams.every(({ players }) => teams[0].players === players);
-    const methodsToAdd = methods.filter(({ filters }) => ((filters.teams.even ? equalTeams : true) && teams.every(({ players }) => players >= filters.teams.minimum)))
+    const teams = [
+        ...Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-none"]:checked`)).map(_ => 1),
+        ...[ ...new Set(Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:not([id$="none"]):checked`)).map(({ value }) => value)) ]
+        .map(team => document.querySelectorAll(`[id^="${gameReference}|"][id$="|team-${team}"]:checked`).length)
+    ];
+    if (teams.length <= 1 || !teams.some(team => team > 1)) return;
+    const equalTeams = teams.every(team => teams[0] === team);
+    const methodsToAdd = methods.filter(({ filters }) => ((filters.teams.even ? equalTeams : true) && teams.every(team => team >= filters.teams.minimum)))
         .map(({ id: value, value: v }) => ({ v, value }));
     toggleVisibility(gameMethodSelect.closest('.col-12'));
     for (const method of methodsToAdd) {
