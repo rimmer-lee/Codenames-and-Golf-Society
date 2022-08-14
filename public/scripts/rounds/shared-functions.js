@@ -14,6 +14,28 @@ Array.prototype.sortAlphabetically = function(property = '') {
     })
 };
 
+// shared with models/round.js
+Date.prototype.full = function() {
+    const weekday = this.toLocaleDateString('en-GB', { weekday: 'long' });
+    const day = this.toLocaleDateString('en-GB', { day: 'numeric' });
+    const month = this.toLocaleDateString('en-GB', { month: 'long' });
+    const year = this.toLocaleDateString('en-GB', { year: '2-digit' });
+    const ordinal = (function(day){
+        if (day === '11' || day === '12' || day === '13') return 'th';
+        switch (day % 10) {
+            case 1:
+                return 'st';
+            case 2:
+                return 'nd';
+            case 3:
+                return 'rd';
+            default:
+                return 'th'
+        };
+    })(day);
+    return `${weekday}, ${day}${ordinal} ${month} '${year}`;
+};
+
 String.prototype.capitalize = function() {
     return this[0].toUpperCase() + this.substring(1);
 };
