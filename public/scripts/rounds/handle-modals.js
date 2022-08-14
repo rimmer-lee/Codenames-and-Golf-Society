@@ -47,3 +47,16 @@ document.addEventListener('hidden.bs.modal', function(e) {
     };
     return false;
 });
+
+document.addEventListener('show.bs.modal', function(e) {
+    switch (e.target.id) {
+        case 'confirmation-modal':
+            const confirmationLabel = document.getElementById('confirmation-label');
+            const roundDate = new Date(document.getElementById('date').value);
+            confirmationLabel.innerText = '';
+            if (roundDate.toDateString() !== new Date().toDateString()) confirmationLabel.innerText = `The date of the round is ${roundDate.full()}. `;
+            confirmationLabel.innerText += 'Are you sure that you want to submit the round?';
+            return true;
+    };
+    return false;
+});
