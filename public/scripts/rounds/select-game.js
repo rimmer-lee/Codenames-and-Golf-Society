@@ -304,10 +304,7 @@ function addGame() {
                                                             { id: 'name', value: `[game]['${gameIndex}'][method]` },
                                                             { id: 'aria-label', value: 'game method' }
                                                         ],
-                                                        addEventListener: [
-                                                            { type: 'change', listener: updateData },
-                                                            { type: 'change', listener: updateDescription }
-                                                        ],
+                                                        addEventListener: [{ type: 'change', listener: updateData }],
                                                         children: [
                                                             {
                                                                 type: 'option',
@@ -768,6 +765,7 @@ function updateMethodSelect() {
         const { v, value } = method;
         appendOption(v, gameMethodSelect, [{ id: 'value', value }]);
     };
+    updateDescription.call(gameMethodSelect);
 };
 
 document.getElementById('play-game').addEventListener('click', addGame);
