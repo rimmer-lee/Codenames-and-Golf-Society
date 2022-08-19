@@ -176,72 +176,73 @@ function selectCourse() {
     for (let i = 1; i < 19; i++) {
         const tableBody = document.querySelector(`#hole-${i} tbody`);
         while (tableBody.children.length > 0) tableBody.children[0].remove();
-        toggleElement(tableBody.closest('[class*="col"]'), false);
+        toggleElement(tableBody.closest('[class*="col"]'), course);
         if (!course) continue;
-        toggleElement(tableBody.closest('[class*="col"]'));
+        // toggleElement(tableBody.closest('[class*="col"]'));
         for (const tee of course.tees) {
-            const { colour, id, names } = tee;
-            const { long, short } = names;
-            const newElementObject = { type: 'tr', classList: [], children: [] };
-            if (colour) newElementObject.classList.push(colour.class.table);
-            newElementObject.children.push({
-                type: 'td',
-                classList: ['align-middle'],
+            const { colour, id, names: { long, short } } = tee;
+            tableBody.insertBefore(createElement({
+                type: 'tr',
+                classList: colour ? [ colour.class.table, 'text-center' ] : ['text-center'],
                 children: [
                     {
-                        classList: ['d-none', 'd-md-block', 'text-center'],
-                        attributes: [{ id: 'id', value: `${id}-${i}|long-name` }],
-                        innerText: long
+                        type: 'td',
+                        classList: ['align-middle'],
+                        children: [
+                            {
+                                classList: ['d-none', 'd-md-block'],
+                                attributes: [{ id: 'id', value: `${id}-${i}|long-name` }],
+                                innerText: long
+                            },
+                            {
+                                classList: ['d-block', 'd-md-none'],
+                                attributes: [{ id: 'id', value: `${id}-${i}|short-name` }],
+                                innerText: short
+                            }
+                        ]
                     },
-                    {
-                        classList: ['d-block', 'd-md-none', 'text-center'],
-                        attributes: [{ id: 'id', value: `${id}-${i}|short-name` }],
-                        innerText: short
-                    }
+                    ...['distance', 'par', 'strokeIndex'].map(property => {
+                        const dataElementObject = {
+                            type: 'td',
+                            classList: ['align-middle'],
+                            children: [
+                                {
+                                    classList: ['d-flex', 'justify-content-center'],
+                                    children: [
+                                        {
+                                            type: 'label',
+                                            classList: ['d-none', 'form-label'],
+                                            attributes: [{ id: 'for', value: `${id}-${i}|${property}` }]
+                                        },
+                                        {
+                                            type: 'input',
+                                            classList: ['form-control', 'text-center'],
+                                            attributes: [
+                                                { id: 'id', value: `${id}-${i}|${property}` },
+                                                { id: 'type', value: 'number' },
+                                                { id: 'name', value: `[course][tees][${id}][${i}][${property}]` },
+                                            ],
+                                            addEventListener: [{ type: 'blur', listener: updateData }]
+                                        }
+                                    ]
+                                }
+                            ]
+                        };
+                        switch (property) {
+                            case 'distance':
+                                dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' });
+                                break;
+                            case 'par':
+                                dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '3' }, { id: 'max', value: '5' });
+                                break;
+                            case 'strokeIndex':
+                                dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' }, { id: 'max', value: '18' });
+                                break;
+                        };
+                        return dataElementObject;;
+                    })
                 ]
-            });
-            for (const property of ['distance', 'par', 'strokeIndex']) {
-                const dataElementObject = {
-                    type: 'td',
-                    classList: ['align-middle'],
-                    children: []
-                };
-                dataElementObject.children.push({
-                    classList: ['d-flex', 'justify-content-center'],
-                    children: [
-                        {
-                            type: 'label',
-                            classList: ['d-none', 'form-label'],
-                            attributes: [{ id: 'for', value: `${id}-${i}|${property}` }]
-                        },
-                        {
-                            type: 'input',
-                            classList: ['form-control', 'text-center'],
-                            attributes: [
-                                { id: 'id', value: `${id}-${i}|${property}` },
-                                { id: 'type', value: 'number' },
-                                { id: 'name', value: `[course][tees][${id}][${i}][${property}]` },
-                            ],
-                            addEventListener: [{ type: 'blur', listener: updateData }]
-                        }
-                    ]
-                });
-                let attributes = [];
-                switch (property) {
-                    case 'distance':
-                        attributes = [{ id: 'min', value: '1' }];
-                        break;
-                    case 'par':
-                        attributes = [{ id: 'min', value: '3' }, { id: 'max', value: '5' }];
-                        break;
-                    case 'strokeIndex':
-                        attributes = [{ id: 'min', value: '1' }, { id: 'max', value: '18' }];
-                        break;
-                };
-                for (const attribute of attributes) dataElementObject.children[0].children[1].attributes.push(attribute);
-                newElementObject.children.push(dataElementObject);
-            };
-            tableBody.insertBefore(createElement(newElementObject), null);
+            }), null);
         };
     };
     if (course) {
@@ -251,83 +252,86 @@ function selectCourse() {
         toggleElement(paginationParentElement);
         // playersAccordion.classList.remove('forced-accordion-bottom');
         for (const tee of course.tees) {
-            const { colour, holes, id, name, names, par, ratings } = tee;
-            const { long, short, value } = names;
-            const { bogey, course, slope, } = ratings;
-            const optionElementObject = {
+            const { colour, holes, id, name, names: { long, short, value }, par, ratings: { bogey, course, slope } } = tee;
+            teeSelect.insertBefore(createElement({
                 type: 'option',
                 attributes: [{ id: 'value', value: id }],
                 innerText: name
-            };
-            const tableRowElementObject = { type: 'tr', classList: [], children: [] };
-            if (colour) tableRowElementObject.classList.push(colour.class.table);
-            teeSelect.insertBefore(createElement(optionElementObject), null);
-            tableRowElementObject.children.push({
-                type: 'td',
-                classList: ['align-middle'],
+            }), null);
+            teeElement.insertBefore(createElement({
+                type: 'tr',
+                classList: colour ? [ colour.class.table, 'text-center' ] : ['text-center'],
                 children: [
                     {
-                        classList: ['d-none', 'd-md-block', 'text-center'],
-                        attributes: [{ id: 'id', value: `${value}|long-name` }],
-                        innerText: long
+                        type: 'td',
+                        classList: ['align-middle'],
+                        children: [
+                            {
+                                classList: ['d-none', 'd-md-block'],
+                                attributes: [{ id: 'id', value: `${value}|long-name` }],
+                                innerText: long
+                            },
+                            {
+                                classList: ['d-block', 'd-md-none'],
+                                attributes: [{ id: 'id', value: `${value}|short-name` }],
+                                innerText: short
+                            }
+                        ]
                     },
-                    {
-                        classList: ['d-block', 'd-md-none', 'text-center'],
-                        attributes: [{ id: 'id', value: `${value}|short-name` }],
-                        innerText: short
-                    }
+                    ...['par',
+                        'courseRating-full',
+                        'courseRating-front',
+                        'courseRating-back',
+                        'bogeyRating',
+                        'slopeRating-full',
+                        'slopeRating-front',
+                        'slopeRating-back'
+                    ].map(property => {
+                        const tableDataElementObject = {
+                            type: 'td',
+                            classList: ['align-middle'],
+                            children: [
+                                {
+                                    attributes: [{ id: 'id', value: `${value}|${property}` }]
+                                }
+                            ]
+                        };
+                        if (['courseRating-front',
+                            'courseRating-back',
+                            'bogeyRating',
+                            'slopeRating-front',
+                            'slopeRating-back'].includes(property)) tableDataElementObject.classList = ['d-none', 'd-lg-table-cell'];
+                        switch (property) {
+                            case 'par':
+                                if ((par || {}).full) tableDataElementObject.children[0].innerText = par.full;
+                                else if (holes) tableDataElementObject.children[0].innerText = holes.reduce((sum, hole) => sum + hole.par, 0);
+                                break;
+                            case 'courseRating-full':
+                                tableDataElementObject.children[0].innerText = singleDecimal(course.full);
+                                break;
+                            case 'courseRating-front':
+                                tableDataElementObject.children[0].innerText = singleDecimal(course.front);
+                                break;
+                            case 'courseRating-back':
+                                tableDataElementObject.children[0].innerText = singleDecimal(course.back);
+                                break;
+                            case 'bogeyRating':
+                                tableDataElementObject.children[0].innerText = singleDecimal(bogey);
+                                break;
+                            case 'slopeRating-full':
+                                tableDataElementObject.children[0].innerText = slope.full;
+                                break;
+                            case 'slopeRating-front':
+                                tableDataElementObject.children[0].innerText = slope.front;
+                                break;
+                            case 'slopeRating-back':
+                                tableDataElementObject.children[0].innerText = slope.back;
+                                break;
+                        };
+                        return tableDataElementObject;
+                    })
                 ]
-            });
-            for (const property of ['par', 'courseRating-full', 'courseRating-front', 'courseRating-back', 'bogeyRating', 'slopeRating-full', 'slopeRating-front', 'slopeRating-back']) {
-                const tableDataElementObject = {
-                    type: 'td',
-                    classList: ['align-middle'],
-                    children: [
-                        {
-                            classList: ['text-center'],
-                            attributes: [{ id: 'id', value: `${value}|${property}` }]
-                        }
-                    ]
-                };
-                let classesToAssign = [];
-                let valueToAssign = '';
-                switch (property) {
-                    case 'par':
-                        if ((par || {}).full) valueToAssign = par.full;
-                        else if (holes) valueToAssign = holes.reduce((sum, hole) => sum + hole.par, 0);
-                        break;
-                    case 'courseRating-full':
-                        valueToAssign = singleDecimal(course.full);
-                        break;
-                    case 'courseRating-front':
-                        classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = singleDecimal(course.front);
-                        break;
-                    case 'courseRating-back':
-                        classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = singleDecimal(course.back);
-                        break;
-                    case 'bogeyRating':
-                        classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = singleDecimal(bogey);
-                        break;
-                    case 'slopeRating-full':
-                        valueToAssign = slope.full;
-                        break;
-                    case 'slopeRating-front':
-                        classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = slope.front;
-                        break;
-                    case 'slopeRating-back':
-                        classesToAssign = ['d-none', 'd-lg-table-cell'];
-                        valueToAssign = slope.back;
-                        break;
-                };
-                tableDataElementObject.classList.push( ...classesToAssign );
-                tableDataElementObject.children[0].innerText = valueToAssign;
-                tableRowElementObject.children.push(tableDataElementObject);
-            };
-            teeElement.insertBefore(createElement(tableRowElementObject), null);
+            }), null);
             if (!holes) continue;
             for (const hole of holes) {
                 const { distance, index, par, strokeIndex } = hole;
