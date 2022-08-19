@@ -63,7 +63,7 @@ function addGame() {
                                                         addEventListener: [
                                                             { type: 'change', listener: selectGame },
                                                             { type: 'change', listener: updateData },
-                                                            { type: 'change', listener: updateDescription }
+                                                            { type: 'change', listener: updateGameOptionDescription }
                                                         ],
                                                         children: [
                                                             {
@@ -194,7 +194,7 @@ function addGame() {
                                                                                             ],
                                                                                             addEventListener: [
                                                                                                 { type: 'change', listener: updateData },
-                                                                                                { type: 'change', listener: updateDescription }
+                                                                                                { type: 'change', listener: updateGameOptionDescription }
                                                                                             ]
                                                                                         },
                                                                                         {
@@ -241,7 +241,7 @@ function addGame() {
                                                                                                     { id: 'value', value: '100.00' }
                                                                                                 ],
                                                                                                 addEventListener: [
-                                                                                                    { type: 'input', listener: updateDescription },
+                                                                                                    { type: 'input', listener: updateGameOptionDescription },
                                                                                                     { type: 'change', listener: function() {
                                                                                                         return this.value = parseFloat(this.value).toFixed(2);
                                                                                                     } },
@@ -465,8 +465,8 @@ function changeScoringType() {
     for (const button of handicapRadioButtons) button.disabled = !enableHandicap;
     handicapAdjustmentInput.disabled = !enableHandicap;
     firstHandicapRadioButton.checked = true;
-    updateDescription.call(this);
-    updateDescription.call(firstHandicapRadioButton);
+    updateGameOptionDescription.call(this);
+    updateGameOptionDescription.call(firstHandicapRadioButton);
 };
 
 function changeTeam() {
@@ -589,7 +589,7 @@ function selectGame() {
     toggleVisibility(gamePlayersElement.closest('.col-12'), false);
     toggleVisibility(gameRoundParent, false);
     toggleVisibility(gameScoringParent.closest('.col-12'), false);
-    updateDescription.call(this);
+    updateGameOptionDescription.call(this);
     for (const handicap of handicapRadioButtons) handicap.disabled = true;
     while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
     while (gamePlayersElement.children.length > 0) gamePlayersElement.children[0].remove();
@@ -630,7 +630,7 @@ function selectGame() {
                     addEventListener: [
                         { type: 'change', listener: changeScoringType },
                         { type: 'change', listener: updateData },
-                        { type: 'change', listener: updateDescription }
+                        { type: 'change', listener: updateGameOptionDescription }
                     ]
                 },
                 {
@@ -698,7 +698,7 @@ function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
     return teamRadioButtonObject;
 };
 
-function updateDescription() {
+function updateGameOptionDescription() {
     const { id, value } = this;
     const [ gameReference, type ] = id.split('|');
     const { description } = GAMES[type]?.find(({ id }) => id === value) ||
@@ -770,7 +770,7 @@ function updateMethodSelect() {
         const { v, value } = method;
         appendOption(v, gameMethodSelect, [{ id: 'value', value }]);
     };
-    updateDescription.call(gameMethodSelect);
+    updateGameOptionDescription.call(gameMethodSelect);
 };
 
 document.getElementById('play-game').addEventListener('click', addGame);
