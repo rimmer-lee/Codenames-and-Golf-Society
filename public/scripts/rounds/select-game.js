@@ -528,52 +528,57 @@ function removeGame() {
     const gameAccordionParentElement = gameAccordionElement.parentElement;
     this.closest('.accordion-item').remove();
     toggleVisibility(gameAccordionParentElement, gameAccordionElement.children.length > 0);
-    document.querySelectorAll(GAME_SELECT_SELECTOR).forEach((gameSelect, index) => {
-        const gameIndex = getGameIndex(gameSelect.id);
+    document.querySelectorAll('#game > .accordion-body .accordion-item').forEach((element, index) => {
+        const { id } = element.querySelector('[id^="game-"]:not(h2)');
+        const gameIndex = getGameIndex(id);
         if (!gameIndex) return;
+
         // updateAttributes(
         //     ['aria-controls', 'aria-labelledby', 'data-bs-target', 'for', 'id', 'name', 'title', 'value'],
         //     gameIndex,
         //     index + 1
         // );
 
-        for (const idElement of document.querySelectorAll(`[id*="${gameIndex}"]`)) {
+        for (const idElement of element.querySelectorAll(`[id^="${id}"]`)) {
             idElement.id = idElement.id.replaceAll(gameIndex, index + 1);
         };
-        for (const nameElement of document.querySelectorAll(`[name*="${gameIndex}"]`)) {
+        for (const nameElement of element.querySelectorAll(`[name^="[game]['${gameIndex}']"]`)) {
             nameElement.name = nameElement.name.replaceAll(gameIndex, index + 1);
         };
-
-        for (const ariaControlsElement of document.querySelectorAll(`[aria-controls*="${gameIndex}"]`)) {
+        for (const ariaControlsElement of element.querySelectorAll(`[aria-controls="${id}"]`)) {
             ariaControlsElement.attributes['aria-controls'].value = ariaControlsElement.attributes['aria-controls'].value.replaceAll(gameIndex, index + 1);
         };
-        for (const ariaLabelledByElement of document.querySelectorAll(`[aria-labelledby*="${gameIndex}"]`)) {
+        for (const ariaLabelledByElement of element.querySelectorAll(`[aria-labelledby="${id}|heading"]`)) {
             ariaLabelledByElement.attributes['aria-labelledby'].value = ariaLabelledByElement.attributes['aria-labelledby'].value.replaceAll(gameIndex, index + 1);
         };
-        for (const bsTargetElement of document.querySelectorAll(`[data-bs-target*="${gameIndex}"]`)) {
+        for (const bsTargetElement of element.querySelectorAll(`[data-bs-target="#${id}"]`)) {
             bsTargetElement.attributes['data-bs-target'].value = bsTargetElement.attributes['data-bs-target'].value.replaceAll(gameIndex, index + 1);
         };
-        for (const forElement of document.querySelectorAll(`[for*="${gameIndex}"]`)) {
+        for (const forElement of element.querySelectorAll(`[for^="${id}|"]`)) {
             forElement.attributes.for.value = forElement.attributes.for.value.replaceAll(gameIndex, index + 1);
         };
-
-        for (const titleElement of document.querySelectorAll(`[title*="${gameIndex}"]`)) {
+        for (const titleElement of element.querySelectorAll(`[title="Game ${gameIndex}"]`)) {
             const titleValue = titleElement.attributes.title.value.replaceAll(gameIndex, index + 1);
             titleElement.attributes.title.value = titleValue;
             titleElement.innerText = titleValue;
         };
-
+        for (const valueElement of element.querySelectorAll(`[value^="${id}"]`)) {
+            valueElement.value = valueElement.value.replaceAll(gameIndex, index + 1);
+        };
     });
     updateData();
 };
 
 function selectGame() {
+
+    // don't reset participation
+
     const gameReference = getGameReference(this);
     const gamePlayersElement = document.getElementById(`${gameReference}|players`);
     const gameHandicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
-    const handicapRadioButtons = document.querySelectorAll(`input${gameElementId('handicap|type|')}[type="radio"]`);
+    const handicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|type|"][type="radio"]`);
     const gameMethodSelect = document.getElementById(`${gameReference}|method`);
-    const gameRoundParent = this.closest('.accordion-body').querySelector(`input${gameElementId('round')}[type="radio"]`).closest('.col-12');
+    const gameRoundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
 
     // find a better way to select the element
     const gameScoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.align-items-center.d-flex.flex-fill.justify-content-evenly');
