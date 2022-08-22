@@ -97,50 +97,6 @@ module.exports = {
         { name: 'Zimbabwe', 'alpha-3': 'ZIM' }
     ],
     GAMES: {
-        handicap: [
-            {
-                description: 'The participating player with the lowest handicap is taken as the baseline with all handicaps having the baseline deducted from them. The participating player with the lowest handicap is, therefore, playing off scratch.',
-                id: 'competition',
-                order: 2,
-                value: 'Competition'
-            },
-            {
-                description: 'The player\'s handicap is used.',
-                id: 'standard',
-                order: 1,
-                value: 'Standard'
-            }
-        ],
-        method: [
-            {
-                description: 'The \'Best\' (lowest) score is used as the team\'s score.',
-                filters: { teams: { even: false, minimum: 1 } },
-                id: 'best',
-                order: 1,
-                value: 'Best'
-            },
-            {
-                description: 'The scores of all teammates are summed together.',
-                filters: { teams: { even: true, minimum: 2 } },
-                id: 'combined',
-                order: 2,
-                value: 'Combined'
-            },
-            {
-                description: 'The \'Best\' (lowest) score is used to play against the \'Best\' score of the opposition and the \'Worst\' (highest) score is used to play against the \'Worst\' score of the opposition. If a team wins both match ups or 1 match up and ties the other then 1 point is scored for that team. If a team wins 1 match up and loses the other or if both match ups are tied then 0 points are scored.',
-                filters: { teams: { even: true, minimum: 2 } },
-                id: 'high/low',
-                order: 3,
-                value: 'High/Low'
-            },
-            {
-                description: 'The \'Worst\' (highest) score is used as the team\'s score.',
-                filters: { teams: { even: false, minimum: 1 } },
-                id: 'worst',
-                order: 4,
-                value: 'Worst'
-            }
-        ],
         game: [
             {
                 description: 'In match play, the lowest score on a hole wins that hole. The match is over when one player or side leads by more holes than there are still to play. A 4&3 victory is when one side is four holes up with only three holes to play.',
@@ -204,6 +160,50 @@ module.exports = {
                 value: 'Stableford'
             }
         ],
+        handicap: [
+            {
+                description: 'The participating player with the lowest handicap is taken as the baseline with all handicaps having the baseline deducted from them. The participating player with the lowest handicap is, therefore, playing off scratch.',
+                id: 'competition',
+                order: 2,
+                value: 'Competition'
+            },
+            {
+                description: 'The player\'s handicap is used.',
+                id: 'standard',
+                order: 1,
+                value: 'Standard'
+            }
+        ],
+        method: [
+            {
+                description: 'The \'Best\' (lowest) score is used as the team\'s score.',
+                filters: { teams: { even: false, minimum: 1 } },
+                id: 'best',
+                order: 1,
+                value: 'Best'
+            },
+            {
+                description: 'The scores of all teammates are summed together.',
+                filters: { teams: { even: true, minimum: 2 } },
+                id: 'combined',
+                order: 2,
+                value: 'Combined'
+            },
+            {
+                description: 'The \'Best\' (lowest) score is used to play against the \'Best\' score of the opposition and the \'Worst\' (highest) score is used to play against the \'Worst\' score of the opposition. If a team wins both match ups or 1 match up and ties the other then 1 point is scored for that team. If a team wins 1 match up and loses the other or if both match ups are tied then 0 points are scored.',
+                filters: { teams: { even: true, minimum: 2 } },
+                id: 'high/low',
+                order: 3,
+                value: 'High/Low'
+            },
+            {
+                description: 'The \'Worst\' (highest) score is used as the team\'s score.',
+                filters: { teams: { even: false, minimum: 1 } },
+                id: 'worst',
+                order: 4,
+                value: 'Worst'
+            }
+        ],
         scoring: [
             {
                 description: 'Handicap adjusted shots are used.',
@@ -231,10 +231,10 @@ module.exports = {
     PAR_CLASSES: ['f-level', 'f-over', 'f-under'],
     ROLES: ['admin', 'founder', 'guest', 'member', 'super'],
     ROUND_TYPES: [
-        { name: 'full', start: 0, end: 18 },
-        { name: 'front', start: 0, end: 9 },
-        { name: 'back', start: 9, end: 18 },
-        { name: 'practice', start: 0, end: 0 }
+        { id: 'full', name: 'full', start: 0, end: 18, value: 'Full' },
+        { id: 'front', name: 'front', start: 0, end: 9, value: 'Front' },
+        { id: 'back', name: 'back', start: 9, end: 18, value: 'Back' },
+        { id: 'practice', name: 'practice', start: 0, end: 0, value: 'Practice' }
     ],
     SAFE_URLS: {
         connect: [
