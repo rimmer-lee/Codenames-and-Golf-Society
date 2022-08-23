@@ -400,9 +400,6 @@ function addPlayerToGame(game, player, innerText) {
 };
 
 function changeParticipation() {
-
-    // resetting teams
-
     const gameReference = getGameReference(this);
     const participationCheckboxes = Array.from(document.querySelectorAll(`[id="${gameReference}|players"] input[type=checkbox]`));
     const participationLabelElement = this.parentElement.querySelector('label');
@@ -428,7 +425,7 @@ function changeParticipation() {
             const idStart = `${(participationCheckboxes.find(({ checked }) => checked)?.id || '').split('|participation')[0]}|team-`;
             if (!document.querySelector(`[id^="${idStart}"][id$="|name"]`)) return defaultTeamNames;
             return defaultTeamNames.map(({ id, value: v }) => {
-                const value = document.getElementById(`${idStart}${id}}|name`)?.value || v;
+                const value = document.getElementById(`${idStart}${id}|name`)?.value || v;
                 return { id, value };
             });
         })();
@@ -570,30 +567,31 @@ function removeGame() {
 };
 
 function selectGame() {
-
-    // don't reset participation
-
     const gameReference = getGameReference(this);
-    const gamePlayersElement = document.getElementById(`${gameReference}|players`);
-    const gameHandicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
+    const playersElement = document.getElementById(`${gameReference}|players`);
+    const handicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
     const handicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|type|"][type="radio"]`);
-    const gameMethodSelect = document.getElementById(`${gameReference}|method`);
-    const gameRoundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
+    const methodSelect = document.getElementById(`${gameReference}|method`);
+    const roundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
+
+    const participationElements = document.querySelectorAll(`[id^="${gameReference}|"][id$="|participation"]`)// .map(({ checked, id }) => ({ checked, id }));
+    const teamElements = document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:checked`)// .map(({ id, value }));
+    const nameElements = document.querySelectorAll('[id^="game-1|marker|team-"][id$="|name"]')// .map(({ value }) => value);
 
     // find a better way to select the element
-    const gameScoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.align-items-center.d-flex.flex-fill.justify-content-evenly');
+    const scoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.align-items-center.d-flex.flex-fill.justify-content-evenly');
 
     this.classList.remove('is-invalid');
-    toggleVisibility(gameHandicapParent, false);
-    toggleVisibility(gameMethodSelect.closest('.col-12'), false);
-    toggleVisibility(gamePlayersElement.closest('.col-12'), false);
-    toggleVisibility(gameRoundParent, false);
-    toggleVisibility(gameScoringParent.closest('.col-12'), false);
+    toggleVisibility(handicapParent, false);
+    toggleVisibility(methodSelect.closest('.col-12'), false);
+    toggleVisibility(playersElement.closest('.col-12'), false);
+    toggleVisibility(roundParent, false);
+    toggleVisibility(scoringParent.closest('.col-12'), false);
     updateGameOptionDescription.call(this);
     for (const handicap of handicapRadioButtons) handicap.disabled = true;
-    while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
-    while (gamePlayersElement.children.length > 0) gamePlayersElement.children[0].remove();
-    while (gameScoringParent.children.length > 0) gameScoringParent.children[0].remove();
+    while (methodSelect.children.length > 0) methodSelect.children[0].remove();
+    while (playersElement.children.length > 0) playersElement.children[0].remove();
+    while (scoringParent.children.length > 0) scoringParent.children[0].remove();
     if (!this.value || this.value === 'Select Game') return this.classList.add('is-invalid');
     const playerSelects = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player');
     const { filters, players } = GAMES.game.find(({ id }) => id === this.value);
@@ -603,9 +601,9 @@ function selectGame() {
     };
     const gameIndex = getGameIndex(gameReference) || 0;
     const scoringValues = GAMES.scoring.filter(({ id }) => filters.scoring.includes(id)).sort((a, b) => a.order - b.order);
-    toggleVisibility(gamePlayersElement.closest('.col-12'));
-    toggleVisibility(gameRoundParent);
-    toggleVisibility(gameScoringParent.closest('.col-12'));
+    toggleVisibility(playersElement.closest('.col-12'));
+    toggleVisibility(roundParent);
+    toggleVisibility(scoringParent.closest('.col-12'));
     for (const playerSelect of playerSelects) {
         const { id, selectedIndex } = playerSelect;
         const [ playerReference ] = id.split('|');
@@ -615,7 +613,7 @@ function selectGame() {
     for (const scoring of scoringValues) {
         const { id, value: innerText } = scoring;
         const value = `${gameReference}|scoring|${id}`;
-        gameScoringParent.insertBefore(createElement({
+        scoringParent.insertBefore(createElement({
             classList: ['form-check', 'form-check-inline'],
             children: [
                 {
@@ -642,7 +640,26 @@ function selectGame() {
             ]
         }), null);
     };
-    const firstScoringRadioButton = gameScoringParent.querySelector(`input${gameElementId('scoring|')}`);
+    for (const participationElement of participationElements) {
+        const { checked, id } = participationElement;
+        if (!checked) continue;
+        const element = document.getElementById(id);
+        if (!element) continue;
+        element.checked = true;
+        changeParticipation.call(element);
+    };
+    for (const teamElement of teamElements) {
+        const element = document.getElementById(teamElement.id);
+        if (element) element.checked = true;
+    };
+    for (const nameElement of nameElements) {
+        const { id, value } = nameElement;
+        const element = document.getElementById(id);
+        if (!element) continue;
+        element.value = value;
+        handleTeamNameChanges.call(element);
+    };
+    const firstScoringRadioButton = scoringParent.querySelector(`input${gameElementId('scoring|')}`);
     firstScoringRadioButton.checked = true;
     changeScoringType.call(firstScoringRadioButton);
 };
