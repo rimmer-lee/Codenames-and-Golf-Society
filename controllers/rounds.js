@@ -9,7 +9,7 @@ const User = require('../models/user');
 
 const { customDate } = require('../utilities/formatDate');
 
-const { TITLES } = require('../constants');
+const { ROUND_TYPES, TITLES } = require('../constants');
 
 // used client-side also
 function getPlayerKeys(object) {
@@ -48,7 +48,7 @@ async function save (req, res) {
         for (const teeId of Object.keys(tees)) {
             const holes = tees[teeId];
             course.tees.find(({ id }) => id === teeId).holes = Object.keys(holes).map(hole => {
-                const {distance, par, strokeIndex } = holes[hole];
+                const { distance, par, strokeIndex } = holes[hole];
                 return { distance: +distance, index: ++hole, par: +par, strokeIndex: +strokeIndex };
             });
         };
@@ -58,7 +58,6 @@ async function save (req, res) {
         //     { created, course, games: [], date, scores: [] };
         const round = await Round.findOne({ course, date, tee }) ||
             { created, course, games: [], date, scores: [], tee };
-
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
@@ -66,10 +65,11 @@ async function save (req, res) {
             // const { demerit, handicap, hole, id, tee } = body[key];
             const { demerit, handicap, hole, id } = body[key];
 
-            const shots = hole.map(Number);
             const existingScoreIndex = round.scores.findIndex(({ player }) => player == id);
+            const existingScore = round.scores[existingScoreIndex] || { shots: [] };
+            const shots = hole.map(Number).map((shot, index) => (shot || existingScore?.shots && existingScore?.shots[index] || 0));
             const player = await (async function(id) {
-                if (existingScoreIndex !== -1) return round.scores[existingScoreIndex].player;
+                if (existingScoreIndex !== -1) return existingScore.player;
                 if (/^new\-\d+/.test(id)) {
                     const { name: full } = body[id];
                     const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
@@ -79,31 +79,32 @@ async function save (req, res) {
                 return await User.findById(id);
             })(id);
             if (existingScoreIndex !== -1) {
-                const { playingGroup } = round.scores[existingScoreIndex];
+                const { playingGroup } = existingScore;
                 round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots, tee });
             } else round.scores.push({ handicap, player, playingGroup: { index, player: key }, shots, tee });
             if (!demerit) continue;
-            for (const hole of Object.keys(demerit)) {
-                for (const index of Object.keys(demerit[hole])) {
-                    const { rule, demerits, comments, ...titles } = demerit[hole][index];
-                    const when = { date, hole: +hole.replace(/'/g, '') };
-                    const d = {
-                        action: { demerits: +demerits || 0 },
+            for (const holeIndex of Object.keys(demerit)) {
+                for (const index of Object.keys(demerit[holeIndex])) {
+                    const { rule: r, demerits, comments, ...titles } = demerit[holeIndex][index];
+                    const hole = +holeIndex.replace(/'/g, '');
+                    const rule = await Rule.findById(r);
+                    const when = { date, hole };
+                    await new Demerit({
+                        action: {
+                            demerits: +demerits || 0,
+                            titles: titles && Object.keys(titles).length > 0 && await Promise.all(Object.keys(titles).map(async title => {
+                                const [ method, id ] = title.split('|');
+                                const name = TITLES.find(TITLE => TITLE.id === id).value;
+                                return await new Title({ name, method, player, when }).save();
+                            }))
+                        },
                         comments,
                         history: [{ status: 'Created', updated: created }],
                         player,
-                        rule: await Rule.findById(rule),
+                        rule,
                         status: 'Approved',
                         when
-                    };
-                    if (titles && Object.keys(titles).length > 0) {
-                        d.action.titles = await Promise.all(Object.keys(titles).map(async title => {
-                            const [ method, id ] = title.split('|');
-                            const name = TITLES.find(TITLE => TITLE.id === id).value;
-                            return await new Title({ name, method, player, when }).save();
-                        }));
-                    };
-                    await new Demerit(d).save();
+                    }).save();
                 };
             };
         };
@@ -111,19 +112,27 @@ async function save (req, res) {
             const gameObject = body.game[key];
             const gamePlayerKeys = getPlayerKeys(gameObject);
             if (gamePlayerKeys.length === 0) continue;
-            const { handicap, method, name, round: roundType } = gameObject;
+            const { handicap = {}, method, game: name, round: roundType, scoring, team = {} } = gameObject;
+            const { multiplier = 100, type = 'standard' } = handicap;
+            const players = await Promise.all(gamePlayerKeys.map(async gamePlayer => {
+                const teamValue = gameObject[gamePlayer].team;
+                return {
+                    player: await User.findById(body[gamePlayer].id),
+                    team: teamValue === 'none' ? undefined : teamValue
+                };
+            }));
             round.games.push({
-                handicap: handicap && handicap === 'on',
+                handicap: { multiplier: +multiplier, type },
                 method,
                 name,
-                players: await Promise.all(gamePlayerKeys.map(async gamePlayer => {
-                    const teamValue = gameObject[gamePlayer].team;
-                    return {
-                        player: await User.findById(body[gamePlayer].id),
-                        team: teamValue === 'none' ? undefined : teamValue
-                    };
-                })),
-                roundType
+                players,
+                roundType,
+                scoring,
+                teams: players.map(({ team }) => team).filter(team => team).map(id => {
+                    const value = gameObject.team[id];
+                    const name = value instanceof Array ? value[0] : value;
+                    return { id, name };
+                })
             });
         };
         if (round._id) await round.save();
@@ -163,42 +172,22 @@ async function view (req, res) {
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
     const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round.toJSON();
     const currentDate = customDate('yyyy-mm-dd');
-    const games = G.map(({ description: d, handicap, method, name, players: p, roundType, summary }, index) => {
-        const teams = [ ...new Set(p.map(({ team }) => team).filter(team => team)) ];
+    const games = G.map(({ description, game, handicap, method, participants, players: p, roundType, summary }, index) => {
         const players = p.map(({ player, team }) => ({ score: S.find(score => score.player._id.toString() === player.toString()), team }));
-
-        // should these be part of the model?
-        const playerString = (function() {
-            if (teams.length > 0) return teams.map(team => {
-                return `${players.filter(player => player.team === team).map(({ score }) => score.player.name.knownAs).join(', ').replaceLastInstance()} (${team.toUpperCase()})`;
-            }).join(' vs. ');
-            return `Played between ${players.map(({ score }) => score.player.name.knownAs).join(', ').replaceLastInstance()}`;
-        })();
-
-        const description = d || `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
         return {
             description,
+            game,
             handicap,
             index: ++index,
             method,
-            name,
             players,
-            playerString,
-            roundType: roundType.capitalize(),
-            summary,
-            teams
+            participants,
+            roundType: ROUND_TYPES.find(({ id }) => roundType === id).value,
+            summary
         };
     });
     const tee = course.tees.find(({ _id }) => _id == T);
-    const scores = S.map(({ classes, handicap = 54, player, playingGroup: pg, scores, shots }, scoreIndex) => {
-        const playingGroup = (function(playingGroup, playerIndex) {
-            const { index, player: p } = playingGroup || { index: 0 };
-            const player = (function(player, playerIndex) {
-                if (player === 'marker' || playerIndex === 0) return player;
-                return `player ${player && player.split('-')[1] || String.fromCharCode(96 + playerIndex)}`;
-            })(p, playerIndex);
-            return { index, player };
-        })(pg, scoreIndex);
+    const scores = S.map(({ classes, handicap = 54, player, playingGroup, scores, shots }) => {
         return { classes, handicap, player, playingGroup, scores, shots };
     });
     const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
