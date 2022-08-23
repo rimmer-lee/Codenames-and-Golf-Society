@@ -5,32 +5,28 @@ String.prototype.replaceLastInstance = function(delimiter = ', ', replacementVal
 };
 
 // shared with models/round.js
-function calculateGames(course = { tees: [] }, games = [],  players = [], scores = [], defaultTee = { holes: [] }) {
+function calculateGames(course = { tees: [] }, games = [], players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
-        const { handicap, method, name, players: gamePlayers, roundType = 'full', scoring, teams } = game;
-        const { multiplier, type } = handicap;
+        const { game: name, handicap: { multiplier, type }, method, players: gamePlayers, roundType = 'full', scoring, teams } = game;
         const GAME = GAMES.game.find(({ id }) => id === name);
-        const HANDICAP = GAMES.handicap.find(({ id }) => id === type);
-        const METHOD = GAMES.method.find(({ id }) => id === method);
-        const SCORING = GAMES.scoring.find(({ id }) => id === scoring);
         game.description = '';
+        game.participants = '';
         game.scores = [];
         game.summary = '';
         if (!GAME) continue;
         const stablefordMultiplier = +(scoring === 'stableford') * -2 + 1;
-        const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
+        const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
         const handicapAdjustment = (function() {
-            if (type === 'competition' || GAME.handicap) return Math.min(
+            if (GAME.handicap && type === 'competition') return Math.min(
                     ...scores.filter(({ player }) => {
-                        return gamePlayers.some(({ player: gp }) => {
-                            return stringifyId(player) === stringifyId(gp)
+                        return gamePlayers.some(({ player: p }) => {
+                            return stringifyId(player) === stringifyId(p)
                         });
-                    }).map(({ handicap }) => +handicap)
+                    }).map(({ handicap }) => +handicap * ((end - start) || 18) / 18)
                 );
             return 0;
         })();
         const gameScores = (function() {
-
             const gameScores = gamePlayers.map(p => {
                 const { player, team } = p;
                 const id = stringifyId(player);
@@ -38,7 +34,7 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
 
                 // move to separate function for use in calculating score values???
                 const score = (function() {
-                    if (scoring === 'shots') return scoreObject.shots;
+                    if (scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
                     const { handicap: playerHandicap, shots, tee } = scoreObject;
                     const { shotsPerHole, holesWithAShot } = handicapShots(multiplier / 100 * (playerHandicap - handicapAdjustment));
                     const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == tee) || defaultTee;
@@ -53,24 +49,27 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                     });
                 })().slice(start, end);
 
-                // const name = team !== 'none' ? getName(team, players, teams) : getNames(id, players, teams);
-
                 return { id, score, team };
             });
+            const teamScores = gameScores.filter(({ team }) => team && team !== 'none');
+            if (teamScores.length > 0 && !GAME.filters.players.for.includes('team')) return [];
             return [
-                ...gameScores.filter(({ team }) => team === 'none').map(({ id: i, score }) => {
+                ...gameScores.filter(({ team }) => !team || team === 'none').map(({ id: i, score }) => {
                     const id = getName(i, players, teams);
-                    return { id, score };
+                    return { id, score: score.map(score => ({ score })) };
                 }),
-                ...[ ...new Set(gameScores.filter(({ team }) => team !== 'none').map(({ team }) => team)) ].map(t => {
+                ...[ ...new Set(teamScores.map(({ team }) => team)) ].map(t => {
                     const playerScores = gameScores.filter(({ team }) => team === t).map(({ score }) => score);
-                    const score = Array.from({ length: (end - start) }).map((a, i) => {
+                    const score = Array.from({ length: (end - start) }).map((_, i) => {
                         const holeScores = playerScores.map(score => score[i]).flat();
                         if (playerScores.length !== holeScores.length) return null;
-                        if (method === 'best') return Math.min( ...holeScores );
-                        if (method === 'combined') return holeScores.reduce((sum, value) => sum += value, 0);
+
+                        // can these be set in GAMES.method[]?
+                        if (method === 'best') return { score: Math.min( ...holeScores ) };
+                        if (method === 'combined') return { score: holeScores.reduce((sum, value) => sum += value, 0) };
                         if (method === 'high/low') return { high: Math.max( ...holeScores ), low: Math.min( ...holeScores ) };
-                        if (method === 'worst') return Math.max( ...holeScores );
+                        if (method === 'worst') return { score: Math.max( ...holeScores ) };
+
                         return null;
                     });
                     const id = getName(t, players, teams);
@@ -78,62 +77,91 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 })
             ]
         })();
-
-        // add in check to see if teams are allowed
         if (gameScores.length < GAME.filters.players.minimum) continue;
 
+        // const properties = method === 'high/low' ? ['low', 'high'] : ['score'];
+        const properties = Object.keys(gameScores[0].score[0]);
+
+        game.description = {
+            get description() {
+                const { method, round, scoring } = this;
+                return `${scoring}${method}${GAME.value}${round}`;
+            },
+            get handicap() {
+                const HANDICAP = GAMES.handicap.find(({ id }) => id === type) || {};
+                const { id, value } = HANDICAP;
+                if (id === 'competition') return `${value} `;
+                return '';
+            },
+            get method() {
+                const METHOD = GAMES.method.find(({ id }) => id === method);
+                if (!METHOD) return '';
+                const { id, value } = METHOD;
+                return `${value} ${id === 'combined' ? 'Score' : 'Ball'} `;
+            },
+            get multiplier() {
+                if (multiplier == 100) return '';
+                return `${Math.round(+multiplier)}% `
+            },
+            get round() {
+                if (!roundType || roundType === 'full') return '';
+                return ` (${roundType.capitalize()} 9)`;
+            },
+            get scoring() {
+                const SCORING = GAMES.scoring.find(({ id }) => id === scoring);
+                const { id, value } = SCORING;
+                if (id === 'shots' || GAME.id === 'stableford') return '';
+                const { handicap, multiplier } = this;
+                return `${multiplier ? multiplier : ''}${handicap}${multiplier ? 'Handicap ' : ''}${value} `;
+            }
+        }.description;
+        game.participants = {
+            get players() {
+                return gamePlayers.map(({ player, team }) => {
+                    const knownAs = getName(stringifyId(player), players, []);
+                    return { knownAs, team };
+                })
+            },
+            get participants () {
+                const { players } = this;
+                if (teams.length > 0) return teams.map(({ id }) => {
+                    return `${players.filter(({ team }) => id === team).map(({ knownAs }) => knownAs).join(', ').replaceLastInstance()} (${getName(id, [], teams)})`;
+                }).join(' vs. ');
+                return `Played between ${players.map(({ knownAs }) => knownAs).join(', ').replaceLastInstance()}`;
+            }
+        }.participants;
         game.scores = gameScores.map(({ id, score }) => {
-            const points = (function() {
-                if (name === 'stroke-play' || name === 'stableford') return score.map(s => +s || null);
-                const matchPlay = name === 'match-play';
-                let skins = 0;
-                return score.map((s, i) => {
-
-                    if (method === 'high/low') {
-
-                        const min = (function() {
-                            const holeScores = gameScores.map(({ score }) => score[i].low * stablefordMultiplier);
-                            if (holeScores.some(s => !+s)) return null;
-                            const winningScore = Math.min( ...holeScores );
-                            if (holeScores.filter(score => score === winningScore).length === 1) {
-                                if (s.low === Math.abs(winningScore)) return 1;
-                                if (matchPlay) return -1;
+            const { points } = {
+                get points() {
+                    if (name === 'stroke-play' || name === 'stableford') return score.map(({ score }) => score);
+                    let skins = 0;
+                    return score.map((playerScore, i) => {
+                        const holeResults = properties.map(property => {
+                            const holeSores = gameScores.map(({ score }) => score[i][property] * stablefordMultiplier);
+                            if (holeSores.some(score => !+score)) return null;
+                            const winningScore = Math.min( ...holeSores );
+                            if (holeSores.filter(score => score === winningScore).length === 1) {
+                                if (playerScore[property] === Math.abs(winningScore)) return 1;
+                                return -1;
                             };
                             return 0;
-                        })();
-
-                        const max = (function() {
-                            const holeScores = gameScores.map(({ score }) => score[i].high * stablefordMultiplier);
-                            if (holeScores.some(s => !+s)) return null;
-                            const winningScore = Math.min( ...holeScores );
-                            if (holeScores.filter(score => score === winningScore).length === 1) {
-                                if (s.high === Math.abs(winningScore)) return 1;
-                                if (matchPlay) return -1;
-                            };
-                            return 0;
-                        })();
-
-                        if (min === null || max === null) return null;
-                        return min + max;
-                    };
-
-                    const holeScores = gameScores.map(({ score }) => score[i] * stablefordMultiplier);
-                    if (holeScores.some(s => !+s)) return null;
-                    const winningScore = Math.min( ...holeScores );
-                    skins++;
-                    if (holeScores.filter(score => score === winningScore).length === 1) {
-                        const skinsToAdd = skins;
+                        });
+                        if (holeResults.some(result => result === null)) return null;
+                        const holeResult = holeResults.reduce((sum, value) => sum += value, 0);
+                        skins++;
+                        if (name === 'match-play' || holeResult === 0) return holeResult;
+                        const k = skins;
                         skins = 0;
-                        if (s === Math.abs(winningScore)) return matchPlay ? 1 : skinsToAdd;
-                        if (matchPlay) return -1;
-                    };
-                    return 0;
-                });
-            })();
+                        if (holeResult > 0) return k;
+                        return 0;
+                    });
+                }
+            };
             return { id, points };
         });
         game.summary = (function() {
-            const gameComplete = !game.scores.some(({ points }) => points.some(point => point === null));
+            const unplayedHoles = Math.max( ...game.scores.map(({ points }) => points.filter(point => point === null).length) );
+            const gameComplete = unplayedHoles === 0;
             if (name === 'match-play') {
                 const { id: nameOne, points } = game.scores[0];
                 const nameTwo = game.scores[1].id;
@@ -141,18 +169,18 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 let currentScore = 0;
                 for (let i = 0; i < lengthOfPoints; i++) {
                     const point = points[i];
-                    const remainingHoles = lengthOfPoints - i - 1;
+                    const remainingHoles = lengthOfPoints - i - 1 + unplayedHoles;
                     if (point === null) continue;
                     currentScore += point;
                     if (gameComplete && remainingHoles === 0) {
                         if (currentScore == 0) return 'Game halved';
-                        return `${currentScore > 0 ? nameOne : nameTwo} wins`;
+                        return `${currentScore > 0 ? nameOne : nameTwo} wins (${currentScore})`;
                     };
                     if (currentScore > 0 && currentScore > remainingHoles) return `${nameOne} wins (${currentScore} & ${remainingHoles})`;
                     if (Math.abs(currentScore) > 0 && Math.abs(currentScore) > remainingHoles) return `${nameTwo} wins (${Math.abs(currentScore)} & ${remainingHoles})`;
                 };
                 if (currentScore === 0) return 'All square';
-                return `${currentScore > 0 ? nameOne : nameTwo} ${currentScore > 0 ? currentScore : Math.abs(currentScore)} up`;
+                return `${currentScore > 0 ? nameOne : nameTwo} ${Math.abs(currentScore)} up`;
             };
             const sortedTotals = game.scores.map(({ id, points }) => {
                 const total = points.reduce((sum, value, index) => {
@@ -161,8 +189,7 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 }, 0);
                 return { id, total };
             }).sort((a, b) => {
-                if (name === 'skins' || name === 'stableford') return b.total - a.total;
-                if (name === 'stroke-play') return a.total - b.total;
+                if (name === 'skins' || name === 'stableford' || scoring === 'stableford') return b.total - a.total;
                 return a.total - b.total;
             });
             if (name === 'skins') return sortedTotals.map(({ id, total}) => `${id} (${total})`).join('; ');
@@ -182,36 +209,6 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 return string.replaceLastInstance();
             }).join('; ');
         }());
-        game.description = {
-            get handicap() {
-                const { id, value } = HANDICAP;
-                if (id === 'competition') return `${value} `;
-                return '';
-            },
-            get method() {
-                if (!METHOD) return '';
-                const { id, value } = METHOD;
-                return `${value} ${id === 'combined' ? 'Score' : 'Ball'} `;
-            },
-            get multiplier() {
-                if (multiplier == 100) return '';
-                return `${Math.round(multiplier)}% `
-            },
-            get round() {
-                if (!roundType || roundType === 'full') return '';
-                return ` (${roundType.capitalize()} 9)`;
-            },
-            get scoring() {
-                const { id, value } = SCORING;
-                if (id === 'shots') return '';
-                const { handicap, multiplier } = this;
-                return `${multiplier ? multiplier : ''}${handicap}${multiplier ? 'Handicap ' : ''} ${value}`;
-            },
-            get value() {
-                const { method, round, scoring } = this;
-                return `${scoring}${method}${GAME.value}${round}`;
-            }
-        }.value;
     };
     return games;
 };
@@ -283,22 +280,6 @@ function sortPlayers() {
     players = players.sortAlphabetically('name.knownAs');
 };
 
-function updateCourse() {
-    const round = getRound();
-    const holes = round.course && round.course.hole;
-    if (!holes) return;
-    for (const index of Object.keys(holes)) {
-        const hole = holes[index];
-        for (const teeName of Object.keys(hole)) {
-            const tee = hole[teeName];
-            for (const property of Object.keys(tee)) {
-                const element = document.querySelector(`[name="[course][tees][${teeName}][${index}][${property}]"]`);
-                if (element) element.value = tee[property];
-            };
-        };
-    };
-};
-
 function updateData() {
     // https://stackoverflow.com/questions/5484673/javascript-how-to-dynamically-create-nested-objects-using-object-names-given-by
     // cleaner solution - https://stackoverflow.com/questions/7640727/javascript-nested-objects-from-string
@@ -361,19 +342,19 @@ function updateGames() {
         .filter(index => Object.keys(round.game[index])
         .some(key => /^(?:marker$|player\-)/.test(key)))
         .map(index => {
-            const game = round.game[index];
-            const { handicap, method, game: name, round: roundType, scoring, team = {} } = game;
-            const players = getPlayerKeys(game).map(player => {
+            const g = round.game[index];
+            const { handicap, method, game, round: roundType, scoring, team = {} } = g;
+            const players = getPlayerKeys(g).map(player => {
                 return {
                     player: { _id: round[player].id },
-                    team: game[player].team
+                    team: g[player].team
                 };
             });
             return {
+                game,
                 handicap,
                 index,
                 method,
-                name,
                 players,
                 roundType,
                 scoring,
@@ -460,10 +441,11 @@ document.addEventListener('DOMContentLoaded', function () {
     sortPlayers();
     window.localStorage.players = JSON.stringify(localPlayers);
     if (round.course && round.course.id && !/^new/.test(round.course.id)) {
-        updateSelect('course-select', round.course.id, selectCourse);
-        if (round.course.tee) {
+        const { id, tee, tees } = round.course;
+        updateSelect('course-select', id, selectCourse);
+        if (tee) {
             const teeSelect = document.getElementById('tee-select');
-            const chosenTee = Array.from(teeSelect.children).find(({ value }) => value === round.course.tee);
+            const chosenTee = Array.from(teeSelect.children).find(({ value }) => value === tee);
             if (chosenTee) {
                 const selectedTee = teeSelect.querySelector('[selected]')
                 if (selectedTee) selectedTee.removeAttribute('selected');
@@ -471,8 +453,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectTee.call(teeSelect);
             };
         };
-        for (const teeId of Object.keys(round.course.tees)) {
-            const tee = round.course.tees[teeId];
+        for (const teeId of Object.keys(tees)) {
+            const tee = tees[teeId];
             for (const hole of Object.keys(tee)) {
                 for (const property of ['distance', 'par', 'strokeIndex']) {
                     const element = document.getElementById(`${teeId}-${hole}|${property}`);
@@ -512,11 +494,11 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         if (multiplier && handicapAdjustmentElement) {
             handicapAdjustmentElement.value = Number.parseFloat(multiplier).toFixed(2);
-            updateDescription.call(handicapAdjustmentElement);
+            updateGameOptionDescription.call(handicapAdjustmentElement);
         };
         if (handicapTypeElement) {
             handicapTypeElement.checked = true;
-            updateDescription.call(handicapTypeElement);
+            updateGameOptionDescription.call(handicapTypeElement);
         };
         for (const gamePlayer of gamePlayers) {
             const playerParticipationElement = document.getElementById(`${game}|${gamePlayer}|participation`);
@@ -536,9 +518,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 element.value = team[key];
             };
         };
-        if (method) updateSelect(`${game}|method`, method, updateDescription);
+        if (method) updateSelect(`${game}|method`, method, updateGameOptionDescription);
     };
-    updateCourse();
     updateData();
 });
 

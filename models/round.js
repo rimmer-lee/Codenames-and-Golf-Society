@@ -6,44 +6,46 @@ const User = require('./user');
 
 const { BREAKDOWN_OBJECT, GAMES, ROUND_TYPES } = require('../constants');
 
-// shared with public/scripts/rounds/update.js
-function calculateGames(course = { tees: [] }, games = [],  players = [], scores = [], defaultTee = { holes: [] }) {
+// shared with models/round.js
+function calculateGames(course = { tees: [] }, games = [], players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
-        const { handicap: defaultHandicap, name, players: defaultPlayersObject } = GAMES.find(({ name }) => name === game.name);
-        // if (!defaultHandicap.adjustable) game.handicap = defaultHandicap.default;
-        const { handicap, method, players: gamePlayers, roundType = 'full', scoring } = game;
+        const { game: name, handicap: { multiplier, type }, method, players: gamePlayers, roundType = 'full', scoring, teams } = game;
+        const GAME = GAMES.game.find(({ id }) => id === name);
         game.description = '';
+        game.participants = '';
         game.scores = [];
         game.summary = '';
-        game.team = gamePlayers.some(({ team }) => team && team !== 'none');
-        if ((game.team ? [ ...new Set(gamePlayers.map(({ team }) => team)) ].length : gamePlayers.length) < defaultPlayersObject.minimum) continue;
-        const { end, start } = ROUND_TYPES.find(({ name }) => name === roundType);
+        if (!GAME) continue;
+        const stablefordMultiplier = +(scoring === 'stableford') * -2 + 1;
+        const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
         const handicapAdjustment = (function() {
-            if (handicap === 'competition') return Math.min(
+            if (GAME.handicap && type === 'competition') return Math.min(
                     ...scores.filter(({ player }) => {
-                        return gamePlayers.some(gamePlayer => player._id.toString() === gamePlayer.player._id.toString());
-                    }).map(({ handicap }) => +handicap)
+                        return gamePlayers.some(({ player: p }) => {
+                            return stringifyId(player) === stringifyId(p)
+                        });
+                    }).map(({ handicap }) => +handicap * ((end - start) || 18) / 18)
                 );
             return 0;
         })();
         const gameScores = (function() {
             const gameScores = gamePlayers.map(p => {
                 const { player, team } = p;
-                const id = player._id.toString();
-                const scoreObject = scores.find(({ player }) => player._id.toString() === id);
+                const id = stringifyId(player);
+                const scoreObject = scores.find(({ player }) => stringifyId(player) === id);
 
                 // move to separate function for use in calculating score values???
                 const score = (function() {
-                    if (handicap === 'none') return scoreObject.shots;
+                    if (scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
                     const { handicap: playerHandicap, shots, tee } = scoreObject;
-                    const { shotsPerHole, holesWithAShot } = handicapShots(playerHandicap - handicapAdjustment);
+                    const { shotsPerHole, holesWithAShot } = handicapShots(multiplier / 100 * (playerHandicap - handicapAdjustment));
                     const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == tee) || defaultTee;
                     return holes.map(({ index, par, strokeIndex }) => {
                         const shot = +shots[index - 1];
                         if (!shot || !par) return null;
                         const doubleBogey = +par + 2;
                         const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
-                        if (name !== 'Stableford' && scoring !== 'stableford') return nettScore > doubleBogey ? doubleBogey : nettScore;
+                        if (name !== 'stableford' && scoring !== 'stableford') return nettScore > doubleBogey ? doubleBogey : nettScore;
                         const nettParScore = doubleBogey - nettScore;
                         return nettParScore < 0 ? 0 : nettParScore;
                     });
@@ -51,79 +53,149 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
 
                 return { id, score, team };
             });
-            if (!game.team) return gameScores;
-            return [ ...new Set(gameScores.map(({ team }) => team)) ].map(id => {
-                const playerScores = gameScores.filter(score => score.team === id).map(({ score }) => score);
-                const players = playerScores.length;
-                const score = Array.from({ length: (end - start) }).map((a, i) => {
-                    const holeScores = playerScores.map(score => score[i]).flat();
-                    if (players !== holeScores.length) return null;
-                    if (method === 'Best') return Math.min( ...holeScores );
-                    if (method === 'Combined') return holeScores.reduce((sum, value) => sum += value, 0);
-                    if (method === 'Worst') return Math.max( ...holeScores );
-                    return null;
-                });
-                return { id, score }
-            });
+            const teamScores = gameScores.filter(({ team }) => team && team !== 'none');
+            if (teamScores.length > 0 && !GAME.filters.players.for.includes('team')) return [];
+            return [
+                ...gameScores.filter(({ team }) => !team || team === 'none').map(({ id: i, score }) => {
+                    const id = getName(i, players, teams);
+                    return { id, score: score.map(score => ({ score })) };
+                }),
+                ...[ ...new Set(teamScores.map(({ team }) => team)) ].map(t => {
+                    const playerScores = gameScores.filter(({ team }) => team === t).map(({ score }) => score);
+                    const score = Array.from({ length: (end - start) }).map((_, i) => {
+                        const holeScores = playerScores.map(score => score[i]).flat();
+                        if (playerScores.length !== holeScores.length) return null;
+
+                        // can these be set in GAMES.method[]?
+                        if (method === 'best') return { score: Math.min( ...holeScores ) };
+                        if (method === 'combined') return { score: holeScores.reduce((sum, value) => sum += value, 0) };
+                        if (method === 'high/low') return { high: Math.max( ...holeScores ), low: Math.min( ...holeScores ) };
+                        if (method === 'worst') return { score: Math.max( ...holeScores ) };
+
+                        return null;
+                    });
+                    const id = getName(t, players, teams);
+                    return { id, score }
+                })
+            ]
         })();
+        if (gameScores.length < GAME.filters.players.minimum) continue;
+
+        // const properties = method === 'high/low' ? ['low', 'high'] : ['score'];
+        const properties = Object.keys(gameScores[0].score[0]);
+
+        game.description = {
+            get description() {
+                const { method, round, scoring } = this;
+                return `${scoring}${method}${GAME.value}${round}`;
+            },
+            get handicap() {
+                const HANDICAP = GAMES.handicap.find(({ id }) => id === type) || {};
+                const { id, value } = HANDICAP;
+                if (id === 'competition') return `${value} `;
+                return '';
+            },
+            get method() {
+                const METHOD = GAMES.method.find(({ id }) => id === method);
+                if (!METHOD) return '';
+                const { id, value } = METHOD;
+                return `${value} ${id === 'combined' ? 'Score' : 'Ball'} `;
+            },
+            get multiplier() {
+                if (multiplier == 100) return '';
+                return `${Math.round(+multiplier)}% `
+            },
+            get round() {
+                if (!roundType || roundType === 'full') return '';
+                return ` (${roundType.capitalize()} 9)`;
+            },
+            get scoring() {
+                const SCORING = GAMES.scoring.find(({ id }) => id === scoring);
+                const { id, value } = SCORING;
+                if (id === 'shots' || GAME.id === 'stableford') return '';
+                const { handicap, multiplier } = this;
+                return `${multiplier ? multiplier : ''}${handicap}${multiplier ? 'Handicap ' : ''}${value} `;
+            }
+        }.description;
+        game.participants = {
+            get players() {
+                return gamePlayers.map(({ player, team }) => {
+                    const knownAs = getName(stringifyId(player), players, []);
+                    return { knownAs, team };
+                })
+            },
+            get participants () {
+                const { players } = this;
+                if (teams.length > 0) return teams.map(({ id }) => {
+                    return `${players.filter(({ team }) => id === team).map(({ knownAs }) => knownAs).join(', ').replaceLastInstance()} (${getName(id, [], teams)})`;
+                }).join(' vs. ');
+                return `Played between ${players.map(({ knownAs }) => knownAs).join(', ').replaceLastInstance()}`;
+            }
+        }.participants;
         game.scores = gameScores.map(({ id, score }) => {
-            const points = (function() {
-                if (name === 'Stroke Play' || name === 'Stableford') return score.map(s => +s || null);
-                const matchPlay = name === 'Match Play';
-                let skins = 0;
-                return score.map((s, i) => {
-                    const holeScores = gameScores.map(({ score }) => score[i]);
-                    if (holeScores.some(s => !+s)) return null;
-                    const minScore = Math.min( ...holeScores );
-                    skins++;
-                    if (holeScores.filter(score => score === minScore).length === 1) {
-                        const skinsToAdd = skins;
+            const { points } = {
+                get points() {
+                    if (name === 'stroke-play' || name === 'stableford') return score.map(({ score }) => score);
+                    let skins = 0;
+                    return score.map((playerScore, i) => {
+                        const holeResults = properties.map(property => {
+                            const holeSores = gameScores.map(({ score }) => score[i][property] * stablefordMultiplier);
+                            if (holeSores.some(score => !+score)) return null;
+                            const winningScore = Math.min( ...holeSores );
+                            if (holeSores.filter(score => score === winningScore).length === 1) {
+                                if (playerScore[property] === Math.abs(winningScore)) return 1;
+                                return -1;
+                            };
+                            return 0;
+                        });
+                        if (holeResults.some(result => result === null)) return null;
+                        const holeResult = holeResults.reduce((sum, value) => sum += value, 0);
+                        skins++;
+                        if (name === 'match-play' || holeResult === 0) return holeResult;
+                        const k = skins;
                         skins = 0;
-                        if (s === minScore) return matchPlay ? 1 : skinsToAdd;
-                        if (matchPlay) return -1;
-                    };
-                    return 0;
-                });
-            })();
+                        if (holeResult > 0) return k;
+                        return 0;
+                    });
+                }
+            };
             return { id, points };
         });
         game.summary = (function() {
-            const gameComplete = !game.scores.some(({ points }) => points.some(point => point === null));
-            if (name === 'Match Play') {
-                const { id, points } = game.scores[0];
-                const nameOne = getName(id, players, game.team);
-                const nameTwo = getName(game.scores[1].id, players, game.team);
+            const unplayedHoles = Math.max( ...game.scores.map(({ points }) => points.filter(point => point === null).length) );
+            const gameComplete = unplayedHoles === 0;
+            if (name === 'match-play') {
+                const { id: nameOne, points } = game.scores[0];
+                const nameTwo = game.scores[1].id;
                 const lengthOfPoints = points.length;
                 let currentScore = 0;
                 for (let i = 0; i < lengthOfPoints; i++) {
                     const point = points[i];
-                    const remainingHoles = lengthOfPoints - i - 1;
+                    const remainingHoles = lengthOfPoints - i - 1 + unplayedHoles;
                     if (point === null) continue;
                     currentScore += point;
                     if (gameComplete && remainingHoles === 0) {
                         if (currentScore == 0) return 'Game halved';
-                        return `${currentScore > 0 ? nameOne : nameTwo} wins`;
+                        return `${currentScore > 0 ? nameOne : nameTwo} wins (${currentScore})`;
                     };
                     if (currentScore > 0 && currentScore > remainingHoles) return `${nameOne} wins (${currentScore} & ${remainingHoles})`;
                     if (Math.abs(currentScore) > 0 && Math.abs(currentScore) > remainingHoles) return `${nameTwo} wins (${Math.abs(currentScore)} & ${remainingHoles})`;
                 };
                 if (currentScore === 0) return 'All square';
-                return `${currentScore > 0 ? nameOne : nameTwo} ${currentScore > 0 ? currentScore : Math.abs(currentScore)} up`;
+                return `${currentScore > 0 ? nameOne : nameTwo} ${Math.abs(currentScore)} up`;
             };
             const sortedTotals = game.scores.map(({ id, points }) => {
                 const total = points.reduce((sum, value, index) => {
                     if (game.scores.some(({ points }) => points[index] === null)) return sum;
                     return sum += value;
                 }, 0);
-                const knownAs = getName(id, players, game.team);
-                return { id: knownAs, total };
+                return { id, total };
             }).sort((a, b) => {
-                if (name === 'Skins' || name === 'Stableford') return b.total - a.total;
-                if (name === 'Stroke Play') return a.total - b.total;
+                if (name === 'skins' || name === 'stableford' || scoring === 'stableford') return b.total - a.total;
                 return a.total - b.total;
             });
-            if (name === 'Skins') return sortedTotals.map(({ id, total}) => `${id} (${total})`).join('; ');
-            if (name === 'Stableford' && game.scores.length === 1) {
+            if (name === 'skins') return sortedTotals.map(({ id, total}) => `${id} (${total})`).join('; ');
+            if (name === 'stableford' && game.scores.length === 1) {
                 const { id, total } = sortedTotals[0];
                 return `${id} (${total})`;
             };
@@ -139,22 +211,25 @@ function calculateGames(course = { tees: [] }, games = [],  players = [], scores
                 return string.replaceLastInstance();
             }).join('; ');
         }());
-        game.description = `${handicap ? 'Nett ' : ''}${method ? (method === 'Combined' ? `Combined Score ` : `${method} Ball `) : ''}${name}${!roundType || roundType === 'full' ? '' : ` (${roundType.capitalize()} 9)`}`;
     };
     return games;
 };
 
 // shared with public/scripts/rounds/update.js
-function getName(id, players, teamGame) {
-    if (teamGame) return `Team ${id.length === 1 ? id.toUpperCase() : id}`;
-    return (players.find(player => player.id == id) || { name: {} }).name.knownAs || id;
+function getName(id, players, teams) {
+    const team = teams.find(team => team.id === id);
+    if (!team) return players.find(player => stringifyId(player) === id)?.name?.knownAs || id;
+    const { id: i, name } = team;
+    if (i === name.toLowerCase()) return `Team ${name}`;
+    return name;
 };
 
 // shared with public/scripts/rounds/update.js
 function handicapShots(handicap = 54) {
+    const rounded = Math.floor(handicap);
     return {
-        shotsPerHole: Math.floor(handicap / 18),
-        holesWithAShot: handicap % 18
+        shotsPerHole: Math.floor(rounded / 18),
+        holesWithAShot: rounded % 18
     };
 };
 
@@ -165,7 +240,6 @@ function parClass(par) {
     return 'f-level';
 };
 
-// shared with public/scripts/rounds/update.js
 function parScoreClass(parScore) {
     if (parScore < -1) return 'eagle';
     if (parScore === -1) return 'birdie';
@@ -174,7 +248,62 @@ function parScoreClass(parScore) {
     return 'par';
 };
 
+// shared with public/scripts/rounds/update.js
+function stringifyId(player) {
+    return (player._id || player.id).toString();
+};
+
 const options = { toJSON: { virtuals: true } };
+
+const GameSchema = new Schema({
+    description: String,
+    game: {
+        enum: GAMES.game.map(({ id }) => id),
+        type: String
+    },
+    handicap: {
+        multiplier: Number,
+        type: {
+            enum: GAMES.handicap.map(({ id }) => id),
+            type: String
+        }
+    },
+    method: {
+        enum: GAMES.method.map(({ id }) => id),
+        type: String
+    },
+    participants: String,
+    players: [
+        {
+            player: {
+                ref: 'User',
+                type: Schema.Types.ObjectId
+            },
+            team: String
+        }
+    ],
+    roundType: {
+        enum: ROUND_TYPES.map(({ id }) => id),
+        type: String
+    },
+    scores: [
+        {
+            id: String,
+            points: [ Number ]
+        }
+    ],
+    summary: String,
+    scoring: {
+        enum: GAMES.scoring.map(({ id }) => id),
+        type: String
+    },
+    teams: [
+        {
+            id: String,
+            name: String
+        }
+    ]
+}, options);
 
 const ScoreSchema = new Schema({
     handicap: Number,
@@ -187,7 +316,7 @@ const ScoreSchema = new Schema({
         player: String
     },
     roundType: {
-        enum: ROUND_TYPES.map(({ name }) => name),
+        enum: ROUND_TYPES.map(({ id }) => id),
         type: String
     },
     scores: {
@@ -241,54 +370,7 @@ const RoundSchema = new Schema({
             type: Date
         }
     },
-    games: [
-        {
-
-            // handicap: Boolean,
-            handicap: Schema.Types.Mixed,
-            // handicap: {
-            //     type: String,
-            //     enum: ['competition', 'none', 'standard']
-            // },
-
-            method: {
-                enum: [ ...new Set(GAMES.map(({ options }) => options.map(({ values }) => values)).flat(2)) ],
-                type: String
-            },
-            name: {
-                enum: GAMES.map(({ name }) => name),
-                type: String
-            },
-            players: [
-                {
-                    player: {
-                        ref: 'User',
-                        type: Schema.Types.ObjectId
-                    },
-                    team: String
-                }
-            ],
-            roundType: {
-                enum: ROUND_TYPES.map(({ name }) => name),
-                type: String
-            },
-            scores: [
-                {
-                    id: String,
-                    points: [ Number ]
-                }
-            ],
-            summary: String,
-            scoring: {
-                type: String,
-                enum: ['stableford', 'standard']
-            },
-            team: {
-                default: false,
-                type: Boolean
-            }
-        }
-    ],
+    games: [ GameSchema ],
     scores: [ ScoreSchema ],
     tee: String
 }, options);
@@ -307,9 +389,9 @@ RoundSchema.pre('save', async function(next) {
         const { shotsPerHole, holesWithAShot } = handicapShots(score.handicap);
         const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == score.tee) || tee;
         for (const roundType of ROUND_TYPES) {
-            const { name, start, end } = roundType;
+            const { id, start, end } = roundType;
             if (score.shots.slice(start, end).every(shot => shot !== 0)) {
-                score.roundType = name;
+                score.roundType = id;
                 break;
             };
         };
