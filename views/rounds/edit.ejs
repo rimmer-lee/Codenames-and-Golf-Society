@@ -212,11 +212,15 @@
                             <div class="row g-3 mx-0">
                                 <% for (const playingGroup of playingGroups) { %>
                                 <div class="border border-1 col-12 rounded p-3">
-                                    <div class="row g-3">
-                                        <h5 class="col-12 fw-light mb-0 ms-1">
+                                    <div class="g-3 row row-cols-1">
+                                        <h5 class="col fw-light mb-0 ms-1">
                                             <%= `Playing Group ${playingGroup[0].playingGroup.index}` %>
                                         </h5>
-                                        <%- include('../partials/rounds/playing-group', { playingGroup }) %>
+                                        <div class="col">
+                                            <div class="row justify-content-center">
+                                                <%- include('../partials/rounds/playing-group', { playingGroup }) %>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <% }; %>
@@ -265,8 +269,8 @@
                                                                         Select Game
                                                                     </option>
                                                                     <% for (const GAME of GAMES) { %>
-                                                                    <option value="<%= GAME.name %>" <%= GAME.name === game.name ? " selected" : "" %>>
-                                                                        <%= GAME.name %>
+                                                                    <option value="<%= GAME.id %>" <%= GAME.id === game.game ? " selected" : "" %>>
+                                                                        <%= GAME.value %>
                                                                     </option>
                                                                     <% }; %>
                                                                 </select>
@@ -283,17 +287,14 @@
                                                         </div>
                                                         <div class="col-12">
                                                             <div class="game-element fixed-game-element-height d-flex justify-content-evenly align-items-center">
-
-                                                                <!-- move logic to server -->
-                                                                <% for (const ROUND_TYPE of ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0).map(({ name }) => name)) { %>
+                                                                <% for (const ROUND_TYPE of ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0).map(({ id, value }) => ({ id, value }))) { %>
                                                                 <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" id="game-<%= game.index %>|round|<%= ROUND_TYPE %>" name="[game]['<%= game.index %>'][round]" type="radio" value="<%= ROUND_TYPE %>" <%= ROUND_TYPE === game.roundType.toLowerCase() && " checked" %>>
-                                                                    <label class="form-check-label" for="game-<%= game.index %>|round|<%= ROUND_TYPE %>">
-                                                                        <%= ROUND_TYPE.split(' ').map(s => s[0].toUpperCase() + s.substring(1)).join(' ') %>
+                                                                    <input class="form-check-input" id="game-<%= game.index %>|round|<%= ROUND_TYPE.id %>" name="[game]['<%= game.index %>'][round]" type="radio" value="<%= ROUND_TYPE.id %>" <%= ROUND_TYPE.id === game.roundType && " checked" %>>
+                                                                    <label class="form-check-label" for="game-<%= game.index %>|round|<%= ROUND_TYPE.id %>">
+                                                                        <%= ROUND_TYPE.value %>
                                                                     </label>
                                                                 </div>
                                                                 <% }; %>
-
                                                             </div>
                                                         </div>
                                                         <div class="col-12">
@@ -386,7 +387,7 @@
                                                     <%= game.summary %>
                                                 </h5>
                                                 <div class="col text-center text-muted">
-                                                    <%= game.playerString %>
+                                                    <%= game.participants %>
                                                 </div>
                                             </div>
                                         </div>
