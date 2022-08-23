@@ -62,7 +62,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     const playerScores = gameScores.filter(({ team }) => team === t).map(({ score }) => score);
                     const score = Array.from({ length: (end - start) }).map((_, i) => {
                         const holeScores = playerScores.map(score => score[i]).flat();
-                        if (playerScores.length !== holeScores.length) return null;
+                        if (playerScores.length !== holeScores.length) return { high: null, low: null, score: null };
 
                         // can these be set in GAMES.method[]?
                         if (method === 'best') return { score: Math.min( ...holeScores ) };
@@ -70,7 +70,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                         if (method === 'high/low') return { high: Math.max( ...holeScores ), low: Math.min( ...holeScores ) };
                         if (method === 'worst') return { score: Math.max( ...holeScores ) };
 
-                        return null;
+                        return { high: null, low: null, score: null };
                     });
                     const id = getName(t, players, teams);
                     return { id, score }
@@ -135,13 +135,13 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 get points() {
                     if (name === 'stroke-play' || name === 'stableford') return score.map(({ score }) => score);
                     let skins = 0;
-                    return score.map((playerScore, i) => {
+                    return score.map((s, i) => {
                         const holeResults = properties.map(property => {
                             const holeSores = gameScores.map(({ score }) => score[i][property] * stablefordMultiplier);
                             if (holeSores.some(score => !+score)) return null;
                             const winningScore = Math.min( ...holeSores );
                             if (holeSores.filter(score => score === winningScore).length === 1) {
-                                if (playerScore[property] === Math.abs(winningScore)) return 1;
+                                if (s[property] === Math.abs(winningScore)) return 1;
                                 return -1;
                             };
                             return 0;
