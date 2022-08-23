@@ -96,7 +96,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 return '';
             },
             get method() {
-                const METHOD = GAMES.method.find(({ id }) => id === method);
+                const METHOD = GAMES.method.find(({ id }) => id === method) || {};
                 if (!METHOD) return '';
                 const { id, value } = METHOD;
                 return `${value} ${id === 'combined' ? 'Score' : 'Ball'} `;
@@ -110,7 +110,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 return ` (${roundType.capitalize()} 9)`;
             },
             get scoring() {
-                const SCORING = GAMES.scoring.find(({ id }) => id === scoring);
+                const SCORING = GAMES.scoring.find(({ id }) => id === scoring) || {};
                 const { id, value } = SCORING;
                 if (id === 'shots' || GAME.id === 'stableford') return '';
                 const { handicap, multiplier } = this;
