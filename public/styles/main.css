@@ -265,3 +265,7 @@ li.page-item.right-hole .page-link {
 .game-element .form-check.form-check-inline > label.form-check-label {
     padding-left: 0.75rem;
 }
+
+.none-label {
+    padding: 0 0.75rem;
+}

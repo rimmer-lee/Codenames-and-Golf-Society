@@ -697,11 +697,11 @@ function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
     const teamNameId = `${value}|name`;
     const noneTeam = teamId === 'none';
     const teamRadioButtonObject = {
-        classList: noneTeam ? ['form-check', 'form-check-inline'] : ['d-flex', 'custom-name-element'],
+        classList: ['d-flex', 'custom-name-element'],
         children: [
             {
                 type: 'input',
-                classList: noneTeam ? ['form-check-input'] : ['flex-shrink-0', 'form-check-input', 'me-2', 'my-auto'],
+                classList: ['flex-shrink-0', 'form-check-input', 'me-2', 'my-auto'],
                 attributes: [
                     { id: 'id', value },
                     { id: 'name', value: `[game]['${gameIndex}'][${player}][team]` },
@@ -712,7 +712,7 @@ function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
             },
             {
                 type: 'label',
-                classList: noneTeam ? ['form-check-label'] : ['flex-fill', 'form-check-label'],
+                classList: noneTeam ? ['form-check-label', 'none-label'] : ['flex-fill', 'form-check-label'],
                 attributes: [{ id: 'for', value }]
             }
         ]
