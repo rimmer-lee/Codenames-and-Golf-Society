@@ -1,4 +1,4 @@
-const CACHE_NAME = 'CGS v.2022.08.24';
+const CACHE_NAME = 'CGS v.2022.08.24.2';
 const FILES_TO_CACHE = [
     '/rounds/new',
     '../../images/favicons/android-chrome-192x192.png',

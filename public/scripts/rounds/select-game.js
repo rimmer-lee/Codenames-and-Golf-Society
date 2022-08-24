@@ -101,32 +101,42 @@ function addGame() {
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
                                         children: [
                                             {
-                                                classList: ['align-items-center', 'd-flex', 'fixed-game-element-height', 'game-element', 'position-relative'],
+                                                classList: ['fixed-game-element-height', 'game-element', 'position-relative'],
                                                 children: [
                                                     {
-                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                        classList: ['g-1', 'pt-1', 'row'],
                                                         children: ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0)
-                                                            .map(({ name }) => {
-                                                                const value = `${gameReference}|round|${name}`;
+                                                            .map(({ id, value: innerText }) => {
+                                                                const value = `${gameReference}|round|${id}`;
                                                                 return {
-                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                    classList: ['col'],
                                                                     children: [
                                                                         {
-                                                                            type: 'input',
-                                                                            classList: ['form-check-input'],
-                                                                            attributes: [
-                                                                                { id: 'id', value },
-                                                                                { id: 'name', value: `[game]['${gameIndex}'][round]` },
-                                                                                { id: 'type', value: 'radio' },
-                                                                                { id: 'value', value: name }
-                                                                            ],
-                                                                            addEventListener: [{ type: 'change', listener: updateData }]
-                                                                        },
-                                                                        {
-                                                                            type: 'label',
-                                                                            classList: ['form-check-label'],
-                                                                            attributes: [{ id: 'for', value }],
-                                                                            innerText: `${name[0].toUpperCase()}${name.substring(1)}`
+                                                                            classList: ['d-flex', 'justify-content-center'],
+                                                                            children: [
+                                                                                {
+                                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                                    children: [
+                                                                                        {
+                                                                                            type: 'input',
+                                                                                            classList: ['form-check-input'],
+                                                                                            attributes: [
+                                                                                                { id: 'id', value },
+                                                                                                { id: 'name', value: `[game]['${gameIndex}'][round]` },
+                                                                                                { id: 'type', value: 'radio' },
+                                                                                                { id: 'value', value: id }
+                                                                                            ],
+                                                                                            addEventListener: [{ type: 'change', listener: updateData }]
+                                                                                        },
+                                                                                        {
+                                                                                            type: 'label',
+                                                                                            classList: ['form-check-label'],
+                                                                                            attributes: [{ id: 'for', value }],
+                                                                                            innerText
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 };
@@ -145,10 +155,10 @@ function addGame() {
                                         attributes: [{ id: 'visibility', value: 'hidden' }],
                                         children: [
                                             {
-                                                classList: ['align-items-center', 'd-flex', 'fixed-game-element-height', 'game-element', 'position-relative'],
+                                                classList: ['fixed-game-element-height', 'game-element', 'position-relative'],
                                                 children: [
                                                     {
-                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                        classList: ['g-1', 'pt-1', 'row'],
                                                         children: []
                                                     },
                                                     {
@@ -174,34 +184,44 @@ function addGame() {
                                                                 classList: ['col'],
                                                                 children: [
                                                                     {
-                                                                        classList: ['align-items-center', 'd-flex', 'flex-fill', 'justify-content-evenly'],
+                                                                        classList: ['g-1', 'pt-1', 'row'],
                                                                         children: GAMES.handicap
                                                                             .sort((a, b) => a.order - b.order)
                                                                             .map(({ id: v, value: innerText }) => {
                                                                                 const value = `${gameReference}|handicap|type|${v}`;
                                                                                 return {
-                                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                                    classList: ['col'],
                                                                                     children: [
                                                                                         {
-                                                                                            type: 'input',
-                                                                                            classList: ['form-check-input'],
-                                                                                            attributes: [
-                                                                                                { id: 'id', value },
-                                                                                                { id: 'disabled', value: true },
-                                                                                                { id: 'name', value: `[game]['${gameIndex}'][handicap][type]` },
-                                                                                                { id: 'type', value: 'radio' },
-                                                                                                { id: 'value', value: v }
-                                                                                            ],
-                                                                                            addEventListener: [
-                                                                                                { type: 'change', listener: updateData },
-                                                                                                { type: 'change', listener: updateGameOptionDescription }
+                                                                                            classList: ['d-flex', 'justify-content-center'],
+                                                                                            children: [
+                                                                                                {
+                                                                                                    classList: ['form-check', 'form-check-inline'],
+                                                                                                    children: [
+                                                                                                        {
+                                                                                                            type: 'input',
+                                                                                                            classList: ['form-check-input'],
+                                                                                                            attributes: [
+                                                                                                                { id: 'id', value },
+                                                                                                                { id: 'disabled', value: true },
+                                                                                                                { id: 'name', value: `[game]['${gameIndex}'][handicap][type]` },
+                                                                                                                { id: 'type', value: 'radio' },
+                                                                                                                { id: 'value', value: v }
+                                                                                                            ],
+                                                                                                            addEventListener: [
+                                                                                                                { type: 'change', listener: updateData },
+                                                                                                                { type: 'change', listener: updateGameOptionDescription }
+                                                                                                            ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                            type: 'label',
+                                                                                                            classList: ['form-check-label'],
+                                                                                                            attributes: [{ id: 'for', value }],
+                                                                                                            innerText
+                                                                                                        }
+                                                                                                    ]
+                                                                                                }
                                                                                             ]
-                                                                                        },
-                                                                                        {
-                                                                                            type: 'label',
-                                                                                            classList: ['form-check-label'],
-                                                                                            attributes: [{ id: 'for', value }],
-                                                                                            innerText
                                                                                         }
                                                                                     ]
                                                                                 };
@@ -210,18 +230,16 @@ function addGame() {
                                                                 ]
                                                             },
                                                             {
-                                                                classList: ['col', 'd-none'],
-                                                                attributes: [{ id: 'visibility', value: 'hidden' }],
+                                                                classList: ['col'],
                                                                 children: [
                                                                     {
                                                                         classList: ['row'],
                                                                         children: [
                                                                             {
-                                                                                classList: ['col-6', 'mx-auto'],
-
+                                                                                classList: ['col', 'col-sm-6', 'mx-auto'],
                                                                                 children: [
                                                                                     {
-                                                                                        classList: ['input-group', 'pb-1', 'pt-3'],
+                                                                                        classList: ['input-group', 'p-3', 'pb-1'],
                                                                                         children: [
                                                                                             {
                                                                                                 type: 'label',
@@ -255,17 +273,16 @@ function addGame() {
                                                                                         ]
                                                                                     }
                                                                                 ]
-
                                                                             }
                                                                         ]
                                                                     }
                                                                 ]
-                                                            },
-                                                            {
-                                                                classList: ['floating-label'],
-                                                                innerText: 'Handicap'
                                                             }
                                                         ]
+                                                    },
+                                                    {
+                                                        classList: ['floating-label'],
+                                                        innerText: 'Handicap'
                                                     }
                                                 ]
                                             },
@@ -362,10 +379,10 @@ function addPlayerToGame(game, player, innerText) {
                 classList: ['border', 'border-1', 'rounded', 'p-2'],
                 children: [
                     {
-                        classList: ['row', 'g-2'],
+                        classList: ['g-2', 'row'],
                         children: [
                             {
-                                classList: ['align-items-center', 'col', 'd-flex', 'justify-content-center'],
+                                classList: ['align-items-center', 'col-12', 'col-sm', 'd-flex', 'justify-content-center'],
                                 children: [
                                     {
                                         classList: ['form-check', 'form-switch'],
@@ -517,6 +534,7 @@ function handleTeamNameChanges() {
     const { id, value } = this;
     const [ , gameIndex, teamValue ] = (id.match(/game\-(\d+)\|.*\|team\-(\w+)\|name/) || Array.from({ length: 3 }))
     for (const element of Array.from(document.querySelectorAll(`[id^="game-${gameIndex}|"][id$="|team-${teamValue}|name"]:not([id="${id}"])`))) element.value = value;
+    document.getElementById(id.split('|name')[0]).checked = true;
     updateData();
 };
 
@@ -572,15 +590,14 @@ function selectGame() {
     const handicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
     const handicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|type|"][type="radio"]`);
     const methodSelect = document.getElementById(`${gameReference}|method`);
+    const nameElements = document.querySelectorAll('[id^="game-1|marker|team-"][id$="|name"]');
+    const participationElements = document.querySelectorAll(`[id^="${gameReference}|"][id$="|participation"]`);
     const roundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
 
-    const participationElements = document.querySelectorAll(`[id^="${gameReference}|"][id$="|participation"]`)// .map(({ checked, id }) => ({ checked, id }));
-    const teamElements = document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:checked`)// .map(({ id, value }));
-    const nameElements = document.querySelectorAll('[id^="game-1|marker|team-"][id$="|name"]')// .map(({ value }) => value);
-
     // find a better way to select the element
-    const scoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.align-items-center.d-flex.flex-fill.justify-content-evenly');
+    const scoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.row');
 
+    const teamElements = document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:checked`);
     this.classList.remove('is-invalid');
     toggleVisibility(handicapParent, false);
     toggleVisibility(methodSelect.closest('.col-12'), false);
@@ -614,28 +631,38 @@ function selectGame() {
         const { id, value: innerText } = scoring;
         const value = `${gameReference}|scoring|${id}`;
         scoringParent.insertBefore(createElement({
-            classList: ['form-check', 'form-check-inline'],
+            classList: ['col'],
             children: [
                 {
-                    type: 'input',
-                    classList: ['form-check-input'],
-                    attributes: [
-                        { id: 'id', value },
-                        { id: 'name', value: `[game]['${gameIndex}'][scoring]` },
-                        { id: 'type', value: 'radio' },
-                        { id: 'value', value: id }
-                    ],
-                    addEventListener: [
-                        { type: 'change', listener: changeScoringType },
-                        { type: 'change', listener: updateData },
-                        { type: 'change', listener: updateGameOptionDescription }
+                    classList: ['d-flex', 'justify-content-center'],
+                    children: [
+                        {
+                            classList: ['form-check', 'form-check-inline'],
+                            children: [
+                                {
+                                    type: 'input',
+                                    classList: ['form-check-input'],
+                                    attributes: [
+                                        { id: 'id', value },
+                                        { id: 'name', value: `[game]['${gameIndex}'][scoring]` },
+                                        { id: 'type', value: 'radio' },
+                                        { id: 'value', value: id }
+                                    ],
+                                    addEventListener: [
+                                        { type: 'change', listener: changeScoringType },
+                                        { type: 'change', listener: updateData },
+                                        { type: 'change', listener: updateGameOptionDescription }
+                                    ]
+                                },
+                                {
+                                    type: 'label',
+                                    classList: ['form-check-label'],
+                                    attributes: [{ id: 'for', value }],
+                                    innerText
+                                }
+                            ]
+                        }
                     ]
-                },
-                {
-                    type: 'label',
-                    classList: ['form-check-label'],
-                    attributes: [{ id: 'for', value }],
-                    innerText
                 }
             ]
         }), null);
@@ -674,7 +701,7 @@ function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
         children: [
             {
                 type: 'input',
-                classList: noneTeam ? ['form-check-input'] : ['form-check-input', 'me-2', 'my-auto'],
+                classList: noneTeam ? ['form-check-input'] : ['flex-shrink-0', 'form-check-input', 'me-2', 'my-auto'],
                 attributes: [
                     { id: 'id', value },
                     { id: 'name', value: `[game]['${gameIndex}'][${player}][team]` },
@@ -701,7 +728,16 @@ function teamRadioButtonObject(game, player, teamId, teamName, checkedValue) {
                     { id: 'name', value: `[game]['${gameIndex}'][team][${teamId}]` },
                     { id: 'value', value: teamName }
                 ],
-                addEventListener: [{ type: 'input', listener: handleTeamNameChanges }]
+                addEventListener: [
+                    { type: 'change', listener: function() {
+                        const { id, value } = this;
+                        if (value) return;
+                        const [ , team ] = id.match(/\|team\-(\w)+\|/);
+                        this.value = team.toUpperCase();
+                        handleTeamNameChanges.call(this);
+                    } },
+                    { type: 'input', listener: handleTeamNameChanges }
+                ]
             },
             {
                 type: 'label',
