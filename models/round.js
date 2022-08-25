@@ -80,10 +80,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
             ]
         })();
         if (gameScores.length < GAME.filters.players.minimum) continue;
-
-        // const properties = method === 'high/low' ? ['low', 'high'] : ['score'];
-        const properties = Object.keys(gameScores[0].score[0]);
-
+        const properties = Object.keys(gameScores[0]?.score[0] || {});
         game.description = {
             get description() {
                 const { method, round, scoring } = this;
