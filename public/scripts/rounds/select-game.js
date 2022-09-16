@@ -105,7 +105,9 @@ function addGame() {
                                                 children: [
                                                     {
                                                         classList: ['g-1', 'pt-1', 'row'],
-                                                        children: ROUND_TYPES.filter(({ end, start }) => start !== 0 || end !== 0)
+                                                        children: ROUND_TYPES
+                                                            .filter(({ end, start }) => start !== 0 || end !== 0)
+                                                            .sort((a, b) => a.order - b.order)
                                                             .map(({ id, value: innerText }) => {
                                                                 const value = `${gameReference}|round|${id}`;
                                                                 return {
@@ -604,7 +606,6 @@ function selectGame() {
     toggleVisibility(playersElement.closest('.col-12'), false);
     toggleVisibility(roundParent, false);
     toggleVisibility(scoringParent.closest('.col-12'), false);
-    updateGameOptionDescription.call(this);
     for (const handicap of handicapRadioButtons) handicap.disabled = true;
     while (methodSelect.children.length > 0) methodSelect.children[0].remove();
     while (playersElement.children.length > 0) playersElement.children[0].remove();
@@ -621,6 +622,7 @@ function selectGame() {
     toggleVisibility(playersElement.closest('.col-12'));
     toggleVisibility(roundParent);
     toggleVisibility(scoringParent.closest('.col-12'));
+    updateGameOptionDescription.call(this);
     for (const playerSelect of playerSelects) {
         const { id, selectedIndex } = playerSelect;
         const [ playerReference ] = id.split('|');
@@ -792,9 +794,7 @@ function updateGameOptions() {
         const currentValue = gameSelect.value;
         while (gameSelect.children.length > 1) gameSelect.children[1].remove();
         for (const option of gameSelectOptions(selectedPlayers)) gameSelect.insertBefore(createElement(option), null);
-        const selectedOption = Array.from(gameSelect.children).find(({ value }) => value === currentValue);
-        if (selectedOption) selectedOption.selected = true;
-        else gameSelect.children[0].selected = true;
+        (Array.from(gameSelect.children).find(({ value }) => value === currentValue) || gameSelect.children[0]).selected = true;
         selectGame.call(gameSelect);
     };
 };
