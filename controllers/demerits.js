@@ -99,55 +99,63 @@ async function show (req, res) {
     const seasonYears = years();
     const data = await Promise.all(seasonYears.map(async ({ year }) => {
         const { endDate, startDate } = dates(year);
-        const demerits = await Demerit.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
-        const drinks = await Drink.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': 1 }).populate('player');
-        const titles = await Title.find({ 'when.date': { $gte: startDate, $lte: endDate } }).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
+        const options = { 'when.date': { $gte: startDate, $lte: endDate } };
+        const demerits = await Demerit.find(options).sort({ 'when.date': 1 }).populate('player');
+        const drinks = await Drink.find(options).sort({ 'when.date': 1 }).populate('player');
+        const titles = await Title.find(options).sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
         const demeritDates = [ ...new Set(demerits.map(({ when }) => when.formattedDate.friendly)) ];
         const drinkDates = [ ...new Set(drinks.map(({ when }) => when.formattedDate.friendly)) ];
-
-        // should we move demerits and drinks into objects in players array?
         const data = {
             year,
-            players: allPlayers.map(player => {
+            players: allPlayers.map(({ id, name }) => {
                 return {
-                    id: String(player._id),
-                    name: player.name,
+                    id: id.toString(),
+                    name,
                     titles: [],
                     bbq: false
                 };
             }),
             demerits: demeritDates.map(date => {
-                const demeritsForDate = demerits.filter(({ when }) => when.formattedDate.friendly === date);
+                const demeritsForDate = demerits.filter(({ when: { formattedDate: { friendly } } }) => friendly === date);
                 return {
                     date,
-                    players: allPlayers.map(({ _id }) => {
-                        const player = String(_id);
-                        const demerits = demeritsForDate.filter(demerit => String(demerit.player._id) === player).reduce((accumulate, { action }) => accumulate + action.demerits, 0);
+                    players: allPlayers.map(({ id }) => {
+                        const player = id.toString();
+                        const demerits = demeritsForDate
+                            .filter(({ player: { id } }) => id.toString() === player)
+                            .reduce((sum, { action: { demerits } }) => sum + demerits, 0);
                         return { player, demerits };
                     })
                 };
             }),
             drinks: drinkDates.map(date => {
-                const drinksForDate = drinks.filter(({ when }) => when.formattedDate.friendly === date);
+                const drinksForDate = drinks.filter(({ when: { formattedDate: { friendly } } }) => friendly === date);
                 return {
                     date,
-                    players: allPlayers.map(({ _id }) => {
-                        const player = String(_id);
-                        const drinks = drinksForDate.filter(drink => String(drink.player._id) === player).reduce((accumulate, { value }) => accumulate + value, 0)
+                    players: allPlayers.map(({ id }) => {
+                        const player = id.toString();
+                        const drinks = drinksForDate
+                            .filter(({ player: { id } }) => id.toString() === player)
+                            .reduce((sum, { value }) => sum + value, 0);
                         return { player, drinks };
                     })
                 };
             }),
         };
-
         for (const player of data.players) {
-            player.demerits = demerits.filter(demerit => String(demerit.player._id) === player.id).reduce((accumulate, { action }) => accumulate + action.demerits, 0);
+            player.demerits = demerits
+                .filter(({ player: { id } }) => id.toString() === player.id)
+                .reduce((sum, { action: { demerits } }) => sum + demerits, 0);
             if (player.demerits < 0) player.demerits = 0;
-            player.bought = drinks.filter(drink => String(drink.player._id) === player.id).reduce((accumulate, drink) => accumulate + drink.value, 0);
+            player.bought = drinks
+                .filter(({ player: { id } }) => id.toString() === player.id)
+                .reduce((sum, { value }) => sum + value, 0);
             player.owed = Math.floor(player.demerits / 5);
             player.balance = player.owed - player.bought;
         };
-        for (const player of data.players) player.bbq = player.demerits > 0 && player.demerits === Math.max( ...data.players.map(({ demerits }) => +demerits) )
+        const maxDemerits = Math.max( ...data.players.map(({ demerits }) => +demerits) ) || undefined;
+        data.bbq = (1 / data.players.filter(({ demerits }) => demerits === maxDemerits).length) || 0;
+        for (const player of data.players) player.bbq = player.demerits === maxDemerits;
         for (const title of allTitles) {
             const filterTitles = titles.filter(({ name }) => name === title);
             if (!filterTitles) continue;
