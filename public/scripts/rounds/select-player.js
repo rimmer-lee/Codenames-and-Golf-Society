@@ -189,7 +189,13 @@ function selectPlayer() {
                                 { id: 'value', value: handicap },
                                 { id: 'max', value: 54 },
                             ],
-                            addEventListener: [{ type: 'input', listener: updateData }]
+                            addEventListener: [
+                                { type: 'change', listener: function() {
+                                    const roundedValue = Math.round(this.value);
+                                    return this.value = roundedValue <= 54 ? roundedValue : 54;;
+                                } },
+                                { type: 'input', listener: updateData }
+                            ]
                         },
                         {
                             type: 'label',
