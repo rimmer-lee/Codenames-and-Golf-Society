@@ -38,16 +38,17 @@ async function seed() {
         const u = await new User(user);
         await User.register(u, u.username);
     }));
-    const defaultUser = await User.findOne({ 'name.preferred': 'The Machine' });
+    const machine = await User.findOne({ 'name.preferred': 'The Machine' });
+    const created = { by: machine };
     for (const section of sections) {
         if ((section.rules || []).length > 0) section.rules = await Promise.all(section.rules.map(async rule => await new Rule(rule).save()));
     };
-    await new Charter({ created: { date: new Date(2021, 0, 1), by: defaultUser }, sections, status: 'Approved' }).save();
+    await new Charter({ created: { date: new Date(2021, 0, 1), ...created }, sections, status: 'Approved' }).save();
     for (const demerit of demerits) {
         demerit.player = await User.findOne({ 'name.full': { $regex: regexName(demerit.player) }});
         demerit.rule = await Rule.findOne({ 'index': demerit.rule });
         if (demerit.action && demerit.action.titles && demerit.action.titles.length > 0) demerit.action.titles = await Promise.all(demerit.action.titles.map(async ({ method, name }) => await new Title({ when: demerit.when, method, player: demerit.player, name }).save()));
-        if (demerit.history && demerit.history.length > 0) for (const h of demerit.history) h.updated.by = defaultUser;
+        if (demerit.history && demerit.history.length > 0) for (const h of demerit.history) h.updated = created;
         await new Demerit(demerit).save();
     };
     for (const drink of drinks) {
@@ -55,12 +56,12 @@ async function seed() {
         await new Drink(drink).save();
     };
     for (const course of courses) {
-        course.created = { by: defaultUser };
+        course.created = created
         await new Course(course).save();
     };
     for (const round of rounds) {
-        round.created = { by: defaultUser };
-        round.lastModified = { by: defaultUser };
+        round.created = created
+        round.lastModified = created
         round.course = await Course.findOne({ 'name': round.course });
         round.tee = round.course.tees.find(({ name }) => name.toLowerCase() === round.tee.toLowerCase())._id;
         round.games = await Promise.all(round.games.map(async game => {
