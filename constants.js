@@ -122,7 +122,7 @@ module.exports = {
                 filters: {
                     players: {
                         for: [ 'individual', 'team' ],
-                        minimum: 2
+                        minimum: 1
                     },
                     method: ['best', 'combined', 'worst'],
                     scoring: ['nett', 'shots', 'stableford']
