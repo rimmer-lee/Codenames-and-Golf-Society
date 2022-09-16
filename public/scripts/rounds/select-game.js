@@ -381,7 +381,7 @@ function addPlayerToGame(game, player, innerText) {
                 classList: ['border', 'border-1', 'rounded', 'p-2'],
                 children: [
                     {
-                        classList: ['g-2', 'row'],
+                        classList: ['g-2', 'px-2', 'row'],
                         children: [
                             {
                                 classList: ['align-items-center', 'col-12', 'col-sm', 'd-flex', 'justify-content-center'],
@@ -803,9 +803,9 @@ function updateMethodSelect() {
     const gameReference = getGameReference(this);
     const gameMethodSelect = document.getElementById(`${gameReference}|method`);
     const gameSelectValue = document.getElementById(`${gameReference}|game`).value;
-    const gameMethods = (GAMES.game.find(({ id }) => id === gameSelectValue) || { filters: { method: GAMES.method }}).filters.method;
-    if (!gameMethods) return;
-    const methods = GAMES.method.filter(({ id }) => gameMethods.includes(id));
+    const { filters } = (GAMES.game.find(({ id }) => id === gameSelectValue) || { filters: { method: GAMES.method }});
+    if (!filters) return;
+    const methods = GAMES.method.filter(({ id }) => filters.method.includes(id));
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
     while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
     if (!methods || methods.length === 0) return;
@@ -814,7 +814,7 @@ function updateMethodSelect() {
         ...[ ...new Set(Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:not([id$="none"]):checked`)).map(({ value }) => value)) ]
         .map(team => document.querySelectorAll(`[id^="${gameReference}|"][id$="|team-${team}"]:checked`).length)
     ];
-    if (teams.length <= 1 || !teams.some(team => team > 1)) return;
+    if (teams.length < filters.players.minimum || !teams.some(team => team > 1)) return;
     const equalTeams = teams.every(team => teams[0] === team);
     const methodsToAdd = methods.filter(({ filters }) => ((filters.teams.even ? equalTeams : true) && teams.every(team => team >= filters.teams.minimum)))
         .map(({ id: value, value: v }) => ({ v, value }));
