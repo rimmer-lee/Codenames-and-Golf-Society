@@ -358,8 +358,6 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 
 // for courses edit and new, add labels for tee and tee display colour
 
-// Calculate handicaps
-
 // Tabbed input is shown on /rounds/new
 
 // Voting/Approval required for submitted demerits
@@ -377,4 +375,4 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 
 
 // lee vs. jonny at waterstock - matchplay
-// 7/8 - 3 best ball stroke play
+// 07/08, 29/08, 04/02, 10/09 - 3 best ball stroke play
