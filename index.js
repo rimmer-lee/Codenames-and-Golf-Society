@@ -374,5 +374,5 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // put flash message in container on home screen i.e. for when logging out
 
 
-// lee vs. jonny at waterstock - matchplay
+// 04/06 lee vs. jonny at waterstock - matchplay
 // 07/08, 29/08, 04/02, 10/09 - 3 best ball stroke play
