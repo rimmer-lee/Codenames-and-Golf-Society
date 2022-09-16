@@ -8,6 +8,8 @@ module.exports = {
         front: Number,
         full: Number
     },
+
+    // move to database
     COUNTRY_CODES: [
         { name: 'Argentina', 'alpha-3': 'ARG' },
         { name: 'Australia', 'alpha-3': 'AUS' },
@@ -96,6 +98,7 @@ module.exports = {
         { name: 'Zambia', 'alpha-3': 'ZAM' },
         { name: 'Zimbabwe', 'alpha-3': 'ZIM' }
     ],
+
     GAMES: {
         game: [
             {
@@ -231,10 +234,10 @@ module.exports = {
     PAR_CLASSES: ['f-level', 'f-over', 'f-under'],
     ROLES: ['admin', 'founder', 'guest', 'member', 'super'],
     ROUND_TYPES: [
-        { id: 'full', name: 'full', start: 0, end: 18, value: 'Full' },
-        { id: 'front', name: 'front', start: 0, end: 9, value: 'Front' },
-        { id: 'back', name: 'back', start: 9, end: 18, value: 'Back' },
-        { id: 'practice', name: 'practice', start: 0, end: 0, value: 'Practice' }
+        { end: 18, id: 'full', name: 'full', order: 1, start: 0, value: 'Full' },
+        { end: 9, id: 'front', name: 'front', order: 2, start: 0, value: 'Front' },
+        { end: 18, id: 'back', name: 'back', order: 3, start: 9, value: 'Back' },
+        { end: 0, id: 'practice', name: 'practice', order: 4, start: 0, value: 'Practice' }
     ],
     SAFE_URLS: {
         connect: [
