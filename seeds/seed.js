@@ -78,10 +78,12 @@ async function seed() {
                 }))
             };
         }));
-        for (const score of round.scores) {
+        round.scores = await Promise.all(round.scores.map(async (score, index) => {
+            score.playingGroup = { index: 1, player: (index === 0 ? 'marker' : `player-${(index - 1).toLetter()}`) };
             score.player = await User.findOne({ 'name.full': { $regex: regexName(score.player) }});
             score.tee = round.course.tees.find(({ name }) => name.toLowerCase() === round.tee.toLowerCase())._id;
-        };
+            return score;
+        }));
         await new Round(round).save();
     };
 };
