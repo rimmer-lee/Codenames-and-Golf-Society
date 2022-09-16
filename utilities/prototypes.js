@@ -71,6 +71,10 @@ Date.prototype.weekday = function() {
     return this.toLocaleDateString('en-GB', { weekday: 'long' });
 };
 
+Number.prototype.toLetter = function() {
+    return String.fromCharCode(97 + this);
+};
+
 String.prototype.capitalize = function() {
     return this[0].toUpperCase() + this.substring(1);
 };
