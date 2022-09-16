@@ -63,7 +63,6 @@ async function seed() {
         round.created = created
         round.lastModified = created
         round.course = await Course.findOne({ 'name': round.course });
-        round.tee = round.course.tees.find(({ name }) => name.toLowerCase() === round.tee.toLowerCase())._id;
         round.games = await Promise.all(round.games.map(async game => {
             const { handicap, method, name, players } = game;
             return {
@@ -79,7 +78,10 @@ async function seed() {
                 }))
             };
         }));
-        for (const score of round.scores) score.player = await User.findOne({ 'name.full': { $regex: regexName(score.player) }});
+        for (const score of round.scores) {
+            score.player = await User.findOne({ 'name.full': { $regex: regexName(score.player) }});
+            score.tee = round.course.tees.find(({ name }) => name.toLowerCase() === round.tee.toLowerCase())._id;
+        };
         await new Round(round).save();
     };
 };
