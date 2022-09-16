@@ -34,13 +34,14 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
 
                 // move to separate function for use in calculating score values???
                 const score = (function() {
-                    if (scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
+                    if (name !== 'stroke-play' && scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
                     const { handicap: playerHandicap, shots, tee } = scoreObject;
                     const { shotsPerHole, holesWithAShot } = handicapShots(multiplier / 100 * (playerHandicap - handicapAdjustment));
-                    const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == tee) || defaultTee;
+                    const { holes = [] } = course.tees && course.tees.find(({ id}) => id == tee) || defaultTee;
                     return holes.map(({ index, par, strokeIndex }) => {
                         const shot = +shots[index - 1];
                         if (!shot || !par) return null;
+                        if (name === 'stroke-play') return shot - par;
                         const doubleBogey = +par + 2;
                         const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
                         if (name !== 'stableford' && scoring !== 'stableford') return nettScore > doubleBogey ? doubleBogey : nettScore;
@@ -190,7 +191,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 return a.total - b.total;
             });
             if (name === 'skins') return sortedTotals.map(({ id, total}) => `${id} (${total})`).join('; ');
-            if (name === 'stableford' && game.scores.length === 1) {
+            if (game.scores.length === 1) {
                 const { id, total } = sortedTotals[0];
                 return `${id} (${total})`;
             };
@@ -201,7 +202,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 const string = equalTotals.filter(equalTotal => equalTotal.total === t).map(({ id, total }, i) => {
                     if (i !== equalTotals.length - 1) return id;
                     if (index === 0) return `${id} ${allSquare ? 'tied' : `${gameComplete ? 'win' : 'lead'}${equalTotals.length === 1 ? 's' : ''}`} (${total})`;
-                    return `${id} (${Math.abs(total)})`;
+                    return `${id} (${total})`;
                 }).join(', ');
                 return string.replaceLastInstance();
             }).join('; ');
