@@ -5,19 +5,20 @@
         <div class="row g-2">
             <div class="col">
                 <div class="form-floating">
-                    <select id="<%= `${score.playingGroup.index}|${score.playingGroup.player.id}|id` %>" class="form-select text-capitalize" name="<%= `[${score.playingGroup.index}][${score.playingGroup.player.id}][id]` %>">
+                    <select id="<%= `playing-group-${score.playingGroup.index}|${score.playingGroup.player}|id` %>" class="form-select text-capitalize" name="<%= `[${score.playingGroup.index}][${score.playingGroup.player}][id]` %>">
+                    <option disabled>Select Player</option>
                     <% for (const player of players) { %>
-                        <% if (playingGroups.map(playingGroup => playingGroup.map(({ player }) => player._id)).flat().some(id => id === player.id) && player.id !== score.player.id) continue; %>
+                        <% if (score.player._id.toString() !== player._id.toString() && playingGroups.some(playingGroup => playingGroup.some(({ player }) => player._id === score.player._id))) continue; %>
                         <option value="<%= player.id %>"<%= player.id === score.player.id ? " selected" : "" %>><%= player.name.knownAs %></option>
                     <% }; %>
                     </select>
-                    <label for="<%= `${score.playingGroup.index}|${score.playingGroup.player.id}|id` %>" class="text-capitalize"><%= score.playingGroup.player.value %></label>
+                    <label for="<%= `playing-group-${score.playingGroup.index}|${score.playingGroup.player}|id` %>" class="text-capitalize"><%= score.playingGroup.player.split('-').join(' ') %></label>
                 </div>
             </div>
             <div class="col-4 col-md-2">
                 <div class="form-floating">
-                    <input id="<%= `${score.playingGroup.index}|${score.playingGroup.player.id}|handicap` %>" class="form-control text-center" type="number" placeholder="Handicap" name="<%= `[${score.playingGroup.index}][${score.playingGroup.player.id}][handicap]` %>" value="<%= score.handicap %>" max="54">
-                    <label for="<%= `${score.playingGroup.index}|${score.playingGroup.player.id}|handicap` %>">Handicap</label>
+                    <input id="<%= `playing-group-${score.playingGroup.index}|${score.playingGroup.player}|handicap` %>" class="form-control text-center" type="number" placeholder="Handicap" name="<%= `[${score.playingGroup.index}][${score.playingGroup.player}][handicap]` %>" value="<%= score.handicap %>" max="54">
+                    <label for="<%= `playing-group-${score.playingGroup.index}|${score.playingGroup.player}|handicap` %>">Handicap</label>
                 </div>
             </div>
         </div>
