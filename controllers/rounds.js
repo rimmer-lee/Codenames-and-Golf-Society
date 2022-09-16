@@ -7,16 +7,15 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const { customDate } = require('../utilities/formatDate');
-
-const { ROUND_TYPES, TITLES } = require('../constants');
+const { TITLES } = require('../constants');
 
 // used client-side also
 function getPlayerKeys(object) {
     return Object.keys(object).filter(key => /^(?:marker$|player\-)/.test(key));
 };
 
-async function create (req, res) {const date = customDate('yyyy-mm-dd');
+async function create (req, res) {
+    const date = new Date().custom('yyyy-mm-dd');
     const allCourses = await Course.find();
     const allPlayers = await User.findPlayers();
     const rules = await Rule.getAll();
@@ -152,11 +151,9 @@ function serviceWorker (req, res) {
 
 async function show (req, res) {
     const rounds = await Round.find().sort({ 'date': -1 }).populate('scores.player').populate('course');
-
     const localStorage = req.session.deleteLocalStorage || [];
     delete req.session.localStorage;
     res.render('rounds/index', { rounds, localStorage });
-
 };
 
 async function update (req, res) {
@@ -171,27 +168,43 @@ async function view (req, res) {
     const players = await User.findPlayers();
     const round = await Round.findById(req.params.id).populate('scores.player').populate('course');
     const { course, formattedDate: date, games: G, id, scores: S, tee: T } = round.toJSON();
-    const currentDate = customDate('yyyy-mm-dd');
-    const games = G.map(({ description, game, handicap, method, participants, players: p, roundType, summary }, index) => {
-        const players = p.map(({ player, team }) => ({ score: S.find(score => score.player._id.toString() === player.toString()), team }));
+    const currentDate = new Date().custom('yyyy-mm-dd');
+    const scores = S.map(({ classes, handicap = 54, player, playingGroup: pg, scores, shots, tee }, index) => {
+        const playingGroup = pg || { index: 1, player: (index === 0 ? 'marker' : `player-${(index - 1).toLetter()}`) };
+        return { classes, handicap, player, playingGroup, scores, shots, tee };
+    });
+    const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
+        return scores.filter(({ playingGroup}) => playingGroup.index === playingGroupIndex);
+    });
+    const games = G.map(({ description, game, handicap, method, participants, players: p, roundType, scoring, summary }, index) => {
+        const players = p.map(({ player, team }) => {
+            return {
+                score: S.find(score => score.player._id.toString() === player.toString()),
+                team
+            };
+        });
+        const playingGroup = playingGroups.find(playingGroup => {
+            return playingGroup.some(({ player }) => {
+                return players.some(({ score }) => score.player._id == player._id);
+            });
+        });
         return {
             description,
             game,
             handicap,
             index: ++index,
             method,
-            players,
             participants,
-            roundType: ROUND_TYPES.find(({ id }) => roundType === id).value,
+            players,
+            playingGroup,
+            roundType,
+            scoring,
             summary
         };
     });
-    const tee = course.tees.find(({ _id }) => _id == T);
-    const scores = S.map(({ classes, handicap = 54, player, playingGroup, scores, shots }) => {
-        return { classes, handicap, player, playingGroup, scores, shots };
-    });
-    const playingGroups = [ ...new Set(scores.map(({ playingGroup}) => playingGroup.index)) ].map(playingGroupIndex => {
-        return scores.filter(({ playingGroup}) => playingGroup.index === playingGroupIndex);
+    const tee = course.tees.find(({ _id }) => {
+        return _id == T ||
+        _id == scores[0].tee;
     });
     res.render('rounds/edit', { course, courses, currentDate, date, games, id, players, playingGroups, tee });
 };
