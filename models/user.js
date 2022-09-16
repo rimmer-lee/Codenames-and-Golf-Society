@@ -119,7 +119,7 @@ UserSchema.virtual('formattedBirthday').get(function() {
 UserSchema.virtual('handicap.current').get(function() {
     const { handicap: { handicaps } } = this;
     if (handicaps.length === 0) return 54.0;
-    return handicaps[handicaps.length - 1].value;
+    return Math.round(handicaps[handicaps.length - 1].value);
 });
 
 UserSchema.virtual('name.knownAs').get(function() {
