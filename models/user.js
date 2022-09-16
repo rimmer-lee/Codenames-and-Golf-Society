@@ -8,12 +8,6 @@ const { customDate } = require('../utilities/formatDate');
 
 const options = { toJSON: { virtuals: true } };
 
-const handicapObject = {
-    type: Number,
-    default: 54.0,
-    max: 54.0
-};
-
 const ImageSchema = new Schema({
     url: String,
     filename: String
@@ -31,14 +25,33 @@ const UserSchema = new Schema({
         type: String
     },
     handicap: {
-        current: handicapObject,
-        progression: [
+        handicaps: [
             {
+                calculated: {
+                    default: true,
+                    type: Boolean
+                },
                 date: Date,
-                handicap: handicapObject
+                value: {
+                    type: Number,
+                    default: 54.0,
+                    max: 54.0
+                }
             }
         ],
-        starting: handicapObject
+        scoreDifferentials: [
+            {
+                date: Date,
+                exceptions: [
+                    {
+                        date: Date,
+                        value: Number
+                    }
+                ],
+                value: Number
+            }
+        ],
+        starting: Number
     },
     images: [ ImageSchema ],
     name: {
@@ -101,6 +114,12 @@ UserSchema.virtual('formattedBirthday').get(function() {
         friendly: customDate('dd/mm/yyyy', birthday),
         date: new Date(birthday.getUTCFullYear(), birthday.getUTCMonth(), birthday.getUTCDate())
     };
+});
+
+UserSchema.virtual('handicap.current').get(function() {
+    const { handicap: { handicaps } } = this;
+    if (handicaps.length === 0) return 54.0;
+    return handicaps[handicaps.length - 1].value;
 });
 
 UserSchema.virtual('name.knownAs').get(function() {
