@@ -93,7 +93,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 return '';
             },
             get method() {
-                const METHOD = GAMES.method.find(({ id }) => id === method) || {};
+                const METHOD = GAMES.method.find(({ id }) => id === method);
                 if (!METHOD) return '';
                 const { id, value } = METHOD;
                 return `${value} ${id === 'combined' ? 'Score' : 'Ball'} `;
@@ -210,6 +210,104 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
         }());
     };
     return games;
+};
+
+async function calculateHandicaps(dateFrom, playerId, teeId) {
+    const player = await User.findById(playerId);
+    const rounds = await Round.find({ 'date': { $gte: dateFrom }, 'scores.player': playerId }).populate('course').sort('date');
+    player.handicap = {
+        handicaps: player.handicap.handicaps.filter(({ date }) => !date || date < dateFrom),
+        scoreDifferentials: player.handicap.scoreDifferentials.filter(({ date }) => !date || date < dateFrom)
+    };
+    if (player.handicap.handicaps.length === 0) player.handicap.handicaps = [{ value: 54.0 }]
+    for (const round of rounds) {
+
+        // still getting tee for historical purposes
+        const { course, date, scores, tee } = round;
+
+        const { roundType, shots } = scores.find(({ player }) => player.toString() === playerId.toString());
+        if (roundType === 'practice') continue;
+
+        // remove 9 holes by default
+        if (roundType !== 'full') continue;
+
+        const handicap = player.handicap.current;
+        const roundAdjustedHandicap = handicap / (1 + +(roundType !== 'full'))
+        const { holes, ratings } = course.tees.find(({ id }) => {
+            const idString = id.toString();
+            return teeId.toString() === idString ||
+                tee.toString() === idString;
+        });
+        const { holesWithAShot, shotsPerHole } = handicapShots(roundAdjustedHandicap);
+        const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
+        const adjustedGrossScore = holes
+            .slice(start, end)
+            .sort((a, b) => a.strokeIndex - b.strokeIndex)
+            .map(({ index, par }, strokeIndex) => {
+                const shot = shots[index - 1];
+                const nettDoubleBogey = par + 2 + shotsPerHole + +((strokeIndex + 1) < holesWithAShot);
+                return shot > nettDoubleBogey ? nettDoubleBogey : shot;
+            })
+            .reduce((sum, value) => sum += value, 0);
+        const assumedGrossScore = holes
+            .slice((start + 9) % 18, end % 18 + 9)
+            .sort((a, b) => a.strokeIndex - b.strokeIndex)
+            .map(({ par }, strokeIndex) => (par + shotsPerHole + +((strokeIndex + 10) < holesWithAShot)))
+            .reduce((sum, value) => sum += value, 0);
+        const assumedScoreDifferential = roundType === 'full' ? 0 : assumedGrossScore + 1 - ratings.course[['back', 'front'].find(value => value !== roundType)];
+        const scoreDifferential = +(((adjustedGrossScore - ratings.course[roundType]) * 113 / ratings.slope[roundType] + assumedScoreDifferential).toFixed(1));
+        player.handicap.scoreDifferentials.push({ date, value: scoreDifferential });
+
+        // 5.9: Submission of an Exceptional Score
+        if (handicap < 54) {
+            const difference = handicap - scoreDifferential;
+            if (difference >= 7) {
+                player.handicap.scoreDifferentials = player.handicap.scoreDifferentials
+                    .sort((a, b) => a.date - b.date)
+                    .slice(0, 20)
+                    .map(differential => {
+                        const value = 1 + +(difference >= 10);
+                        differential.exceptions.push({ date, value });
+                        differential.value = differential.value - value;
+                        return differential;
+                    });
+            };
+        };
+
+        const newHandicap = +((function() {
+            const { scoreDifferentials } = player.handicap;
+            const sortedScoreDifferentials = scoreDifferentials
+                .sort((a, b) => b.date - a.date)
+                .slice(0, 20)
+                .map(({ value }) => value)
+                .sort((a, b) => a - b);
+            const differentials = sortedScoreDifferentials.length;
+            const adjustment = differentials === 3 ? 2 : ([4, 6].indexOf(differentials) !== -1 ? 1 : 0);
+            if (differentials < 3) return 54;
+            if (differentials < 6) return Math.min(sortedScoreDifferentials.slice(0, 1)) - adjustment;
+            const length = (function() {
+                if (differentials < 9) return 2;
+                if (differentials < 12) return 3;
+                if (differentials < 15) return 4;
+                if (differentials < 17) return 5;
+                if (differentials < 19) return 6;
+                if (differentials < 20) return 7;
+                return 8;
+            })();
+            const handicap = sortedScoreDifferentials.slice(0, length).reduce((sum, value) => sum += +value, 0) / length - adjustment;
+
+            // 5.8: Limit on Upward Movement of a Handicap Index
+            const acceptableScores = scoreDifferentials.filter(({ date }) => date >= (dateFrom - 365));
+            if (acceptableScores.length < 20) return handicap;
+            const lowHandicapIndex = Math.min( ...acceptableScores.map(({ value }) => value) );
+            const difference = handicap - lowHandicapIndex;
+            if (difference <= 3) return handicap;
+            return handicap + (difference >= 10 ? 5 : difference * 0.5);
+
+        })().toFixed(1));
+        if (newHandicap !== handicap) player.handicap.handicaps.push({ date, value: newHandicap });
+    };
+    await player.save();
 };
 
 // shared with public/scripts/rounds/update.js
@@ -385,6 +483,7 @@ RoundSchema.pre('save', async function(next) {
     for (const score of this.scores) {
         const { shotsPerHole, holesWithAShot } = handicapShots(score.handicap);
         const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == score.tee) || tee;
+        score.roundType === score.roundType || 'practice';
         for (const roundType of ROUND_TYPES) {
             const { id, start, end } = roundType;
             if (score.shots.slice(start, end).every(shot => shot !== 0)) {
@@ -423,59 +522,13 @@ RoundSchema.pre('save', async function(next) {
     next();
 });
 
-// RoundSchema.post('save', async function(next) {
-//     for (const score of this.scores) {
-//         const playerId = score.player;
-//         const player = await Player.findById(playerId);
-//         only do this for rounds including and after this round
-//         const rounds = await Rounds.find({ 'scores.player': playerId }).populate('course').sort({ 'date': -1 });
-//         const handicapDifferentials = [];
-//         const { starting } = player.handicap;
-//         player.handicap.progression = [{ handicap: starting ? starting : 54.0 }];
-//         for (const round of rounds) {
-//             const { course, date, scores, tee } = round;
-//             const { holes, ratings } = course.tees.find(({ colour, name }) => colour.toLowerCase() === tee.toLowerCase() || name.toLowerCase() === tee.toLowerCase());
-//             const { roundType, shots } = scores.find(({ player }) => player === playerId);
-//             const adjustedShots = []
-//             let roundHandicap = player.handicap.progression[player.handicap.progression.length - 1].handicap;
-//             if (roundType === 'practice') continue;
-//             else if (roundType !== 'full') roundHandicap = roundHandicap / 2;
-//             const { start, end } = ROUND_TYPES.find(({ name }) => name === roundType);
-//             const holesPlayed = end - start;
-//             roundHandicap = Math.floor(roundHandicap);
-//             holes.forEach((hole, holeIndex) => {
-//                 if (holeIndex < start || holeIndex > end) return;
-//                 const { par, strokeIndex } = hole;
-//                 const handicapShots = Math.floor(roundHandicap / holesPlayed, 0) + +(strokeIndex < roundHandicap % holesPlayed);
-//                 const shot = shots[holeIndex];
-//                 const maxScore = par + handicapShots + 2;
-//                 adjustedShots.push(shot > maxScore ? maxScore : shot);
-//             });
-//             handicapDifferentials.push(Math.round(10 * (adjustedShots.reduce((sum, value) => sum += value, 0) - ratings.course[roundType]) * 113 / ratings.slope[roundType]) / 10);
-
-//             // need to handle plus handicaps i.e. really good golfers
-
-//             let adjustment = 0;
-//             let differentials;
-//             if (handicapDifferentials.length < 3) continue;
-//             else if (handicapDifferentials.length < 6) differentials = 1;
-//             else if (handicapDifferentials.length < 9) differentials = 2;
-//             else if (handicapDifferentials.length < 12) differentials = 3;
-//             else if (handicapDifferentials.length < 15) differentials = 4;
-//             else if (handicapDifferentials.length < 17) differentials = 5;
-//             else if (handicapDifferentials.length < 19) differentials = 6;
-//             else if (handicapDifferentials.length < 20) differentials = 7;
-//             else differentials = 8;
-//             if ([4, 6].indexOf(handicapDifferentials.length) !== -1) adjustment = 1;
-//             else if (handicapDifferentials.length === 3) adjustment = 2;
-//             const handicap = handicapDifferentials.sort((a, b) => a - b).slice(0, differentials).reduce((sum, value) => sum += value, 0) / differentials - adjustment;
-//             player.handicap.progression.push({ date, handicap });
-//         };
-//         player.save();
-
-//     };
-//     next();
-// });
+RoundSchema.post('save', async function(document) {
+    const { date, scores } = document;
+    for (const score of scores) {
+        const { player, tee } = score;
+        await calculateHandicaps(date, (player.id || player).toString(), tee.id || tee);
+    };
+});
 
 RoundSchema.virtual('formattedDate').get(function () {
     const { date } = this;
@@ -496,4 +549,6 @@ ScoreSchema.virtual('classes').get(function () {
     return { par: classesObject };
 });
 
-module.exports = mongoose.model('Round', RoundSchema);
+const Round = mongoose.model('Round', RoundSchema);
+
+module.exports = Round;
