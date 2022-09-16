@@ -53,7 +53,7 @@ function createOption(innerText, attributes = []) {
     });
 };
 
-// shared with models/round.js
+// shared with controllers/rounds.js
 function letterFromNumber(number) {
     return String.fromCharCode(97 + number);
 };
