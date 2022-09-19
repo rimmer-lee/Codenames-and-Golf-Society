@@ -194,7 +194,7 @@ module.exports = {
             },
             {
                 description: 'The \'Best\' (lowest) score is used to play against the \'Best\' score of the opposition and the \'Worst\' (highest) score is used to play against the \'Worst\' score of the opposition. If a team wins both match ups or 1 match up and ties the other then 1 point is scored for that team. If a team wins 1 match up and loses the other or if both match ups are tied then 0 points are scored.',
-                filters: { teams: { even: true, minimum: 2 } },
+                filters: { teams: { even: false, minimum: 2 } },
                 id: 'high/low',
                 order: 3,
                 value: 'High/Low'
