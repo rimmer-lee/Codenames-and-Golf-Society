@@ -593,7 +593,7 @@ function selectGame() {
     const handicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
     const handicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|type|"][type="radio"]`);
     const methodSelect = document.getElementById(`${gameReference}|method`);
-    const nameElements = document.querySelectorAll('[id^="game-1|marker|team-"][id$="|name"]');
+    const nameElements = document.querySelectorAll(`[id^="${gameReference}|marker|team-"][id$="|name"]`);
     const participationElements = document.querySelectorAll(`[id^="${gameReference}|"][id$="|participation"]`);
     const roundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
 
