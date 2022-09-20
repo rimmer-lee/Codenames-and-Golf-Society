@@ -431,7 +431,9 @@ function changeParticipation() {
     participationLabelElement.classList.toggle('text-muted', !checked);
     participationLabelElement.classList.toggle('fw-bold', checked);
     if (f.includes('team')) {
-        const participatingPlayers = participationCheckboxes.filter(({ checked }) => checked).length;
+        const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked)
+        const participatingPlayers = checkedParticipationCheckboxes.length;
+        const gameReference = getGameReference(checkedParticipationCheckboxes[0]);
         const teamNames = (function() {
             const startingValue = +(maximum === minimum) - 1;
             const length = maximum || Math.floor(participatingPlayers / 2) - startingValue;
@@ -441,10 +443,9 @@ function changeParticipation() {
                 const value = id.toUpperCase();
                 return { id, value };
             });
-            const idStart = `${(participationCheckboxes.find(({ checked }) => checked)?.id || '').split('|participation')[0]}|team-`;
-            if (!document.querySelector(`[id^="${idStart}"][id$="|name"]`)) return defaultTeamNames;
             return defaultTeamNames.map(({ id, value: v }) => {
-                const value = document.getElementById(`${idStart}${id}|name`)?.value || v;
+                const value = [ ...new Set(Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id$="|team-${id}|name"]`))
+                    .map(({ value }) => value)) ][0] || v;
                 return { id, value };
             });
         })();
