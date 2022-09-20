@@ -16,25 +16,25 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
         game.scores = [];
         game.summary = '';
         if (!GAME) continue;
-        const stablefordMultiplier = +(scoring === 'stableford') * -2 + 1;
+        const stablefordMultiplier = +(name === 'stableford' || scoring === 'stableford') * -2 + 1;
         const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
         const handicapAdjustment = (function() {
-            if (GAME.handicap && type === 'competition') return Math.min(
-                    ...scores.filter(({ player }) => {
+            if (type !== 'competition') return 0;
+            return Math.min(
+                ...scores
+                    .filter(({ player }) => {
                         return gamePlayers.some(({ player: p }) => {
                             return stringifyId(player) === stringifyId(p)
                         });
-                    }).map(({ handicap }) => +handicap * ((end - start) || 18) / 18)
-                );
-            return 0;
+                    })
+                    .map(({ handicap }) => +handicap * ((end - start) || 18) / 18)
+            );
         })();
         const gameScores = (function() {
             const gameScores = gamePlayers.map(p => {
                 const { player, team } = p;
                 const id = stringifyId(player);
                 const scoreObject = scores.find(({ player }) => stringifyId(player) === id);
-
-                // move to separate function for use in calculating score values???
                 const score = (function() {
                     if (name !== 'stroke-play' && scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
                     const { handicap: playerHandicap, shots, tee } = scoreObject;
@@ -44,14 +44,12 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                         const shot = +shots[index - 1];
                         if (!shot || !par) return null;
                         if (name === 'stroke-play') return shot - par;
-                        const doubleBogey = +par + 2;
                         const nettScore = shot - shotsPerHole - (holesWithAShot && strokeIndex <= holesWithAShot);
-                        if (name !== 'stableford' && scoring !== 'stableford') return nettScore > doubleBogey ? doubleBogey : nettScore;
-                        const nettParScore = doubleBogey - nettScore;
-                        return nettParScore < 0 ? 0 : nettParScore;
+                        if (name !== 'stableford' && scoring !== 'stableford') return nettScore;
+                        const stablefordScore = +par + 2 - nettScore;
+                        return stablefordScore < 0 ? 0 : stablefordScore;
                     });
                 })().slice(start, end);
-
                 return { id, score, team };
             });
             const teamScores = gameScores.filter(({ team }) => team && team !== 'none');
@@ -64,16 +62,13 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 ...[ ...new Set(teamScores.map(({ team }) => team)) ].map(t => {
                     const playerScores = gameScores.filter(({ team }) => team === t).map(({ score }) => score);
                     const score = Array.from({ length: (end - start) }).map((_, i) => {
-                        const holeScores = playerScores.map(score => score[i]).flat();
+                        const holeScores = playerScores.map(score => score[i] * stablefordMultiplier).flat();
                         if (playerScores.length !== holeScores.length) return { high: null, low: null, score: null };
-
-                        // can these be set in GAMES.method[]?
-                        if (method === 'best') return { score: Math.min( ...holeScores ) };
-                        if (method === 'combined') return { score: holeScores.reduce((sum, value) => sum += value, 0) };
-                        if (method === 'high/low') return { high: Math.max( ...holeScores ), low: Math.min( ...holeScores ) };
-                        if (method === 'worst') return { score: Math.max( ...holeScores ) };
-
-                        return { high: null, low: null, score: null };
+                        return {
+                            combined: holeScores.reduce((sum, value) => sum += value, 0),
+                            high: Math.max( ...holeScores ),
+                            low: Math.min( ...holeScores )
+                        };
                     });
                     const id = getName(t, players, teams);
                     return { id, score }
@@ -81,7 +76,13 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
             ]
         })();
         if (gameScores.length < GAME.filters.players.minimum) continue;
-        const properties = Object.keys(gameScores[0]?.score[0] || {});
+        const properties = (function() {
+            if (method === 'best') return ['low'];
+            if (method === 'combined') return ['combined'];
+            if (method === 'high/low') return ['high', 'low'];
+            if (method === 'worst') return ['high'];
+            return ['score'];
+        })();
         game.description = {
             get description() {
                 const { method, round, scoring } = this;
@@ -133,15 +134,15 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
         game.scores = gameScores.map(({ id, score }) => {
             const { points } = {
                 get points() {
-                    if (name === 'stroke-play' || name === 'stableford') return score.map(({ score }) => score);
                     let skins = 0;
                     return score.map((s, i) => {
                         const holeResults = properties.map(property => {
-                            const holeSores = gameScores.map(({ score }) => score[i][property] * stablefordMultiplier);
-                            if (holeSores.some(score => !+score)) return null;
+                            const holeSores = gameScores.map(({ score }) => score[i][property]);
+                            if (holeSores.some(score => [null, undefined].includes(score))) return null;
+                            if (name === 'stroke-play' || name === 'stableford') return s[property];
                             const winningScore = Math.min( ...holeSores );
                             if (holeSores.filter(score => score === winningScore).length === 1) {
-                                if (s[property] === Math.abs(winningScore)) return 1;
+                                if (s[property] === winningScore) return 1;
                                 return -1;
                             };
                             return 0;
@@ -149,7 +150,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                         if (holeResults.some(result => result === null)) return null;
                         const holeResult = holeResults.reduce((sum, value) => sum += value, 0);
                         skins++;
-                        if (name === 'match-play' || holeResult === 0) return holeResult;
+                        if (name !== 'skins' || holeResult === 0) return holeResult;
                         const k = skins;
                         skins = 0;
                         if (holeResult > 0) return k;
@@ -174,7 +175,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     currentScore += point;
                     if (gameComplete && remainingHoles === 0) {
                         if (currentScore == 0) return 'Game halved';
-                        return `${currentScore > 0 ? nameOne : nameTwo} wins (${currentScore})`;
+                        return `${currentScore > 0 ? nameOne : nameTwo} wins`;
                     };
                     if (currentScore > 0 && currentScore > remainingHoles) return `${nameOne} wins (${currentScore} & ${remainingHoles})`;
                     if (Math.abs(currentScore) > 0 && Math.abs(currentScore) > remainingHoles) return `${nameTwo} wins (${Math.abs(currentScore)} & ${remainingHoles})`;
