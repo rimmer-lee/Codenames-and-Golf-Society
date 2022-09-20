@@ -213,7 +213,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
     return games;
 };
 
-async function calculateHandicaps(dateFrom, playerId, teeId) {
+async function calculateHandicaps(dateFrom, playerId, teeId = '') {
     const player = await User.findById(playerId);
     const rounds = await Round.find({ 'date': { $gte: dateFrom }, 'scores.player': playerId }).populate('course').sort('date');
     player.handicap = {
