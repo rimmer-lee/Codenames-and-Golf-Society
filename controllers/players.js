@@ -124,10 +124,6 @@ async function show (req, res) {
 
 async function view (req, res) {
     try {
-
-        // req.flash('info', 'Apologies, page under construction')
-        // return res.redirect('/players');
-
         const { id: playerId } = req.params;
         const player = await User.findById(playerId);
         const De = await Demerit.find({ 'player': playerId }).populate('rule').populate('action.titles').sort({ 'when.date': -1, 'when.hole': -1, 'when.created': -1 });
@@ -193,7 +189,7 @@ async function view (req, res) {
                 rule: {
                     index,
 
-                    // hard code first description for now
+                    // hard coded to first description for now
                     rule: `${index}. ${encodeURI(description[0].replace(/'/g, '`'))}`
 
                 },
@@ -301,52 +297,6 @@ async function view (req, res) {
                 break;
             };
         };
-
-        // const handicapDifferentials = [];
-        // const { starting } = player.handicap;
-        // player.handicap.progression = [{ handicap: starting ? starting : 54.0 }];
-        // for (const round of R) {
-        //     const { course, date, scores, tee } = round;
-        //     const { holes, ratings } = course.tees.find(({ _id }) => _id.toString() === tee);
-        //     const { roundType, shots } = scores.find(({ player }) => player == playerId);
-        //     const adjustedShots = []
-        //     let roundHandicap = player.handicap.progression[player.handicap.progression.length - 1].handicap;
-        //     if (roundType === 'practice') continue;
-        //     if (roundType !== 'full') roundHandicap = roundHandicap / 2;
-        //     const { start, end } = ROUND_TYPES.find(({ name }) => name === roundType);
-        //     const holesPlayed = end - start;
-        //     let adjustment = 0;
-        //     let differentials;
-        //     roundHandicap = Math.floor(roundHandicap);
-        //     holes.forEach((hole, holeIndex) => {
-        //         if (holeIndex < start || holeIndex > end) return;
-        //         const { par, strokeIndex } = hole;
-        //         const handicapShots = Math.floor(roundHandicap / holesPlayed, 0) + +(strokeIndex < roundHandicap % holesPlayed);
-        //         const shot = shots[holeIndex];
-        //         const maxScore = par + handicapShots + 2;
-        //         adjustedShots.push(shot > maxScore ? maxScore : shot);
-        //     });
-        //     handicapDifferentials.push(Math.round(10 * (adjustedShots.reduce((sum, value) => sum += value, 0) - ratings.course[roundType]) * 113 / ratings.slope[roundType]) / 10);
-
-        //     // need to handle plus handicaps i.e. really good golfers
-
-        //     if (handicapDifferentials.length < 3) continue;
-        //     else if (handicapDifferentials.length < 6) differentials = 1;
-        //     else if (handicapDifferentials.length < 9) differentials = 2;
-        //     else if (handicapDifferentials.length < 12) differentials = 3;
-        //     else if (handicapDifferentials.length < 15) differentials = 4;
-        //     else if (handicapDifferentials.length < 17) differentials = 5;
-        //     else if (handicapDifferentials.length < 19) differentials = 6;
-        //     else if (handicapDifferentials.length < 20) differentials = 7;
-        //     else differentials = 8;
-        //     if ([4, 6].indexOf(handicapDifferentials.length) !== -1) adjustment = 1;
-        //     else if (handicapDifferentials.length === 3) adjustment = 2;
-        //     const handicap = handicapDifferentials.sort((a, b) => a - b).slice(0, differentials).reduce((sum, value) => sum += value, 0) / differentials - adjustment;
-        //     player.handicap.progression.push({ date, handicap });
-        // };
-        // console.log(handicapDifferentials)
-        // console.log(player.handicap)
-
 
         res.render('players/view', { data, headings, player });
     } catch (error) {
