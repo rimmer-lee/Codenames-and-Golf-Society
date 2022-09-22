@@ -24,7 +24,7 @@ async function create (req, res) {
     const players = allPlayers.map(player => {
         const { handicap, id, name, role } = player.toJSON();
             const { initials, knownAs } = name;
-            return { handicap: handicap.current, id, name: { initials, knownAs }, guest: role === 'guest' };
+            return { handicap: handicap.trending.playing, id, name: { initials, knownAs }, guest: role === 'guest' };
     });
     res.render('rounds/new', { players, rules, courses, date });
 };
