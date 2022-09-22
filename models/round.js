@@ -334,7 +334,8 @@ function handicapShots(handicap = 54) {
 function parClass(par) {
     if (par > 0) return 'f-over';
     if (par < 0) return 'f-under';
-    return 'f-level';
+    if (par == 0) return 'f-level';
+    return null;
 };
 
 function parScoreClass(parScore) {
@@ -342,7 +343,8 @@ function parScoreClass(parScore) {
     if (parScore === -1) return 'birdie';
     if (parScore === 1) return 'bogey';
     if (parScore > 1) return 'double-bogey';
-    return 'par';
+    if (parScore === 0) return 'par';
+    return null;
 };
 
 // shared with public/scripts/rounds/update.js
@@ -495,7 +497,7 @@ RoundSchema.pre('save', async function(next) {
         };
         score.scores = {
             nett: [],
-            par: { front: 0, back: 0, full: 0, shots: [] },
+            par: { front: null, back: null, full: null, shots: [] },
             shots: {
                 front: score.shots.slice(0, 9).reduce((sum, value) => sum += value, 0),
                 back: score.shots.slice(9).reduce((sum, value) => sum += value, 0),
@@ -545,7 +547,7 @@ ScoreSchema.virtual('classes').get(function () {
     const { par } = this.scores;
     const classesObject = {};
     for (const key of Object.keys(par)) {
-        const value = par[key] || 0;
+        const value = par[key];
         classesObject[key] = value instanceof Array ? value.map(v => parScoreClass(v)) : parClass(value);
     };
     return { par: classesObject };
