@@ -21,7 +21,15 @@
     <div id="rounds" class="tab-pane pt-3 fade<%= data.rounds.selected ? " show active" : "" %>" role="tabpanel" aria-labelledby="rounds-tab">
         <div class="gy-4 row row-cols-1">
             <div class="col">
-                <h4>Current Handicap: <%= player.handicap.current %></h4>
+                <h4>Handicap</h4>
+                <div class="row row-cols-1 text-center">
+                    <div class="col">
+                        <h5>
+                            <i class="bi bi-<%= player.handicap.trending.icon %> text-<%= player.handicap.trending.class %>"></i>
+                            <%= player.handicap.trending.current %>
+                        </h5>
+                    </div>
+                </div>
             </div>
             <div class="col">
                 <h4>Hole Performance</h4>
