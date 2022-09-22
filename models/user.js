@@ -116,10 +116,32 @@ UserSchema.virtual('formattedBirthday').get(function() {
     };
 });
 
-UserSchema.virtual('handicap.current').get(function() {
+UserSchema.virtual('handicap.trending').get(function() {
     const { handicap: { handicaps } } = this;
-    if (handicaps.length === 0) return 54.0;
-    return Math.round(handicaps[handicaps.length - 1].value);
+    const handicap = handicaps[handicaps.length - 1]?.value || 54;
+    return {
+        get class() {
+            const { direction } = this;
+            if (direction === 'up') return 'danger';
+            if (direction === 'down') return 'success';
+            return 'secondary';
+        },
+        current: +parseFloat(handicap).toFixed(1),
+        get direction() {
+            const { current, previous } = this;
+            const direction = current - previous;
+            if (direction > 0) return 'up';
+            if (direction < 0) return 'down';
+            return '';
+        },
+        get icon() {
+            const { direction } = this;
+            if (direction === '') return 'shuffle';
+            return `arrow-${direction}-circle-fill`;
+        },
+        playing: Math.round(handicap),
+        previous: handicaps[handicaps.length - 2]?.value
+    };
 });
 
 UserSchema.virtual('name.knownAs').get(function() {
