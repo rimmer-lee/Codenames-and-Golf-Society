@@ -7,48 +7,6 @@ const User = require('../models/user');
 const { ACTIONS, NON_MEMBERS, ROUND_TYPES, TITLES } = require('../constants');
 const { dates, years } = require('../utilities/seasons');
 
-// function favouriteString(array, ascending = true) {
-//     const orderedArray = array.sortBy(ascending, 'count');
-//     const lead = orderedArray[0].count;
-//     const favourites = orderedArray.filter(({ count }) => count === lead);
-//     const string = ` - ${favourites.map(({ value }) => value).sortAlphabetically().join(', ').replaceLastInstance()} (${lead})`
-//     if (favourites.length > 1) return `s${string}`;
-//     return string;
-// };
-
-// function getBest(data = {}, path = '') {
-//     return getData(data, path).sortBy(true, 'value')[0];
-// };
-
-// function getData(data = {}, path = '') {
-//     const r = path.split('.').pop();
-//     return [ ...new Set(data.filter(({ roundType }) => r === 'full' ? r === roundType : true)
-//         .map(d => getProperty.call(d, path))) ]
-//     .map(value => {
-//         return {
-//             value,
-//             count: data.filter(d => getProperty.call(d, path) === value).length
-//         }
-//     });
-// };
-
-// function getFavourites(data = {}, path = '') {
-//     const d = getData(data, path).sortBy(false, 'count');
-//     const lead = d[0].count;
-//     const favourites = d.filter(({ count }) => count === lead);
-//     const courseString = ` - ${favourites.map(({ value }) => value).sortAlphabetically().join(', ').replaceLastInstance()} (${lead})`
-//     if (favourites.length > 1) return `s${courseString}`;
-//     return courseString;
-// };
-
-// shared with utilities/prototypes.js
-// function getProperty(path) {
-//     if (!path) return this;
-//     let o = this;
-//     for (const p of path.split('.')) o = o[p];
-//     return o;
-// };
-
 function isBetweenDates(year, value) {
     const { endDate, startDate } = dates(year);
     return value >= startDate && value <= endDate;
@@ -56,17 +14,6 @@ function isBetweenDates(year, value) {
 
 function isMember(role) {
     return !NON_MEMBERS.some(r => r === role);
-};
-
-// function mostRecent(array = [], limit = 3) {
-//     return array.slice(0, limit);
-// };
-
-// shared with models/round.js
-function parClass(par) {
-    if (par > 0) return 'f-over';
-    if (par < 0) return 'f-under';
-    return 'f-level';
 };
 
 async function show (req, res) {
