@@ -1,4 +1,5 @@
 module.exports = async function (hostname, path) {
+    if (!hostname) return '';
     const options = {
         hostname,
         port: 443,
