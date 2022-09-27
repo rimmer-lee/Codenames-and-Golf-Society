@@ -1,4 +1,5 @@
 const Charter = require('../models/charter');
+const Country = require('../models/country');
 const Course = require('../models/course');
 const Demerit = require('../models/demerit');
 const Drink = require('../models/drink');
@@ -8,7 +9,7 @@ const Rule = require('../models/rule');
 const Title = require('../models/title');
 const User = require('../models/user');
 
-const { courses, demerits, drinks, rounds, sections, users } = require('./base');
+const { countries, courses, demerits, drinks, regions, rounds, sections, users } = require('./base');
 
 function regexName(name) {
     const [ first, last ] = name.split(' ');
@@ -16,27 +17,29 @@ function regexName(name) {
 };
 
 async function seed() {
-    const ch = await Charter.find();
-    if (ch.length > 0) await Charter.collection.drop();
-    const co = await Course.find();
-    if (co.length > 0) await Course.collection.drop();
-    const de = await Demerit.find();
-    if (de.length > 0) await Demerit.collection.drop();
-    const dr = await Drink.find();
-    if (dr.length > 0) await Drink.collection.drop();
-    const re = await Region.find();
-    if (re.length > 0) await Region.collection.drop();
-    const ro = await Round.find();
-    if (ro.length > 0) await Round.collection.drop();
-    const ru = await Rule.find();
-    if (ru.length > 0) await Rule.collection.drop();
-    const t = await Title.find();
-    if (t.length > 0) await Title.collection.drop();
-    const u = await User.find();
-    if (u.length > 0) await User.collection.drop();
+    const Charters = await Charter.find();
+    if (Charters.length > 0) await Charter.collection.drop();
+    const Countries = await Country.find();
+    if (Countries.length > 0) await Country.collection.drop();
+    const Courses = await Course.find();
+    if (Courses.length > 0) await Course.collection.drop();
+    const Demerits = await Demerit.find();
+    if (Demerits.length > 0) await Demerit.collection.drop();
+    const Drinks = await Drink.find();
+    if (Drinks.length > 0) await Drink.collection.drop();
+    const Regions = await Region.find();
+    if (Regions.length > 0) await Region.collection.drop();
+    const Rounds = await Round.find();
+    if (Rounds.length > 0) await Round.collection.drop();
+    const Rules = await Rule.find();
+    if (Rules.length > 0) await Rule.collection.drop();
+    const Titles = await Title.find();
+    if (Titles.length > 0) await Title.collection.drop();
+    const Users = await User.find();
+    if (Users.length > 0) await User.collection.drop();
     await Promise.all(users.map(async user => {
-        const u = await new User(user);
-        await User.register(u, u.username);
+        const U = await new User(user);
+        await User.register(U, U.username);
     }));
     const machine = await User.findOne({ 'name.preferred': 'The Machine' });
     const created = { by: machine };
@@ -44,6 +47,13 @@ async function seed() {
         if ((section.rules || []).length > 0) section.rules = await Promise.all(section.rules.map(async rule => await new Rule(rule).save()));
     };
     await new Charter({ created: { date: new Date(2021, 0, 1), ...created }, sections, status: 'Approved' }).save();
+    for (const country of countries) {
+        await new Country(country).save();
+    };
+    for (const region of regions) {
+        region.country = await Country.findOne({ name: region.country });
+        await new Region(region).save();
+    };
     for (const demerit of demerits) {
         demerit.player = await User.findOne({ 'name.full': { $regex: regexName(demerit.player) }});
         demerit.rule = await Rule.findOne({ 'index': demerit.rule });
