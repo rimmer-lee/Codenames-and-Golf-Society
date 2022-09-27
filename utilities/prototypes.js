@@ -75,6 +75,10 @@ Number.prototype.toLetter = function() {
     return String.fromCharCode(97 + this);
 };
 
+Number.prototype.singleDecimal = function() {
+    return +Number.parseFloat(this).toFixed(1);
+};
+
 String.prototype.capitalize = function() {
     return this[0].toUpperCase() + this.substring(1);
 };
