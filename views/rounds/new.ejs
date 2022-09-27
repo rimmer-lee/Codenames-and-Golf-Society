@@ -387,8 +387,8 @@
                         <div class="form-floating">
                             <select id="country-select" class="form-select text-capitalize" aria-label="country">
                                 <option selected>Select country</option>
-                                <% for (const country of countryCodes) { %>
-                                <option value="<%= country.name %>"><%= country.name %></option>
+                                <% for (const country of countries) { %>
+                                <option value="<%= country.code %>"><%= country.name %></option>
                                 <% }; %>
                             </select>
                             <label for="country-select">Country</label>
