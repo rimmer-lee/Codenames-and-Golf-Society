@@ -84,3 +84,7 @@ String.prototype.replaceLastInstance = function(delimiter = ', ', replacementVal
     if (lastInstance === -1) return this;
     return `${this.substring(0, lastInstance)}${replacementValue}${this.substring(lastInstance + delimiter.length)}`;
 };
+
+String.prototype.replaceWhiteSpace = function(replacementValue = '') {
+    return this.replace(/\s/g, replacementValue);
+};
