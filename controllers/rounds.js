@@ -1,5 +1,6 @@
 const path = require('path');
 
+const Country = require('../models/country');
 const Course = require('../models/course');
 const Demerit = require('../models/demerit');
 const Round = require('../models/round');
@@ -18,6 +19,7 @@ async function create (req, res) {
     const date = new Date().custom('yyyy-mm-dd');
     const allCourses = await Course.find();
     const allPlayers = await User.findPlayers();
+    const countries = await Country.find();
     const rules = await Rule.getAll();
     const courses = allCourses.sortAlphabetically('name')
         .map(({ facility, id, name, randa, tees }) => ({ facility, id, name, randa, tees }));
@@ -26,7 +28,7 @@ async function create (req, res) {
             const { initials, knownAs } = name;
             return { handicap: handicap.trending.playing, id, name: { initials, knownAs }, guest: role === 'guest' };
     });
-    res.render('rounds/new', { players, rules, courses, date });
+    res.render('rounds/new', { countries, players, rules, courses, date });
 };
 
 async function remove (req, res) {
