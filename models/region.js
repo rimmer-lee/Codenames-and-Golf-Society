@@ -13,4 +13,12 @@ const RegionSchema = new Schema({
     name: String
 });
 
+RegionSchema.statics.findByCountry = async function(country) {
+    return await this.find().populate({ path: 'country', match: { country } }).populate('country');
+};
+
+RegionSchema.statics.findByCountryCode = async function(code) {
+    return await this.find().populate({ path: 'country', match: { code } }).populate('country');
+};
+
 module.exports = mongoose.model('Region', RegionSchema);
