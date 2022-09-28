@@ -18,23 +18,23 @@ document.getElementById('year').addEventListener('change', function() {
     while (tableBody.children.length > 0) tableBody.children[0].remove();
     for (const player of players) {
         const { drinks, id, infractions, name, quorums, rounds, titles } = player;
-        const children = titles.map(({ class: tClass, icon, method, value }) => {
-            return {
-                // type: 'a',
-                classList: ['btn', `btn-${tClass}`, 'py-0', 'px-1'],
-                // attributes: [
-                //     { id: 'data-bs-toggle', value: 'tooltip' },
-                //     { id: 'data-bs-placement', value: 'top' },
-                //     { id: 'title', value: `${method} ${value}` }
-                // ],
-                children: [
-                    {
-                        type: 'i',
-                        classList: ['bi', icon]
-                    }
-                ]
-            }
-        });
+        // const children = titles.map(({ class: tClass, icon, method, value }) => {
+        //     return {
+        //         // type: 'a',
+        //         classList: ['btn', `btn-${tClass}`, 'mx-1', 'px-1', 'py-0'],
+        //         // attributes: [
+        //         //     { id: 'data-bs-toggle', value: 'tooltip' },
+        //         //     { id: 'data-bs-placement', value: 'top' },
+        //         //     { id: 'title', value: `${method} ${value}` }
+        //         // ],
+        //         children: [
+        //             {
+        //                 type: 'i',
+        //                 classList: ['bi', icon]
+        //             }
+        //         ]
+        //     }
+        // });
         tableBody.insertBefore(createElement({
             type: 'tr',
             children: [
@@ -75,7 +75,23 @@ document.getElementById('year').addEventListener('change', function() {
                     children: [
                         {
                             classList: ['d-flex', 'justify-content-evenly', 'align-items-center'],
-                            children
+                            children: titles.map(({ class: tClass, icon, method, value }) => {
+                                return {
+                                    // type: 'a',
+                                    classList: ['btn', `btn-${tClass}`, 'mx-1', 'px-1', 'py-0'],
+                                    // attributes: [
+                                    //     { id: 'data-bs-toggle', value: 'tooltip' },
+                                    //     { id: 'data-bs-placement', value: 'top' },
+                                    //     { id: 'title', value: `${method} ${value}` }
+                                    // ],
+                                    children: [
+                                        {
+                                            type: 'i',
+                                            classList: ['bi', icon]
+                                        }
+                                    ]
+                                }
+                            })
                         }
                     ]
                 },
