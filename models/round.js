@@ -240,6 +240,7 @@ async function calculateHandicaps(dateFrom, playerId, teeId = '') {
             return teeId.toString() === idString ||
                 tee.toString() === idString;
         });
+        if (!ratings.course[roundType] || !ratings.slope[roundType]) continue;
         const { holesWithAShot, shotsPerHole } = handicapShots(roundAdjustedHandicap);
         const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
         const adjustedGrossScore = holes
