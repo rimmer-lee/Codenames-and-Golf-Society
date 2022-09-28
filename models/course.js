@@ -1,17 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const Region = require('../models/region');
+const { BREAKDOWN_OBJECT, GENDERS } = require('../constants');
 
-const { BREAKDOWN_OBJECT, COUNTRY_CODES, GENDERS, TEE_COLOURS } = require('../constants');
-
-const { courseNames, findTeeColour } = require('../utilities/courseFunctions');
-const { searchCourse, searchCourses } = require('../utilities/externalApis');
-
-// shared with public/scripts/rounds/select-course.js
-function singleDecimal(number) {
-    return Number.parseFloat(number).toFixed(1);
-};
+const { findTeeColour } = require('../utilities/courseFunctions');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -97,10 +89,6 @@ const TeeSchema = new Schema({
 const CourseSchema = new Schema({
     address: {
         city: String,
-        country: {
-            enum: COUNTRY_CODES.map(({ name }) => name),
-            type: String
-        },
         firstLine: String,
         postcode: String,
         region: {
@@ -143,56 +131,13 @@ CourseSchema.pre('validate', function(next) {
 });
 
 CourseSchema.pre('save', async function(next) {
-    const { name, randa } = this;
-    if (randa) {
-        const coursesData = await searchCourses({ name });
-        const courseData = await searchCourse(randa);
-        const courses = JSON.parse(coursesData).find(({ CourseID }) => CourseID === randa);
-        const course = JSON.parse(courseData)[0];
-        if (courses) {
-            const { Address1: firstLine, City: city, Country, FacilityName, State: code, Zip: postcode } = courses;
-            const region = await Region.findOne({ code });
-            const country = (COUNTRY_CODES.find(country => country['alpha-3'] === Country) || { name: '' }).name;
-            this.address = { city, country, firstLine, postcode, region };
-            this.facility = FacilityName.split(' (')[0];
-        };
-        if (course) {
-            for (const tee of this.tees) {
-                const { gender, name } = tee;
-                const courseTee = course.TeeRows.find(({ TeeName, Gender }) => {
-                    return TeeName.toLowerCase() === name.toLowerCase() &&
-                    (gender ? Gender.toLowerCase() === gender.toLowerCase() : true)
-                });
-                const { Back, BogeyRating, CourseRating, Front, Gender, Par, SlopeRating } = courseTee;
-                const [ courseFront, slopeFront ] = Front.split(' / ');
-                const [ courseBack, slopeBack ] = Back.split(' / ');
-                tee.gender = Gender.toLowerCase();
-                tee.names = courseNames(gender, name, this.tees);
-                if (!tee.par) tee.par = { full: +Par };
-                tee.ratings = {
-                    course: {
-                        full: singleDecimal(CourseRating),
-                        front: singleDecimal(courseFront),
-                        back: singleDecimal(courseBack)
-                    },
-                    bogey: singleDecimal(BogeyRating),
-                    slope: {
-                        full: +SlopeRating,
-                        front: +slopeFront,
-                        back: +slopeBack
-                    }
-                };
-            };
-        };
-    };
     for (const tee of this.tees) {
-        const teeColour = findTeeColour(tee);
-        tee.measure.full = 'yards';
+        tee.measure.full = tee.measure.full || 'yards';
         tee.distance.front = 0;
         tee.distance.back = 0;
         tee.par.front = 0;
         tee.par.back = 0;
-        if (teeColour) tee.colour = teeColour;
+        tee.colour = tee.colour || findTeeColour(tee);
         for (const hole of tee.holes) {
             const { distance = 0, index, par = 0 } = hole;
             if (index < 10) {
@@ -204,7 +149,7 @@ CourseSchema.pre('save', async function(next) {
             tee.par.back += par;
         };
         tee.distance.full = tee.distance.front + tee.distance.back;
-        if (tee.par.front && tee.par.back) tee.par.full = tee.par.front + tee.par.back;
+        tee.par.full = tee.par.front + tee.par.back;
     };
     next();
 });
