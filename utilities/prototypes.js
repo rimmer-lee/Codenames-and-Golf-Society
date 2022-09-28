@@ -92,3 +92,9 @@ String.prototype.replaceLastInstance = function(delimiter = ', ', replacementVal
 String.prototype.replaceWhiteSpace = function(replacementValue = '') {
     return this.replace(/\s/g, replacementValue);
 };
+
+String.prototype.singleDecimal = function() {
+    const number = +this;
+    if (isNaN(number)) return this;
+    return number.singleDecimal();
+};
