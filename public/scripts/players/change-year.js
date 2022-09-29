@@ -18,23 +18,6 @@ document.getElementById('year').addEventListener('change', function() {
     while (tableBody.children.length > 0) tableBody.children[0].remove();
     for (const player of players) {
         const { drinks, id, infractions, name, quorums, rounds, titles } = player;
-        // const children = titles.map(({ class: tClass, icon, method, value }) => {
-        //     return {
-        //         // type: 'a',
-        //         classList: ['btn', `btn-${tClass}`, 'mx-1', 'px-1', 'py-0'],
-        //         // attributes: [
-        //         //     { id: 'data-bs-toggle', value: 'tooltip' },
-        //         //     { id: 'data-bs-placement', value: 'top' },
-        //         //     { id: 'title', value: `${method} ${value}` }
-        //         // ],
-        //         children: [
-        //             {
-        //                 type: 'i',
-        //                 classList: ['bi', icon]
-        //             }
-        //         ]
-        //     }
-        // });
         tableBody.insertBefore(createElement({
             type: 'tr',
             children: [
@@ -72,13 +55,14 @@ document.getElementById('year').addEventListener('change', function() {
                 },
                 {
                     type: 'td',
+                    classList: ['p-0'],
                     children: [
                         {
-                            classList: ['d-flex', 'justify-content-evenly', 'align-items-center'],
+                            classList: ['align-items-center', 'd-flex', 'flex-column', 'flex-sm-row', 'justify-content-evenly'],
                             children: titles.map(({ class: tClass, icon, method, value }) => {
                                 return {
                                     // type: 'a',
-                                    classList: ['btn', `btn-${tClass}`, 'mx-1', 'px-1', 'py-0'],
+                                    classList: ['btn', `btn-${tClass}`, 'm-1', 'px-1', 'py-0'],
                                     // attributes: [
                                     //     { id: 'data-bs-toggle', value: 'tooltip' },
                                     //     { id: 'data-bs-placement', value: 'top' },

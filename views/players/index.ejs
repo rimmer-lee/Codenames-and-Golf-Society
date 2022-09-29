@@ -87,11 +87,11 @@
             <td>
                 <%= player.infractions %>
             </td>
-            <td>
-                <div class="d-flex justify-content-evenly align-items-center">
+            <td class="p-0">
+                <div class="align-items-center d-flex flex-column flex-sm-row justify-content-evenly">
                     <% for (const title of player.titles) { %>
                     <!-- <a class="btn btn-<%= title.class %> py-0 px-1" href=""> -->
-                    <div class="btn btn-<%= title.class %> mx-1 px-1 py-0">
+                    <div class="btn btn-<%= title.class %> m-1 px-1 py-0">
                         <i class="bi <%= title.icon %>"></i>
                     </div>
                     <!-- </a> -->
