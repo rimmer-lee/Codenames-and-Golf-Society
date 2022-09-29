@@ -25,7 +25,6 @@ const User = require(path.join(__dirname, 'models', 'user'));
 
 const {
     ACTIONS,
-    COUNTRY_CODES,
     GAMES,
     GENDERS,
     NAME_TITLES,
@@ -55,7 +54,6 @@ const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 const port = process.env.PORT;
 const secret = process.env.SECRET;
 const dbUrl = process.env.DB_URL;
-// const dbUrl = 'mongodb+srv://Admin:admin@prod.g9azw.mongodb.net/prod?retryWrites=true&w=majority';
 const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({
@@ -134,7 +132,6 @@ app.use(async (req, res, next) => {
 
     // Constants
     res.locals.actions = ACTIONS;
-    res.locals.countryCodes = COUNTRY_CODES;
     res.locals.GAMES = (function() {
         for (const key of Object.keys(GAMES)) {
             GAMES[key].map(i => {
@@ -376,3 +373,13 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 
 // 04/06 lee vs. jonny at waterstock - matchplay
 // 07/08, 29/08, 04/02, 10/09 - 3 best ball stroke play
+// silverstone 19/09 - Martin and Lee (Marlee) vs. Joe and Oli (Joli) - best ball stableford competition handicap match play
+
+(async function() {
+
+    const { createCourse } = require('./utilities/courseFunctions');
+    const course = await createCourse(14485)
+    // console.log(course)
+    // for (const tee of course.tees) console.log(tee)
+
+})()
