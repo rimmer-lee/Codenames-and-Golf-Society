@@ -374,12 +374,3 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // 04/06 lee vs. jonny at waterstock - matchplay
 // 07/08, 29/08, 04/02, 10/09 - 3 best ball stroke play
 // silverstone 19/09 - Martin and Lee (Marlee) vs. Joe and Oli (Joli) - best ball stableford competition handicap match play
-
-(async function() {
-
-    const { createCourse } = require('./utilities/courseFunctions');
-    const course = await createCourse(14485)
-    // console.log(course)
-    // for (const tee of course.tees) console.log(tee)
-
-})()
