@@ -113,7 +113,7 @@ async function save (req, res) {
             const gameObject = body.game[key];
             const gamePlayerKeys = getPlayerKeys(gameObject);
             if (gamePlayerKeys.length === 0) continue;
-            const { handicap = {}, method, game: name, round: roundType, scoring, team = {} } = gameObject;
+            const { handicap = {}, method, game, round: roundType, scoring, team = {} } = gameObject;
             const { multiplier = 100, type = 'standard' } = handicap;
             const players = await Promise.all(gamePlayerKeys.map(async gamePlayer => {
                 const teamValue = gameObject[gamePlayer].team;
@@ -123,9 +123,9 @@ async function save (req, res) {
                 };
             }));
             round.games.push({
+                game,
                 handicap: { multiplier: +multiplier, type },
                 method,
-                name,
                 players,
                 roundType,
                 scoring,
