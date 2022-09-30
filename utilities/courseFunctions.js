@@ -25,7 +25,7 @@ function courseNames(gender, name, tees) {
 async function createCourse(id) {
     const course = await searchCourse(id);
     if (!course) return false;
-    const { CourseName: name, CourseState, TeeRows } = JSON.parse(course)[0];
+    const { CourseName: name, TeeRows } = JSON.parse(course)[0];
     const coursesData = await searchCourses({ name });
     const courseData = JSON.parse(coursesData).find(({ CourseID }) => CourseID == id);
     const { Address1: firstLine, City: city, FacilityName, State: code, Zip: postcode } = courseData;
