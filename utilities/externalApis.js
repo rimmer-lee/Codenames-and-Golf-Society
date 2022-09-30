@@ -1,102 +1,181 @@
-const HTMLParser = require('node-html-parser');
+const { parse } = require('node-html-parser');
 
+const Country = require('../models/country');
 const Region = require('../models/region');
-
-const { COUNTRY_CODES } = require('../constants');
-const { courseNames, findTeeColour } = require('./courseFunctions');
 
 const fetch = require('./fetch');
 
-async function createCourse(id) {
-    const course = await searchCourse(id);
-    if (!course) return false;
-    const { CourseCity, CourseName: name, CourseState, TeeRows } = JSON.parse(course)[0];
-    const scorecard = await createScorecard(CourseCity, name, CourseState);
-    const { url: scorecardUrl, tees: scorecardTees } = scorecard;
-    return { randa: id, name, scorecardUrl, tees: TeeRows.map(tee => {
-        const [ courseFront, slopeFront ] = tee.Front.split(' / ');
-        const [ courseBack, slopeBack ] = tee.Back.split(' / ');
-        const { CourseRating, TeeName: name, Gender: gender, Par, SlopeRating } = tee;
-        const colour = findTeeColour({ colour: '', name });
-        const scorecardTee = scorecardTees.find(tee => {
-            return testMatch(tee.name, name) ||
-                ((testMatch(tee.name, colour) ||
-                testMatch(tee.name, gender)) &&
-                (+tee.courseRating == +CourseRating ||
-                +tee.slopeRating == +SlopeRating));
-        });
-        const holes = (scorecardTee || {}).holes || [];
-        return {
-            name,
-            names: courseNames(gender, name, TeeRows.map(({ TeeName: name }) => name)),
-            gender,
-            holes,
-            colour,
-            par: { full: Par },
-            ratings: {
-                course: {
-                    full: +CourseRating,
-                    front: +courseFront,
-                    back: +courseBack
-                },
-                bogey: +tee.BogeyRating,
-                slope: {
-                    full: +SlopeRating,
-                    front: +slopeFront,
-                    back: +slopeBack
-                }
-            }
-        };
-    })};
-};
-
-async function createScorecard(city, courseName, regionCode) {
+async function createScorecard(courseData) {
+    const BGCOLOUR = 'bgcolor';
+    const CR_SLOPE = ' cr/slope';
+    const Address = courseData.Address1 || '';
+    const City = courseData.City || '';
+    const CourseName = courseData.CourseName || '';
+    const FacilityName = courseData.FacilityName || '';
+    const Zip = courseData.Zip || '';
+    const domain = 'mscorecard.com';
     const emptyObject = { url: { domain: undefined, path: undefined }, tees: [] };
     try {
-        const region = await Region.findOne({ code: regionCode });
-        if (!region) return emptyObject;
-        const coursesRandaDataString = await searchCourses({ country: region.country, name: courseName, region: regionCode });
-        const { Address1, CourseName, FacilityName, Zip } = JSON.parse(coursesRandaDataString)[0];
-
-        // search for first 30 courses by default
-        const coursesSwinguDataString = await fetch('courses.swingu.com', `/api/swingbyswing/-/v1/courses?name=${encodeURIComponent(courseName)}&to=30&from=0`);
-
-        const coursesSwinguData = coursesSwinguDataString ? JSON.parse(coursesSwinguDataString) : { courses: [] };
-        const foundCourseSwingu = coursesSwinguData.courses.find(course => {
-            return (testMatch(course.name, FacilityName) ||
-                testMatch(course.name, CourseName, 'loose')) &&
-                (testMatch(course.addr1, Address1) ||
-                testMatch(course.city, city) ||
-                testMatch(course.stateOrProvince, region.country) ||
-                testMatch(course.stateOrProvince, region.name) ||
-                testMatch(course.zipCode, Zip));
+        const document = await (async function() {
+            let names = FacilityName.split(' '), document = [];
+            while (document.length === 0 && names.length > 0) {
+                document = parse(
+                    await fetch(
+                        domain,
+                        `/mscorecard/courses.php?CourseName=${names.join('+')}&Country=&SubmitButton=Search`
+                    )).querySelectorAll('a.no-hover');
+                names = names.slice(0, names.length - 1);
+            };
+            return document;
+        })();
+        const mscorecardCourses = await Promise.all(document.map(async element => {
+            const cid = element._attrs.href.match(/\?cid=(\d+)/)[1];
+            const [ facility, course ] = element.querySelectorAll('div > div > div')
+                .filter(div => !['flag', 'gps'].includes(div.innerText.toLowerCase()))
+                .map(value => getFirstValue(value));
+            const location = getFirstValue(element.querySelector('.course-location')).replace(/(?:\r|\n|\t)/gm, '').split(', ');
+            const path = `/mscorecard/showcourse.php?cid=${cid}`;
+            const document = parse(
+                await fetch(
+                    domain,
+                    path
+                ));
+            const name = getFirstValue(document.querySelector('h1'));
+            const address = document.querySelector('#content > .page-content > .row > .col-md-4').childNodes
+                .map(element => element._rawText).filter(value => value);
+            const postcode = (address.join(', ').match(/(\w{1,2}\d{1,2}\s?\d{1,2}\w{1,2})/) || [])[0];
+            const allRows = Array.from(document.querySelectorAll('table.scorecardtable tr'));
+            const headings = allRows.find(row => {
+                return row.querySelectorAll('td').find(td => getFirstValue(td) === 'Hole');
+            }).querySelectorAll('td').map(td => getFirstValue(td));
+            const ratingRows = allRows.slice(allRows.map(({ classList: { _set } }) => [ ..._set ].join()).lastIndexOf('total') + 1);
+            const holeRows = allRows.filter(row => {
+                return row.classList.contains('nonfocus') &&
+                    row.querySelectorAll('td').length === headings.length;
+            });
+            const tees = ratingRows.map(row => {
+                const tds = row.querySelectorAll('td');
+                const gender = refineGender(tds[0].childNodes
+                    .map(element => getRawText(element, true))
+                    .flat()
+                    .find(value => value.indexOf(CR_SLOPE) !== -1)
+                    .split(CR_SLOPE)[0]);
+                const maleTee = gender === 'men';
+                const parIndex = getIndex(headings, 'Par', maleTee);
+                const siIndex = getIndex(headings, 'SI', maleTee);
+                return tds.map(td => {
+                    const colour = td.getAttribute(BGCOLOUR);
+                    const rawRatings = td.childNodes
+                        .map(element => getRawText(element))
+                        .flat();
+                    const ratings = rawRatings.some(value => !isNaN(+value)) ? rawRatings
+                        .map(value => value === '-' ? 0 : value)
+                        .filter(value => !isNaN(+value)) : [];
+                    const teeIndex = holeRows[0].querySelectorAll('td').map(td => {
+                        return td.getAttribute(BGCOLOUR);
+                    }).indexOf(colour);
+                    return { ratings, teeIndex };
+                }).filter(({ ratings, teeIndex }) => {
+                    return ratings.length > 0 && teeIndex !== -1;
+                }).map(({ ratings, teeIndex }) => {
+                    return {
+                        gender,
+                        holes: holeRows.map((row, index) => {
+                            const tds = row.querySelectorAll('td');
+                            return {
+                                distance: getFirstValue(tds[teeIndex]),
+                                index: index + 1,
+                                par: getFirstValue(tds[parIndex]),
+                                strokeIndex: getFirstValue(tds[siIndex])
+                            };
+                        }),
+                        name: headings[teeIndex],
+                        ratings: {
+                            course: {
+                                back: ratings[4],
+                                front: ratings[2],
+                                full: ratings[0]
+                            },
+                            slope: {
+                                back: ratings[5],
+                                front: ratings[3],
+                                full: ratings[1]
+                            }
+                        }
+                    };
+                });
+            }).flat();
+            return { address, course, facility, location, name, path, postcode, tees };
+        }));
+        const mscorecardCourse = mscorecardCourses.find(({ address, facility, name, postcode }) => {
+            return (testMatch(postcode.replaceWhiteSpace(), Zip.replaceWhiteSpace()) ||
+            address.some(a => testMatch(a, Address, 'loose')) ||
+            address.some(a => testMatch(a, City, 'loose'))) &&
+            ((testMatch(facility, CourseName, 'loose') ||
+            testMatch(name, CourseName, 'loose')),
+            (testMatch(facility, FacilityName, 'loose') ||
+            testMatch(name, FacilityName, 'loose')));
         });
-        if (!foundCourseSwingu) return emptyObject;
-        const { city: sCity, country: sCountry, courseId, name: sName, stateOrProvince } = foundCourseSwingu;
-        const domain = 'courses.swingu.com';
-        const path = removeWhiteSpace('-', `/courses/${sCountry}/${stateOrProvince}/${sCity}/${sName}/${courseId}`).toLowerCase();
-        return await searchScorecards(domain, path, emptyObject);
+        if (!mscorecardCourse) return emptyObject;
+        const { path, tees } = mscorecardCourse;
+        return { url: { domain, path }, tees };
     } catch (error) {
         console.error(error);
         return emptyObject;
     };
 };
 
-async function findRegions(country) {
-    try {
-        const fetchedRegions = await fetch('www.randa.org', `/api/sitecore/chclookup/getcounties?contryName=${encodeURIComponent(country)}`);
-        if (fetchedRegions) {
-            const parsedRegions = JSON.parse(fetchedRegions);
-            for (const code of Object.keys(parsedRegions)) {
-                const region = await Region.find({ code });
-                if (!region || region.length === 0) await new Region({ name: parsedRegions[code], code, country }).save();
-            };
-        };
-        return await Region.find({ country });
-    } catch (error) {
-        console.error(error);
-        return [];
+function getFirstValue(element) {
+    const value = element.childNodes[0]._rawText;
+    if (isNaN(+value)) return value;
+    return +value;
+};
+
+function getIndex(array, value, firstIndex) {
+    if (firstIndex) return array.indexOf(value);
+    return array.lastIndexOf(value);
+};
+
+function getRawText(element, lower = false) {
+    const { _rawText, childNodes, nodeType } = element;
+    if (nodeType === 1) return childNodes.map(({ _rawText }) => lowerText(_rawText, lower));
+    if (nodeType === 3) return lowerText(_rawText, lower);
+    return '';
+};
+
+function lowerText(text, lower) {
+    if (lower) return text.toLowerCase();
+    return text;
+};
+
+function refineGender(gender) {
+
+    // move these to constants.js
+    const genderCollections = {
+        female: [
+            'female',
+            'females',
+            'ladies',
+            'lady',
+            'woman',
+            'women'
+        ],
+        male: [
+            'male',
+            'males',
+            'men',
+            'mens'
+        ]
     };
+
+    for (const key of Object.keys(genderCollections)) {
+        if (genderCollections[key].includes(gender)) return key;
+    };
+    return undefined;
+};
+
+function removeRAndAId(name) {
+    return (name.match(/([^\(\)]*)\(\d+\)/) || Array.from({ length: 2 }, _ => name))[1];
 };
 
 async function searchCourse(id) {
@@ -109,74 +188,24 @@ async function searchCourse(id) {
 };
 
 async function searchCourses(parameters) {
-    const { city, country, name, region } = parameters;
-    let path = '/api/RandACRS/SearchCoursesAsync?';
-    if (city) path += `&cityName=${encodeURIComponent(city)}`;
-
-    // add checks in case country and region need to be converted to respective codes
+    let { city, country, name, region } = parameters;
+    let countryCode = '';
+    let regionCode = '';
+    city = city ? `&cityName=${encodeURIComponent(city)}` : '';
+    name = name ? `&clubName=${encodeURIComponent(name)}` : '';
     if (country) {
-        const countryCode = COUNTRY_CODES.find(({ name }) => name === country)['alpha-3'];
-        path += `&countryName=${encodeURIComponent(countryCode)}`;
+        countryCode = await Country.findOne({ code: country });
+        if (!countryCode) countryCode = await Country.findOne({ name: country });
     };
-
-    if (name) path += `&clubName=${encodeURIComponent(name)}`;
-
-    if (region) path += `&stateName=${encodeURIComponent(region)}`;
-
-    return await fetch('chclookup.randa.org', path.replace('&', ''));
-};
-
-async function searchScorecards(domain, path, defaultObject = {}) {
-    try {
-        const course = await fetch(domain, path);
-        const teeBodies = HTMLParser.parse(course).querySelectorAll('.vertical-scorecard.visible-xs > table > tbody[style]');
-        const scorecard = { url: { domain, path }, tees: [] };
-        for (const teeBody of teeBodies) {
-            const headingMatchArray = ((teeBody.querySelector('th[data-parent]') || {}).getAttribute('data-target') || '').match(/js\-row\-collapse\-(.*)/);
-            const name = headingMatchArray[1].replace('women', 'female').replace('men', 'male');
-            const teeData = teeBody.querySelectorAll('tr:first-child td');
-            const slopeRating = +removeWhiteSpace('', teeData[2].innerText);
-            const courseRating = +removeWhiteSpace('', teeData[3].innerText);
-            const holes = teeBody.querySelectorAll('tr > td > div tr:not([style])');
-            const teeObject = { courseRating, holes: [], name, slopeRating };
-            for (const hole of holes) {
-                const holeObject = {};
-                hole.querySelectorAll('td').forEach((attribute, index) => {
-                    const value = attribute.innerText.toString();
-                    switch (index) {
-                        case 0:
-                            const indexMatchArray = value.match(/Hole\s(\d{1,2})/);
-                            if (!indexMatchArray) return;
-                            return holeObject.index = +indexMatchArray[1];
-                        case 1:
-                            return holeObject.par = +value;
-                        case 2:
-                            const distanceArray = value.split('/');
-                            holeObject.distance = {};
-                            for (const distanceValue of distanceArray) {
-                                const distanceMatchArray = distanceValue.match(/(\d+)(\w+)/);
-                                if (!distanceMatchArray) continue;
-                                const [ , distance, measureShort ] = distanceMatchArray;
-                                if (measureShort === 'yd') return holeObject.distance = +distance;
-                            };
-                            return holeObject.distance = 0;
-                        case 3:
-                            return holeObject.strokeIndex = +value;
-                    };
-                });
-                teeObject.holes.push(holeObject);
-            };
-            scorecard.tees.push(teeObject);
-        };
-        return scorecard;
-    } catch (error) {
-        console.error(error);
-        return defaultObject;
+    if (countryCode) country = `&countryName=${encodeURIComponent(countryCode.code)}`;
+    else country = '';
+    if (region) {
+        regionCode = await Region.findOne({ code: region });
+        if (!regionCode) regionCode = await Region.findOne({ name: region });
     };
-};
-
-function removeWhiteSpace(newValue, string) {
-    return string.replace(/\s/g, newValue)
+    if (regionCode) region = `&stateName=${encodeURIComponent(regionCode.code)}`;
+    else region = '';
+    return await fetch('chclookup.randa.org', `/api/RandACRS/SearchCoursesAsync?${city}${country}${name}${region}`.replace('&', ''));
 };
 
 function testMatch(a, b, type = 'exact') {
@@ -192,4 +221,4 @@ function testMatch(a, b, type = 'exact') {
     };
 };
 
-module.exports = { createCourse, findRegions, searchCourse, searchCourses };
+module.exports = { createScorecard, removeRAndAId, searchCourse, searchCourses, testMatch };

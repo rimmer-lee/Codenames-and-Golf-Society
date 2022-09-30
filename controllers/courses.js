@@ -1,11 +1,10 @@
+const Country = require('../models/country');
 const Course = require('../models/course');
 const Region = require('../models/region');
-const Round = require('../models/round');
 const User = require('../models/user');
 
-const { COUNTRY_CODES } = require('../constants');
-
-const { createCourse, findRegions, searchCourses } = require('../utilities/externalApis');
+const { createCourse } = require('../utilities/courseFunctions');
+const { searchCourses, removeRAndAId } = require('../utilities/externalApis');
 
 async function create (req, res) {
     res.send('here')
@@ -19,13 +18,13 @@ async function find (req, res) {
     let response;
     if (id) {
         try {
-            const existingCourse = await Course.findOne({ 'randa': data.randa });
+            const existingCourse = await Course.findOne({ randa: id });
             if (existingCourse) {
                 message = 'Course already exists.';
                 data = existingCourse;
             } else {
                 const courseData = await createCourse(id);
-                const by = marker ? await User.findById(marker) : await User.findOne({ 'username': 'machine' });
+                const by = marker ? await User.findById(marker) : await User.findOne({ username: 'machine' });
                 const createdObject = { by };
                 courseData.created = createdObject;
                 courseData.updated = [ createdObject ];
@@ -45,9 +44,8 @@ async function find (req, res) {
         };
     } else {
         if (country && !region && !city && !name) {
-            data = await findRegions(country);
-            if (!data) message = 'Unable to retrieve regions.';
-            else if (data.length === 0) message = 'No regions retrieved.';
+            data = await Region.findByCountry(country);
+            if (data.length === 0) message = 'No regions retrieved.';
             else {
                 success = true;
                 message = 'Successfully retrieved regions.';
@@ -60,28 +58,19 @@ async function find (req, res) {
                     JSON.parse(data)
                         .filter(({ CourseID }) => !courses.some(({ randa }) => randa === CourseID))
                         .map(async chunk => {
-                            const { CourseID: id, CourseName, City: city, Country, FacilityName } = chunk;
-                            let country = '';
-                            let name = FacilityName.split(' (')[0];
-                            let regions = [];
-                            let region = '';
-                            if (Country) {
-                                country = COUNTRY_CODES.find(country => country['alpha-3'] === Country);
-                                if (country) {
-                                    country = country.name
-                                    regions = await Region.find({ country });
-                                    if (!regions || regions.length === 0) regions = await findRegions(country);
-                                } else country = undefined;
+                            const { City: city, Country: code, CourseID: id, CourseName, FacilityName, State } = chunk;
+                            const R = await Region.findOne({ code: State });
+                            return {
+                                id,
+                                city,
+                                name: (function() {
+                                    const name = removeRAndAId(FacilityName);
+                                    if (CourseName === name) return name;
+                                    return `${name} - ${CourseName}`;
+                                })(),
+                                country: await Country.findOne({ code }),
+                                region: { code: R.code, name: R.name }
                             };
-                            if (regions) {
-                                region = regions.find(({ code }) => code === chunk.State);
-                                if (region) {
-                                    const { code, name } = region;
-                                    region = { code, name };
-                                } else region = undefined;
-                            };
-                            if (CourseName !== name) name += ` - ${CourseName}`;
-                            return { id, city, name, country, region };
                         })
                     );
             } catch (error) {
@@ -114,7 +103,6 @@ async function update (req, res) {
     const { id } = req.params;
     try {
         const course = await Course.findById(id);
-        const rounds = await Round.find({ 'course': id });
         for (const tee of course.tees) {
             const { colour, hole } = req.body[tee.id];
             const { distance, par, strokeIndex } = hole;
@@ -127,7 +115,6 @@ async function update (req, res) {
             };
         };
         await course.save();
-        for (const round of rounds) await round.save();
     } catch (error) {
         console.log(error);
         req.flash('error', 'Course not updated');
@@ -151,13 +138,6 @@ module.exports = { create, find, save, show, update, view };
 
 // scorecard and map options
 
-// https://www.mscorecard.com/mscorecard/showcourse.php?cid=1145444320154
-
 // https://offcourse.co/courses/scorecard/windmill-hill-golf-centre/
-
-// https://courses.swingu.com/courses/United-Kingdom/England/Milton-Keynes/Windmill-Hill-Golf-Centre/34866
-// https://courses.swingu.com/api/swingbyswing/-/v1/courses?name=windmill+hill&to=30&from=0
-// https://courses.swingu.com/api/swingbyswing/-/v1/courses?city=windmill+hill&to=30&from=0
-// `https://courses.swingu.com/courses/${country}/%{stateOrProvince)}/%{city}/%{name}/%{courseId}`.replace(/\s/g, '-')
 
 // https://golftraxx.com/view_scorecard.php?course_name=Windmill+Hill+Golf+Centre&zipcode=MK3%207RB&static=true
