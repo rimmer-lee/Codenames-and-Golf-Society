@@ -482,7 +482,7 @@ RoundSchema.pre('validate', async function(next) {
 
 RoundSchema.pre('save', async function(next) {
     const { course: courseId, games, scores, tee: teeId } = this;
-    const players = await User.find();
+    const players = await User.findPlayers();
     const course = await Course.findById(courseId);
     const tee = course.tees.find(({ _id}) => _id == teeId);
     for (const score of this.scores) {
