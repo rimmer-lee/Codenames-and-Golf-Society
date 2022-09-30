@@ -1,4 +1,4 @@
-// shared with models/round.js
+// shared with utilities/prototype.js
 Array.prototype.sortAlphabetically = function(property = '') {
     function getProperty(property) {
         let object = this;
@@ -14,7 +14,7 @@ Array.prototype.sortAlphabetically = function(property = '') {
     })
 };
 
-// shared with models/round.js
+// shared with utilities/prototype.js
 Date.prototype.full = function() {
     const weekday = this.toLocaleDateString('en-GB', { weekday: 'long' });
     const day = this.toLocaleDateString('en-GB', { day: 'numeric' });
@@ -36,6 +36,7 @@ Date.prototype.full = function() {
     return `${weekday}, ${day}${ordinal} ${month} '${year}`;
 };
 
+// shared with utilities/prototype.js
 String.prototype.capitalize = function() {
     return this[0].toUpperCase() + this.substring(1);
 };
@@ -54,6 +55,7 @@ function createOption(innerText, attributes = []) {
 };
 
 // shared with controllers/rounds.js
+// now refactored in utilities/prototype.js
 function letterFromNumber(number) {
     return String.fromCharCode(97 + number);
 };
