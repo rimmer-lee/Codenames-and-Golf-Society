@@ -532,7 +532,7 @@ RoundSchema.post('save', async function(document) {
     for (const score of scores) {
         const { player } = score;
         const tee = score.tee || document.tee;
-        await calculateHandicaps(date, (player._id || player).toString(), tee.id || tee);
+        await calculateHandicaps(date, player._id.toString(), tee.id || tee);
     };
 });
 
