@@ -530,8 +530,9 @@ RoundSchema.pre('save', async function(next) {
 RoundSchema.post('save', async function(document) {
     const { date, scores } = document;
     for (const score of scores) {
-        const { player, tee } = score;
-        await calculateHandicaps(date, (player.id || player).toString(), tee.id || tee);
+        const { player } = score;
+        const tee = score.tee || document.tee;
+        await calculateHandicaps(date, (player._id || player).toString(), tee.id || tee);
     };
 });
 
