@@ -277,7 +277,7 @@ async function calculateHandicaps(dateFrom, playerId, teeId = '') {
             };
         };
 
-        const newHandicap = +((function() {
+        const newHandicap = (function() {
             const { scoreDifferentials } = player.handicap;
             const sortedScoreDifferentials = scoreDifferentials
                 .sort((a, b) => b.date - a.date)
@@ -307,7 +307,7 @@ async function calculateHandicaps(dateFrom, playerId, teeId = '') {
             if (difference <= 3) return handicap;
             return handicap + (difference >= 10 ? 5 : difference * 0.5);
 
-        })().toFixed(1));
+        })().singleDecimal();
         if (newHandicap !== handicap) player.handicap.handicaps.push({ date, value: newHandicap });
     };
     await player.save();
