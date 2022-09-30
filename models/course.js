@@ -149,6 +149,7 @@ CourseSchema.pre('save', async function(next) {
             tee.par.back += par;
         };
         tee.distance.full = tee.distance.front + tee.distance.back;
+        if (tee.par.front === 0 && tee.par.back === 0) continue;
         tee.par.full = tee.par.front + tee.par.back;
     };
     next();
