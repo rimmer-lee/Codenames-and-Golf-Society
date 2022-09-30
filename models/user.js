@@ -117,7 +117,7 @@ UserSchema.virtual('formattedBirthday').get(function() {
 });
 
 UserSchema.virtual('handicap.trending').get(function() {
-    const { handicap: { handicaps } } = this;
+    const { handicap: { handicaps, scoreDifferentials } } = this;
     const handicap = handicaps[handicaps.length - 1]?.value || 54;
     return {
         get class() {
@@ -126,7 +126,14 @@ UserSchema.virtual('handicap.trending').get(function() {
             if (direction === 'down') return 'success';
             return 'secondary';
         },
-        current: +parseFloat(handicap).toFixed(1),
+        get current() {
+            if (this.estimated) {
+                return (scoreDifferentials.reduce((sum, { value }) => {
+                    return sum += value;
+                }, 0) / scoreDifferentials.length || 54).singleDecimal();
+            };
+            return handicap.singleDecimal();
+        },
         get direction() {
             const { current, previous } = this;
             const direction = current - previous;
@@ -134,6 +141,7 @@ UserSchema.virtual('handicap.trending').get(function() {
             if (direction < 0) return 'down';
             return '';
         },
+        estimated: handicap === 54,
         get icon() {
             const { direction } = this;
             if (direction === '') return 'shuffle';
