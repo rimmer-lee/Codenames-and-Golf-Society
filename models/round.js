@@ -95,7 +95,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                 return '';
             },
             get method() {
-                const METHOD = GAMES.method.find(({ id }) => id === method) || {};
+                const METHOD = GAMES.method.find(({ id }) => id === method);
                 if (!METHOD) return '';
                 const { id, value } = METHOD;
                 return `${value} ${id === 'combined' ? 'Score' : 'Ball'} `;
