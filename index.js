@@ -369,8 +369,3 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 //    - have them floating?
 
 // put flash message in container on home screen i.e. for when logging out
-
-
-// 04/06 lee vs. jonny at waterstock - matchplay
-// 07/08, 29/08, 04/02, 10/09 - 3 best ball stroke play
-// silverstone 19/09 - Martin and Lee (Marlee) vs. Joe and Oli (Joli) - best ball stableford competition handicap match play
