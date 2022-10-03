@@ -127,12 +127,9 @@ UserSchema.virtual('handicap.trending').get(function() {
             return 'secondary';
         },
         get current() {
-            if (this.estimated) {
-                return (scoreDifferentials.reduce((sum, { value }) => {
-                    return sum += value;
-                }, 0) / scoreDifferentials.length || 54).singleDecimal();
-            };
-            return handicap.singleDecimal();
+            return (this.estimated ? Math.min( ...scoreDifferentials.map(({ value }) => {
+                    return value;
+                }) ) : handicap).singleDecimal();
         },
         get direction() {
             const { current, previous } = this;
