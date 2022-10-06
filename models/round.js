@@ -214,7 +214,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
     return games;
 };
 
-async function calculateHandicaps(dateFrom, playerId, teeId = '') {
+async function calculateHandicaps(dateFrom, playerId) {
     const player = await User.findById(playerId);
     const rounds = await Round.find({ 'date': { $gte: dateFrom }, 'scores.player': playerId }).populate('course').sort('date');
     player.handicap = {
@@ -225,21 +225,18 @@ async function calculateHandicaps(dateFrom, playerId, teeId = '') {
     for (const round of rounds) {
 
         // still getting tee for historical purposes
-        const { course, date, scores, tee } = round;
+        const { course, date, scores, tee: roundTee } = round;
 
-        const { roundType, shots } = scores.find(({ player }) => player.toString() === playerId.toString());
+        const { roundType, shots, tee: scoreTee } = scores.find(({ player }) => player.toString() === playerId.toString());
         if (roundType === 'practice') continue;
 
         // remove 9 holes by default
         if (roundType !== 'full') continue;
 
+        const tee = scoreTee._id || roundTee._id;
         const handicap = player.handicap.current;
         const roundAdjustedHandicap = handicap / (1 + +(roundType !== 'full'))
-        const { holes, ratings } = course.tees.find(({ id }) => {
-            const idString = id.toString();
-            return teeId.toString() === idString ||
-                tee.toString() === idString;
-        });
+        const { holes, ratings } = course.tees.find(({ id }) => tee.toString() === id.toString());
         if (!ratings.course[roundType] || !ratings.slope[roundType]) continue;
         const { holesWithAShot, shotsPerHole } = handicapShots(roundAdjustedHandicap);
         const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
@@ -530,9 +527,7 @@ RoundSchema.pre('save', async function(next) {
 RoundSchema.post('save', async function(document) {
     const { date, scores } = document;
     for (const score of scores) {
-        const { player } = score;
-        const tee = score.tee || document.tee;
-        await calculateHandicaps(date, player._id.toString(), tee.id || tee);
+        await calculateHandicaps(date, score.player._id.toString());
     };
 });
 
