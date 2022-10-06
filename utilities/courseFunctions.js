@@ -4,22 +4,56 @@ const { TEE_COLOURS } = require('../constants');
 
 const { createScorecard, searchCourse, searchCourses, removeRAndAId, testMatch } = require('./externalApis.js');
 
-function courseNames(gender, name, tees) {
-    const multiple = gender && tees.filter(tee => tee.name === name).length > 1;
-    return {
-        long: `${name}${multiple ? ` (${gender.capitalize()})` : ''}`,
-        short: `${name.split((function(value) {
-            if (/\s/.test(value)) return ' ';
-            if (/\//.test(value)) return '/';
-            return;
-        })(name)).map(value => {
-            if (!/\D/.test(value)) return value;
-            for (const v of value) {
-                if (/\w/.test(v)) return v.toUpperCase();
+function calculateTeeNames(tees) {
+    const refinedTees = tees.map((tee, index) => {
+        const gender = tee.Gender || tee.gender;
+        const name = tee.TeeName || tee.name;
+        return { gender, index, name }
+    });
+    return refinedTees.map(({ gender, index, name }) => {
+        const multipleTeeNames = refinedTees.filter(tee => tee.name === name).length > 1;
+        const { longSuffix, shortSuffix } = (function() {
+            if (!multipleTeeNames) return { longSuffix: '', shortSuffix: '' };
+            const matchingTees = refinedTees.filter(tee => tee.name === name && tee.gender === gender);
+            const teeIndex = matchingTees.length > 1 ? ` ${matchingTees.findIndex(tee => tee.index === index) + 1}` : '';
+            return {
+                longSuffix: ` (${gender.capitalize()}${teeIndex})`,
+                shortSuffix: `(${gender.capitalize()[0]}${teeIndex})`.replaceWhiteSpace()
             };
-        }).join('')}${multiple ? ` (${gender[0].toUpperCase()})` : ''}`,
-        value: `${name.toLowerCase()}${multiple ? `-${gender.toLowerCase()}` : ''}`
-    };
+        })();
+        const long = `${name}${longSuffix}`;
+        const short = (function() {
+            const splitRegex = /[\s\/]+/;
+            const nameParts = name.split(splitRegex);
+            if (multipleTeeNames) return `${nameParts.map(v => v[0]).join('')}${shortSuffix}`.toUpperCase();
+            const maximumLength = Math.min(Math.max( ...nameParts.map(v => v.length) ), 3);
+            let letters = 1;
+            while (letters <= maximumLength) {
+                const short = nameParts.map(v => v.slice(0, letters)).join('');
+                const shortenedTeeNames = refinedTees
+                    .map(({ name }) => {
+                        return name
+                            .split(splitRegex)
+                            .map(v => v.slice(0, letters))
+                            .join('');
+                    });
+                if (shortenedTeeNames
+                    .filter(name => {
+                        return name === short &&
+                            shortenedTeeNames.filter(shortenedTeeName => {
+                                return shortenedTeeName === name;
+                            }).length === 1;
+                    }).length === 1) return short;
+                letters++;
+            };
+            return name;
+        })();
+        const value = long
+            .replace(/[()]+/g, '')
+            .replaceWhiteSpace('-')
+            .toLowerCase();
+        return { long, short, value };
+    });
 };
 
 async function createCourse(id) {
@@ -34,7 +68,12 @@ async function createCourse(id) {
     const facility = removeRAndAId(FacilityName);
     const scorecard = await createScorecard({ ...courseData, FacilityName: facility });
     const { url: scorecardUrl, tees: scorecardTees } = scorecard;
-    const tees = TeeRows.length > 0 ? TeeRows.map(tee => {
+
+    const randaTeesExist = TeeRows.length > 0;
+    const teeNames = calculateTeeNames(randaTeesExist ? TeeRows : scorecardTees);
+
+    // make this better
+    const tees = randaTeesExist ? TeeRows.map((tee, index) => {
         const [ courseFront, slopeFront ] = tee.Front.split(' / ');
         const [ courseBack, slopeBack ] = tee.Back.split(' / ');
         const { CourseRating, TeeName: name, Gender: gender, Par, SlopeRating } = tee;
@@ -57,7 +96,7 @@ async function createCourse(id) {
             gender,
             holes,
             name,
-            names: courseNames(gender, name, TeeRows.map(({ TeeName }) => TeeName)),
+            names: teeNames[index],
             par: { full: Par },
             ratings: {
                 course: {
@@ -79,11 +118,12 @@ async function createCourse(id) {
             gender,
             holes,
             name,
-            names: courseNames(gender, name, scorecardTees.map(({ name }) => name)),
+            names: teeNames[index],
             par: {},
             ratings
         };
     });
+
     return { address, facility, randa: id, name, scorecardUrl, tees };
 };
 
@@ -93,4 +133,4 @@ function findTeeColour(tee) {
         TEE_COLOURS.find(({ colour }) => colour === 'white');
 };
 
-module.exports = { courseNames, createCourse, findTeeColour };
+module.exports = { createCourse, findTeeColour };
