@@ -14,12 +14,6 @@
     #tees td {
         width: calc(100% / 4);
     }
-
-    /* temporary solution */
-    .hole-score {
-        --size: 40%;
-    }
-
 }
 
 /* Bootstrap Medium (md) */
@@ -27,21 +21,7 @@
     #tees td {
         width: calc(100% / 9);
     }
-
-    /* temporary solution */
-    .hole-score {
-        --size: 35%;
-    }
-
 }
-
-@media (min-width: 992px) {
-    /* temporary solution */
-    .hole-score {
-        --size: 50px;
-    }
-}
-
 
 /* Bootstrap Large (lg) */
 @media (min-width: 992px) {
@@ -148,7 +128,7 @@ input:not(:focus) + .double-bogey::after {
     font-weight: 400;
     line-height: 1.5;
     padding: 0.375rem 0.75rem;
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     width: inherit;
     z-index: 1;
 }
@@ -179,10 +159,11 @@ table#round tr > * {
 }
 
 .hole-score {
+    --size: 1.75rem;
     padding-bottom: var(--size);
     position: absolute;
     width: var(--size);
-    z-index: var(--z);
+    z-index: -1;
 }
 
 #players td {
@@ -202,8 +183,4 @@ table#rounds-table > thead > tr > td i[class^="bi-"] {
 table.player-table [data-direction][data-path]:hover,
 table#courses > tbody > tr:hover {
     cursor: pointer;
-}
-
-.hole-square {
-    --z: -1;
 }
