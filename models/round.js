@@ -233,7 +233,7 @@ async function calculateHandicaps(dateFrom, playerId) {
         // remove 9 holes by default
         if (roundType !== 'full') continue;
 
-        const tee = scoreTee._id || roundTee._id;
+        const tee = scoreTee || roundTee;
         const handicap = player.handicap.current;
         const roundAdjustedHandicap = handicap / (1 + +(roundType !== 'full'))
         const { holes, ratings } = course.tees.find(({ id }) => tee.toString() === id.toString());
