@@ -453,7 +453,7 @@ function changeParticipation() {
             const participationCheckboxRow = participationCheckbox.closest('.row');
             const checkedId = participationCheckboxRow.querySelector('input.form-check-input[type=radio]:checked')?.value || teamNames[0]?.id;
             participationCheckboxRow.querySelector('input.form-check-input[type=radio]')?.closest('.col')?.remove();
-            if (!participationCheckbox.checked || participatingPlayers < 3) continue;
+            if (!participationCheckbox.checked || participatingPlayers < minimum) continue;
             const [ , playerReference ] = participationCheckbox.id.split('|');
             participationCheckbox.closest('.row').insertBefore(createElement({
                 classList: ['col'],

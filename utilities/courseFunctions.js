@@ -16,9 +16,10 @@ function calculateTeeNames(tees) {
             if (!multipleTeeNames) return { longSuffix: '', shortSuffix: '' };
             const matchingTees = refinedTees.filter(tee => tee.name === name && tee.gender === gender);
             const teeIndex = matchingTees.length > 1 ? ` ${matchingTees.findIndex(tee => tee.index === index) + 1}` : '';
+            const capitalizedGender = gender.capitalize();
             return {
-                longSuffix: ` (${gender.capitalize()}${teeIndex})`,
-                shortSuffix: `(${gender.capitalize()[0]}${teeIndex})`.replaceWhiteSpace()
+                longSuffix: ` (${capitalizedGender}${teeIndex})`,
+                shortSuffix: `(${capitalizedGender[0]}${teeIndex})`.replaceWhiteSpace()
             };
         })();
         const long = `${name}${longSuffix}`;

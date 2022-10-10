@@ -1,4 +1,4 @@
-const CACHE_NAME = 'CGS v.2022.09.30';
+const CACHE_NAME = 'CGS v.2022.10.08';
 const FILES_TO_CACHE = [
     '/rounds/new',
     '../../images/favicons/android-chrome-192x192.png',
@@ -26,6 +26,7 @@ const FILES_TO_CACHE = [
     '../../scripts/rounds/select-player.js',
     '../../scripts/rounds/select-tee.js',
     '../../scripts/rounds/shared-functions.js',
+    '../../scripts/rounds/toggle-buttons.js',
     '../../scripts/rounds/update.js',
     '../../scripts/rounds/validate.js',
     '../../styles/main.css',
