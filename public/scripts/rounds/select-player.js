@@ -169,9 +169,8 @@ function selectPlayer() {
         };
         if (playerSelect.value === 'Select Player') continue;
         const selectParent = playerSelect.closest('.row.g-2');
-        const localStoragePlayer = localStorage[id];
         const currentPlayer = players.find(({ id }) => id === currentSelectedPlayer);
-        const handicap = +(localStoragePlayer && localStoragePlayer.handicap || currentPlayer.handicap);
+        const handicap = +currentPlayer.handicap;
         const handicapElementObject = {
             classList: ['col-4', 'col-md-2'],
             children: [
