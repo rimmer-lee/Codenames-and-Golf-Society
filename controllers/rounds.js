@@ -53,7 +53,7 @@ async function save (req, res) {
                 return { distance: +distance, index: ++hole, par: +par, strokeIndex: +strokeIndex };
             });
         };
-        await course.save();
+        // await course.save();
 
         // const round = await Round.findOne({ course, date }) ||
         //     { created, course, games: [], date, scores: [] };
@@ -129,7 +129,7 @@ async function save (req, res) {
                 players,
                 roundType,
                 scoring,
-                teams: players.map(({ team }) => team).filter(team => team).map(id => {
+                teams: [ ...new Set(players.map(({ team }) => team).filter(team => team)) ].map(id => {
                     const value = gameObject.team[id];
                     const name = value instanceof Array ? value[0] : value;
                     return { id, name };
