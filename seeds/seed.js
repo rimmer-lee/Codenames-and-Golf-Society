@@ -10,6 +10,7 @@ const Title = require('../models/title');
 const User = require('../models/user');
 
 const { countries, courses, demerits, drinks, regions, rounds, sections, users } = require('./base');
+const { createCourse } = require('../utilities/courseFunctions');
 
 function regexName(name) {
     const [ first, last ] = name.split(' ');
@@ -66,8 +67,12 @@ async function seed() {
         await new Drink(drink).save();
     };
     for (const course of courses) {
-        course.created = created
-        await new Course(course).save();
+        const courseData = await createCourse(course.randa);
+        courseData.tees = courseData.tees.map(tee => {
+            const { holes } = course.tees.find(({ name }) => name === tee.name);
+            return { ...tee, holes };
+        })
+        await new Course({ ...courseData, created, updated: [ created ] }).save();
     };
     for (const round of rounds) {
         round.created = created
