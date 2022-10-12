@@ -53,12 +53,11 @@ async function save (req, res) {
                 return { distance: +distance, index: ++hole, par: +par, strokeIndex: +strokeIndex };
             });
         };
-        // await course.save();
+        await course.save();
 
         // const round = await Round.findOne({ course, date }) ||
         //     { created, course, games: [], date, scores: [] };
-        const round = await Round.findOne({ course, date, tee }) ||
-            { created, course, games: [], date, scores: [], tee };
+        const round = { created, course, games: [], date, scores: [] };
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
