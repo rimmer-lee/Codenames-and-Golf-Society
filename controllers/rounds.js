@@ -204,8 +204,7 @@ async function view (req, res) {
         };
     });
     const tee = course.tees.find(({ _id }) => {
-        return _id == T ||
-        _id == scores[0].tee;
+        return _id == T || _id == scores[0].tee;
     });
     res.render('rounds/edit', { course, courses, currentDate, date, games, id, players, playingGroups, tee });
 };
