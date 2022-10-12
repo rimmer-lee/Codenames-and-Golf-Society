@@ -25,10 +25,8 @@ async function find (req, res) {
             } else {
                 const courseData = await createCourse(id);
                 const by = marker ? await User.findById(marker) : await User.findOne({ username: 'machine' });
-                const createdObject = { by };
-                courseData.created = createdObject;
-                courseData.updated = [ createdObject ];
-                const newCourse = await new Course(courseData).save();
+                const created = { by };
+                const newCourse = await new Course({ ...courseData, created, updated: [ created ] }).save();
                 if (newCourse) {
                     const { facility, id: courseId, name, randa, tees } = newCourse;
                     data = { facility, id: courseId, name, randa, tees };
