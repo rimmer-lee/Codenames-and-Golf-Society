@@ -108,21 +108,20 @@ async function createScorecard(courseData) {
             return { address, course, facility, location, name, path, postcode, tees };
         }));
         const mscorecardCourse = (function() {
-            const matchedCourses = mscorecardCourses.filter(({ address, facility, name, postcode, tees }) => {
-                return (testMatch(postcode.replaceWhiteSpace(), Zip.replaceWhiteSpace()) ||
-                address.some(a => testMatch(a, Address, 'loose')) ||
-                address.some(a => testMatch(a, City, 'loose'))) &&
-                ((testMatch(facility, CourseName, 'loose') ||
-                testMatch(name, CourseName, 'loose') ||
-                testMatch(facility, FacilityName, 'loose') ||
-                testMatch(name, FacilityName, 'loose')));
+            const matchedCourses = mscorecardCourses.filter(({ address, course, facility, name, postcode }) => {
+                return (testMatch(postcode.replaceWhiteSpace(), Zip.replaceWhiteSpace()) &&
+                (address.some(a => testMatch(a, Address, 'loose')) ||
+                address.some(a => testMatch(a, City, 'loose')))) &&
+                (testMatch(facility, FacilityName, 'loose') ||
+                testMatch(name, FacilityName, 'loose') ||
+                testMatch(course, CourseName, 'loose'));
             });
-            if (matchedCourses.length === 1) return matchedCourses[0];
+            if (matchedCourses.length === 0) return false;
             if (matchedCourses.length > 1) {
                 const matchedCoursesWithTees = matchedCourses.filter(({ tees }) => tees.length > 0);
                 if (matchedCoursesWithTees.length === 1) return matchedCoursesWithTees[0];
             };
-            return false;
+            return matchedCourses[0];
         })();
         if (!mscorecardCourse) return emptyObject;
         const { path, tees } = mscorecardCourse;

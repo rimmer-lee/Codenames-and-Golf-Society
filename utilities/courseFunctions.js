@@ -5,11 +5,7 @@ const { TEE_COLOURS } = require('../constants');
 const { createScorecard, searchCourse, searchCourses, removeRAndAId, testMatch } = require('./externalApis.js');
 
 function calculateTeeNames(tees) {
-    const refinedTees = tees.map((tee, index) => {
-        const gender = tee.Gender || tee.gender;
-        const name = tee.TeeName || tee.name;
-        return { gender, index, name }
-    });
+    const refinedTees = tees.map(({ gender, name }, index) => ({ gender, index, name }));
     return refinedTees.map(({ gender, index, name }) => {
         const multipleTeeNames = refinedTees.filter(tee => tee.name === name).length > 1;
         const { longSuffix, shortSuffix } = (function() {
@@ -69,19 +65,12 @@ async function createCourse(id) {
     const facility = removeRAndAId(FacilityName);
     const scorecard = await createScorecard({ ...courseData, FacilityName: facility });
     const { url: scorecardUrl, tees: scorecardTees } = scorecard;
-
-    const randaTeesExist = TeeRows.length > 0;
-    const teeNames = calculateTeeNames(randaTeesExist ? TeeRows : scorecardTees);
-
-    // make this better
-    const tees = randaTeesExist ? TeeRows.map((tee, index) => {
+    const tees = TeeRows.length === 0 ? scorecardTees : TeeRows.map(tee => {
         const [ courseFront, slopeFront ] = tee.Front.split(' / ');
         const [ courseBack, slopeBack ] = tee.Back.split(' / ');
         const { CourseRating, TeeName: name, Gender: gender, Par, SlopeRating } = tee;
-        const colour = findTeeColour({ colour: '', name });
         const scorecardTee = scorecardTees.find(tee => {
-            return ((testMatch(tee.name, name, 'loose') ||
-                testMatch(tee.name, colour.colour, 'loose')) &&
+            return (testMatch(tee.name, name, 'loose') &&
                 (testMatch(tee.gender, gender) ||
                 testMatch(tee.name, gender, 'loose'))) ||
                 ((+tee.ratings.course.back === +courseBack ||
@@ -91,13 +80,11 @@ async function createCourse(id) {
                 +tee.ratings.slope.full === +SlopeRating ||
                 +tee.ratings.slope.front === +slopeFront));
         });
-        const holes = (scorecardTee || {}).holes || [];
+        const holes = scorecardTee?.holes || [];
         return {
-            colour,
             gender,
             holes,
             name,
-            names: teeNames[index],
             par: { full: Par },
             ratings: {
                 course: {
@@ -113,25 +100,14 @@ async function createCourse(id) {
                 }
             }
         };
-    }) : scorecardTees.map(({ gender, holes, name, ratings }) => {
-        return {
-            colour: findTeeColour({ colour: '', name }),
-            gender,
-            holes,
-            name,
-            names: teeNames[index],
-            par: {},
-            ratings
-        };
     });
-
     return { address, facility, randa: id, name, scorecardUrl, tees };
 };
 
 function findTeeColour(tee) {
-    return TEE_COLOURS.find(({ colour }) => colour.toLowerCase() === (tee.colour && tee.colour.colour || tee.colour || '').toLowerCase()) ||
+    return TEE_COLOURS.find(({ colour }) => colour.toLowerCase() === (tee?.colour?.colour || tee?.colour || '').toLowerCase()) ||
         TEE_COLOURS.find(({ colour }) => colour.toLowerCase() === tee.name.split(' ')[0].toLowerCase()) ||
         TEE_COLOURS.find(({ colour }) => colour === 'white');
 };
 
-module.exports = { createCourse, findTeeColour };
+module.exports = { calculateTeeNames, createCourse, findTeeColour };

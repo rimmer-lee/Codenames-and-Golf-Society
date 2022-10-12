@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const { BREAKDOWN_OBJECT, GENDERS } = require('../constants');
 
-const { findTeeColour } = require('../utilities/courseFunctions');
+const { calculateTeeNames, findTeeColour } = require('../utilities/courseFunctions');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -64,7 +64,10 @@ const TeeSchema = new Schema({
     measure: {
         full: {
             default: 'yards',
-            enum: [ 'yards', 'metres' ],
+
+            // move to constants
+            enum: [ 'metres', 'yards' ],
+
             type: String
         }
     },
@@ -131,13 +134,17 @@ CourseSchema.pre('validate', function(next) {
 });
 
 CourseSchema.pre('save', async function(next) {
-    for (const tee of this.tees) {
-        tee.measure.full = tee.measure.full || 'yards';
-        tee.distance.front = 0;
-        tee.distance.back = 0;
-        tee.par.front = 0;
-        tee.par.back = 0;
+    const { tees } = this;
+    const teeNames = calculateTeeNames(tees);
+    this.tees = tees.map((tee, index) => {
         tee.colour = tee.colour || findTeeColour(tee);
+        tee.measure.full = tee.measure.full || 'yards';
+        tee.par = tee.par || {};
+        for (const key of ['distance', 'par']) {
+            for (const property of ['back', 'full', 'front']) {
+                tee[key][property] = 0;
+            };
+        };
         for (const hole of tee.holes) {
             const { distance = 0, index, par = 0 } = hole;
             if (index < 10) {
@@ -149,9 +156,12 @@ CourseSchema.pre('save', async function(next) {
             tee.par.back += par;
         };
         tee.distance.full = tee.distance.front + tee.distance.back;
-        if (tee.par.front === 0 && tee.par.back === 0) continue;
-        tee.par.full = tee.par.front + tee.par.back;
-    };
+        if (tee.par.front !== 0 || tee.par.back !== 0) tee.par.full = tee.par.front + tee.par.back;
+        return {
+            ...tee._doc,
+            names: teeNames[index],
+        };
+    });
     next();
 });
 
@@ -166,8 +176,11 @@ CourseSchema.virtual('scorecardUrl.full').get(function() {
 
 TeeSchema.virtual('measure.short').get(function() {
     const { full } = this.measure;
+
+    // move values to constants
     if (full === 'yards') return 'yd';
     if (full === 'metres') return 'm';
+
     return undefined;
 });
 
