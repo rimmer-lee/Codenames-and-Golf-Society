@@ -363,9 +363,11 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 
 // Push notifications
 
-// get scorecard and geo location data - see course controller
+// geo location data - see course controller
 
 // add save/submit buttons to top of form
 //    - have them floating?
 
 // put flash message in container on home screen i.e. for when logging out
+
+// show hole by hole game result in scorecard when viewing round
