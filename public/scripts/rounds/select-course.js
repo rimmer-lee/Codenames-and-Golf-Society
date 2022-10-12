@@ -239,7 +239,7 @@ function selectCourse() {
                                 dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' }, { id: 'max', value: '18' });
                                 break;
                         };
-                        return dataElementObject;;
+                        return dataElementObject;
                     })
                 ]
             }), null);
@@ -252,11 +252,11 @@ function selectCourse() {
         toggleElement(paginationParentElement);
         // playersAccordion.classList.remove('forced-accordion-bottom');
         for (const tee of course.tees) {
-            const { colour, holes, id, name, names: { long, short, value }, par, ratings: { bogey, course, slope } } = tee;
+            const { colour, holes, id, names: { long, short, value }, par, ratings: { bogey, course, slope } } = tee;
             teeSelect.insertBefore(createElement({
                 type: 'option',
                 attributes: [{ id: 'value', value: id }],
-                innerText: name
+                innerText: long
             }), null);
             teeElement.insertBefore(createElement({
                 type: 'tr',
