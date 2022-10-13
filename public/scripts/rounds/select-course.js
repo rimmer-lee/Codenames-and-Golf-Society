@@ -183,11 +183,10 @@ function selectCourse() {
             const { colour, id, names: { long, short } } = tee;
             tableBody.insertBefore(createElement({
                 type: 'tr',
-                classList: colour ? [ colour.class.table, 'text-center' ] : ['text-center'],
+                classList: colour ? [ colour.class.table ] : [],
                 children: [
                     {
                         type: 'td',
-                        classList: ['align-middle'],
                         children: [
                             {
                                 classList: ['d-none', 'd-md-block'],
@@ -202,12 +201,10 @@ function selectCourse() {
                         ]
                     },
                     ...['distance', 'par', 'strokeIndex'].map(property => {
-                        const dataElementObject = {
+                        return {
                             type: 'td',
-                            classList: ['align-middle'],
                             children: [
                                 {
-                                    classList: ['d-flex', 'justify-content-center'],
                                     children: [
                                         {
                                             type: 'label',
@@ -221,6 +218,22 @@ function selectCourse() {
                                                 { id: 'id', value: `${id}-${i}|${property}` },
                                                 { id: 'type', value: 'number' },
                                                 { id: 'name', value: `[course][tees][${id}][${i}][${property}]` },
+                                                ...(function() {
+                                                    switch (property) {
+                                                        case 'distance':
+                                                            return [{ id: 'min', value: '1' }];
+                                                        case 'par':
+                                                            return [
+                                                                { id: 'min', value: '3' },
+                                                                { id: 'max', value: '5' }
+                                                            ]
+                                                        case 'strokeIndex':
+                                                            return [
+                                                                { id: 'min', value: '1' },
+                                                                { id: 'max', value: '18' }
+                                                            ];
+                                                    };
+                                                })()
                                             ],
                                             addEventListener: [{ type: 'blur', listener: updateData }]
                                         }
@@ -228,18 +241,6 @@ function selectCourse() {
                                 }
                             ]
                         };
-                        switch (property) {
-                            case 'distance':
-                                dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' });
-                                break;
-                            case 'par':
-                                dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '3' }, { id: 'max', value: '5' });
-                                break;
-                            case 'strokeIndex':
-                                dataElementObject.children[0].children[1].attributes.push({ id: 'min', value: '1' }, { id: 'max', value: '18' });
-                                break;
-                        };
-                        return dataElementObject;
                     })
                 ]
             }), null);
@@ -260,11 +261,10 @@ function selectCourse() {
             }), null);
             teeElement.insertBefore(createElement({
                 type: 'tr',
-                classList: colour ? [ colour.class.table, 'text-center' ] : ['text-center'],
+                classList: colour ? [ colour.class.table ] : [],
                 children: [
                     {
                         type: 'td',
-                        classList: ['align-middle'],
                         children: [
                             {
                                 classList: ['d-none', 'd-md-block'],
@@ -287,48 +287,40 @@ function selectCourse() {
                         'slopeRating-front',
                         'slopeRating-back'
                     ].map(property => {
-                        const tableDataElementObject = {
+                        return {
                             type: 'td',
-                            classList: ['align-middle'],
+                            classList: ['courseRating-front',
+                                'courseRating-back',
+                                'bogeyRating',
+                                'slopeRating-front',
+                                'slopeRating-back'].includes(property) ? ['d-none', 'd-lg-table-cell'] : [],
                             children: [
                                 {
-                                    attributes: [{ id: 'id', value: `${value}|${property}` }]
+                                    attributes: [{ id: 'id', value: `${value}|${property}` }],
+                                    innerText: (function() {
+                                            switch (property) {
+                                                case 'par':
+                                                    if (par?.full) return par.full;
+                                                    else if (holes) return holes.reduce((sum, hole) => sum + hole.par, 0);
+                                                case 'courseRating-full':
+                                                    return singleDecimal(course.full);
+                                                case 'courseRating-front':
+                                                    return singleDecimal(course.front);
+                                                case 'courseRating-back':
+                                                    return singleDecimal(course.back);
+                                                case 'bogeyRating':
+                                                    return singleDecimal(bogey);
+                                                case 'slopeRating-full':
+                                                    return slope.full;
+                                                case 'slopeRating-front':
+                                                    return slope.front;
+                                                case 'slopeRating-back':
+                                                    return slope.back;
+                                            };
+                                        })()
                                 }
                             ]
                         };
-                        if (['courseRating-front',
-                            'courseRating-back',
-                            'bogeyRating',
-                            'slopeRating-front',
-                            'slopeRating-back'].includes(property)) tableDataElementObject.classList = ['d-none', 'd-lg-table-cell'];
-                        switch (property) {
-                            case 'par':
-                                if ((par || {}).full) tableDataElementObject.children[0].innerText = par.full;
-                                else if (holes) tableDataElementObject.children[0].innerText = holes.reduce((sum, hole) => sum + hole.par, 0);
-                                break;
-                            case 'courseRating-full':
-                                tableDataElementObject.children[0].innerText = singleDecimal(course.full);
-                                break;
-                            case 'courseRating-front':
-                                tableDataElementObject.children[0].innerText = singleDecimal(course.front);
-                                break;
-                            case 'courseRating-back':
-                                tableDataElementObject.children[0].innerText = singleDecimal(course.back);
-                                break;
-                            case 'bogeyRating':
-                                tableDataElementObject.children[0].innerText = singleDecimal(bogey);
-                                break;
-                            case 'slopeRating-full':
-                                tableDataElementObject.children[0].innerText = slope.full;
-                                break;
-                            case 'slopeRating-front':
-                                tableDataElementObject.children[0].innerText = slope.front;
-                                break;
-                            case 'slopeRating-back':
-                                tableDataElementObject.children[0].innerText = slope.back;
-                                break;
-                        };
-                        return tableDataElementObject;
                     })
                 ]
             }), null);

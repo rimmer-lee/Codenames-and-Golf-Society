@@ -60,40 +60,28 @@
                                 </div>
                             </div>
                             <div class="d-none col-12" visibility="hidden">
-                                <table id="tees" class="table table-sm table-bordered mb-0">
+                                <table id="tees" class="align-middle table table-sm table-bordered text-center mb-0">
                                     <thead class="table-dark">
                                         <tr class="d-none d-lg-table-row">
-                                            <th scope="col" rowspan="2">
-                                                <div class="text-center">
-                                                    Tee
-                                                </div>
+                                            <th class="align-middle" scope="col" rowspan="2">
+                                                Tee
                                             </th>
-                                            <th scope="col" rowspan="2">
-                                                <div class="text-center">
-                                                    Par
-                                                </div>
+                                            <th class="align-middle" scope="col" rowspan="2">
+                                                Par
                                             </th>
                                             <th scope="col" colspan="3">
-                                                <div class="text-center">
-                                                    Course Rating
-                                                </div>
+                                                Course Rating
                                             </th>
                                             <th scope="col" rowspan="2">
-                                                <div class="text-center">
-                                                    Bogey Rating
-                                                </div>
+                                                Bogey Rating
                                             </th>
                                             <th scope="col" colspan="3">
-                                                <div class="text-center">
-                                                    Slope Rating
-                                                </div>
+                                                Slope Rating
                                             </th>
                                         </tr>
                                         <tr>
                                             <th class="d-table-cell d-lg-none" scope="col">
-                                                <div class="text-center">
-                                                    Tee
-                                                </div>
+                                                Tee
                                             </th>
                                             <th class="d-table-cell d-lg-none" scope="col">
                                                 <div class="text-center">
@@ -101,40 +89,32 @@
                                                 </div>
                                             </th>
                                             <th scope="col">
-                                                <div class="d-none d-lg-block text-center">
+                                                <div class="d-none d-lg-block">
                                                     18
                                                 </div>
-                                                <div class="d-block d-lg-none text-center">
+                                                <div class="d-block d-lg-none">
                                                     Course
                                                 </div>
                                             </th>
                                             <th class="d-none d-lg-table-cell" scope="col">
-                                                <div class="text-center">
-                                                    Front
-                                                </div>
+                                                Front
                                             </th>
                                             <th class="d-none d-lg-table-cell" scope="col">
-                                                <div class="text-center">
-                                                    Back
-                                                </div>
+                                                Back
                                             </th>
                                             <th scope="col">
-                                                <div class="d-none d-lg-block text-center">
+                                                <div class="d-none d-lg-block">
                                                     18
                                                 </div>
-                                                <div class="d-block d-lg-none text-center">
+                                                <div class="d-block d-lg-none">
                                                     Slope
                                                 </div>
                                             </th>
                                             <th class="d-none d-lg-table-cell" scope="col">
-                                                <div class="text-center">
-                                                    Front
-                                                </div>
+                                                Front
                                             </th>
                                             <th class="d-none d-lg-table-cell" scope="col">
-                                                <div class="text-center">
-                                                    Back
-                                                </div>
+                                                Back
                                             </th>
                                         </tr>
                                     </thead>
@@ -235,36 +215,30 @@
                                     <div class="row gy-2">
                                         <% for (let i = 1; i < 19; i++) { %>
                                         <div id="hole-<%= i %>" class="<%= i > 1 ? "d-none " : "" %>col-12"<%= i > 1 ? " visibility=hidden" : "" %>>
-                                            <div class="row justify-content-md-center row-cols-1 row-cols-md-2 g-4">
+                                            <div class="g-4 justify-content-md-center row row-cols-1 row-cols-md-2">
                                                 <div class="col d-none" visibility="hidden">
-                                                    <div class="mb-2 border-bottom border-1">
+                                                    <div class="border-1 border-bottom g-4">
                                                         <h5>Hole <%= i %></h5>
                                                     </div>
-                                                    <table class="table table-sm table-bordered hole mb-0 lh-lg">
+                                                    <table class="align-middle hole mb-0 lh-lg table table-sm table-bordered text-center">
                                                         <thead class="table-dark">
                                                             <tr>
                                                                 <td scope="col">
-                                                                    <div class="text-center">
-                                                                        Tee
-                                                                    </div>
+                                                                    Tee
                                                                 </td>
                                                                 <td scope="col">
-                                                                    <div class="d-none d-md-block text-center distance-long">
+                                                                    <div class="d-none d-md-block distance-long">
                                                                         Yards
                                                                     </div>
-                                                                    <div class="d-block d-md-none text-center distance-short">
+                                                                    <div class="d-block d-md-none distance-short">
                                                                         Yds
                                                                     </div>
                                                                 </td>
                                                                 <td scope="col">
-                                                                    <div class="text-center">
-                                                                        Par
-                                                                    </div>
+                                                                    Par
                                                                 </td>
                                                                 <td scope="col">
-                                                                    <div class="text-center">
-                                                                        SI
-                                                                    </div>
+                                                                    SI
                                                                 </td>
                                                             </tr>
                                                         </thead>
@@ -272,10 +246,10 @@
                                                     </table>
                                                 </div>
                                                 <div class="col d-none" visibility="hidden">
-                                                    <div class="mb-2 border-bottom border-1">
+                                                    <div class="border-1 border-bottom mb-2">
                                                         <h5>Players</h5>
                                                     </div>
-                                                    <div id="players-<%= i %>" class="row gy-2"></div>
+                                                    <div id="players-<%= i %>" class="gy-2 row"></div>
                                                 </div>
                                             </div>
                                         </div>
