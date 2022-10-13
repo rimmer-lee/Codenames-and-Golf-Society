@@ -17,7 +17,7 @@ const passport = require('passport');
 const path = require('path');
 const session = require('express-session');
 
-require('./utilities/prototypes');
+require(path.join(__dirname, 'utilities', 'prototypes'));
 
 const ExpressError = require(path.join(__dirname, 'utilities', 'ExpressError'));
 
@@ -97,20 +97,20 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
 app.use(session(sessionConfig));
 app.use(flash());
 app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", ...SAFE_URLS.connect],
-        scriptSrc: ["'unsafe-inline'", "'self'", ...SAFE_URLS.script],
-        styleSrc: ["'self'", "'unsafe-inline'", ...SAFE_URLS.style],
-        workerSrc: ["'self'", "blob:", ...SAFE_URLS.worker],
+        connectSrc: [...SAFE_URLS.connect, "'self'"],
+        scriptSrc: [...SAFE_URLS.script, "'unsafe-inline'", "'self'"],
+        styleSrc: [ ...SAFE_URLS.style, "'self'", "'unsafe-inline'"],
+        workerSrc: [...SAFE_URLS.worker, "'self'", "blob"],
         objectSrc: [...SAFE_URLS.object],
-        imgSrc: ["'self'", "blob:", "data:", ...SAFE_URLS.image],
-        fontSrc: ["'self'", ...SAFE_URLS.font]
+        imgSrc: [...SAFE_URLS.image, "'self'", "blob", "data"],
+        fontSrc: [...SAFE_URLS.font, "'self'"]
     }
 }));
 app.use(passport.initialize());
@@ -129,6 +129,7 @@ passport.deserializeUser(User.deserializeUser());
 // app.get('/:route/:id', (req, res) => res.render(`${req.params.route}/${req.params.id}/index`));
 
 app.use(async (req, res, next) => {
+    // const { user } = req;
 
     // Constants
     res.locals.actions = ACTIONS;
@@ -156,8 +157,16 @@ app.use(async (req, res, next) => {
 
     // User variables
     res.locals.currentUser = req.user;
-    res.locals.ADMIN_ACCESS = !!(req.user && req.user.access.admin);
-    res.locals.EDIT_ACCESS = !!(req.user && req.user.access.edit);
+    res.locals.ADMIN_ACCESS = !!(req?.user?.access?.admin);
+    res.locals.EDIT_ACCESS = !!(req?.user?.access?.edit);
+
+    // res.locals.USER = {
+    //     ...user,
+    //     ACCESS: {
+    //         ADMIN: !!(user?.access?.admin),
+    //         EDIT: !!(user?.access?.edit)
+    //     }
+    // };
 
     next();
 });
@@ -270,7 +279,7 @@ if (process.env.NODE_ENV !== 'production') {
             req.flash('error', 'You\'re not connected to the dev database');
             return res.redirect('home');
         };
-        const { seed } = require('./seeds/seed');
+        const { seed } = require(path.join(__dirname, 'seeds', 'seed'));
         await seed();
         res.redirect('/');
     });
@@ -301,7 +310,7 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // https://rapidapi.com/golfambit-golfambit-default/api/golf-course-finder/
 
 
-// async function readImage() {
+// (async function readImage() {
 //     const Jimp = require('jimp');
 //     const tesseract = require('node-tesseract-ocr');
 
@@ -327,9 +336,7 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 
 //         })
 //         .catch(error => console.error(error));
-// };
-
-// readImage();
+// })();
 
 
 // make container a fixed width for wide screens
