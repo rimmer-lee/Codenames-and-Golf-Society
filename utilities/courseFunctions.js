@@ -20,20 +20,13 @@ function calculateTeeNames(tees) {
         })();
         const long = `${name}${longSuffix}`;
         const short = (function() {
-            const splitRegex = /[\s\/]+/;
-            const nameParts = name.split(splitRegex);
-            if (multipleTeeNames) return `${nameParts.map(v => v[0]).join('')}${shortSuffix}`.toUpperCase();
+            const nameParts = splitName(name);
+            if (multipleTeeNames) return `${shortenName(nameParts, 1)}${shortSuffix}`.toUpperCase();
             const maximumLength = Math.min(Math.max( ...nameParts.map(v => v.length) ), 3);
-            let letters = 1;
-            while (letters <= maximumLength) {
-                const short = nameParts.map(v => v.slice(0, letters)).join('');
-                const shortenedTeeNames = refinedTees
-                    .map(({ name }) => {
-                        return name
-                            .split(splitRegex)
-                            .map(v => v.slice(0, letters))
-                            .join('');
-                    });
+            let characters = 1;
+            while (characters <= maximumLength) {
+                const short = shortenName(nameParts, characters);
+                const shortenedTeeNames = refinedTees.map(({ name }) => shortenName(splitName(name), characters));
                 if (shortenedTeeNames
                     .filter(name => {
                         return name === short &&
@@ -41,7 +34,7 @@ function calculateTeeNames(tees) {
                                 return shortenedTeeName === name;
                             }).length === 1;
                     }).length === 1) return short;
-                letters++;
+                characters++;
             };
             return name;
         })();
@@ -108,6 +101,14 @@ function findTeeColour(tee) {
     return TEE_COLOURS.find(({ colour }) => colour.toLowerCase() === (tee?.colour?.colour || tee?.colour || '').toLowerCase()) ||
         TEE_COLOURS.find(({ colour }) => colour.toLowerCase() === tee.name.split(' ')[0].toLowerCase()) ||
         TEE_COLOURS.find(({ colour }) => colour === 'white');
+};
+
+function shortenName(names, characters) {
+    return names.map(v => (/[^A-Za-z]+/.test(v) ? v : v.slice(0, characters))).join('');
+};
+
+function splitName(name) {
+    return name.split(/[\s\/]+/);
 };
 
 module.exports = { calculateTeeNames, createCourse, findTeeColour };
