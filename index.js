@@ -28,6 +28,7 @@ const {
     GAMES,
     GENDERS,
     NAME_TITLES,
+    NAVBAR_LINKS,
     PAR_CLASSES,
     ROLES,
     ROUND_TYPES,
@@ -107,9 +108,9 @@ app.use(helmet.contentSecurityPolicy({
         connectSrc: [...SAFE_URLS.connect, "'self'"],
         scriptSrc: [...SAFE_URLS.script, "'unsafe-inline'", "'self'"],
         styleSrc: [ ...SAFE_URLS.style, "'self'", "'unsafe-inline'"],
-        workerSrc: [...SAFE_URLS.worker, "'self'", "blob"],
+        workerSrc: [...SAFE_URLS.worker, "'self'", "blob:"],
         objectSrc: [...SAFE_URLS.object],
-        imgSrc: [...SAFE_URLS.image, "'self'", "blob", "data"],
+        imgSrc: [...SAFE_URLS.image, "'self'", "blob:", "data:"],
         fontSrc: [...SAFE_URLS.font, "'self'"]
     }
 }));
@@ -130,6 +131,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(async (req, res, next) => {
     // const { user } = req;
+
+    res.locals.NAVBAR_LINKS = NAVBAR_LINKS.sortBy(true, 'order');
 
     // Constants
     res.locals.actions = ACTIONS;

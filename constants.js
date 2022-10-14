@@ -139,6 +139,14 @@ module.exports = {
     },
     GENDERS: ['ambiguous', 'female', 'male', 'trans'],
     NAME_TITLES: ['Master', 'Mr', 'Ms', 'Miss', 'Mrs', 'Mx', 'Lord', 'Lady', 'Sir', 'Dame', 'Dr', 'Prof'],
+    NAVBAR_LINKS: [
+        { admin: false, link: '/charter', order: 1, text: 'Charter' },
+        { admin: false, link: '/rounds/courses', order: 6, text: 'Courses' },
+        { admin: false, link: '/demerits', order: 2, text: 'Demerits' },
+        { admin: false, link: '/players', order: 3, text: 'Players' },
+        { admin: false, link: '/rounds', order: 5, text: 'Rounds' },
+        { admin: true, link: '/users', order: 4, text: 'Users' }
+    ],
     NON_MEMBERS: ['guest', 'super'],
     PAR_CLASSES: ['f-level', 'f-over', 'f-under'],
     ROLES: ['admin', 'founder', 'guest', 'member', 'super'],

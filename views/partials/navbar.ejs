@@ -1,36 +1,29 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-    <div class="container-fluid">
-        <a class="navbar-brand mx-3" href="/">CGS</a>
-        <button class="navbar-toggler mx-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="navbarNavAltMarkup" class="collapse navbar-collapse">
-            <div class="navbar-nav ms-3 me-auto">
-                <a class="nav-link" href="/charter">Charter</a>
-                <a class="nav-link" href="/demerits">Demerits</a>
-                <a class="nav-link" href="/players">Players</a>
-                <% if (ADMIN_ACCESS) { %>
-                <a class="nav-link" href="/users">Users</a>
-                <% }; %>
-                <a class="nav-link" href="/rounds">Rounds</a>
-                <a class="nav-link" href="/rounds/courses">Courses</a>
-                <!-- <a class="nav-link" href="/games">Games</a> -->
-            </div>
-            <hr class="d-block d-lg-none d-xl-none d-xxl-none">
-            <div class="navbar-nav mx-3">
-                <% if (typeof currentUser !== "undefined" && currentUser)  { %>
-                <%- include('icon', { classes: 'bi-person-fill btn-outline-success', link: 'account', text: 'Account' }) %>
-                <form method="POST" action="/logout">
-                    <label class="nav-link py-0 d-none d-lg-inline d-xl-inline d-xxl-inline">
-                        <input class="d-none" type="submit" value="">
-                        <i class="btn btn-outline-danger rounded-circle bi bi-person-dash-fill fs-5"></i>
-                    </label>
-                    <input class="btn nav-link d-inline d-lg-none d-xl-none d-xxl-none" type="submit" value="Logout">
-                </form>
-                <% } else { %>
-                <%- include('icon', { classes: 'bi-person-fill', link: 'login', text: 'Login' }) %>
-                <% }; %>
-            </div>
+    <a class="navbar-brand mx-3" href="/">CGS</a>
+    <button class="navbar-toggler mx-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div id="navbarNavAltMarkup" class="collapse navbar-collapse">
+        <div class="navbar-nav ms-3 me-auto">
+            <% for (const navbarLink of NAVBAR_LINKS) { %>
+            <% if (navbarLink.admin && !ADMIN_ACCESS) continue; %>
+            <a class="nav-link" href="<%= navbarLink.link %>"><%= navbarLink.text %></a>
+            <% }; %>
+        </div>
+        <hr class="d-block d-lg-none">
+        <div class="navbar-nav mx-3">
+            <% if (typeof currentUser !== "undefined" && currentUser)  { %>
+            <%- include('icon', { classes: 'bi-person-fill btn-outline-success', link: 'account', text: 'Account' }) %>
+            <form method="POST" action="/logout">
+                <label class="nav-link py-0 d-none d-lg-inline">
+                    <input class="d-none" type="submit">
+                    <i class="btn btn-outline-danger rounded-circle bi bi-person-dash-fill fs-5"></i>
+                </label>
+                <button class="btn nav-link d-inline d-lg-none" type="submit">Logout</button>
+            </form>
+            <% } else { %>
+            <%- include('icon', { classes: 'bi-person-fill', link: 'login', text: 'Login' }) %>
+            <% }; %>
         </div>
     </div>
 </nav>
