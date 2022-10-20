@@ -224,6 +224,7 @@ li.page-item.right-hole .page-link {
 .game-element {
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
+    z-index: 1;
 }
 
 .fixed-game-element-height {
@@ -259,6 +260,7 @@ li.page-item.right-hole .page-link {
     transform-origin: 0 0;
     white-space: nowrap;
     width: 100%;
+    z-index: -1;
 }
 
 .custom-name-element {
