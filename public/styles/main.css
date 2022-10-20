@@ -249,11 +249,16 @@ li.page-item.right-hole .page-link {
     height: 100%;
     left: 0;
     opacity: .65;
+    overflow: hidden;
     padding: 1rem 0.75rem;
     position: absolute;
+    text-align: start;
+    text-overflow: ellipsis;
     top: 0;
     transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
     transform-origin: 0 0;
+    white-space: nowrap;
+    width: 100%;
 }
 
 .custom-name-element {
