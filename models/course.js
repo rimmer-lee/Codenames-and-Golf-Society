@@ -137,7 +137,7 @@ CourseSchema.pre('save', async function(next) {
     const { tees } = this;
     const teeNames = calculateTeeNames(tees);
     this.tees = tees.map((tee, index) => {
-        tee.colour = tee.colour || findTeeColour(tee);
+        tee.colour = findTeeColour(tee);
         tee.measure.full = tee.measure.full || 'yards';
         tee.par = tee.par || {};
         for (const key of ['distance', 'par']) {
