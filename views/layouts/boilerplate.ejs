@@ -17,10 +17,19 @@
 </head>
 <body>
     <%- include('../partials/navbar') %>
+
     <!-- https://getbootstrap.com/docs/5.1/components/breadcrumb/ -->
-    <main class="container">
-        <%- include('../partials/flash') %>
-        <%- body %>
+
+    <main class="row">
+
+        <!-- have page headings independent of sizing -->
+
+        <div class="col-12 col-8-sm col-md-7 col-lg-6 mx-auto">
+            <div class="container-fluid">
+                <%- include('../partials/flash') %>
+                <%- body %>
+            </div>
+        </div>
     </main>
     <%- include('../partials/footer') %>
 
