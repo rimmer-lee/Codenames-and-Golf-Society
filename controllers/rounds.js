@@ -41,8 +41,7 @@ async function remove (req, res) {
 async function save (req, res) {
     try {
         const { body } = req;
-        const { date } = body.round;
-        const { id: courseId, tee, tees } = body.course;
+        const { course: { id: courseId, tee, tees }, round: { date } } = body;
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
         const course = await Course.findById(courseId);
@@ -57,18 +56,16 @@ async function save (req, res) {
 
         // const round = await Round.findOne({ course, date }) ||
         //     { created, course, games: [], date, scores: [] };
+
         const round = { created, course, games: [], date, scores: [] };
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
-
-            // const { demerit, handicap, hole, id, tee } = body[key];
-            const { demerit, handicap, hole, id } = body[key];
-
+            const { demerit, handicap: { course: handicap }, hole, id, tee } = body[key];
             const existingScoreIndex = round.scores.findIndex(({ player }) => player == id);
             const existingScore = round.scores[existingScoreIndex] || { shots: [] };
             const shots = hole.map(Number).map((shot, index) => (shot || existingScore?.shots && existingScore?.shots[index] || 0));
-            const player = await (async function(id) {
+            const player = await (async function() {
                 if (existingScoreIndex !== -1) return existingScore.player;
                 if (/^new\-\d+/.test(id)) {
                     const { name: full } = body[id];
@@ -77,7 +74,7 @@ async function save (req, res) {
                     return player;
                 };
                 return await User.findById(id);
-            })(id);
+            })();
             if (existingScoreIndex !== -1) {
                 const { playingGroup } = existingScore;
                 round.scores.splice(existingScoreIndex, 1, { handicap, player, playingGroup, shots, tee });
