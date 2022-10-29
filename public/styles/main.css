@@ -134,11 +134,13 @@ li.page-item {
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 
 input[type=number] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* #course > div > div > div.col-12 > div > div.col.btn-group > label.btn.btn-outline-light.text-capitalize {
