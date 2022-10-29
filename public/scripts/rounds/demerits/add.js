@@ -41,9 +41,12 @@ function demeritObject(player, hole, index) {
                                             { id: 'required', value: '' }
                                         ],
                                         addEventListener: [
-                                            { type: 'blur', listener: validation },
-                                            { type: 'change', listener: updateData },
-                                            { type: 'change', listener: updateDescription }
+                                            { type: 'change', listener: function() {
+                                                validation.call(this);
+                                                updateData.call(this);
+                                                updateDescription.call(this);
+                                                updateCloseButtons(this.closest('.modal'));
+                                            } }
                                         ],
                                         children: [
                                             {
