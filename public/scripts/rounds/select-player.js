@@ -3,77 +3,151 @@ const playerSelectSelector = 'select.form-select[id$="|id"]:not([id^="game-"])';
 
 function addPlayer() {
     const parentRow = this.closest('.row');
-    const selects = parentRow.querySelectorAll('select');
+    const selects = parentRow.querySelectorAll('select[id$="|id"]');
+    const { value: courseId } = document.getElementById('course-select');
+    const { tees = [] } = courses.find(({ id }) => id == courseId) || {};
+
+    // needs to accommodate marker when moving to React
     const letter = letterFromNumber(selects.length - 1);
     const playerReference = `player-${letter}`;
-    const id = `${playerReference}|id`;
+
     const playerSelect = {
-        classList: ['col-12', 'd-flex'],
+        classList: ['col-12'],
         children: [
             {
-                classList: ['flex-grow-1'],
+                classList: ['border', 'border-1', 'p-2', 'rounded'],
                 children: [
                     {
-                        classList: ['row', 'g-2'],
+                        classList: ['d-flex'],
                         children: [
                             {
-                                classList: ['col'],
+                                classList: ['flex-grow-1'],
                                 children: [
                                     {
-                                        classList: ['form-floating'],
+                                        classList: ['g-2', 'row', 'row-cols-1'],
                                         children: [
                                             {
-                                                type: 'select',
-                                                classList: ['form-select', 'text-capitalize'],
-                                                attributes: [
-                                                    { id: 'id', value: id },
-                                                    { id: 'name', value: `[player-${letter}][id]` }
-                                                ],
-                                                addEventListener: [
-                                                    { type: 'change', listener: selectPlayer },
-                                                    { type: 'change', listener: updateData }
-                                                ],
+                                                classList: ['col'],
                                                 children: [
                                                     {
-                                                        type: 'option',
-                                                        attributes: [
-                                                            { id: 'selected', value: true },
-                                                            { id: 'disabled', value: true }
-                                                        ],
-                                                        innerText: 'Select Player'
+                                                        classList: ['form-floating'],
+                                                        children: [
+                                                            {
+                                                                type: 'select',
+                                                                classList: ['form-select', 'text-capitalize'],
+                                                                attributes: [
+                                                                    { id: 'id', value: `${playerReference}|id` },
+                                                                    { id: 'name', value: `[${playerReference}][id]` }
+                                                                ],
+                                                                addEventListener: [
+                                                                    { type: 'change', listener: function() {
+                                                                        selectPlayer.call(this);
+                                                                        updateData.call(this);
+                                                                    } }
+                                                                ],
+                                                                children: [
+                                                                    {
+                                                                        type: 'option',
+                                                                        attributes: [
+                                                                            { id: 'selected', value: true },
+                                                                            { id: 'disabled', value: true }
+                                                                        ],
+                                                                        innerText: 'Select Player'
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                type: 'label',
+                                                                classList: ['text-capitalize'],
+                                                                attributes: [{ id: 'for', value: `${playerReference}|id` }],
+                                                                innerText: `Player ${letter}`
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             },
                                             {
-                                                type: 'label',
-                                                classList: ['text-capitalize'],
-                                                attributes: [{ id: 'for', value: id }],
-                                                innerText: `Player ${letter}`
+                                                classList: ['col', 'd-none'],
+                                                attributes: [{ id: 'visibility', value: 'hidden' }],
+                                                children: [
+                                                    {
+                                                        classList: ['form-floating'],
+                                                        children: [
+                                                            {
+                                                                type: 'select',
+                                                                classList: ['form-select', 'text-capitalize'],
+                                                                attributes: [
+                                                                    { id: 'id', value: `${playerReference}|tee` },
+                                                                    { id: 'name', value: `[${playerReference}][tee]` }
+                                                                ],
+                                                                addEventListener: [{ type: 'change', listener: updateData }],
+                                                                children: tees.map(({ default: defaultTee, id: value, names: { long: innerText } }) => {
+                                                                    const attributes = [{ id: 'value', value }];
+                                                                    if (defaultTee) attributes.push({ id: 'selected', value: true });
+                                                                    return { type: 'option', attributes, innerText };
+                                                                })
+                                                            },
+                                                            {
+                                                                type: 'label',
+                                                                attributes: [{ id: 'for', value: `${playerReference}|tee` }],
+                                                                innerText: 'Tee'
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                classList: ['col', 'd-none'],
+                                                attributes: [{ id: 'visibility', value: 'hidden' }],
+                                                children: [
+                                                    {
+                                                        classList: ['form-floating'],
+                                                        children: [
+                                                            {
+                                                                type: 'input',
+                                                                classList: ['form-control', 'text-center'],
+                                                                attributes: [
+                                                                    { id: 'id', value: `${playerReference}|handicap` },
+                                                                    { id: 'max', value: 54 },
+                                                                    { id: 'name', value: `[${playerReference}][handicap]` },
+                                                                    { id: 'placeholder', value: 'Handicap' },
+                                                                    { id: 'type', value: 'number' }
+                                                                ],
+                                                                addEventListener: [{ type: 'change', listener: updateData }]
+                                                            },
+                                                            {
+                                                                type: 'label',
+                                                                attributes: [{ id: 'for', value: `${playerReference}|handicap` }],
+                                                                innerText: 'Handicap'
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         ]
                                     }
                                 ]
-                            }
-                        ]
-                    }
-                ]
-            },
+                            },
 
-            // need to enable tooltips
-            {
-                classList: ['d-flex', 'ps-2'],
-                children: [
-                    {
-                        classList: ['btn', 'btn-danger', 'd-flex', 'align-items-center'],
-                        attributes: [
-                            { id: 'data-bs-placement', value: 'left' },
-                            { id: 'title', value: 'Remove Player' }
-                        ],
-                        addEventListener: [{ listener: removePlayer }],
-                        children: [
+                            // need to enable tooltips
                             {
-                                classList: ['btn-close', 'btn-close-white'],
-                                attributes: [{ id: 'aria-label', value: 'remove' }]
+                                classList: ['d-flex', 'ps-2'],
+                                children: [
+                                    {
+                                        classList: ['btn', 'btn-danger', 'd-flex', 'align-items-center'],
+                                        attributes: [
+                                            { id: 'data-bs-placement', value: 'left' },
+                                            { id: 'title', value: 'Remove Player' }
+                                        ],
+                                        addEventListener: [{ listener: removePlayer }],
+                                        children: [
+                                            {
+                                                classList: ['btn-close', 'btn-close-white'],
+                                                attributes: [{ id: 'aria-label', value: 'remove' }]
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -83,11 +157,11 @@ function addPlayer() {
         ]
     };
     parentRow.insertBefore(createElement(playerSelect), this.parentElement);
-    selectPlayer.call(document.getElementById(id));
+    selectPlayer.call(document.getElementById(`${playerReference}|id`));
 };
 
 function removePlayer() {
-    const parentRow = this.closest('.col-12.d-flex');
+    const parentRow = this.closest('.col-12');
     const [ playerId ] = parentRow.querySelector('select').id.split('|');
     parentRow.remove();
     for (const playerParticipationInput of document.querySelectorAll(`input[id^=game][id$="|${playerId}|participation"][type=checkbox]`)) playerParticipationInput.closest('.col-12').remove();
@@ -133,9 +207,7 @@ function selectPlayer() {
         return;
     };
     const playerSelects = document.querySelectorAll(playerSelectSelector);
-    const handicapInputs = document.querySelectorAll('input.form-control[id$="|handicap"]:not([id^="game-"])');
     const selectValues = Array.from(playerSelects).filter(({ value }) => value && value !== 'Select Player'); // .map(({ value }) => value); -- doesn't work
-    const localStorage = JSON.parse(window.localStorage.round) || {};
     // const nonGuests = players.filter(({ guest, id }) => !guest && selectValues.some(selectValue => selectValue.value === id));
     const summary = document.getElementById('summary-score');
     const holeOne = document.getElementById('hole-1');
@@ -147,13 +219,15 @@ function selectPlayer() {
     toggleElement(holeOne.closest('.row').closest('.col-12'), selectValues.length > 0);
     // toggleElement(scorecardAccordionItem, selectValues.length > 0);
     // if (selectValues.length > 0) playersAccordion.classList.remove('forced-accordion-bottom');
-    for (const handicap of handicapInputs) handicap.parentElement.parentElement.remove();
     for (const team of document.querySelectorAll('.team')) team.remove();
     for (const demeritModal of document.querySelectorAll('.modal.fade[id^="demerit|"]')) demeritModal.remove();
     while (summary.children.length > 0) summary.children[0].remove();
     for (const playerSelect of playerSelects) {
         const id = playerSelect.id.split('|')[0];
         const currentSelectedPlayer = playerSelect.value;
+        const currentPlayer = players.find(({ id }) => id === currentSelectedPlayer);
+        const handicapElement = document.getElementById(`${id}|handicap`);
+        const teeElement = document.getElementById(`${id}|tee`);
         if (!document.querySelector(`input[value="${currentSelectedPlayer}"]`)) {
             while (playerSelect.children.length > 0) playerSelect.children[0].remove();
             const optionAttributes = [{ id: 'disabled', value: 'true' }];
@@ -167,45 +241,19 @@ function selectPlayer() {
             };
             appendOption('New Player', playerSelect, [{ id: 'value', value: 'new' }]);
         };
+        toggleVisibility(closestColumn(handicapElement), false);
+        toggleVisibility(closestColumn(teeElement), false);
         if (playerSelect.value === 'Select Player') continue;
-        const selectParent = playerSelect.closest('.row.g-2');
-        const currentPlayer = players.find(({ id }) => id === currentSelectedPlayer);
-        const handicap = +currentPlayer.handicap;
-        const handicapElementObject = {
-            classList: ['col-4', 'col-md-2'],
-            children: [
-                {
-                    classList: ['form-floating'],
-                    children: [
-                        {
-                            type: 'input',
-                            classList: ['form-control', 'text-center'],
-                            attributes: [
-                                { id: 'id', value: `${id}|handicap` },
-                                { id: 'type', value: 'number' },
-                                { id: 'placeholder', value: 'Handicap' },
-                                { id: 'name', value: `[${id}][handicap]` },
-                                { id: 'value', value: handicap },
-                                { id: 'max', value: 54 },
-                            ],
-                            addEventListener: [
-                                { type: 'change', listener: function() {
-                                    const roundedValue = Math.round(this.value);
-                                    return this.value = roundedValue <= 54 ? roundedValue : 54;;
-                                } },
-                                { type: 'input', listener: updateData }
-                            ]
-                        },
-                        {
-                            type: 'label',
-                            attributes: [{ id: 'for', value: `${id}|handicap` }],
-                            innerText: 'Handicap'
-                        }
-                    ]
-                }
-            ]
+        if (this.id === playerSelect.id) handicapElement.value = +(currentPlayer?.handicap || 54);
+        toggleVisibility(closestColumn(handicapElement));
+        if (!/select course/i.test(document.getElementById('course-select').value)) {
+
+            // remove children from teeSelect
+            // populate teeSelect with appropriate options
+
+            toggleVisibility(closestColumn(teeElement));
         };
-        const playerSummaryElementObject = {
+        summary.insertBefore(createElement({
             type: 'h4',
             classList: ['col', 'mb-0', 'px-0'],
             children: [
@@ -252,14 +300,12 @@ function selectPlayer() {
                     ]
                 }
             ]
-        };
-        selectParent.insertBefore(createElement(handicapElementObject), null);
-        summary.insertBefore(createElement(playerSummaryElementObject), null);
+        }), null);
     };
     for (const playersSection of document.querySelectorAll('[id^="players-"]:not([id$="heading"]):not([id$="button"])')) {
         const hole = playersSection.id.split('-')[1];
-        while (playersSection.children.length > 0) playersSection.children[0].remove();
-        toggleElement(playersSection.closest('[class*="col"]'), selectValues.length > 0);
+        removeChildren(playersSection);
+        toggleElement(closestColumn(playersSection), selectValues.length > 0);
         for (const playerSelect of playerSelects) {
             const currentSelectedPlayer = playerSelect.value;
             if (currentSelectedPlayer === 'Select Player') continue;
@@ -497,3 +543,6 @@ document.getElementById('add-new-player').addEventListener('click', function () 
 document.getElementById('player-name').addEventListener('input', function () {
     this.classList.remove('is-invalid');
 });
+
+document.getElementById('marker|handicap').addEventListener('change', updateData);
+document.getElementById('marker|tee').addEventListener('change', updateData);

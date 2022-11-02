@@ -20,7 +20,7 @@ Date.prototype.full = function() {
     const day = this.toLocaleDateString('en-GB', { day: 'numeric' });
     const month = this.toLocaleDateString('en-GB', { month: 'long' });
     const year = this.toLocaleDateString('en-GB', { year: '2-digit' });
-    const ordinal = (function(day){
+    const ordinal = (function(){
         if (day === '11' || day === '12' || day === '13') return 'th';
         switch (day % 10) {
             case 1:
@@ -32,7 +32,7 @@ Date.prototype.full = function() {
             default:
                 return 'th'
         };
-    })(day);
+    })();
     return `${weekday}, ${day}${ordinal} ${month} '${year}`;
 };
 
@@ -60,16 +60,27 @@ function letterFromNumber(number) {
     return String.fromCharCode(97 + number);
 };
 
+// change name to showgGrandparentElement() as default is to show element
 function toggleGrandparentVisibility(element, show = true) {
     const grandparent = element.parentElement.parentElement;
     return toggleVisibility(grandparent, show);
 };
 
+// change name to showElement() as default is to show element
 function toggleVisibility(element, show = true) {
     element.classList.toggle('d-none', !show);
     if (show) return element.removeAttribute('visibility');
     return element.setAttribute('visibility', 'hidden');
 };
+
+function closestColumn(element) {
+    return element.closest('[class*="col"]');
+};
+
+function removeChildren(element, index = 0) {
+    while (element.children.length > index) element.children[index].remove();
+};
+
 
 // function updateAttributes(attributes, oldValue, newValue) {
 //     for (const attribute of attributes) {

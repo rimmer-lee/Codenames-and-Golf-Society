@@ -211,8 +211,10 @@ function addGame() {
                                                                                                                 { id: 'value', value: v }
                                                                                                             ],
                                                                                                             addEventListener: [
-                                                                                                                { type: 'change', listener: updateData },
-                                                                                                                { type: 'change', listener: updateGameOptionDescription }
+                                                                                                                { type: 'change', listener: function() {
+                                                                                                                    updateData();
+                                                                                                                    updateGameOptionDescription.call(this);
+                                                                                                                } }
                                                                                                             ]
                                                                                                         },
                                                                                                         {
@@ -263,9 +265,9 @@ function addGame() {
                                                                                                 addEventListener: [
                                                                                                     { type: 'input', listener: updateGameOptionDescription },
                                                                                                     { type: 'change', listener: function() {
-                                                                                                        return this.value = parseFloat(this.value).toFixed(2);
-                                                                                                    } },
-                                                                                                    { type: 'change', listener: updateData }
+                                                                                                        this.value = parseFloat(this.value).toFixed(2);
+                                                                                                        updateData();
+                                                                                                    } }
                                                                                                 ]
                                                                                             },
                                                                                             {
@@ -421,6 +423,8 @@ function addPlayerToGame(game, player, innerText) {
 function changeParticipation() {
     const gameReference = getGameReference(this);
     const participationCheckboxes = Array.from(document.querySelectorAll(`[id="${gameReference}|players"] input[type=checkbox]`));
+    const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked);
+    const participatingPlayers = checkedParticipationCheckboxes.length;
     const participationLabelElement = this.parentElement.querySelector('label');
     const gameSelectValue = document.getElementById(`${gameReference}|game`).value;
 
@@ -430,9 +434,7 @@ function changeParticipation() {
     const { checked } = this;
     participationLabelElement.classList.toggle('text-muted', !checked);
     participationLabelElement.classList.toggle('fw-bold', checked);
-    if (f.includes('team')) {
-        const checkedParticipationCheckboxes = participationCheckboxes.filter(({ checked }) => checked)
-        const participatingPlayers = checkedParticipationCheckboxes.length;
+    if (f.includes('team') && participatingPlayers > (minimum || 0)) {
         const gameReference = getGameReference(checkedParticipationCheckboxes[0]);
         const teamNames = (function() {
             const startingValue = +(maximum === minimum) - 1;
@@ -440,8 +442,7 @@ function changeParticipation() {
             const defaultTeamNames = Array.from({ length }, (_, i) => i + startingValue).map(i => {
                 if (i < 0) return { id: 'none', value: 'None' };
                 const id = letterFromNumber(i);
-                const value = id.toUpperCase();
-                return { id, value };
+                return {id, value: id.toUpperCase() };
             });
             return defaultTeamNames.map(({ id, value: v }) => {
                 const value = [ ...new Set(Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id$="|team-${id}|name"]`))
@@ -590,27 +591,24 @@ function removeGame() {
 function selectGame() {
     const gameReference = getGameReference(this);
     const playersElement = document.getElementById(`${gameReference}|players`);
-    const handicapParent = document.getElementById(`${gameReference}|handicap-description`).closest('.col-12');
+    const handicapParent = closestColumn(document.getElementById(`${gameReference}|handicap-description`));
     const handicapRadioButtons = document.querySelectorAll(`input[id^="${gameReference}|handicap|type|"][type="radio"]`);
     const methodSelect = document.getElementById(`${gameReference}|method`);
     const nameElements = document.querySelectorAll(`[id^="${gameReference}|marker|team-"][id$="|name"]`);
     const participationElements = document.querySelectorAll(`[id^="${gameReference}|"][id$="|participation"]`);
-    const roundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
-
-    // find a better way to select the element
-    const scoringParent = document.getElementById(`${gameReference}|scoring-description`).closest('.col-12').querySelector('.row');
-
+    const roundParent = closestColumn(this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`));
+    const scoringParent = closestColumn(document.getElementById(`${gameReference}|scoring-description`)).querySelector('.row');
     const teamElements = document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:checked`);
     this.classList.remove('is-invalid');
     toggleVisibility(handicapParent, false);
-    toggleVisibility(methodSelect.closest('.col-12'), false);
-    toggleVisibility(playersElement.closest('.col-12'), false);
+    toggleVisibility(closestColumn(methodSelect), false);
+    toggleVisibility(closestColumn(playersElement), false);
     toggleVisibility(roundParent, false);
-    toggleVisibility(scoringParent.closest('.col-12'), false);
+    toggleVisibility(closestColumn(scoringParent), false);
     for (const handicap of handicapRadioButtons) handicap.disabled = true;
-    while (methodSelect.children.length > 0) methodSelect.children[0].remove();
-    while (playersElement.children.length > 0) playersElement.children[0].remove();
-    while (scoringParent.children.length > 0) scoringParent.children[0].remove();
+    removeChildren(methodSelect);
+    removeChildren(playersElement);
+    removeChildren(scoringParent);
     if (!this.value || this.value === 'Select Game') return this.classList.add('is-invalid');
     const playerSelects = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player');
     const { filters, players } = GAMES.game.find(({ id }) => id === this.value);
@@ -620,9 +618,9 @@ function selectGame() {
     };
     const gameIndex = getGameIndex(gameReference) || 0;
     const scoringValues = GAMES.scoring.filter(({ id }) => filters.scoring.includes(id)).sort((a, b) => a.order - b.order);
-    toggleVisibility(playersElement.closest('.col-12'));
+    toggleVisibility(closestColumn(playersElement));
     toggleVisibility(roundParent);
-    toggleVisibility(scoringParent.closest('.col-12'));
+    toggleVisibility(closestColumn(scoringParent));
     updateGameOptionDescription.call(this);
     for (const playerSelect of playerSelects) {
         const { id, selectedIndex } = playerSelect;
@@ -652,9 +650,11 @@ function selectGame() {
                                         { id: 'value', value: id }
                                     ],
                                     addEventListener: [
-                                        { type: 'change', listener: changeScoringType },
-                                        { type: 'change', listener: updateData },
-                                        { type: 'change', listener: updateGameOptionDescription }
+                                        { type: 'change', listener: function() {
+                                            changeScoringType.call(this);
+                                            updateData.call(this);
+                                            updateGameOptionDescription.call(this);
+                                        } }
                                     ]
                                 },
                                 {
@@ -793,7 +793,7 @@ function updateGameOptions() {
     const selectedPlayers = Array.from(document.querySelectorAll(playerSelectSelector)).filter(({ value }) => value && value !== 'Select Player').length;
     for (const gameSelect of gameSelects) {
         const currentValue = gameSelect.value;
-        while (gameSelect.children.length > 1) gameSelect.children[1].remove();
+        removeChildren(gameSelect, 1);
         for (const option of gameSelectOptions(selectedPlayers)) gameSelect.insertBefore(createElement(option), null);
         (Array.from(gameSelect.children).find(({ value }) => value === currentValue) || gameSelect.children[0]).selected = true;
         selectGame.call(gameSelect);
@@ -808,7 +808,7 @@ function updateMethodSelect() {
     if (!filters) return;
     const methods = GAMES.method.filter(({ id }) => filters.method.includes(id));
     toggleVisibility(gameMethodSelect.closest('.col-12'), false);
-    while (gameMethodSelect.children.length > 0) gameMethodSelect.children[0].remove();
+    removeChildren(gameMethodSelect);
     if (!methods || methods.length === 0) return;
     const teams = [
         ...Array.from(document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-none"]:checked`)).map(_ => 1),

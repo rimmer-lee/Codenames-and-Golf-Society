@@ -244,22 +244,6 @@ function getPlayerKeys(object = getRound()) {
     return Object.keys(object).filter(key => /^(?:marker$|player\-)/.test(key));
 };
 
-function getTee() {
-    const { course } = getRound();
-    const teeObject = { id: '', name: '', holes: [] };
-    if (!course) return teeObject;
-    const { id, tee, tees } = course;
-    if (!tee || !tees) return teeObject;
-    const chosenTee = tees[tee];
-    teeObject.id = tee;
-    teeObject.name = ((courses.find(course => course.id === id) || { tees: [] }).tees.find(({ id }) => id === tee) || {}).name;
-    for (const index of Object.keys(chosenTee)) {
-        const { distance, par, strokeIndex } = chosenTee[index];
-        teeObject.holes.push({ distance, index, par, strokeIndex });
-    };
-    return teeObject;
-};
-
 function sortCourses() {
     const courseSelect = document.getElementById('course-select');
     const { value: selectedValue } = courseSelect.querySelector('[selected]');
@@ -296,7 +280,7 @@ function updateData() {
         const option = select.selectedOptions[0];
         if (option && !(/^select\s/i).test(option.innerText)) createNestedObject(round, select);
     };
-    for (const input of document.querySelectorAll('form input:not([type="button"]):not([type="submit"]):not(.update-data-ignore)')) {
+    for (const input of document.querySelectorAll('form input[name]:not([type="button"]):not([type="submit"]):not(.update-data-ignore):not([disabled])')) {
         if ((input.type === 'radio' || input.type === 'checkbox') && !input.checked) continue;
         createNestedObject(round, input);
     };
@@ -333,7 +317,7 @@ function updateGames() {
     const round = getRound();
     if (!round) return;
     const gamesSummary = document.getElementById('games-summary');
-    while (gamesSummary.children.length > 0) gamesSummary.children[0].remove();
+    removeChildren(gamesSummary);
     toggleGrandparentVisibility(gamesSummary, false);
     if (!round.game) return;
     const course = courses.find(({ id }) => id === (round.course && round.course.id));
@@ -369,8 +353,7 @@ function updateGames() {
         const shots = Object.keys(hole).map(h => +hole[h]);
         return { handicap, player: { _id }, shots, tee };
     });
-    const tee = getTee();
-    const games = calculateGames(course, gamesArray, players, scores, tee);
+    const games = calculateGames(course, gamesArray, players, scores);
     for (const game of games) {
         const { index, summary } = game;
         if (!summary) return;
@@ -393,9 +376,8 @@ function updateParElement(player, par) {
 function updateScores() {
     const round = getRound();
     if (!round) return;
-    const tee = getTee().id;
     for (const player of getPlayerKeys()) {
-        const { hole } = round[player] || {};
+        const { hole, tee } = round[player] || {};
         if (!hole) continue;
         const totalElement = document.getElementById(`${player}|score`);
         let total = 0, par = 0;
@@ -416,7 +398,7 @@ function updateScores() {
 
 document.addEventListener('DOMContentLoaded', function () {
     function updateSelect(id, value, callback) {
-        const element = document.querySelector(`[id="${id}"]`);
+        const element = document.getElementById(id);
         const chosenElement = Array.from(element.children).find(child => child.value === value);
         if (!chosenElement) return;
         const selectedElement = element.querySelector('[selected]');
@@ -439,38 +421,19 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     sortPlayers();
     window.localStorage.players = JSON.stringify(localPlayers);
-    if (round.course && round.course.id && !/^new/.test(round.course.id)) {
+    if (round.course?.id && !/^new/.test(round.course.id)) {
         const { id, tee, tees } = round.course;
-        updateSelect('course-select', id, selectCourse);
-        if (tee) {
-            const teeSelect = document.getElementById('tee-select');
-            const chosenTee = Array.from(teeSelect.children).find(({ value }) => value === tee);
-            if (chosenTee) {
-                const selectedTee = teeSelect.querySelector('[selected]')
-                if (selectedTee) selectedTee.removeAttribute('selected');
-                chosenTee.setAttribute('selected', true);
-                selectTee.call(teeSelect);
-            };
-        };
-        for (const teeId of Object.keys(tees)) {
-            const tee = tees[teeId];
-            for (const hole of Object.keys(tee)) {
-                for (const property of ['distance', 'par', 'strokeIndex']) {
-                    const element = document.getElementById(`${teeId}-${hole}|${property}`);
-                    const value = +tee[hole][property];
-                    if (element && value) element.value = value;
-                };
-            };
-         };
+        updateSelect('course-select', round.course.id, selectCourse);
     };
-    if (round.round && round.round.date) document.getElementById('date').value = round.round.date;
+    if (round.round?.date) document.getElementById('date').value = round.round.date;
     for (const player of playerKeys) {
-        const { handicap, id } = round[player];
+        const { handicap, id, tee } = round[player];
         if (id === 'new') continue;
         const elementId = `${player}|id`;
         if (!document.getElementById(elementId)) addPlayer.call(document.getElementById('add-player'));
         updateSelect(elementId, id, selectPlayer);
-        if (handicap) document.getElementById(`${player}|handicap`).value = +handicap;
+        if (handicap) document.getElementById(`${player}|handicap`).value = +handicap || 54;
+        if (tee) updateSelect(`${player}|tee`, tee);
     };
     for (index of gameIndexes) {
         const gameObject = round.game[index];

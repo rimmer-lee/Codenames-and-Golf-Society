@@ -1,13 +1,14 @@
-function removeInvalidClass(id) {
-    document.getElementById(id).classList.remove('is-invalid');
-};
-
 function provideFeedback(message) {
     const feedback = document.getElementById('feedback');
     const feedbackParent = feedback.parentElement;
     feedback.innerText = message;
     feedbackParent.classList.remove('d-none');
     feedbackParent.removeAttribute('visibility');
+};
+
+// use ./validate/resetValidation.js
+function removeInvalidClass(id) {
+    document.getElementById(id).classList.remove('is-invalid');
 };
 
 function resetCourseModalFields() {
@@ -157,30 +158,37 @@ function searchOnEnter(event) {
 };
 
 function selectCourse() {
-    const course = courses.find(({ randa, id }) => id == this.value || (/^randa/.test(this.value) && randa == this.value.split('randa-')[1]));
+    const course = courses.find(({ id }) => id == this.value);
     const teeElement = document.querySelector('#tees tbody');
-    const teeElementParent = teeElement.closest('[class*="col"]');
-    const teeSelect = document.getElementById('tee-select');
-    const teeSelectParent = teeSelect.closest('[class*="col"]');
+    const teeElementParent = closestColumn(teeElement);
+    const teeSelects = document.querySelectorAll('select[id$="|tee"]');
+
     // const scorecardAccordionItem = document.getElementById('scorecard-heading').closest('.accordion-item');
+
     const holeOneParentColumn = document.getElementById('hole-1').closest('.row').closest('.col-12');
-    const paginationParentElement = document.querySelector('ul').closest('[class*="col"]');
+    const paginationParentElement = closestColumn(document.querySelector('ul'));
+
     // const playersAccordion = document.getElementById('players');
+
     toggleElement(teeElementParent, false);
-    toggleElement(teeSelectParent, false);
     toggleElement(holeOneParentColumn, false);
     toggleElement(paginationParentElement, false);
+
     // playersAccordion.classList.add('forced-accordion-bottom');
-    while (teeElement.children.length > 0) teeElement.children[0].remove();
-    while (teeSelect.children.length > 0) teeSelect.children[0].remove();
+
+    removeChildren(teeElement);
+    for (const teeSelect of teeSelects) {
+        removeChildren(teeSelect);
+        toggleElement(closestColumn(teeSelect), false);
+    };
     for (let i = 1; i < 19; i++) {
         const tableBody = document.querySelector(`#hole-${i} tbody`);
-        while (tableBody.children.length > 0) tableBody.children[0].remove();
-        toggleElement(tableBody.closest('[class*="col"]'), course);
+        removeChildren(tableBody);
+        toggleElement(closestColumn(tableBody), course);
         if (!course) continue;
-        // toggleElement(tableBody.closest('[class*="col"]'));
         for (const tee of course.tees) {
-            const { colour, id, names: { long, short } } = tee;
+            const { colour, _id, names: { long, short } } = tee;
+            const id = `${_id}-${i}|`;
             tableBody.insertBefore(createElement({
                 type: 'tr',
                 classList: colour ? [ colour.class.table ] : [],
@@ -190,17 +198,18 @@ function selectCourse() {
                         children: [
                             {
                                 classList: ['d-none', 'd-md-block'],
-                                attributes: [{ id: 'id', value: `${id}-${i}|long-name` }],
+                                attributes: [{ id: 'id', value: `${id}long-name` }],
                                 innerText: long
                             },
                             {
                                 classList: ['d-block', 'd-md-none'],
-                                attributes: [{ id: 'id', value: `${id}-${i}|short-name` }],
+                                attributes: [{ id: 'id', value: `${id}short-name` }],
                                 innerText: short
                             }
                         ]
                     },
                     ...['distance', 'par', 'strokeIndex'].map(property => {
+                        const value = `${id}${property}`;
                         return {
                             type: 'td',
                             children: [
@@ -209,15 +218,15 @@ function selectCourse() {
                                         {
                                             type: 'label',
                                             classList: ['d-none', 'form-label'],
-                                            attributes: [{ id: 'for', value: `${id}-${i}|${property}` }]
+                                            attributes: [{ id: 'for', value }]
                                         },
                                         {
                                             type: 'input',
                                             classList: ['form-control', 'text-center'],
                                             attributes: [
-                                                { id: 'id', value: `${id}-${i}|${property}` },
+                                                { id: 'id', value },
                                                 { id: 'type', value: 'number' },
-                                                { id: 'name', value: `[course][tees][${id}][${i}][${property}]` },
+                                                { id: 'name', value: `[course][tees][${_id}][${i}][${property}]` },
                                                 ...(function() {
                                                     switch (property) {
                                                         case 'distance':
@@ -247,18 +256,22 @@ function selectCourse() {
         };
     };
     if (course) {
+        const { _id: defaultTee } = course.tees.find(({ default: defaultTee }) => defaultTee) || {};
         toggleElement(teeElementParent);
-        toggleElement(teeSelectParent);
         toggleElement(holeOneParentColumn);
         toggleElement(paginationParentElement);
+
         // playersAccordion.classList.remove('forced-accordion-bottom');
+
         for (const tee of course.tees) {
-            const { colour, holes, id, names: { long, short, value }, par, ratings: { bogey, course, slope } } = tee;
-            teeSelect.insertBefore(createElement({
-                type: 'option',
-                attributes: [{ id: 'value', value: id }],
-                innerText: long
-            }), null);
+            const { colour, holes, _id, names: { long, short, value }, par, ratings: { bogey, course, slope } } = tee;
+            for (const teeSelect of teeSelects) {
+                teeSelect.insertBefore(createElement({
+                    type: 'option',
+                    attributes: [{ id: 'value', value: _id }],
+                    innerText: long
+                }), null);
+            };
             teeElement.insertBefore(createElement({
                 type: 'tr',
                 classList: colour ? [ colour.class.table ] : [],
@@ -279,21 +292,21 @@ function selectCourse() {
                         ]
                     },
                     ...['par',
-                        'courseRating-full',
-                        'courseRating-front',
-                        'courseRating-back',
-                        'bogeyRating',
-                        'slopeRating-full',
-                        'slopeRating-front',
-                        'slopeRating-back'
+                        'course-rating-full',
+                        'course-rating-front',
+                        'course-rating-back',
+                        'bogey-rating',
+                        'slope-rating-full',
+                        'slope-rating-front',
+                        'slope-rating-back'
                     ].map(property => {
                         return {
                             type: 'td',
-                            classList: ['courseRating-front',
-                                'courseRating-back',
-                                'bogeyRating',
-                                'slopeRating-front',
-                                'slopeRating-back'].includes(property) ? ['d-none', 'd-lg-table-cell'] : [],
+                            classList: ['course-rating-front',
+                                'course-rating-back',
+                                'bogey-rating',
+                                'slope-rating-front',
+                                'slope-rating-back'].includes(property) ? ['d-none', 'd-lg-table-cell'] : [],
                             children: [
                                 {
                                     attributes: [{ id: 'id', value: `${value}|${property}` }],
@@ -302,19 +315,19 @@ function selectCourse() {
                                                 case 'par':
                                                     if (par?.full) return par.full;
                                                     else if (holes) return holes.reduce((sum, hole) => sum + hole.par, 0);
-                                                case 'courseRating-full':
+                                                case 'course-rating-full':
                                                     return singleDecimal(course.full);
-                                                case 'courseRating-front':
+                                                case 'course-rating-front':
                                                     return singleDecimal(course.front);
-                                                case 'courseRating-back':
+                                                case 'course-rating-back':
                                                     return singleDecimal(course.back);
-                                                case 'bogeyRating':
+                                                case 'bogey-rating':
                                                     return singleDecimal(bogey);
-                                                case 'slopeRating-full':
+                                                case 'slope-rating-full':
                                                     return slope.full;
-                                                case 'slopeRating-front':
+                                                case 'slope-rating-front':
                                                     return slope.front;
-                                                case 'slopeRating-back':
+                                                case 'slope-rating-back':
                                                     return slope.back;
                                             };
                                         })()
@@ -327,7 +340,7 @@ function selectCourse() {
             if (!holes) continue;
             for (const hole of holes) {
                 const { distance, index, par, strokeIndex } = hole;
-                const holeId = `${id}-${index}|`;
+                const holeId = `${_id}-${index}|`;
                 const distanceElement = document.getElementById(`${holeId}distance`);
                 const parElement = document.getElementById(`${holeId}par`);
                 const strokeIndexElement = document.getElementById(`${holeId}strokeIndex`);
@@ -336,7 +349,11 @@ function selectCourse() {
                 if (strokeIndexElement) strokeIndexElement.value = strokeIndex;
             };
         };
-        teeSelect.children[0].setAttribute('selected', true);
+        for (const teeSelect of teeSelects) {
+            const [ , player ] = teeSelect.id.match(/([^|]+)\|tee/);
+            toggleElement(closestColumn(teeSelect), !/select player/i.test(document.getElementById(`${player}|id`)?.value));
+            Array.from(teeSelect.children).find(({ value }) => defaultTee === value).setAttribute('selected', true);
+        };
     } else if (this.value === 'new') {
         if (window.navigator.onLine) new bootstrap.Modal(document.getElementById('course-search-modal')).show();
         else {
@@ -346,7 +363,6 @@ function selectCourse() {
         };
     };
     validation.call(this);
-    selectTee.call(document.getElementById('tee-select'));
 };
 
 const countrySelect = document.getElementById('country-select');
@@ -409,5 +425,7 @@ courseNameInput.addEventListener('keydown', searchOnEnter);
 
 document.getElementById('search-course').addEventListener('click', searchCourse);
 
-document.getElementById('course-select').addEventListener('change', selectCourse);
-document.getElementById('course-select').addEventListener('change', updateData);
+document.getElementById('course-select').addEventListener('change', function() {
+    selectCourse.bind(this)();
+    updateData.bind(this)();
+});

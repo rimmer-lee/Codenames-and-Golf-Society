@@ -36,7 +36,7 @@
                 </h2>
                 <div id="course" class="accordion-collapse collapse show" aria-labelledby="course-heading">
                     <div class="accordion-body p-3">
-                        <div class="row g-2">
+                        <div class="g-2 row row-cols-1">
                             <div class="col">
                                 <div class="form-floating">
                                     <select id="course-select" class="form-select text-capitalize text-wrap" aria-label="course" name="[course][id]" required>
@@ -53,13 +53,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-none col-12 col-md-4" visibility="hidden">
-                                <div class="form-floating">
-                                    <select id="tee-select" class="form-select text-capitalize" aria-label="tee" name="[course][tee]"></select>
-                                    <label for="tee-select">Tee</label>
-                                </div>
-                            </div>
-                            <div class="d-none col-12" visibility="hidden">
+                            <div class="d-none col" visibility="hidden">
                                 <table id="tees" class="align-middle table table-sm table-bordered text-center mb-0">
                                     <thead class="table-dark">
                                         <tr class="d-none d-lg-table-row">
@@ -134,9 +128,9 @@
                 <div id="players" class="accordion-collapse collapse show" aria-labelledby="players-heading">
                     <div class="accordion-body p-3">
                         <div class="row gy-3">
-                            <div class="col-12 d-flex">
-                                <div class="flex-grow-1">
-                                    <div class="row g-2">
+                            <div class="col-12">
+                                <div class="border border-1 p-2 rounded">
+                                    <div class="g-2 row row-cols-1">
                                         <div class="col">
                                             <div class="form-floating">
                                                 <select id="marker|id" class="form-select text-capitalize" name="[marker][id]"<%= currentUser ? " disabled" : " required" %>>
@@ -152,7 +146,10 @@
                                                 </select>
                                                 <label for="marker|id" class="text-capitalize">Marker</label>
                                                 <% if (currentUser) { %>
-                                                <input class="d-none" value=<%= currentUser.id %> name="[marker][id]" visibility="hidden">
+
+                                                <!-- do we need a label for accessibility? -->
+                                                <input class="d-none" type="text" value=<%= currentUser.id %> name="[marker][id]" visibility="hidden">
+
                                                 <% } else { %>
                                                 <div class="invalid-feedback">
                                                     <div class="d-flex justify-content-end">
@@ -160,6 +157,18 @@
                                                     </div>
                                                 </div>
                                                 <% }; %>
+                                            </div>
+                                        </div>
+                                        <div class="col d-none" visibility="hidden">
+                                            <div class="form-floating">
+                                                <select id="marker|tee" class="form-select text-capitalize" name="[marker][tee]"></select>
+                                                <label for="marker|tee">Tee</label>
+                                            </div>
+                                        </div>
+                                        <div class="col<%= currentUser ? '' : ' d-none' %>"<% currentUser ? '' : ' visibility="hidden"' %>>
+                                            <div class="form-floating">
+                                                <input id="marker|handicap" class="form-control text-center" name="[marker][handicap]" placeholder="Handicap" type="number" value="<%= currentUser && currentUser.handicap || 54 %>">
+                                                <label for="marker|handicap">Handicap</label>
                                             </div>
                                         </div>
                                     </div>
@@ -540,4 +549,3 @@
 <script src="/scripts/rounds/validate.js"></script>
 <script src="/scripts/rounds/select-course.js"></script>
 <script src="/scripts/rounds/select-player.js"></script>
-<script src="/scripts/rounds/select-tee.js"></script>
