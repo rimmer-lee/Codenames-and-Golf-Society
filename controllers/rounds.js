@@ -44,6 +44,8 @@ async function save (req, res) {
         const { course: { id: courseId, tee, tees }, round: { date } } = body;
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
+
+        // avoid always saving course
         const course = await Course.findById(courseId);
         for (const teeId of Object.keys(tees)) {
             const holes = tees[teeId];
@@ -89,11 +91,11 @@ async function save (req, res) {
                     await new Demerit({
                         action: {
                             demerits: +demerits || 0,
-                            titles: titles && Object.keys(titles).length > 0 && await Promise.all(Object.keys(titles).map(async title => {
+                            titles: (titles && Object.keys(titles).length > 0) ? await Promise.all(Object.keys(titles).map(async title => {
                                 const [ method, id ] = title.split('|');
                                 const name = TITLES.find(TITLE => TITLE.id === id).value;
                                 return await new Title({ name, method, player, when }).save();
-                            }))
+                            })) : []
                         },
                         comments,
                         history: [{ status: 'Created', updated: created }],
