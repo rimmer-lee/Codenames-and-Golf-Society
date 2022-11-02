@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const { BREAKDOWN_OBJECT, GENDERS } = require('../constants');
 
-const { calculateTeeNames, findTeeColour } = require('../utilities/courseFunctions');
+const { calculateTeeValues, findTeeColour } = require('../utilities/courseFunctions');
 
 const options = { toJSON: { virtuals: true } };
 
@@ -55,6 +55,10 @@ const HoleSchema = new Schema({
 const TeeSchema = new Schema({
     // colour: { enum: TEE_COLOURS },
     colour: Schema.Types.Mixed,
+    default: {
+        default: false,
+        type: Boolean
+    },
     distance: BREAKDOWN_OBJECT,
     gender: {
         enum: GENDERS,
@@ -135,8 +139,9 @@ CourseSchema.pre('validate', function(next) {
 
 CourseSchema.pre('save', async function(next) {
     const { tees } = this;
-    const teeNames = calculateTeeNames(tees);
+    const teeValues = calculateTeeValues(tees);
     this.tees = tees.map((tee, index) => {
+        const { defaultTee, names } = teeValues[index];
         tee.colour = findTeeColour(tee);
         tee.measure.full = tee.measure.full || 'yards';
         tee.par = tee.par || {};
@@ -157,10 +162,7 @@ CourseSchema.pre('save', async function(next) {
         };
         tee.distance.full = tee.distance.front + tee.distance.back;
         if (tee.par.front !== 0 || tee.par.back !== 0) tee.par.full = tee.par.front + tee.par.back;
-        return {
-            ...tee._doc,
-            names: teeNames[index],
-        };
+        return { ...tee._doc, default: defaultTee, names };
     });
     next();
 });

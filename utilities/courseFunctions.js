@@ -4,8 +4,12 @@ const { TEE_COLOURS } = require('../constants');
 
 const { createScorecard, searchCourse, searchCourses, removeRAndAId, testMatch } = require('./externalApis.js');
 
-function calculateTeeNames(tees) {
+function calculateTeeValues(tees) {
+    const { colour: defaultColour, gender: defaultGender } = { colour: 'yellow', gender: 'male' };
     const refinedTees = tees.map(({ gender, name }, index) => ({ gender, index, name }));
+    const { index: defaultIndex } = refinedTees.find(({ gender, name }) => {
+        return name.toLowerCase() === defaultColour && gender === defaultGender;
+    }) || refinedTees.find(({ name }) => (name.toLowerCase() === defaultColour)) || {};
     return refinedTees.map(({ gender, index, name }) => {
         const multipleTeeNames = refinedTees.filter(tee => tee.name === name).length > 1;
         const { longSuffix, shortSuffix } = (function() {
@@ -42,7 +46,7 @@ function calculateTeeNames(tees) {
             .replace(/[()]+/g, '')
             .replaceWhiteSpace('-')
             .toLowerCase();
-        return { long, short, value };
+        return { defaultTee: defaultIndex === index, names: { long, short, value } };
     });
 };
 
@@ -111,4 +115,4 @@ function splitName(name) {
     return name.split(/[\s\/]+/);
 };
 
-module.exports = { calculateTeeNames, createCourse, findTeeColour };
+module.exports = { calculateTeeValues, createCourse, findTeeColour };
