@@ -4,12 +4,8 @@ const { TEE_COLOURS } = require('../constants');
 
 const { createScorecard, searchCourse, searchCourses, removeRAndAId, testMatch } = require('./externalApis.js');
 
-function calculateTeeValues(tees) {
-    const { colour: defaultColour, gender: defaultGender } = { colour: 'yellow', gender: 'male' };
+function calculateTeeNames(tees) {
     const refinedTees = tees.map(({ gender, name }, index) => ({ gender, index, name }));
-    const { index: defaultIndex } = refinedTees.find(({ gender, name }) => {
-        return name.toLowerCase() === defaultColour && gender === defaultGender;
-    }) || refinedTees.find(({ name }) => (name.toLowerCase() === defaultColour)) || {};
     return refinedTees.map(({ gender, index, name }) => {
         const multipleTeeNames = refinedTees.filter(tee => tee.name === name).length > 1;
         const { longSuffix, shortSuffix } = (function() {
@@ -46,7 +42,7 @@ function calculateTeeValues(tees) {
             .replace(/[()]+/g, '')
             .replaceWhiteSpace('-')
             .toLowerCase();
-        return { defaultTee: defaultIndex === index, names: { long, short, value } };
+        return { long, short, value };
     });
 };
 
@@ -62,7 +58,7 @@ async function createCourse(id) {
     const facility = removeRAndAId(FacilityName);
     const scorecard = await createScorecard({ ...courseData, FacilityName: facility });
     const { url: scorecardUrl, tees: scorecardTees } = scorecard;
-    const tees = TeeRows.length === 0 ? scorecardTees : TeeRows.map(tee => {
+    const tees = setDefaultTees(TeeRows.length === 0 ? scorecardTees : TeeRows.map(tee => {
         const [ courseFront, slopeFront ] = tee.Front.split(' / ');
         const [ courseBack, slopeBack ] = tee.Back.split(' / ');
         const { CourseRating, TeeName: name, Gender: gender, Par, SlopeRating } = tee;
@@ -97,7 +93,7 @@ async function createCourse(id) {
                 }
             }
         };
-    });
+    }));
     return { address, facility, randa: id, name, scorecardUrl, tees };
 };
 
@@ -111,8 +107,17 @@ function shortenName(names, characters) {
     return names.map(v => (/[^A-Za-z]+/.test(v) ? v : v.slice(0, characters))).join('');
 };
 
+function setDefaultTee(tees) {
+    const { colour: defaultColour, gender: defaultGender } = { colour: 'yellow', gender: 'male' };
+    const refinedTees = tees.map(({ gender, name }, index) => ({ index, gender, name }));
+    const { index: defaultIndex } = refinedTees.find(({ gender, name }) => {
+        return name.toLowerCase() === defaultColour && gender === defaultGender;
+    }) || refinedTees.find(({ name }) => (name.toLowerCase() === defaultColour)) || {};
+    return tees.map((tee, index) => ({ ...tee, default: defaultIndex === index }));
+};
+
 function splitName(name) {
     return name.split(/[\s\/]+/);
 };
 
-module.exports = { calculateTeeValues, createCourse, findTeeColour };
+module.exports = { calculateTeeNames, createCourse, findTeeColour };
