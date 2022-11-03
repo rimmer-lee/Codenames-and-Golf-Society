@@ -136,7 +136,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     return score.map((s, i) => {
                         const holeResults = properties.map(property => {
                             const holeSores = gameScores.map(({ score }) => score[i][property]);
-                            if (holeSores.some(score => [null, undefined].includes(score))) return null;
+                            if (holeSores.some(score => !score)) return null;
                             if (name === 'stroke-play' || name === 'stableford') return s[property];
                             const winningScore = Math.min( ...holeSores );
                             if (holeSores.filter(score => score === winningScore).length === 1) {
@@ -320,13 +320,13 @@ function updateGames() {
     removeChildren(gamesSummary);
     toggleGrandparentVisibility(gamesSummary, false);
     if (!round.game) return;
-    const course = courses.find(({ id }) => id === (round.course && round.course.id));
+    const course = courses.find(({ id }) => id === round?.course?.id);
     const gamesArray = Object.keys(round.game)
         .filter(index => Object.keys(round.game[index])
         .some(key => /^(?:marker$|player\-)/.test(key)))
         .map(index => {
             const g = round.game[index];
-            const { handicap, method, game, round: roundType, scoring, team = {} } = g;
+            const { handicap = {}, method, game, round: roundType, scoring, team = {} } = g;
             const players = getPlayerKeys(g).map(player => {
                 return {
                     player: { _id: round[player].id },
@@ -343,9 +343,7 @@ function updateGames() {
                 scoring,
                 teams: Object.keys(team)
                     .filter(id => players.some(({ team }) => team === id))
-                    .map(id => {
-                        return { id, name: team[id] };
-                    })
+                    .map(id => ({ id, name: team[id] }))
             };
         });
     const scores = getPlayerKeys().map(key => {
@@ -437,7 +435,8 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     for (index of gameIndexes) {
         const gameObject = round.game[index];
-        const { handicap: { multiplier, type }, method, game: name, round: roundType, scoring, team = {} } = gameObject;
+        const { handicap: { multiplier, type } = {}, method, game: name, round: roundType, scoring, team = {} } = gameObject;
+        // const { multiplier, type } = handicap;
         if (!name) continue;
         const game = `game-${index.replace(/'/g, '')}`;
         const selectId = `${game}|game`;

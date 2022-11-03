@@ -138,7 +138,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     return score.map((s, i) => {
                         const holeResults = properties.map(property => {
                             const holeSores = gameScores.map(({ score }) => score[i][property]);
-                            if (holeSores.some(score => [null, undefined].includes(score))) return null;
+                            if (holeSores.some(score => !score)) return null;
                             if (name === 'stroke-play' || name === 'stableford') return s[property];
                             const winningScore = Math.min( ...holeSores );
                             if (holeSores.filter(score => score === winningScore).length === 1) {
