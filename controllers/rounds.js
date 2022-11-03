@@ -41,20 +41,28 @@ async function remove (req, res) {
 async function save (req, res) {
     try {
         const { body } = req;
-        const { course: { id: courseId, tee, tees }, round: { date } } = body;
+        const { course: { id: courseId, tees }, round: { date } } = body;
         const playerKeys = getPlayerKeys(body);
         const created = { by: await User.findById(body.marker.id) };
-
-        // avoid always saving course
         const course = await Course.findById(courseId);
-        for (const teeId of Object.keys(tees)) {
-            const holes = tees[teeId];
-            course.tees.find(({ id }) => id === teeId).holes = Object.keys(holes).map(hole => {
-                const { distance, par, strokeIndex } = holes[hole];
-                return { distance: +distance, index: ++hole, par: +par, strokeIndex: +strokeIndex };
+        if (course && Object.keys(tees).some(teeId => {
+            const newHoles = tees[teeId];
+            const existingHoles = course.tees.find(({ id }) => id === teeId).holes;
+            return Object.keys(newHoles).some(index => {
+                return ['distance', 'par', 'strokeIndex'].some(property => {
+                    return newHoles[index][property] != existingHoles[index][property]
+                });
             });
+        })) {
+            for (const teeId of Object.keys(tees)) {
+                const holes = tees[teeId];
+                course.tees.find(({ id }) => id === teeId).holes = Object.keys(holes).map(hole => {
+                    const { distance, par, strokeIndex } = holes[hole];
+                    return { distance: +distance, index: ++hole, par: +par, strokeIndex: +strokeIndex };
+                });
+            };
+            await course.save();
         };
-        await course.save();
 
         // const round = await Round.findOne({ course, date }) ||
         //     { created, course, games: [], date, scores: [] };
@@ -63,15 +71,24 @@ async function save (req, res) {
         const index = Math.max( 0, ...round.scores.map(({ playingGroup }) => playingGroup.index) ) + 1;
         round.lastModified = created;
         for (const key of playerKeys) {
-            const { demerit, handicap: { course: handicap }, hole, id, tee } = body[key];
+            const { demerit, handicap, hole, id, tee } = body[key];
             const existingScoreIndex = round.scores.findIndex(({ player }) => player == id);
             const existingScore = round.scores[existingScoreIndex] || { shots: [] };
-            const shots = hole.map(Number).map((shot, index) => (shot || existingScore?.shots && existingScore?.shots[index] || 0));
+            const shots = hole.map(Number).map((shot, index) => {
+                return shot ||
+                    existingScore?.shots && existingScore?.shots[index]
+                    || 0;
+            });
             const player = await (async function() {
                 if (existingScoreIndex !== -1) return existingScore.player;
                 if (/^new\-\d+/.test(id)) {
-                    const { name: full } = body[id];
-                    const player = await new User({ name: { full }, handicap: { starting: handicap, current: handicap } }).save();
+                    const player = await new User({
+                        name: { full: body[id].name },
+                        handicap: {
+                            starting: handicap,
+                            current: handicap
+                        }
+                    }).save();
                     body[key].id = player.id;
                     return player;
                 };
@@ -91,11 +108,11 @@ async function save (req, res) {
                     await new Demerit({
                         action: {
                             demerits: +demerits || 0,
-                            titles: (titles && Object.keys(titles).length > 0) ? await Promise.all(Object.keys(titles).map(async title => {
+                            titles: titles && Object.keys(titles).length > 0 && await Promise.all(Object.keys(titles).map(async title => {
                                 const [ method, id ] = title.split('|');
                                 const name = TITLES.find(TITLE => TITLE.id === id).value;
                                 return await new Title({ name, method, player, when }).save();
-                            })) : []
+                            })) || []
                         },
                         comments,
                         history: [{ status: 'Created', updated: created }],
@@ -111,13 +128,13 @@ async function save (req, res) {
             const gameObject = body.game[key];
             const gamePlayerKeys = getPlayerKeys(gameObject);
             if (gamePlayerKeys.length === 0) continue;
-            const { handicap = {}, method, game, round: roundType, scoring, team = {} } = gameObject;
+            const { handicap = {}, method, game, round: roundType, scoring } = gameObject;
             const { multiplier = 100, type = 'standard' } = handicap;
             const players = await Promise.all(gamePlayerKeys.map(async gamePlayer => {
                 const teamValue = gameObject[gamePlayer].team;
                 return {
                     player: await User.findById(body[gamePlayer].id),
-                    team: teamValue === 'none' ? undefined : teamValue
+                    team: teamValue !== 'none' && teamValue || undefined
                 };
             }));
             round.games.push({
@@ -129,7 +146,7 @@ async function save (req, res) {
                 scoring,
                 teams: [ ...new Set(players.map(({ team }) => team).filter(team => team)) ].map(id => {
                     const value = gameObject.team[id];
-                    const name = value instanceof Array ? value[0] : value;
+                    const name = value instanceof Array && value[0] || value;
                     return { id, name };
                 })
             });
