@@ -14,7 +14,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
         game.scores = [];
         game.summary = '';
         if (!GAME) continue;
-        const stablefordMultiplier = +(name === 'stableford' || scoring === 'stableford') * -2 + 1;
+        const stablefordMultiplier = +([name, scoring].includes('stableford')) * -2 + 1;
         const { end, start } = ROUND_TYPES.find(({ id }) => id === roundType);
         const handicapAdjustment = (function() {
             if (type !== 'competition') return 0;
@@ -135,9 +135,9 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     let skins = 0;
                     return score.map((s, i) => {
                         const holeResults = properties.map(property => {
+                            if (['stroke-play', 'stableford'].includes(name)) return s[property];
                             const holeSores = gameScores.map(({ score }) => score[i][property]);
                             if (holeSores.some(score => !score)) return null;
-                            if (name === 'stroke-play' || name === 'stableford') return s[property];
                             const winningScore = Math.min( ...holeSores );
                             if (holeSores.filter(score => score === winningScore).length === 1) {
                                 if (s[property] === winningScore) return 1;
@@ -149,9 +149,9 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                         const holeResult = holeResults.reduce((sum, value) => sum += value, 0);
                         skins++;
                         if (name !== 'skins' || holeResult === 0) return holeResult;
-                        const k = skins;
+                        const skinsWon = skins;
                         skins = 0;
-                        if (holeResult > 0) return k;
+                        if (holeResult > 0) return skinsWon;
                         return 0;
                     });
                 }
