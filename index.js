@@ -342,11 +342,6 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // })();
 
 
-// make container a fixed width for wide screens
-
-// for rounds/new
-//      - move tee from round schema to score schema and allow individual players to choose which tee they're playing off
-
 // live scoring with socket.io()
 
 // prevent users from navigating away from the reset password page when forced to reset password i.e. login for first time with default password or reset password
@@ -364,8 +359,9 @@ app.listen(port, () => console.log(`Serving Codenames and Golf Society on port $
 // resolve birthday date issue in /account
 
 // for courses edit and new, add labels for tee and tee display colour
+//  - change default tee for course
 
-// Tabbed input is shown on /rounds/new
+// Tabbed input is shown on /rounds/new i.e. input for next hole then that hole is shown
 
 // Voting/Approval required for submitted demerits
 
