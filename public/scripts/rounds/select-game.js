@@ -596,7 +596,7 @@ function selectGame() {
     const methodSelect = document.getElementById(`${gameReference}|method`);
     const nameElements = document.querySelectorAll(`[id^="${gameReference}|marker|team-"][id$="|name"]`);
     const participationElements = document.querySelectorAll(`[id^="${gameReference}|"][id$="|participation"]`);
-    const roundParent = closestColumn(this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`));
+    const roundParent = this.closest('.accordion-body').querySelector(`input[id^="${gameReference}|round|"][type="radio"]`).closest('.col-12');
     const scoringParent = closestColumn(document.getElementById(`${gameReference}|scoring-description`)).querySelector('.row');
     const teamElements = document.querySelectorAll(`[id^="${gameReference}|"][id*="|team-"]:checked`);
     this.classList.remove('is-invalid');
