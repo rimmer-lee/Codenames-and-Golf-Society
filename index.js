@@ -52,13 +52,17 @@ const playerRoutes = require(path.join(__dirname, 'routes', 'players'));
 const roundRoutes = require(path.join(__dirname, 'routes', 'rounds'));
 const userRoutes = require(path.join(__dirname, 'routes', 'users'));
 
-const port = process.env.PORT;
-const secret = process.env.SECRET;
-const dbUrl = process.env.DB_URL;
+const {
+    DB_URL: mongoUrl,
+    NODE_ENV: ENV,
+    PORT,
+    SECRET: secret
+} = process.env;
+
 const sessionDuration = 1000 * 60 * 60 * 24 * 728;
 
 const store = MongoStore.create({
-    mongoUrl: dbUrl,
+    mongoUrl,
     secret,
     touchAfter: 24 * 60 * 60
 });
@@ -77,11 +81,13 @@ const sessionConfig = {
     }
 };
 
-mongoose.connect(dbUrl, {
-    useNewUrlParser: true,
+mongoose.connect(mongoUrl, {
+    // keepAlive: true,
     useCreateIndex: true,
-    useUnifiedTopology: true,
     useFindAndModify: false,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    // reconnectTries: 5,
     // ssl: true,
     // sslValidate: true
 });
@@ -276,9 +282,9 @@ app.use(devFeatures)
 
 // above routes are available only locally or with cookie 'testing'
 
-if (process.env.NODE_ENV !== 'production') {
+if (ENV !== 'production') {
     app.get('/reseed', async (req, res) => {
-        if (mongoose.connection._connectionString !== process.env.DB_URL) {
+        if (mongoose.connection._connectionString !== mongoUrl) {
             req.flash('error', 'You\'re not connected to the dev database');
             return res.redirect('home');
         };
@@ -289,7 +295,7 @@ if (process.env.NODE_ENV !== 'production') {
 };
 
 app.all('*', (req, res, next) => {
-    if (process.env.NODE_ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
+    if (ENV !== 'production') return next(new ExpressError(404, 'Page Not Found'));
     req.flash('error', 'Page not found');
     res.redirect('/');
 });
@@ -300,7 +306,7 @@ app.use((error, req, res, next) => {
     res.status(status).render('error', { error });
 });
 
-app.listen(port, () => console.log(`Serving Codenames and Golf Society on port ${port}`));
+app.listen(PORT, () => console.log(`Serving Codenames and Golf Society on port ${PORT}`));
 
 // https://ncrdb.usga.org/
 
