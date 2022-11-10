@@ -3,5 +3,6 @@
         "colspan",
         "favourites",
         "randa"
-    ]
+    ],
+    "editor.tabSize": 2
 }
