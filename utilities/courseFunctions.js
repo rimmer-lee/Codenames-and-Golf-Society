@@ -58,7 +58,7 @@ async function createCourse(id) {
     const facility = removeRAndAId(FacilityName);
     const scorecard = await createScorecard({ ...courseData, FacilityName: facility });
     const { url: scorecardUrl, tees: scorecardTees } = scorecard;
-    const tees = setDefaultTees(TeeRows.length === 0 ? scorecardTees : TeeRows.map(tee => {
+    const tees = setDefaultTee(TeeRows.length === 0 ? scorecardTees : TeeRows.map(tee => {
         const [ courseFront, slopeFront ] = tee.Front.split(' / ');
         const [ courseBack, slopeBack ] = tee.Back.split(' / ');
         const { CourseRating, TeeName: name, Gender: gender, Par, SlopeRating } = tee;
