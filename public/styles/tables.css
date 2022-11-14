@@ -161,9 +161,9 @@ table#round tr > * {
 .hole-score {
     --size: 1.75rem;
     padding-bottom: var(--size);
+    pointer-events: none;
     position: absolute;
     width: var(--size);
-    z-index: -1;
 }
 
 #players td {
