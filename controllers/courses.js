@@ -57,6 +57,7 @@ async function find (req, res) {
                         .filter(({ CourseID }) => !courses.some(({ randa }) => randa === CourseID))
                         .map(async chunk => {
                             const { City: city, Country: code, CourseID: id, CourseName, FacilityName, State } = chunk;
+                            const C = await Country.findOne({ code });
                             const R = await Region.findOne({ code: State });
                             return {
                                 id,
@@ -66,7 +67,7 @@ async function find (req, res) {
                                     if (CourseName === name) return name;
                                     return `${name} - ${CourseName}`;
                                 })(),
-                                country: await Country.findOne({ code }),
+                                country: C.name,
                                 region: { code: R.code, name: R.name }
                             };
                         })
