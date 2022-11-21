@@ -50,7 +50,8 @@ async function save (req, res) {
             const existingHoles = course.tees.find(({ id }) => id === teeId).holes;
             return Object.keys(newHoles).some(index => {
                 return ['distance', 'par', 'strokeIndex'].some(property => {
-                    return newHoles[index][property] != existingHoles[index][property]
+                    return !(existingHoles[index] || {})[property] ||
+                        newHoles[index][property] != existingHoles[index][property];
                 });
             });
         })) {
