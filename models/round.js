@@ -166,22 +166,15 @@ function calculateGames(tees = [], games = [], players = [], scores = [], defaul
             if (name === 'match-play') {
                 const { id: nameOne, points } = game.scores[0];
                 const nameTwo = game.scores[1].id;
-                const lengthOfPoints = points.length;
-                let currentScore = 0;
-                for (let i = 0; i < lengthOfPoints; i++) {
-                    const point = points[i];
-                    const remainingHoles = lengthOfPoints - i - 1 + unplayedHoles;
-                    if (point === null) continue;
-                    currentScore += point;
-                    if (gameComplete && remainingHoles === 0) {
-                        if (currentScore == 0) return 'Game halved';
-                        return `${currentScore > 0 ? nameOne : nameTwo} wins`;
-                    };
-                    if (currentScore > 0 && currentScore > remainingHoles) return `${nameOne} wins (${currentScore} & ${remainingHoles})`;
-                    if (Math.abs(currentScore) > 0 && Math.abs(currentScore) > remainingHoles) return `${nameTwo} wins (${Math.abs(currentScore)} & ${remainingHoles})`;
+                const score = points.reduce((sum, value) => sum += value, 0);
+                if (gameComplete) {
+                    if (score == 0) return 'Game halved';
+                    return `${score > 0 ? nameOne : nameTwo} wins`;
                 };
-                if (currentScore === 0) return 'All square';
-                return `${currentScore > 0 ? nameOne : nameTwo} ${Math.abs(currentScore)} up`;
+                if (score === 0) return 'All square';
+                if (score > 0 && score > unplayedHoles) return `${nameOne} wins (${score} & ${unplayedHoles})`;
+                if (Math.abs(score) > 0 && Math.abs(score) > unplayedHoles) return `${nameTwo} wins (${Math.abs(score)} & ${unplayedHoles})`;
+                return `${score > 0 ? nameOne : nameTwo} ${Math.abs(score)} up`;
             };
             const sortedTotals = game.scores.map(({ id, points }) => {
                 const total = points.reduce((sum, value, index) => {
