@@ -5,7 +5,7 @@ String.prototype.replaceLastInstance = function(delimiter = ', ', replacementVal
 };
 
 // shared with models/round.js
-function calculateGames(course = { tees: [] }, games = [], players = [], scores = [], defaultTee = { holes: [] }) {
+function calculateGames(tees = [], games = [], players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
         const { game: name, handicap: { multiplier, type }, method, players: gamePlayers, roundType = 'full', scoring, teams } = game;
         const GAME = GAMES.game.find(({ id }) => id === name);
@@ -37,7 +37,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     if (name !== 'stroke-play' && scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
                     const { handicap: playerHandicap, shots, tee } = scoreObject;
                     const { shotsPerHole, holesWithAShot } = handicapShots(multiplier / 100 * (playerHandicap - handicapAdjustment));
-                    const { holes = [] } = course.tees && course.tees.find(({ id}) => id == tee) || defaultTee;
+                    const { holes = [] } = tees.find(({ id }) => id == tee) || defaultTee;
                     return holes.map(({ index, par, strokeIndex }) => {
                         const shot = +shots[index - 1];
                         if (!shot || !par) return null;
@@ -320,7 +320,17 @@ function updateGames() {
     removeChildren(gamesSummary);
     toggleGrandparentVisibility(gamesSummary, false);
     if (!round.game) return;
-    const course = courses.find(({ id }) => id === round?.course?.id);
+    const tees = Object.keys(round.course.tees).map(id => {
+        return {
+            holes: Object.keys(round.course.tees[id]).map(index => {
+                return {
+                    ...round.course.tees[id][index],
+                    index
+                };
+            }),
+            id
+        };
+    });
     const gamesArray = Object.keys(round.game)
         .filter(index => Object.keys(round.game[index])
         .some(key => /^(?:marker$|player\-)/.test(key)))
@@ -351,7 +361,7 @@ function updateGames() {
         const shots = Object.keys(hole).map(h => +hole[h]);
         return { handicap, player: { _id }, shots, tee };
     });
-    const games = calculateGames(course, gamesArray, players, scores);
+    const games = calculateGames(tees, gamesArray, players, scores);
     for (const game of games) {
         const { index, summary } = game;
         if (!summary) return;

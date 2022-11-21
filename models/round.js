@@ -7,7 +7,7 @@ const User = require('./user');
 const { BREAKDOWN_OBJECT, GAMES, ROUND_TYPES } = require('../constants');
 
 // shared with models/round.js
-function calculateGames(course = { tees: [] }, games = [], players = [], scores = [], defaultTee = { holes: [] }) {
+function calculateGames(tees = [], games = [], players = [], scores = [], defaultTee = { holes: [] }) {
     for (const game of games) {
         const { game: name, handicap: { multiplier, type }, method, players: gamePlayers, roundType = 'full', scoring, teams } = game;
         const GAME = GAMES.game.find(({ id }) => id === name);
@@ -39,7 +39,7 @@ function calculateGames(course = { tees: [] }, games = [], players = [], scores 
                     if (name !== 'stroke-play' && scoring === 'shots') return scoreObject.shots.map(shot => shot > 0 ? shot : null);
                     const { handicap: playerHandicap, shots, tee } = scoreObject;
                     const { shotsPerHole, holesWithAShot } = handicapShots(multiplier / 100 * (playerHandicap - handicapAdjustment));
-                    const { holes = [] } = course.tees && course.tees.find(({ id}) => id == tee) || defaultTee;
+                    const { holes = [] } = tees.find(({ id }) => id == tee) || defaultTee;
                     return holes.map(({ index, par, strokeIndex }) => {
                         const shot = +shots[index - 1];
                         if (!shot || !par) return null;
@@ -480,11 +480,11 @@ RoundSchema.pre('validate', async function(next) {
 RoundSchema.pre('save', async function(next) {
     const { course: courseId, games, scores, tee: teeId } = this;
     const players = await User.findPlayers();
-    const course = await Course.findById(courseId);
-    const tee = course.tees.find(({ _id}) => _id == teeId);
+    const { tees = [] } = await Course.findById(courseId);
+    const tee = tees.find(({ _id}) => _id == teeId);
     for (const score of this.scores) {
         const { shotsPerHole, holesWithAShot } = handicapShots(score.handicap);
-        const { holes = [] } = course.tees && course.tees.find(({ _id}) => _id == score.tee) || tee;
+        const { holes = [] } = tees && tees.find(({ _id}) => _id == score.tee) || tee;
         score.roundType === score.roundType || 'practice';
         for (const roundType of ROUND_TYPES) {
             const { id, start, end } = roundType;
@@ -520,7 +520,7 @@ RoundSchema.pre('save', async function(next) {
             score.scores.par.full += parScore;
         };
     };
-    this.games = calculateGames(course, games, players, scores, tee);
+    this.games = calculateGames(tees, games, players, scores, tee);
     next();
 });
 
