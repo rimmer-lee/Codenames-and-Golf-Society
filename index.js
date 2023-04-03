@@ -383,3 +383,7 @@ app.listen(PORT, () => console.log(`Serving Codenames and Golf Society on port $
 // put flash message in container on home screen i.e. for when logging out
 
 // show hole by hole game result in scorecard when viewing round
+
+// ace instead of eagle on hole in ones
+
+// graphs/charts
